@@ -734,10 +734,16 @@ class TestReviewFindings(Base):
     def test_doctor_names_what_is_over_the_cap(self):
         # This checks storage reporting, not editor installation. A real
         # `code` binary must not run while this fixture has --yes set.
+        # HOME is patched to this fixture path. Path.home() follows that patch,
+        # but the external editor CLI may still act on the account's real home.
+        self.assertFalse(cli._real_home(self.home))
+        if os.name == "posix":
+            import pwd
+            self.assertTrue(cli._real_home(Path(pwd.getpwuid(os.getuid()).pw_dir)))
         with mock.patch("agent_harness.extensions.detect_editors", return_value=[]) as editors:
             with mock.patch("agent_harness.extensions._run", side_effect=AssertionError("live editor invoked")) as editor_run:
                 self.assertEqual(harness(self.home, "install", "--yes", "--tools", "claude-code")[0], 0)
-        editors.assert_called()
+        editors.assert_not_called()
         editor_run.assert_not_called()
         big = self.hh() / "state" / "blob.bin"
         big.parent.mkdir(parents=True, exist_ok=True)

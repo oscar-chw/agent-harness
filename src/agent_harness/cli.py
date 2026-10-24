@@ -187,9 +187,15 @@ def cmd_install(args) -> int:
 
 
 def _real_home(home: Path) -> bool:
+    """Editor CLIs can escape HOME overrides; compare with the account home on POSIX."""
     try:
-        return Path(home).resolve() == Path.home().resolve()
-    except OSError:
+        if os.name == "posix":
+            import pwd
+            account_home = Path(pwd.getpwuid(os.getuid()).pw_dir)
+        else:
+            account_home = Path.home()
+        return Path(home).resolve() == account_home.resolve()
+    except (ImportError, KeyError, OSError):
         return False
 
 
