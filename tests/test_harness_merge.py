@@ -198,6 +198,54 @@ class TestSelfUpdate(Base):
         self.install_version("0.9.0")
         self.assertIn("is current", self.go()[1])
 
+    def test_self_update_never_downgrades_a_newer_development_build(self):
+        self.install_version("0.9.0.dev0")
+        rc, msg, _ = self.go()
+        self.assertEqual(rc, 0, msg)
+        self.assertIn("is current", msg)
+        self.assertEqual(json.loads((self.hh() / "state" / "self-update.json").read_text())["result"], "current")
+
+    def test_self_update_refuses_an_unrecognised_installed_version(self):
+        self.install_version("local-private-snapshot")
+        rc, msg, _ = self.go()
+        self.assertNotEqual(rc, 0, msg)
+        self.assertIn("unsupported installed version", msg)
+
+    def test_self_update_refuses_a_missing_installed_version(self):
+        rc, msg, _ = self.go()
+        self.assertNotEqual(rc, 0, msg)
+        self.assertIn("unsupported installed version", msg)
+
+    def test_self_update_refuses_a_malformed_installed_version(self):
+        self.install_version("0.4.1")
+        (self.hh() / "lib" / "agent_harness" / "__init__.py").write_text("not_a_version = 1\n")
+        rc, msg, _ = self.go()
+        self.assertNotEqual(rc, 0, msg)
+        self.assertIn("unsupported installed version", msg)
+
+    def test_final_release_can_replace_its_own_development_build(self):
+        from agent_harness import selfupdate
+        self.install_version("0.9.0.dev0")
+        def get(url):
+            if url.endswith("/tags?per_page=100"):
+                return json.dumps([{"name": "v0.9.0", "commit": {"sha": "d" * 40}}]).encode()
+            if "/check-runs" in url:
+                return json.dumps({"check_runs": [{"name": "ci", "status": "completed", "conclusion": "success"}]}).encode()
+            raise AssertionError(url)
+        rc, msg = selfupdate.run(self.hh(), self.home, check_only=True, get=get)
+        self.assertEqual(rc, 0, msg)
+        self.assertIn("would update 0.9.0.dev0 -> v0.9.0", msg)
+        self.assertFalse((self.hh() / "state" / "self-update.json").exists())
+
+    def test_supported_prerelease_order_matches_the_release_channel(self):
+        from agent_harness.selfupdate import version_key
+        self.assertLess(version_key("0.9.0.dev0"), version_key("0.9.0a1"))
+        self.assertLess(version_key("0.9.0a1"), version_key("0.9.0b1"))
+        self.assertLess(version_key("0.9.0b1"), version_key("0.9.0rc1"))
+        self.assertLess(version_key("0.9.0rc1"), version_key("0.9.0"))
+        self.assertLess(version_key("0.9.0"), version_key("0.9.0.post1"))
+        self.assertGreater(version_key("0.9.0.dev0"), version_key("0.4.5"))
+
     def test_self_update_refuses_an_archive_that_escapes(self):
         self.install_version("0.4.1")
         rc, msg, _ = self.go(get=self.fake_get(tar=release_tarball(evil=True)))
