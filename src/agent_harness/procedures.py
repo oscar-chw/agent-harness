@@ -1,10 +1,10 @@
 """Personal, project-scoped procedure candidates, promotion and rollback.
 
 SQLite is the source of truth for this lifecycle; memory search reads active
-rows rather than copying them into a second store. Receipts bind a comparison
-to a candidate, not to an authenticated evaluator. The caller must supply an
-independent evaluator's measurements. This is not proof of model learning,
-tenant isolation, or protection against the same OS user rewriting the DB.
+rows rather than copying them into a second store. A local binder records
+frozen inputs, observed artifacts and provider usage, but holds promotion until
+actor isolation and evaluator provenance can be verified. This is not proof of
+model learning, tenant isolation, or protection against the same OS user.
 """
 import hashlib
 import json
@@ -56,6 +56,11 @@ def _db(home):
                     "(id TEXT PRIMARY KEY, project TEXT, status TEXT, payload TEXT, evidence TEXT)")
         con.execute("CREATE TABLE IF NOT EXISTS procedure_events "
                     "(sequence INTEGER PRIMARY KEY, id TEXT, action TEXT, evidence_sha256 TEXT, at REAL)")
+        con.execute("CREATE TABLE IF NOT EXISTS procedure_frozen_cases "
+                    "(id TEXT, task_id TEXT, task_sha256 TEXT, answer_sha256 TEXT, "
+                    "PRIMARY KEY(id,task_id))")
+        con.execute("CREATE TABLE IF NOT EXISTS procedure_binder_receipts "
+                    "(id TEXT, task_id TEXT, receipt TEXT, PRIMARY KEY(id,task_id))")
         con.execute("BEGIN IMMEDIATE")
         yield con
         con.commit()
@@ -164,7 +169,7 @@ def evaluate(payload, result):
     _number(context["budget"], positive=True)
     for value in (context["tools_sha256"], context["benchmark_sha256"], result.get("grader_sha256")):
         if not isinstance(value, str) or not SHA.fullmatch(value):
-            raise ValueError("comparison requires pinned benchmark, tools and independent grader")
+            raise ValueError("comparison requires pinned benchmark, tools and grader identifiers")
     development, development_inputs = _episodes(payload["candidate"], payload["project"])
     pairs = result.get("pairs")
     if not isinstance(pairs, list) or not pairs:
@@ -206,13 +211,108 @@ def evaluate(payload, result):
             "receipt_sha256": digest(result)}
 
 
+def _bytes(value, name):
+    if not isinstance(value, bytes) or not value or len(value) > MAX_BYTES:
+        raise ValueError(name + " must be nonempty bytes within 64 KiB")
+    return hashlib.sha256(value).hexdigest()
+
+
+def _proposal(con, project, identity):
+    row = con.execute("SELECT * FROM procedures WHERE id=? AND project=?", (identity, project)).fetchone()
+    if not row or row["status"] != "proposed":
+        raise ValueError("a proposed procedure in this project is required")
+    return json.loads(row["payload"])
+
+
+def freeze_case(home, project, identity, task_id, task, answer):
+    """Pin a small local task and answer before any artifact is submitted.
+
+    Only hashes are persisted. This does not establish that the actor could not
+    read the answer; that requires a separately observed native deny boundary.
+    """
+    project = _scope(project)
+    if not isinstance(task_id, str) or not task_id or len(task_id) > 128:
+        raise ValueError("a bounded task id is required")
+    task_sha, answer_sha = _bytes(task, "task"), _bytes(answer, "answer")
+    with _db(home) as con:
+        payload = _proposal(con, project, identity)
+        _, development_inputs = _episodes(payload["candidate"], project)
+        if task_sha in development_inputs:
+            raise ValueError("frozen task overlaps a development input")
+        if con.execute("SELECT 1 FROM procedure_frozen_cases WHERE id=? AND task_sha256=?",
+                       (identity, task_sha)).fetchone():
+            raise ValueError("frozen task input is already registered")
+        try:
+            con.execute("INSERT INTO procedure_frozen_cases VALUES (?,?,?,?)",
+                        (identity, task_id, task_sha, answer_sha))
+        except sqlite3.IntegrityError:
+            raise ValueError("frozen task id already exists") from None
+    return {"task_id": task_id, "task_sha256": task_sha, "answer_sha256": answer_sha}
+
+
+def _native_tokens(receipt):
+    if (not isinstance(receipt, dict)
+            or receipt.get("native_completion") != "COMPLETED_UNGRADED"
+            or receipt.get("usage_scope") != "fresh_thread_total"
+            or receipt.get("usage_status") != "PROVIDER_REPORTED"
+            or receipt.get("usage_report_count") != 1):
+        raise ValueError("complete single-run provider usage receipt is required")
+    usage = receipt.get("usage")
+    if not isinstance(usage, dict) or any(type(usage.get(k)) is not int or usage[k] < 0
+                                            for k in ("input_tokens", "cached_input_tokens", "output_tokens")):
+        raise ValueError("provider usage counts are incomplete")
+    if usage["cached_input_tokens"] > usage["input_tokens"]:
+        raise ValueError("cached input exceeds total input")
+    return _number(usage["input_tokens"] + usage["output_tokens"], positive=True)
+
+
+def bind_hold(home, project, identity, task_id, task, answer,
+              base_artifact, candidate_artifact, base_usage, candidate_usage):
+    """Compute a content-bound local receipt; never activate from this receipt.
+
+    Exact-byte correctness is a narrow mechanical grader, not general quality.
+    The provided native receipts are checked for completeness and hashed, but
+    same-user mutation and actor answer isolation are not established here.
+    """
+    project = _scope(project)
+    task_sha, answer_sha = _bytes(task, "task"), _bytes(answer, "answer")
+    base_sha = _bytes(base_artifact, "baseline artifact")
+    cand_sha = _bytes(candidate_artifact, "candidate artifact")
+    base_tokens, cand_tokens = _native_tokens(base_usage), _native_tokens(candidate_usage)
+    with _db(home) as con:
+        payload = _proposal(con, project, identity)
+        frozen = con.execute("SELECT task_sha256,answer_sha256 FROM procedure_frozen_cases "
+                             "WHERE id=? AND task_id=?", (identity, task_id)).fetchone()
+        if not frozen or (task_sha, answer_sha) != tuple(frozen):
+            raise ValueError("frozen task or answer receipt is missing or changed")
+        if con.execute("SELECT 1 FROM procedure_binder_receipts WHERE id=? AND task_id=?",
+                       (identity, task_id)).fetchone():
+            raise ValueError("binder receipt already exists; immutable task result")
+        grader = {"version": "exact-bytes-v1",
+                  "sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+        result = {"schema": 1, "project": project, "procedure_id": identity,
+                  "candidate_sha256": payload["sha256"], "task_id": task_id,
+                  "task_sha256": task_sha, "answer_sha256": answer_sha,
+                  "artifacts": {"base_sha256": base_sha, "candidate_sha256": cand_sha},
+                  "grader": grader,
+                  "quality": {"base": int(base_artifact == answer),
+                              "candidate": int(candidate_artifact == answer)},
+                  "usage_receipts": {"base_sha256": digest(base_usage),
+                                     "candidate_sha256": digest(candidate_usage)},
+                  "tokens": {"base": base_tokens, "candidate": cand_tokens},
+                  "decision": "HOLD_UNVERIFIED_BOUNDARY",
+                  "hold_reason": "actor answer isolation, effective model and receipt provenance unverified"}
+        con.execute("INSERT INTO procedure_binder_receipts VALUES (?,?,?)",
+                    (identity, task_id, encoded(result).decode()))
+    return result
+
+
 def change(home, project, identity, result=None, *, rollback=False):
     project = _scope(project)
     with _db(home) as con:
         row = con.execute("SELECT * FROM procedures WHERE id=? AND project=?", (identity, project)).fetchone()
         if not row:
             raise ValueError("no procedure in this project")
-        payload = json.loads(row["payload"])
         if rollback:
             if row["status"] != "active":
                 raise ValueError("only an active procedure can be rolled back")
@@ -220,8 +320,11 @@ def change(home, project, identity, result=None, *, rollback=False):
         else:
             if row["status"] != "proposed":
                 raise ValueError("procedure is already " + row["status"])
-            receipt = evaluate(payload, result)
-            status, evidence = "active", encoded(result).decode()
+            # A matching score and grader hash in caller JSON are assertions,
+            # not independent evidence. Local binder receipts remain held until
+            # native answer isolation and evaluator provenance are established.
+            raise ValueError("independent grader receipt and actor isolation are required; "
+                             "local binder receipts remain on hold")
         con.execute("UPDATE procedures SET status=?,evidence=? WHERE id=?", (status, evidence, identity))
         con.execute("INSERT INTO procedure_events(id,action,evidence_sha256,at) VALUES (?,?,?,?)",
                     (identity, status, receipt["receipt_sha256"] if receipt else None, time.time()))
@@ -235,7 +338,9 @@ def _active(home, project):
     con = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)
     try:
         records = [json.loads(r[0]) for r in con.execute(
-            "SELECT payload FROM procedures WHERE project=? AND status='active'", (str(project),))]
+            "SELECT p.payload FROM procedures p WHERE p.project=? AND p.status='active' "
+            "AND EXISTS (SELECT 1 FROM procedure_events e WHERE e.id=p.id "
+            "AND e.action='native_verified_active')", (str(project),))]
     finally:
         con.close()
     return records
@@ -259,12 +364,15 @@ def inspect(home, project, identity):
     try:
         row = con.execute("SELECT payload,status,evidence FROM procedures WHERE id=? AND project=?",
                           (identity, project)).fetchone()
+        verified = con.execute("SELECT 1 FROM procedure_events WHERE id=? "
+                               "AND action='native_verified_active'", (identity,)).fetchone()
     finally:
         con.close()
     if row is None:
         raise ValueError("no procedure in this project")
     payload = json.loads(row[0])
-    status = "stale" if row[1] == "active" and not _source_current(payload) else row[1]
+    status = ("held_unverified" if row[1] == "active" and not verified else
+              "stale" if row[1] == "active" and not _source_current(payload) else row[1])
     try:
         evidence_sha = digest(json.loads(row[2])) if row[2] else None
     except ValueError:

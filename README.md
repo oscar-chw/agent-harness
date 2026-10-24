@@ -89,7 +89,12 @@ tedious and rarely kept up.
 - **Memory, lessons, task state, learned methods.** Local stores are shared by the tools on one machine.
   `skill_manage draft` records a dormant, source-bound project method in `procedures.sqlite`. A matched,
   independent held-out comparison must show no quality regression on any case or dimension and aggregate
-  tokens, including overhead, no greater than baseline before `harness improve --apply` activates it.
+  tokens, including overhead, no greater than baseline. **Promotion is currently held:** caller-written
+  scores cannot activate a method. The local binder pins task and answer hashes before artifacts exist,
+  then hashes artifacts, computes a narrow exact-byte grade and validates reported usage. It records
+  `HOLD_UNVERIFIED_BOUNDARY` until native actor answer isolation and evaluator provenance are observed.
+  Previously active methods without native verification are quarantined from recall as `held_unverified`;
+  their rows and evidence are retained for inspection or rollback.
   Rollback withdraws it; no new learned `SKILL.md` is generated. Existing learned skills remain readable,
   but direct `skill_manage create/update` and automatic application of legacy proposals are refused.
   `state_save` / `state_load` carry unfinished work across a compaction. [On-demand weekly intake](docs/v1/weekly-learning-intake.md)

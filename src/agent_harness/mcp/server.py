@@ -170,7 +170,7 @@ TOOLS = [
                        session={"type": "string", "description": "only this session id (prefix)"},
                        project={"type": "string"})},
     {"name": "skill_manage",
-     "description": "Draft a source-bound project method; activate only after independent harness improve --apply. "
+     "description": "Draft a source-bound project method; promotion is held pending independent native evidence. "
                     "list/view; direct create/update blocked.",
      "inputSchema": _s(action={"type": "string", "enum": ["draft", "create", "update", "list", "view", "archive"],
                                "_req": True},
@@ -271,7 +271,8 @@ class Server:
             raise ValueError("missing argument: name")
         if act in ("create", "update"):
             raise ValueError("direct skill writes are disabled; draft a source-bound procedure with skill_manage, "
-                             "then harness improve --apply with an independent comparison")
+                             "then qualify it against an independently graded native comparison; "
+                             "promotion is currently held")
         procedure_id = re.fullmatch(r"pr-[0-9a-f]{24}", name) is not None
         if act == "view":
             if procedure_id:

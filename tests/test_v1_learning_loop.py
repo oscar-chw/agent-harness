@@ -88,6 +88,24 @@ def apply(lab, proposal, evidence):
     return cli(lab, "--apply", proposal["id"], "--eval", str(path))
 
 
+def synthetic_active(lab, proposal, evidence, *, project=None):
+    """Seed only the active-state consumer fixture; never model promotion evidence.
+
+    The production change path must refuse caller-written scores. We still
+    exercise recall, source staleness, compact and rollback against an active
+    row, without adding a runtime test bypass.
+    """
+    from agent_harness import procedures
+    home = lab[0] / "harness"
+    procedures.evaluate(proposal, evidence)  # keep arithmetic contract coverage
+    with procedures._db(home) as con:
+        con.execute("UPDATE procedures SET status='active',evidence=? WHERE id=? AND project=?",
+                    (procedures.encoded(evidence).decode(), proposal["id"],
+                     str(project or lab[1][1])))
+        con.execute("INSERT INTO procedure_events(id,action,at) VALUES (?,?,0)",
+                    (proposal["id"], "native_verified_active"))
+
+
 def test_skill_manage_cannot_publish_or_rewrite_an_ungated_skill(lab):
     from agent_harness.mcp.skills import Skills
     home, projects = lab
@@ -111,7 +129,7 @@ def test_skill_manage_cannot_publish_or_rewrite_an_ungated_skill(lab):
     assert path.read_bytes() == before
 
 
-def test_skill_manage_draft_is_dormant_until_promoted_then_teaches_and_withdraws(lab):
+def test_skill_manage_draft_is_dormant_then_active_fixture_teaches_and_withdraws(lab):
     home, projects = lab
     alpha, bravo = projects[1:]
     candidate = candidate_input(lab)
@@ -128,7 +146,8 @@ def test_skill_manage_draft_is_dormant_until_promoted_then_teaches_and_withdraws
                                            "project": str(bravo)})])[0]["isError"] is True
 
     promoted = apply(lab, proposal, receipt(proposal))
-    assert promoted.returncode == 0, promoted.stdout + promoted.stderr
+    assert promoted.returncode == 1 and "independent grader" in promoted.stdout
+    synthetic_active(lab, proposal, receipt(proposal))
     active = value(exchange(lab, [("skill_manage", {"action": "view", "name": proposal["id"],
                                                      "project": str(alpha)})])[0])
     assert active["status"] == "active" and len(active["evidence_sha256"]) == 64
@@ -162,7 +181,7 @@ def test_a_promoted_skill_stops_recall_when_its_bound_source_changes(lab):
     candidate = candidate_input(lab)
     proposal = value(exchange(lab, [("skill_manage", {"action": "draft", "project": str(alpha),
                                                        "candidate": candidate})])[0])
-    assert apply(lab, proposal, receipt(proposal)).returncode == 0
+    synthetic_active(lab, proposal, receipt(proposal))
     assert "Validate the archive checksum" in prompt(lab, "archive recovery", session="before-edit").stdout
     (alpha / "episode-1.json").write_text("source changed after promotion")
     status = value(exchange(lab, [("skill_manage", {"action": "view", "name": proposal["id"],
@@ -178,8 +197,8 @@ def test_a_promoted_skill_stops_recall_when_its_bound_source_changes(lab):
 def test_procedure_is_dormant_then_recalled_in_scope_and_revoked(lab):
     _, proposal = draft(lab)
     assert prompt(lab, "archive recovery").stdout == ""
-    applied = apply(lab, proposal, receipt(proposal))
-    assert applied.returncode == 0, applied.stdout + applied.stderr
+    assert apply(lab, proposal, receipt(proposal)).returncode == 1
+    synthetic_active(lab, proposal, receipt(proposal))
     out = prompt(lab, "archive recovery", session="fresh").stdout
     assert "Validate the archive checksum" in out
     assert "Do not use for a live database" in out
@@ -202,6 +221,7 @@ def test_procedure_is_dormant_then_recalled_in_scope_and_revoked(lab):
                                   "missing-dimension", "no-gain", "negative-overhead",
                                   "aggregate-overflow", "schema-bool"])
 def test_promotion_refuses_invalid_or_unmatched_evidence(lab, fault):
+    from agent_harness import procedures
     _, proposal = draft(lab)
     evidence = receipt(proposal)
     if fault == "cost":
@@ -235,16 +255,20 @@ def test_promotion_refuses_invalid_or_unmatched_evidence(lab, fault):
             pair["base"]["tokens"] = pair["cand"]["tokens"] = 1e308
     elif fault == "schema-bool":
         evidence["schema"] = True
+    with pytest.raises((ValueError, KeyError, TypeError, OverflowError)):
+        procedures.evaluate(proposal, evidence)
     assert apply(lab, proposal, evidence).returncode != 0
     assert prompt(lab, "archive recovery").stdout == ""
 
 
 def test_equal_quality_and_lower_total_tokens_is_a_valid_gain(lab):
+    from agent_harness import procedures
     _, proposal = draft(lab)
     evidence = receipt(proposal)
     for pair in evidence["pairs"]:
         pair["base"]["quality"] = copy.deepcopy(pair["cand"]["quality"])
-    assert apply(lab, proposal, evidence).returncode == 0
+    assert procedures.evaluate(proposal, evidence)["candidate_tokens"] < 200
+    assert apply(lab, proposal, evidence).returncode == 1
 
 
 def test_other_project_cannot_activate_or_rollback(lab):
@@ -253,14 +277,17 @@ def test_other_project_cannot_activate_or_rollback(lab):
     evidence.write_text(json.dumps(receipt(proposal)))
     assert cli(lab, "--apply", proposal["id"], "--eval", str(evidence),
                project=lab[1][2]).returncode != 0
-    assert apply(lab, proposal, receipt(proposal)).returncode == 0
+    synthetic_active(lab, proposal, receipt(proposal))
     assert cli(lab, "--rollback", proposal["id"], project=lab[1][2]).returncode != 0
     assert "Validate the archive checksum" in prompt(lab, "archive recovery").stdout
 
 
 def test_source_edit_after_draft_refuses_promotion(lab):
+    from agent_harness import procedures
     _, proposal = draft(lab)
     (lab[1][1] / "episode-1.json").write_text("changed evidence")
+    with pytest.raises(ValueError, match="source changed"):
+        procedures.evaluate(proposal, receipt(proposal))
     assert apply(lab, proposal, receipt(proposal)).returncode != 0
 
 
@@ -268,47 +295,61 @@ def test_repeated_draft_does_not_duplicate_or_resurrect(lab):
     _, one = draft(lab)
     _, two = draft(lab)
     assert one["id"] == two["id"]
-    assert apply(lab, one, receipt(one)).returncode == 0
+    synthetic_active(lab, one, receipt(one))
     assert cli(lab, "--rollback", one["id"]).returncode == 0
     _, three = draft(lab)
     assert three["id"] == one["id"] and three["status"] == "rolled_back"
 
 
 def test_invalid_comparison_shape_is_a_refusal_without_traceback(lab):
+    from agent_harness import procedures
     _, proposal = draft(lab)
     evidence = receipt(proposal)
     evidence["pairs"] = ["claimed success"]
+    with pytest.raises(ValueError, match="pair"):
+        procedures.evaluate(proposal, evidence)
     result = apply(lab, proposal, evidence)
     assert result.returncode == 1
     assert "Traceback" not in result.stderr
 
 
 def test_missing_task_input_fingerprints_cannot_establish_unseen_transfer(lab):
+    from agent_harness import procedures
     _, proposal = draft(lab)
     evidence = receipt(proposal)
     for pair in evidence["pairs"]:
         pair.pop("task_path", None)
         pair.pop("task_sha256", None)
+    with pytest.raises(ValueError):
+        procedures.evaluate(proposal, evidence)
     assert apply(lab, proposal, evidence).returncode != 0
 
 
 def test_renaming_a_development_task_does_not_make_it_unseen(lab):
+    from agent_harness import procedures
     _, proposal = draft(lab)
     evidence = receipt(proposal)
     episode = proposal["candidate"]["episodes"][0]
     evidence["pairs"][0].update(task_id="new-name", task_path=episode["task_path"],
                                 task_sha256=episode["task_sha256"])
+    with pytest.raises(ValueError, match="overlap"):
+        procedures.evaluate(proposal, evidence)
     assert apply(lab, proposal, evidence).returncode != 0
 
 
 def test_changed_heldout_input_and_duplicate_input_under_two_names_are_refused(lab):
+    from agent_harness import procedures
     _, proposal = draft(lab)
     evidence = receipt(proposal)
     (Path(proposal["project"]) / evidence["pairs"][0]["task_path"]).write_text("different input")
+    with pytest.raises(ValueError, match="source changed"):
+        procedures.evaluate(proposal, evidence)
     assert apply(lab, proposal, evidence).returncode != 0
     evidence = receipt(proposal)
     evidence["pairs"][1].update(task_path=evidence["pairs"][0]["task_path"],
                                 task_sha256=evidence["pairs"][0]["task_sha256"])
+    with pytest.raises(ValueError, match="overlap"):
+        procedures.evaluate(proposal, evidence)
     assert apply(lab, proposal, evidence).returncode != 0
 
 

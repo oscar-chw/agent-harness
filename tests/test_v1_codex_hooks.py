@@ -158,7 +158,14 @@ def test_active_procedure_survives_compaction_with_its_exclusion(stage):
                                      "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                                      "task_path": task.name, "task_sha256": hashlib.sha256(task.read_bytes()).hexdigest()})
     proposal = procedures.draft(hh, str(projects[0]), candidate)
-    procedures.change(hh, str(projects[0]), proposal["id"], receipt(proposal))
+    evidence = receipt(proposal)
+    procedures.evaluate(proposal, evidence)
+    # Synthetic active row exercises hook delivery, never the guarded promotion path.
+    with procedures._db(hh) as con:
+        con.execute("UPDATE procedures SET status='active',evidence=? WHERE id=? AND project=?",
+                    (procedures.encoded(evidence).decode(), proposal["id"], str(projects[0])))
+        con.execute("INSERT INTO procedure_events(id,action,at) VALUES (?,?,0)",
+                    (proposal["id"], "native_verified_active"))
     hooks = install(stage)
     assert proposal["id"] in event(stage, hooks, "UserPromptSubmit", prompt="archive recovery").stdout
     out = event(stage, hooks, "SessionStart", source="compact").stdout
