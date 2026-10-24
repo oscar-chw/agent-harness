@@ -28,6 +28,13 @@ visible = ["list"]
 fast_words = ["fast", "affordable", "efficient", "mini", "lightweight"]
 # `default`: the `model` in the user's ~/.codex/config.toml, else the candidate first in the picker.
 
+[progression]
+# Candidate only. Enable in a project/profile after pinning every step to an
+# account-visible model and supported effort and setting per-task limits.
+# Order is declared policy, not a measured price, speed or capability ranking.
+enabled = false
+codex_steps = ["quick", "standard", "deep"]
+
 [tiers.quick]
 brief = "Do exactly the task you were given, fast. Run the check that shows it is done and report the command and its result in a few lines. If it turns out not to be mechanical, stop and say so instead of guessing."
 when = "mechanical work with an obvious check: a lookup, a rename, formatting, a small edit, reading a log or a file"

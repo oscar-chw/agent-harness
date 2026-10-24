@@ -138,13 +138,15 @@ def _codex(events, r):
     r["tokens"] = usage or NOT_OBSERVABLE
 
 
-def explain(client, transcript, home):
+def explain(client, transcript, home, *, advisory_simulation=None):
     if client not in RULES:
         raise ValueError("client must be one of %s" % sorted(RULES))
     r = {"client": client, "transcript": str(transcript), "instructions": _rules_on_disk(client, home),
          "skills": {"available": [], "invoked": []}, "memory": [], "checks": [], "workers": [],
          "compactions": 0, "tokens": NOT_OBSERVABLE, "omissions": []}
     (_claude if client == "claude-code" else _codex)(_events(transcript), r)
+    if advisory_simulation is not None:
+        r["advisory_simulation"] = advisory_simulation.status()
     om = r["omissions"]
     if r["instructions"]["installed"] == "MISSING":
         om.append("rules file missing: %s" % r["instructions"]["path"])
@@ -185,6 +187,10 @@ def render(r):
              "tokens    %s" % tok]
     if r["omissions"]:
         lines.append("omitted   " + "; ".join(r["omissions"]))
+    if "advisory_simulation" in r:
+        sim = r["advisory_simulation"]
+        lines.append("advisory  %s (synthetic only; native effective mode %s)" %
+                     (sim["mode"], sim["native_effective_mode"]))
     return "\n".join(lines)
 
 

@@ -1,0 +1,228 @@
+"""Synthetic contract tests, not evidence of model transfer or token improvement.
+
+The evaluator receipts below are test fixtures. Real promotion still requires a
+matched, independently graded native campaign; no native campaign is run here.
+"""
+import copy
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+import pytest
+
+from . import test_memory_transport as transport
+from .test_memory_transport import SRC, exchange, value
+from .test_v1_prompt_recall import prompt
+
+lab = transport.lab
+
+def cli(lab, *args, project=None):
+    home, projects = lab
+    env = {k: v for k, v in os.environ.items() if not k.startswith("HARNESS_")}
+    env.update(HOME=str(home), HARNESS_HOME=str(home / "harness"), PYTHONPATH=str(SRC))
+    return subprocess.run([sys.executable, "-m", "agent_harness.cli", "improve", *args,
+                           "--project", str(project or projects[1])],
+                          cwd=projects[0], env=env, text=True, capture_output=True, timeout=10)
+
+
+def draft(lab):
+    alpha = lab[1][1]
+    episodes = []
+    for n in (1, 2):
+        source = alpha / ("episode-%d.json" % n)
+        raw = json.dumps({"task": "development-%d" % n, "before": 1, "after": 0}).encode()
+        source.write_bytes(raw)
+        task = alpha / ("task-%d.json" % n)
+        task.write_text(json.dumps({"prompt": "Recover the archive", "fixture": n}))
+        episodes.append({"task_id": "development-%d" % n, "path": source.name,
+                         "sha256": hashlib.sha256(raw).hexdigest(), "task_path": task.name,
+                         "task_sha256": hashlib.sha256(task.read_bytes()).hexdigest()})
+    candidate = {"schema": 1, "title": "Archive recovery", "trigger": "archive recovery",
+                 "steps": ["Validate the archive checksum before extracting.",
+                           "Restore into a temporary directory and compare the inventory."],
+                 "exceptions": ["Do not use for a live database."],
+                 "episodes": episodes}
+    path = alpha / "candidate.json"
+    path.write_text(json.dumps(candidate))
+    result = cli(lab, "--draft-procedure", str(path))
+    assert result.returncode == 0, result.stdout + result.stderr
+    return candidate, json.loads(result.stdout)
+
+
+def receipt(candidate):
+    # Same task/model/effort/tools/budget; disjoint from development episodes.
+    result = {"schema": 1, "candidate_sha256": candidate["sha256"],
+            "project": candidate["project"], "usage_complete": True,
+            "comparison": "without-procedure", "grader_sha256": "a" * 64,
+            "context": {"model": "fixture-model", "effort": "fixture", "tools_sha256": "b" * 64,
+                        "budget": 4000, "benchmark_sha256": "c" * 64},
+            "base_context": {"model": "fixture-model", "effort": "fixture", "tools_sha256": "b" * 64,
+                             "budget": 4000, "benchmark_sha256": "c" * 64},
+            "overhead_tokens": 10,
+            "pairs": [
+                {"task_id": "unseen-A", "class": "recovery", "split": "heldout",
+                 "base": {"quality": {"correctness": 0, "integrity": 1}, "tokens": 100},
+                 "cand": {"quality": {"correctness": 1, "integrity": 1}, "tokens": 80}},
+                {"task_id": "unseen-B", "class": "recovery", "split": "heldout",
+                 "base": {"quality": {"correctness": 1, "integrity": 1}, "tokens": 100},
+                 "cand": {"quality": {"correctness": 1, "integrity": 1}, "tokens": 80}}]}
+    for pair in result["pairs"]:
+        task = Path(candidate["project"]) / (pair["task_id"] + ".json")
+        task.write_text(json.dumps({"prompt": "Recover the archive", "fixture": pair["task_id"]}))
+        pair.update(task_path=task.name, task_sha256=hashlib.sha256(task.read_bytes()).hexdigest())
+    return result
+
+
+def apply(lab, proposal, evidence):
+    path = lab[1][1] / "comparison.json"
+    path.write_text(json.dumps(evidence))
+    return cli(lab, "--apply", proposal["id"], "--eval", str(path))
+
+
+def test_procedure_is_dormant_then_recalled_in_scope_and_revoked(lab):
+    _, proposal = draft(lab)
+    assert prompt(lab, "archive recovery").stdout == ""
+    applied = apply(lab, proposal, receipt(proposal))
+    assert applied.returncode == 0, applied.stdout + applied.stderr
+    out = prompt(lab, "archive recovery", session="fresh").stdout
+    assert "Validate the archive checksum" in out
+    assert "Do not use for a live database" in out
+    assert "advisory" in out.lower() and proposal["id"] in out
+    assert prompt(lab, "archive recovery", project=lab[1][2]).stdout == ""
+    found = value(exchange(lab, [("lesson_search", {"query": "archive recovery",
+                                                    "project": str(lab[1][1])})])[0])
+    assert proposal["id"] in {r["id"] for r in found}
+    rollback = cli(lab, "--rollback", proposal["id"])
+    assert rollback.returncode == 0, rollback.stdout + rollback.stderr
+    notice = prompt(lab, "archive recovery", session="fresh").stdout
+    assert "withdrawn" in notice and proposal["id"] in notice
+    assert prompt(lab, "archive recovery", session="fresh").stdout == ""
+    assert prompt(lab, "archive recovery", session="after-rollback").stdout == ""
+    assert apply(lab, proposal, receipt(proposal)).returncode != 0
+
+
+@pytest.mark.parametrize("fault", ["cost", "regression", "overlap", "duplicate", "context",
+                                  "unknown-usage", "stale-candidate", "wrong-project", "nan",
+                                  "missing-dimension", "no-gain", "negative-overhead",
+                                  "aggregate-overflow", "schema-bool"])
+def test_promotion_refuses_invalid_or_unmatched_evidence(lab, fault):
+    _, proposal = draft(lab)
+    evidence = receipt(proposal)
+    if fault == "cost":
+        evidence["overhead_tokens"] = 41  # total 201 vs baseline 200
+    elif fault == "regression":
+        evidence["pairs"][1]["cand"]["quality"]["integrity"] = 0
+    elif fault == "overlap":
+        evidence["pairs"][0]["task_id"] = "development-1"
+    elif fault == "duplicate":
+        evidence["pairs"][1]["task_id"] = "unseen-A"
+    elif fault == "context":
+        evidence["context"]["model"] = "different-model"
+    elif fault == "unknown-usage":
+        evidence["usage_complete"] = False
+    elif fault == "stale-candidate":
+        evidence["candidate_sha256"] = "d" * 64
+    elif fault == "wrong-project":
+        evidence["project"] = str(lab[1][2])
+    elif fault == "nan":
+        evidence["pairs"][0]["cand"]["tokens"] = float("nan")
+    elif fault == "missing-dimension":
+        del evidence["pairs"][1]["cand"]["quality"]["integrity"]
+    elif fault == "no-gain":
+        for pair in evidence["pairs"]:
+            pair["cand"] = copy.deepcopy(pair["base"])
+        evidence["overhead_tokens"] = 0
+    elif fault == "negative-overhead":
+        evidence["overhead_tokens"] = -1
+    elif fault == "aggregate-overflow":
+        for pair in evidence["pairs"]:
+            pair["base"]["tokens"] = pair["cand"]["tokens"] = 1e308
+    elif fault == "schema-bool":
+        evidence["schema"] = True
+    assert apply(lab, proposal, evidence).returncode != 0
+    assert prompt(lab, "archive recovery").stdout == ""
+
+
+def test_equal_quality_and_lower_total_tokens_is_a_valid_gain(lab):
+    _, proposal = draft(lab)
+    evidence = receipt(proposal)
+    for pair in evidence["pairs"]:
+        pair["base"]["quality"] = copy.deepcopy(pair["cand"]["quality"])
+    assert apply(lab, proposal, evidence).returncode == 0
+
+
+def test_other_project_cannot_activate_or_rollback(lab):
+    _, proposal = draft(lab)
+    evidence = lab[1][1] / "eval.json"
+    evidence.write_text(json.dumps(receipt(proposal)))
+    assert cli(lab, "--apply", proposal["id"], "--eval", str(evidence),
+               project=lab[1][2]).returncode != 0
+    assert apply(lab, proposal, receipt(proposal)).returncode == 0
+    assert cli(lab, "--rollback", proposal["id"], project=lab[1][2]).returncode != 0
+    assert "Validate the archive checksum" in prompt(lab, "archive recovery").stdout
+
+
+def test_source_edit_after_draft_refuses_promotion(lab):
+    _, proposal = draft(lab)
+    (lab[1][1] / "episode-1.json").write_text("changed evidence")
+    assert apply(lab, proposal, receipt(proposal)).returncode != 0
+
+
+def test_repeated_draft_does_not_duplicate_or_resurrect(lab):
+    _, one = draft(lab)
+    _, two = draft(lab)
+    assert one["id"] == two["id"]
+    assert apply(lab, one, receipt(one)).returncode == 0
+    assert cli(lab, "--rollback", one["id"]).returncode == 0
+    _, three = draft(lab)
+    assert three["id"] == one["id"] and three["status"] == "rolled_back"
+
+
+def test_invalid_comparison_shape_is_a_refusal_without_traceback(lab):
+    _, proposal = draft(lab)
+    evidence = receipt(proposal)
+    evidence["pairs"] = ["claimed success"]
+    result = apply(lab, proposal, evidence)
+    assert result.returncode == 1
+    assert "Traceback" not in result.stderr
+
+
+def test_missing_task_input_fingerprints_cannot_establish_unseen_transfer(lab):
+    _, proposal = draft(lab)
+    evidence = receipt(proposal)
+    for pair in evidence["pairs"]:
+        pair.pop("task_path", None)
+        pair.pop("task_sha256", None)
+    assert apply(lab, proposal, evidence).returncode != 0
+
+
+def test_renaming_a_development_task_does_not_make_it_unseen(lab):
+    _, proposal = draft(lab)
+    evidence = receipt(proposal)
+    episode = proposal["candidate"]["episodes"][0]
+    evidence["pairs"][0].update(task_id="new-name", task_path=episode["task_path"],
+                                task_sha256=episode["task_sha256"])
+    assert apply(lab, proposal, evidence).returncode != 0
+
+
+def test_changed_heldout_input_and_duplicate_input_under_two_names_are_refused(lab):
+    _, proposal = draft(lab)
+    evidence = receipt(proposal)
+    (Path(proposal["project"]) / evidence["pairs"][0]["task_path"]).write_text("different input")
+    assert apply(lab, proposal, evidence).returncode != 0
+    evidence = receipt(proposal)
+    evidence["pairs"][1].update(task_path=evidence["pairs"][0]["task_path"],
+                                task_sha256=evidence["pairs"][0]["task_sha256"])
+    assert apply(lab, proposal, evidence).returncode != 0
+
+
+def test_two_episodes_of_one_input_do_not_establish_recurrence(lab):
+    candidate, _ = draft(lab)
+    candidate["episodes"][1].update(task_path=candidate["episodes"][0]["task_path"],
+                                     task_sha256=candidate["episodes"][0]["task_sha256"])
+    path = lab[1][1] / "repeated-input.json"
+    path.write_text(json.dumps(candidate))
+    assert cli(lab, "--draft-procedure", str(path)).returncode != 0

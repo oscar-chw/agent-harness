@@ -30,7 +30,11 @@ class Base(unittest.TestCase):
         self.tmp = Path(tempfile.mkdtemp(prefix="merge-"))
         self.home = self.tmp / "home"
         self.home.mkdir()
-        env = mock.patch.dict(os.environ, {"HOME": str(self.home), "HARNESS_HOME": str(self.home / ".agent-harness")})
+        # A temporary HOME alone does not isolate editor CLIs from a running
+        # desktop. Keep real code/cursor binaries out of installer fixtures.
+        env = mock.patch.dict(os.environ, {"HOME": str(self.home),
+                                          "HARNESS_HOME": str(self.home / ".agent-harness"),
+                                          "PATH": os.defpath})
         env.start()
         self.addCleanup(env.stop)
 
@@ -228,8 +232,7 @@ class TestSelfUpdate(Base):
 
 
 class TestStrict(Base):
-    """4: the release trend: a single run is strict; repeated runs allow one run in 54 below the BEST accepted
-    release (the owner, 2026-10-07: "it is ok to iterate not to give up updating"), never compounding."""
+    """Personal-v1 supersedes the historical noise allowance; every run is strict."""
 
     def check(self, rows):
         f = self.tmp / "h.jsonl"
@@ -243,10 +246,10 @@ class TestStrict(Base):
         self.assertNotEqual(self.check([self.r("0.3.3", 17, 18), self.r("0.4.1", 16, 18)]), 0)
         self.assertEqual(self.check([self.r("0.3.3", 17, 18), self.r("0.4.2", 17, 18)]), 0)
 
-    def test_strict_three_runs_allow_one_run_below_but_not_two(self):
-        self.assertEqual(self.check([self.r("0.3.3", 51, 54), self.r("0.4.3", 50, 54)]), 0)
+    def test_strict_three_runs_reject_one_or_more_losses(self):
+        self.assertNotEqual(self.check([self.r("0.3.3", 51, 54), self.r("0.4.3", 50, 54)]), 0)
         self.assertNotEqual(self.check([self.r("0.3.3", 51, 54), self.r("0.4.3", 49, 54)]), 0)
-        self.assertEqual(self.check([self.r("0.3.3", 102, 108), self.r("0.4.3", 100, 108)]), 0)
+        self.assertNotEqual(self.check([self.r("0.3.3", 102, 108), self.r("0.4.3", 100, 108)]), 0)
         self.assertNotEqual(self.check([self.r("0.3.3", 102, 108), self.r("0.4.3", 99, 108)]), 0)
 
     def test_strict_allowance_never_compounds(self):
@@ -256,8 +259,8 @@ class TestStrict(Base):
 
     def test_strict_is_the_documented_owner_decision(self):
         from agent_harness import improve
-        self.assertEqual(improve.RUNS_PER_ALLOWED_MISS, 54)
-        self.assertIn("one run in 54", (ROOT / "docs" / "design-decisions.md").read_text())
+        self.assertEqual(improve.TOKEN_OVERHEAD, 0)
+        self.assertIn("Personal-v1 supersedes", (ROOT / "docs" / "design-decisions.md").read_text())
 
 
 if __name__ == "__main__":

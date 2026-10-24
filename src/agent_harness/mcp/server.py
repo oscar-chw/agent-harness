@@ -22,6 +22,7 @@ if __package__ in (None, ""):  # executed as a script: make `agent_harness` impo
     from agent_harness.mcp.memory import Memory  # type: ignore
     from agent_harness.mcp import sessions, skills  # type: ignore
     from agent_harness.mcp.state import State  # type: ignore
+    from agent_harness.operational_state import OperationalState, dispatch as op_dispatch  # type: ignore
     from agent_harness.workgraph import tool as workgraph_tool  # type: ignore
 else:
     from .. import __version__
@@ -30,6 +31,7 @@ else:
     from .memory import Memory
     from . import sessions, skills
     from .state import State
+    from ..operational_state import OperationalState, dispatch as op_dispatch
     from ..workgraph import tool as workgraph_tool
 
 PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
@@ -115,19 +117,22 @@ TOOLS = [
      "description": "Headings tree (ids, titles, bytes) of one page; with no path, the list of pages.",
      "inputSchema": _s(path={"type": "string", "default": ""})},
     {"name": "mem_add",
-     "description": "Remember one short durable fact the user stated (near-duplicates are merged).",
+     "description": "Save a user-stated fact (near-duplicates merge).",
      "inputSchema": _s(text={"type": "string", "_req": True},
                        tags={"type": "array", "items": {"type": "string"}, "default": []},
                        scope={"type": "string", "enum": ["user", "project"], "default": "user"},
+                       project={"type": "string"},
                        pin={"type": "boolean", "default": False,
                             "description": "only when the user explicitly asks: shown at every session start"})},
     {"name": "mem_search",
-     "description": "Find remembered facts about the user's own setup, folders, preferences or past decisions.",
+     "description": "Search saved facts; project is an absolute existing directory.",
      "inputSchema": _s(query={"type": "string", "_req": True}, k={"type": "integer", "default": 5},
-                       min_score={"type": "number"})},
+                       min_score={"type": "number"},
+                       project={"type": "string"})},
     {"name": "mem_forget",
-     "description": "Forget a remembered fact or lesson by id when it is wrong or stale (archived, not deleted).",
-     "inputSchema": _s(id={"type": "string", "_req": True})},
+     "description": "Archive a stale fact/lesson by id; honors project scope.",
+     "inputSchema": _s(id={"type": "string", "_req": True},
+                       project={"type": "string"})},
     {"name": "lesson_add",
      "description": "After a check failed and then passed, or the user corrected you: the mistake, the fix, "
                     "and when to recall it.",
@@ -136,7 +141,7 @@ TOOLS = [
     {"name": "lesson_search",
      "description": "Past lessons that match a risky step you are about to take.",
      "inputSchema": _s(query={"type": "string", "_req": True}, k={"type": "integer", "default": 3},
-                       min_score={"type": "number"})},
+                       min_score={"type": "number"}, project={"type": "string"})},
     {"name": "state_save",
      "description": "Save unfinished multi-step work (<=4096 bytes, replaces the last save): goal, stage, "
                     "decisions, next, key files.",
@@ -144,6 +149,13 @@ TOOLS = [
     {"name": "state_load",
      "description": "Read this project's saved working state (after a compaction, or to resume work).",
      "inputSchema": _s(project={"type": "string", "default": ""})},
+    {"name": "op_state",
+     "description": "Local project task snapshot/change cursor/CAS lease. Sourced knowledge remains in project memory; plan gate proves completion.",
+     "inputSchema": _s(action={"type": "string", "enum": ["snapshot", "changes", "put", "claim", "renew", "release", "withdraw"], "_req": True},
+                       task={"type": "string"}, expected={"type": "integer"}, request_id={"type": "string"},
+                       value={"type": "object"}, memory_receipt={"type": "object"},
+                       token={"type": "string"}, fence={"type": "integer"}, ttl={"type": "integer"},
+                       cursor={"type": "integer"}, limit={"type": "integer"})},
     {"name": "session_note",
      "description": "Only when files changed: one line (<=300 chars) on what was done and what is next.",
      "inputSchema": _s(summary={"type": "string", "_req": True})},
@@ -154,7 +166,8 @@ TOOLS = [
      "description": "Search the user's past conversations (Claude Code, Codex) for what was said or decided "
                     "earlier: dated excerpts.",
      "inputSchema": _s(query={"type": "string", "_req": True}, k={"type": "integer", "default": 5},
-                       session={"type": "string", "description": "only this session id (prefix)"})},
+                       session={"type": "string", "description": "only this session id (prefix)"},
+                       project={"type": "string"})},
     {"name": "skill_manage",
      "description": "Learned methods. create one when finding the working method took several tool calls, or the "
                     "user corrected how; body: ## When to Use, ## Procedure, ## Pitfalls, ## Verification. "
@@ -189,6 +202,7 @@ class Server:
         self._sessions = None
         self._skills = None
         self._started = time.time()   # sessions that began after this are the one asking: not a past conversation
+        self._op_cwd = Path.cwd()       # one MCP session cannot change project scope mid-connection
 
     @property
     def kb(self) -> KB:
@@ -220,6 +234,27 @@ class Server:
             self._skills = skills.Skills(home=self._home)
         return self._skills
 
+    def memory_call(self, method: str, args: Dict[str, Any], *values) -> Any:
+        """An explicit caller project must not inherit the server's launch directory.
+
+        Keep the selection local to this call: changing the cached Memory object
+        would leak it into later calls that omit project. This is a retrieval
+        scope for one local user, not a cross-user authorization boundary.
+        """
+        if "project" not in args:
+            return getattr(self.mem, method)(*values)
+        project = args["project"]
+        if not isinstance(project, str):
+            raise ValueError("project must be an absolute existing directory")
+        path = Path(project).expanduser()
+        if not path.is_absolute() or not path.is_dir():
+            raise ValueError("project must be an absolute existing directory")
+        memory = Memory(home=self._home, fts=self._fts, project=path)
+        try:
+            return getattr(memory, method)(*values)
+        finally:
+            memory.close()
+
     def skill_manage(self, a: Dict[str, Any]) -> Any:
         act, name = a.get("action"), (a.get("name") or "").strip()
         if act == "list":
@@ -241,22 +276,27 @@ class Server:
     def call_tool(self, name: str, args: Dict[str, Any]) -> Any:
         """Run a tool in-process and return its Python result."""
         a = dict(args or {})
+        if name == "op_state":
+            return op_dispatch(OperationalState.for_host(self._home, cwd=self._op_cwd), a)
         table: Dict[str, Callable[[], Any]] = {
             "kb_search": lambda: self.kb.search(a["query"], int(a.get("k", 5)), a.get("min_score")),
             "kb_get": lambda: self.kb.get(a["id"], int(a.get("max_bytes", 8000))),
             "kb_toc": lambda: self.kb.toc(a.get("path", "") or ""),
-            "mem_add": lambda: self.mem.mem_add(a["text"], a.get("tags") or [], a.get("scope", "user"),
-                                                bool(a.get("pin", False))),
-            "mem_search": lambda: self.mem.mem_search(a["query"], int(a.get("k", 5)), a.get("min_score")),
-            "mem_forget": lambda: self.mem.mem_forget(a["id"]),
+            "mem_add": lambda: self.memory_call("mem_add", a, a["text"], a.get("tags") or [],
+                                                  a.get("scope", "user"), bool(a.get("pin", False))),
+            "mem_search": lambda: self.memory_call("mem_search", a, a["query"], int(a.get("k", 5)),
+                                                     a.get("min_score")),
+            "mem_forget": lambda: self.memory_call("mem_forget", a, a["id"]),
             "lesson_add": lambda: self.mem.lesson_add(a["mistake"], a["fix"], a.get("trigger", "")),
-            "lesson_search": lambda: self.mem.lesson_search(a["query"], int(a.get("k", 3)), a.get("min_score")),
+            "lesson_search": lambda: self.memory_call("lesson_search", a, a["query"], int(a.get("k", 3)),
+                                                       a.get("min_score")),
             "state_save": lambda: self.state.state_save(a["text"], a.get("project", "") or ""),
             "state_load": lambda: self.state.state_load(a.get("project", "") or ""),
             "session_note": lambda: self.state.session_note(a["summary"]),
             "session_recent": lambda: self.state.session_recent(int(a.get("k", 5))),
             "session_search": lambda: self.sessions.search(a["query"], int(a.get("k", 5)), a.get("session", "") or "",
-                                                           before=self._started - 5),
+                                                           before=None if a.get("session") else self._started - 5,
+                                                           project=a.get("project", "") or ""),
             "skill_manage": lambda: self.skill_manage(a),
             "run_checks": lambda: checks.run_checks(a.get("cmd", "") or "", int(a.get("timeout", 300)),
                                                     home=self._home),

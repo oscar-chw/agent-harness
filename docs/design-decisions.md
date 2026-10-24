@@ -37,6 +37,12 @@ while looking at the result it decides; that is recorded here rather than hidden
 
 ## The keep rule
 
+Personal-v1 supersedes the earlier +15% token allowance for its own
+acceptance: aggregate tokens must be no greater than the measured baseline
+while quality is no worse. This is a release criterion, not evidence that the
+v0.9 development candidate has met it. The historical keep rule below still
+describes the older component evaluations and is not retroactively rewritten.
+
 A part ships on by default only if accuracy is no worse, the gain is measurable, and token overhead stays
 within +15%; parts that fail stay off by default. The private eval reports call the rule pre-set, but no
 committed record here shows it predates the 2026-09-30 eval (its thresholds first appear in `eval/report.py`

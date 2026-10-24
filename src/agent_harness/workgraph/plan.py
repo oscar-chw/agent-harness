@@ -29,6 +29,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import threading
 import time
 from datetime import datetime, timezone, timedelta
 
@@ -367,7 +368,27 @@ def load(slug):
         malformed.append((fence_line,
                           f"unclosed code fence — everything after this line was "
                           f"ignored, including {swallowed} node-like line(s)"))
+    # Legacy plans do not import or read version evidence. The marker is explicit opt-in.
+    if any("## versions:" in line or "@version=" in line or "version_claim:" in line
+           or "version_run:" in line for line in lines):
+        try:
+            v = version_module()
+            if v.enabled(lines, nodes):
+                v.Versions(path, lines, nodes).annotate()
+        except (ValueError, OSError) as error:
+            die(f"version evidence: {error}", 8)
     return path, lines, nodes, order, malformed
+
+
+def version_module():
+    # plan.py is also a standalone entry point; bind its sibling, never an ambient module.
+    import importlib.util
+    if "_plan_versions" not in sys.modules:
+        spec = importlib.util.spec_from_file_location("_plan_versions", os.path.join(os.path.dirname(__file__), "versions.py"))
+        module = importlib.util.module_from_spec(spec)
+        sys.modules["_plan_versions"] = module
+        spec.loader.exec_module(module)
+    return sys.modules["_plan_versions"]
 
 
 def save(path, lines):
@@ -394,6 +415,8 @@ def needs_of(n):
 
 
 def effective_mark(n):
+    if n["mark"] == "x" and n.get("_version_stale"):
+        return " "
     if n["mark"] != ">":
         return n["mark"]
     ts = parse_iso(n["fields"].get("lease", ""))
@@ -611,7 +634,7 @@ def analyse(nodes, order, malformed):
             unmet = [d for d in deps if eff.get(d) != "x"]
             if unmet:
                 blocked.append((nid, unmet))
-            elif is_irreversible(n):
+            elif n.get("_version_hold") or is_irreversible(n):
                 held.append(nid)          # G4: never auto-dispatched
             else:
                 ready.append(nid)
@@ -920,6 +943,24 @@ Done-condition: <one command that exits 0 when this goal is finished>
      for a human instead of running it unattended. -->
 """
 
+# A task already authorized for reversible work can opt into evidence gates
+# without a new sign-off. Keep FRONT_TEMPLATE as the default and for plan init;
+# irreversible nodes still require the existing risk hold and attended gate.
+AUTONOMOUS_TEMPLATE = """## goal: {goal}
+
+Done-condition: <one command that exits 0 when this goal is finished>
+
+- [ ] 1. Analyse: what is actually being asked, and what would prove it done \
+| gate: phase-check {slug} analysis
+- [ ] 2. Research: what ALREADY solves this, prior art, unknowns resolved or deferred \
+| needs: 1 | gate: phase-check {slug} research
+- [ ] 3. Plan, with acceptance tests written before any implementation \
+| needs: 2 | gate: phase-check {slug} plan
+
+<!-- Add work nodes with needs: 3 and a check that can fail. Mark irreversible
+     actions risk: irreversible so they stay held for a human. -->
+"""
+
 
 PROJECT_CLAUDE = """# {name}
 
@@ -1034,7 +1075,8 @@ def cmd_new(a):
     if os.path.exists(path):
         die(f"{path} already exists — edit it, or pick another slug")
     goal = " ".join(a.goal) if a.goal else a.slug
-    open(path, "w", encoding="utf-8").write(FRONT_TEMPLATE.format(goal=goal, slug=a.slug))
+    template = AUTONOMOUS_TEMPLATE if a.autonomous else FRONT_TEMPLATE
+    open(path, "w", encoding="utf-8").write(template.format(goal=goal, slug=a.slug))
     print(path); return 0
 
 
@@ -1047,7 +1089,11 @@ def _report_defects(st, nodes):
     for nid, why in st["broken"]:
         print(f"BROKEN {nid}. {nodes[nid]['title']} — {why}")
     for nid in st["held"]:
-        print(f"HELD {nid}. {nodes[nid]['title']} — risk: irreversible, needs a human")
+        reason = nodes[nid].get("_version_hold") or "risk: irreversible, needs a human"
+        print(f"HELD {nid}. {nodes[nid]['title']} — {reason}")
+    for nid, n in nodes.items():
+        if n.get("_version_stale"):
+            print(f"STALE {nid}. {n['title']} — {n['_version_stale']}")
 
 
 def cmd_ready(a):
@@ -1076,13 +1122,31 @@ def cmd_claim(a):
     with Lock(path):
         _, lines, nodes, order, mal = load(a.slug)
         st = analyse(nodes, order, mal)
-        if not st["ready"]:
-            print("NONE READY", file=sys.stderr); return 1
-        # G7: fewest attempts first, so retrying sessions spread across the
-        # frontier instead of piling onto whichever node has the lowest id.
-        nid = sorted(st["ready"], key=lambda i: (len(attempts(nodes[i])), i))[0]
+        requested = getattr(a, "id", None)
+        if requested is not None:
+            if requested not in nodes:
+                print(f"no node {requested}", file=sys.stderr); return 1
+            if st["malformed"]:
+                print(f"unparseable graph; run plan lint {a.slug}", file=sys.stderr); return 1
+            if requested not in st["ready"]:
+                reason = next((label for label in ("running", "done", "held")
+                               if requested in st[label]), "blocked")
+                if requested in dict(st["broken"]):
+                    reason = "broken: " + dict(st["broken"])[requested]
+                print(f"node {requested} is {reason}; run plan ready {a.slug}", file=sys.stderr)
+                return 1
+            nid = requested
+        else:
+            if not st["ready"]:
+                print("NONE READY", file=sys.stderr); return 1
+            # G7: fewest attempts first, so retrying sessions spread across the
+            # frontier instead of piling onto whichever node has the lowest id.
+            nid = sorted(st["ready"], key=lambda i: (len(attempts(nodes[i])), i))[0]
         n = nodes[nid]
-        set_node(path, lines, n, mark=">", lease=now_iso(), owner=a.owner)
+        extra = {}
+        if n.get("_versioned"):
+            extra = {"version_claim": version_module().claim(path, lines, nodes, nid), "version_run": None}
+        set_node(path, lines, n, mark=">", lease=now_iso(), owner=a.owner, **extra)
         ensure_record(a.slug, n)
     print(nid); return 0
 
@@ -1187,6 +1251,20 @@ def build_context(slug, nid):
     if is_irreversible(n):
         out.append("RISK: IRREVERSIBLE — do not run the gate unattended.")
 
+    declared = ("inputs", "checks", "outputs", "write_scope", "budget", "retry", "escalation", "evidence")
+    if any(n["fields"].get(key) for key in declared):
+        # A cold worker must see the same declared contract as the coordinator.
+        # These values do not grant permission or configure the runner's limits.
+        out.append("DECLARED NODE CONTRACT (operational metadata is advisory, not permission):")
+        for key in ("owner",) + declared:
+            if n["fields"].get(key):
+                out.append(f"  {key}: {n['fields'][key]}")
+    if n.get("_versioned"):
+        state = n["_version_state"]
+        out.append(f"VERSION: {state['state']} — {state['reason']}")
+        if state.get("receipt"):
+            out.append(f"RESULT RECEIPT: {state['receipt']}")
+
     # G1: a session should know its context budget BEFORE it starts, not after
     # it compacts mid-node.
     ctx = [f.strip() for f in n["fields"].get("ctx", "").split(",") if f.strip()]
@@ -1215,6 +1293,10 @@ def build_context(slug, nid):
     # previous attempt actually did rather than only that it failed.
     rec = read_record(a.slug, n)
     if rec:
+        # Accounting is durable for evaluation, but gives the next worker no
+        # task evidence and needlessly changes its context on every attempt.
+        rec = re.sub(r"\n## Summary \d{4}-\d\d-\d\dT[\d:]+Z — worker usage\n.*?(?=\n## |\Z)",
+                     "", rec, flags=re.S)
         body = squeeze_record(rec)
         out.append(""); out.append("--- THIS NODE'S RECORD ---")
         out.append(body.strip())
@@ -1229,21 +1311,24 @@ def cmd_context(a):
 
 SHIMS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bin")
 _GUARD = [None, False]   # (module, tried)
+_GUARD_LOCK = threading.Lock()
 
 
 def _guard():
     """The harness guard, content/hooks/guard.py, three levels above this file in a checkout and in an
     install alike (src|lib / agent_harness / workgraph / plan.py)."""
     if not _GUARD[1]:
-        _GUARD[1] = True
-        p = os.environ.get("PLAN_GUARD") or os.path.normpath(os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "content", "hooks", "guard.py"))
-        if p != "off" and os.path.isfile(p):
-            import importlib.util
-            spec = importlib.util.spec_from_file_location("agent_harness_guard", p)
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            _GUARD[0] = mod
+        with _GUARD_LOCK:
+            if not _GUARD[1]:
+                p = os.environ.get("PLAN_GUARD") or os.path.normpath(os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "content", "hooks", "guard.py"))
+                if p != "off" and os.path.isfile(p):
+                    import importlib.util
+                    spec = importlib.util.spec_from_file_location("agent_harness_guard", p)
+                    mod = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(mod)
+                    _GUARD[0] = mod
+                _GUARD[1] = True
     return _GUARD[0]
 
 
@@ -1288,6 +1373,36 @@ def cmd_gate(a):
         die(f"node {a.id} is risk: irreversible — re-run with --attended, with a human present", 3)
     _assert_owner(n, getattr(a, "owner", None), getattr(a, "force", False), a.id)
 
+    versioned = n.get("_versioned", False)
+    binding, version_run, not_run = None, None, None
+    if versioned:
+        with Lock(path):
+            _, lines, nodes, _, _ = load(a.slug)
+            n = nodes[a.id]
+            _assert_owner(n, getattr(a, "owner", None), getattr(a, "force", False), a.id)
+            if is_irreversible(n) and not a.attended:
+                die(f"node {a.id} is risk: irreversible — re-run with --attended, with a human present", 3)
+            v = version_module()
+            try:
+                if not v.enabled(lines, nodes):
+                    raise ValueError("version mode changed before execution")
+                if n.get("_version_hold"):
+                    raise ValueError(n["_version_hold"])
+                if n["fields"].get("gate") != gate:
+                    raise ValueError("gate definition changed before execution")
+                binding = v.Versions(path, lines, nodes).capture(a.id)
+                expected = getattr(a, "authorised_inputs", None)
+                claim = n["fields"].get("version_claim")
+                if expected is not None and claim != expected:
+                    raise ValueError("claimed input revision changed on disk")
+                if claim is not None and claim != v.digest(binding):
+                    raise ValueError("inputs changed since claim; no gate executed")
+                version_run = v.nonce()
+                set_node(path, lines, n, mark=">", owner=getattr(a, "owner", None) or sessionid(),
+                         lease=now_iso(), version_run=version_run)
+            except (ValueError, OSError) as error:
+                not_run = str(error)
+
     before_mark = n["mark"]
     before_owner = n["fields"].get("owner")
     before_lease = n["fields"].get("lease")
@@ -1301,7 +1416,9 @@ def cmd_gate(a):
         env = dict(os.environ, PATH=SHIMS + os.pathsep + os.environ.get("PATH", ""))
         refused = guard_refusal(gate, root)
         sb = _sandbox_prefix()
-        if refused:
+        if not_run:
+            code, blob = 8, f"NOT_RUN: version check refused: {not_run}\n"
+        elif refused:
             # Not run at all. Recorded as an ordinary failed attempt, so the node returns to pending
             # with the reason as evidence and the same refusal twice reads as STUCK.
             code, blob = 126, "refused by the guard before it ran: %s\n" % refused
@@ -1331,7 +1448,21 @@ def cmd_gate(a):
         # Compare and swap: if the node moved while the gate ran, record the
         # evidence but do not settle someone else's node.
         moved = (n["mark"] != before_mark or n["fields"].get("owner") != before_owner
-                 or n["fields"].get("lease") != before_lease)
+                 or n["fields"].get("lease") != before_lease
+                 or (version_run is not None and n["fields"].get("version_run") != version_run))
+        receipt = None
+        if versioned and code == 0 and not moved:
+            try:
+                current = version_module().Versions(path, lines, nodes)
+                if current.capture(a.id) != binding:
+                    raise ValueError("inputs, definition or dependencies changed during the gate")
+                receipt = current.publish(a.id, binding, now_iso(), version_run)
+            except (ValueError, OSError) as error:
+                code = 8
+                blob += f"\nGate exited 0 but its result was not accepted: {error}\n"
+                tail = str(error)[:400]
+                sig = gate_signature(blob)
+                print(f"STALE {a.id}: {error}", file=sys.stderr)
         append_record(a.slug, n, f"Attempt {now_iso()} — {whoami()} — {secs}s — exit {code}"
                                  + (" (NOT APPLIED: node was re-claimed)" if moved else ""),
                       "```\n" + (blob.strip() or "(no output)") + "\n```")
@@ -1342,6 +1473,22 @@ def cmd_gate(a):
             print(f"CONFLICT {a.id}: re-claimed while the gate ran; result not applied",
                   file=sys.stderr)
             return 5
+        if versioned:
+            text = (f"NOT_RUN version check — {not_run}" if not_run
+                    else f"exit {code} in {secs}s [{sig}] — {tail}")
+            if receipt:
+                text += f" @version={receipt}"
+            # The receipt exists first. One graph replacement publishes its reference and mark.
+            n["mark"] = "x" if code == 0 else " "
+            for key in ("lease", "version_run", "version_claim"):
+                n["fields"].pop(key, None)
+            lines[n["line"]] = render_node(n)
+            at = (n["note_lines"][-1] if n["note_lines"] else n["line"]) + 1
+            lines.insert(at, f"      {now_iso()} {_clean(text)}")
+            save(path, lines)
+            print(("PASS " if code == 0 else "NOT_RUN " if not_run else "FAIL ")
+                  + f"{a.id} (exit {code}, {secs}s)")
+            return 0 if code == 0 else 1
         append_note(path, lines, n, f"exit {code} in {secs}s [{sig}] — {tail}")
         _, lines, nodes, _, _ = load(a.slug)
         n = nodes[a.id]
@@ -1385,6 +1532,8 @@ def cmd_mark(a):
         if a.id not in nodes:
             die(f"no node {a.id}")
         n = nodes[a.id]
+        if n.get("_versioned") and a.state == "done":
+            die("versioned nodes require an actual gate result; mark done is unavailable", 8)
         _assert_owner(n, getattr(a, "owner", None), getattr(a, "force", False), a.id)
         assert_sound(a.slug, a.id, getattr(a, "force", False))
         if a.note:
@@ -1632,7 +1781,7 @@ def cmd_status(a):
         else:
             row("ready", nid)
     for nid in st["held"]:
-        row("HELD", nid, "risk: irreversible")
+        row("HELD", nid, nodes[nid].get("_version_hold") or "risk: irreversible")
     for nid, why in st["broken"]:
         row("BROKEN", nid, why[:40])
     blocked = [str(b[0]) for b in st["blocked"]]
@@ -1953,15 +2102,32 @@ Report in two lines: what you changed, and anything the next attempt should know
 """
 
 
-def tier_for(n):
-    """Which routing tier a worker on this node gets: the node's own `tier:` when it names one, else `standard`
-    for a first attempt and `deep` once its gate has failed (extra compute only where a check has shown the
-    cheaper attempt was not enough). The tiers' models and efforts are not chosen here: they are the agent files
-    agent-harness writes from its routing.toml (harness-<tier>), resolved per account."""
+def route_for(n):
+    """Choose an existing tier from the node's declared minimum and gate evidence.
+
+    This does not choose a model, change a gate or convert dispatch health into
+    task success. Model/effort support is resolved in routing.toml.
+    """
     named = (n["fields"].get("tier") or "").strip()
-    if named:
-        return named
-    return "deep" if any(x["code"] != "0" for x in attempts(n)) else "standard"
+    steps = ("quick", "standard", "deep")
+    start = named or "standard"
+    seen = attempts(n)
+    def not_run(a):
+        return ((a["code"] == "126" and a["tail"].startswith("refused by the guard before it ran:"))
+                or (a["code"] == "8" and a["tail"].startswith("NOT_RUN:"))
+                or (a["code"] == "124" and a["tail"].startswith("timed out after ")))
+    if seen and not_run(seen[-1]):
+        return {"tier": None, "reason": "gate_not_run", "route_version": "workgraph-tier-v1",
+                "attempt": len(seen) + 1}
+    failures = sum(x["code"] != "0" and not not_run(x) for x in seen)
+    tier = steps[min(steps.index(start) + failures, len(steps) - 1)] if start in steps else start
+    return {"tier": tier, "reason": "independent_gate_failed" if failures else "declared_minimum",
+            "route_version": "workgraph-tier-v1", "attempt": failures + 1}
+
+
+def tier_for(n):
+    """Backward-compatible tier name for existing worker dispatch."""
+    return route_for(n)["tier"]
 
 
 def runner():
@@ -2015,31 +2181,134 @@ def codex_cmd(prompt, tier, model=None, home=None):
     return cmd + [prompt]
 
 
+def worker_usage(provider, raw):
+    """Observed counters only, never subscription quota or gate evidence.
+
+    Claude input excludes cache reads/writes; Codex input includes cache reads.
+    Missing is not zero. Invalid counts cannot become a claimed cache saving.
+    """
+    names = ("input_tokens", "output_tokens", "cached_input_tokens", "reasoning_output_tokens") \
+        if provider == "codex" else ("input_tokens", "output_tokens", "cache_read_input_tokens",
+                                     "cache_creation_input_tokens")
+    reported, invalid = {}, []
+    for name in names:
+        value = raw.get(name) if isinstance(raw, dict) else None
+        if value is not None:
+            if type(value) is int and 0 <= value <= 2**63 - 1:
+                reported[name] = value
+            else:
+                invalid.append(name)
+    total = reported.get("input_tokens")
+    cached = reported.get("cached_input_tokens" if provider == "codex" else "cache_read_input_tokens")
+    creation = reported.get("cache_creation_input_tokens")
+    if provider == "claude":
+        total = total + cached + creation if all(v is not None for v in (total, cached, creation)) else None
+    if total is not None and cached is not None and cached > total:
+        invalid.append("cached_input_tokens exceeds input_tokens")
+    if invalid:
+        total = cached = creation = None
+    uncached = total - cached if total is not None and cached is not None else None
+    output = reported.get("output_tokens")
+    status = ("INVALID" if invalid else "OBSERVED" if all(v is not None for v in (total, cached, output))
+              else "PARTIAL" if reported else "NOT_OBSERVABLE")
+    return {"provider": provider, "status": status, "reported": reported,
+            "input_tokens": total, "cached_input_tokens": cached, "uncached_input_tokens": uncached,
+            "cache_creation_input_tokens": creation, "output_tokens": output,
+            "reasoning_output_tokens": reported.get("reasoning_output_tokens"), "invalid_fields": invalid}
+
+
+def record_worker_usage(slug, nid, usage, route=None):
+    """Use the existing bounded record, without adding a passing gate attempt."""
+    path = plan_path(slug)
+    with Lock(path):
+        _, _, nodes, _, _ = load(slug)
+        if nid not in nodes:
+            die(f"cannot record usage for missing node {nid}")
+        observed = dict(usage)
+        if route is not None:
+            observed["route"] = {k: route.get(k) for k in
+                                 ("tier", "reason", "route_version", "attempt",
+                                  "dispatch_seconds", "tool_calls",
+                                  "requested_model", "requested_effort")}
+        append_record(slug, nodes[nid], f"Summary {now_iso()} — worker usage",
+                      "Provider-reported usage; not gate evidence or subscription quota savings.\n\n"
+                      + json.dumps(observed, sort_keys=True, ensure_ascii=True))
+
+
 def codex_info(rc, out, err):
     """`codex exec --json` (JSON lines) as the envelope classify_worker reads: the last agent message is the
     result; a non-zero exit is an error whose text is what codex said last."""
-    last = ""
+    last, reports, tool_calls, completed = "", [], 0, False
     for line in (out or "").splitlines():
         try:
             ev = json.loads(line)
         except ValueError:
             continue
         item = ev.get("item") if isinstance(ev, dict) else None
+        if (isinstance(ev, dict) and ev.get("type") == "item.completed"
+                and isinstance(item, dict)
+                and item.get("type") in ("command_execution", "mcp_tool_call", "mcpToolCall")):
+            tool_calls += 1
         if isinstance(item, dict) and item.get("type") in ("agent_message", "assistant_message") and item.get("text"):
             last = item["text"]
         elif isinstance(ev, dict) and ev.get("type") in ("error", "turn.failed"):
             last = str(ev.get("message") or (ev.get("error") or {}).get("message") or last)
+        if isinstance(ev, dict) and ev.get("type") == "turn.completed" and "usage" in ev:
+            completed = True
+            reports.append(worker_usage("codex", ev["usage"]))
     if rc != 0 and not last:
         last = (err or "").strip().splitlines()[-1] if (err or "").strip() else f"codex exited {rc}"
-    return {"is_error": rc != 0, "result": last, "subtype": "success" if rc == 0 else "error"}
+    usage = reports[0] if len(reports) == 1 else worker_usage("codex", None)
+    if len(reports) > 1:
+        # Terminal reports might overlap. Do not invent aggregate totals.
+        usage.update(status="AMBIGUOUS", reports=reports[:8], report_count=len(reports),
+                     reports_omitted=max(0, len(reports) - 8))
+    return {"is_error": rc != 0, "result": last, "subtype": "success" if rc == 0 else "error",
+            "usage": usage, "observed_tool_calls": tool_calls,
+            "tool_calls_status": "COMPLETE_EVENT_STREAM" if rc == 0 and completed else "PARTIAL_EVENT_STREAM"}
 
 
-def _dispatch(slug, nid, timeout, model=None):
+def _dispatch(slug, nid, timeout, model=None, route=None):
     """Run one worker. Returns dispatch health, never task truth."""
-    prompt = build_context(slug, nid) + WORKER_INSTRUCTIONS
+    provider = runner()
+    def route_hold(why):
+        return {"id": nid, "quota": False, "dispatch_failed": True, "route_hold": True,
+                "why": why, "secs": 0, "cost": 0, "denials": 0, "text": "",
+                "usage": worker_usage(provider, None)}
     _, _, _nodes, _, _ = load(slug)
-    tier = tier_for(_nodes[nid]) if nid in _nodes else "standard"
-    if runner() == "codex":
+    route = route or (route_for(_nodes[nid]) if nid in _nodes else
+                      {"tier": "standard", "reason": "legacy_default"})
+    if route.get("tier") is None:
+        return route_hold(route.get("reason") or "route unavailable")
+    tier = route["tier"]
+    prompt = WORKER_INSTRUCTIONS + build_context(slug, nid)
+    if nid in _nodes and _nodes[nid]["fields"].get("tier"):
+        suffix = (".toml" if provider == "codex" else ".md")
+        config = os.path.expanduser(f"~/.{provider if provider == 'codex' else 'claude'}/agents/harness-{tier}{suffix}")
+        if not os.path.isfile(config):
+            return route_hold(f"declared route tier {tier} is not installed")
+        if model is not None:
+            return route_hold("explicit model override has no validated tier effort")
+        configured_model, configured_effort = (codex_tier(tier) if provider == "codex"
+                                               else claude_tier(tier))
+        if not configured_model or not configured_effort:
+            return route_hold(f"declared route tier {tier} has no resolved model/effort pair")
+        if provider == "codex":
+            try:
+                with open(os.path.expanduser("~/.codex/models_cache.json"), encoding="utf-8") as handle:
+                    cache = json.load(handle)
+                candidates = cache.get("models") or []
+            except (OSError, ValueError, AttributeError):
+                return route_hold("Codex model capability list is unavailable")
+            supported = any(isinstance(item, dict) and item.get("slug") == configured_model
+                            and item.get("visibility") == "list"
+                            and configured_effort in {level.get("effort") for level in
+                                                      item.get("supported_reasoning_levels") or []
+                                                      if isinstance(level, dict)}
+                            for item in candidates)
+            if not supported:
+                return route_hold(f"declared route tier {tier} model/effort pair is unsupported")
+    if provider == "codex":
         return _dispatch_codex(nid, prompt, tier, timeout, model)
     # Scope what a worker inherits. `claude -p` loads PROJECT-scoped MCP servers
     # without the approval prompt an interactive session shows, so a .mcp.json in
@@ -2071,7 +2340,7 @@ def _dispatch(slug, nid, timeout, model=None):
             return {"id": nid, "ok": False,
                     "why": f"worker killed by signal {-proc.returncode}",
                     "quota": False, "dispatch_failed": True, "denials": 0,
-                    "secs": int(time.time() - t0), "cost": 0, "text": ""}
+                    "secs": int(time.time() - t0), "cost": 0, "text": "", "usage": worker_usage("claude", None)}
     except subprocess.TimeoutExpired:
         if proc is not None:
             try:
@@ -2080,14 +2349,14 @@ def _dispatch(slug, nid, timeout, model=None):
                 pass
         return {"id": nid, "ok": False, "why": f"worker timed out after {timeout}s",
                 "quota": False, "dispatch_failed": True, "denials": 0,
-                "secs": int(time.time() - t0), "cost": 0, "text": ""}
+                "secs": int(time.time() - t0), "cost": 0, "text": "", "usage": worker_usage("claude", None)}
     except Exception as e:
         # Anything else — claude missing from PATH, OSError, a decode fault. An
         # uncaught raise here propagates out of ex.map and leaves every claimed
         # node marked [>] under a dead owner for the whole lease.
         return {"id": nid, "ok": False, "why": f"dispatch crashed: {e}",
                 "quota": False, "dispatch_failed": True, "denials": 0,
-                "secs": int(time.time() - t0), "cost": 0, "text": ""}
+                "secs": int(time.time() - t0), "cost": 0, "text": "", "usage": worker_usage("claude", None)}
     finally:
         if proc is not None:
             _LIVE.discard(proc)
@@ -2105,6 +2374,7 @@ def _dispatch(slug, nid, timeout, model=None):
             "cost": info.get("total_cost_usd", 0) or 0,
             "denials": len(info.get("permission_denials") or []),
             "text": str(info.get("result", ""))[:300],
+            "usage": worker_usage("claude", info.get("usage")),
             **classify_worker(info)}
 
 
@@ -2115,13 +2385,15 @@ def _dispatch_codex(nid, prompt, tier, timeout, model=None):
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
     except subprocess.TimeoutExpired:
         return {"id": nid, "ok": False, "why": f"worker timed out after {timeout}s", "quota": False,
-                "dispatch_failed": True, "denials": 0, "secs": int(time.time() - t0), "cost": 0, "text": ""}
+                "dispatch_failed": True, "denials": 0, "secs": int(time.time() - t0), "cost": 0, "text": "", "usage": worker_usage("codex", None)}
     except Exception as e:
         return {"id": nid, "ok": False, "why": f"dispatch crashed: {e}", "quota": False,
-                "dispatch_failed": True, "denials": 0, "secs": int(time.time() - t0), "cost": 0, "text": ""}
+                "dispatch_failed": True, "denials": 0, "secs": int(time.time() - t0), "cost": 0, "text": "", "usage": worker_usage("codex", None)}
     info = codex_info(proc.returncode, proc.stdout, proc.stderr)
     return {"id": nid, "secs": int(time.time() - t0), "cost": 0, "denials": 0,
-            "text": str(info["result"])[:300], "tier": tier, **classify_worker(info)}
+            "text": str(info["result"])[:300], "tier": tier, "usage": info["usage"],
+            "observed_tool_calls": info["observed_tool_calls"],
+            "tool_calls_status": info["tool_calls_status"], **classify_worker(info)}
 
 
 def classify_worker(info):
@@ -2252,16 +2524,27 @@ def gate_files(cmd, root, depth=3, owned=()):
     return found
 
 
-def _work_one(slug, nid, timeout, model, owner, authorised=None, gatepin=None):
+def _work_one(slug, nid, timeout, model, owner, authorised=None, gatepin=None,
+              authorised_inputs=None, route=None):
     """Dispatch one node, then gate it — both inside the worker pool, so gating
     is concurrent too. A worker that never ran is never gated: dispatch failure
     must not be recorded as evidence about the task."""
-    r = _dispatch(slug, nid, timeout, model)
+    requested, effort = None, None
+    if route is not None and route.get("tier") is not None:
+        requested, effort = (codex_tier(route["tier"]) if runner() == "codex"
+                             else claude_tier(route["tier"]))
+    r = _dispatch(slug, nid, timeout, model, route=route)
+    if route is not None:
+        r["route"] = {**route, "dispatch_seconds": r.get("secs"),
+                      "tool_calls": (r.get("observed_tool_calls")
+                                     if r.get("tool_calls_status") == "COMPLETE_EVENT_STREAM" else None),
+                      "requested_model": model or requested,
+                      "requested_effort": effort if model is None else None}
     if r["quota"] or r.get("dispatch_failed"):
         return r
     g = type("A", (), {"slug": slug, "id": nid, "attended": False,
                        "owner": owner, "force": False,
-                       "authorised_gate": authorised})()
+                       "authorised_gate": authorised, "authorised_inputs": authorised_inputs})()
     # Verify the gate's own scripts BEFORE running it. After is too late: the
     # rewritten gate has already produced its exit 0 and the only thing left to
     # do with it is throw it away, which is indistinguishable from a failure the
@@ -2373,6 +2656,9 @@ def cmd_run(a):
         for i in skipped:
             print(f"STUCK {i}. {nodes[i]['title']} — same failure twice, left for a human")
         for i in st["held"]:
+            if nodes[i].get("_version_hold"):
+                print(f"HELD {i}. {nodes[i]['title']} — {nodes[i]['_version_hold']}")
+                continue
             print(f"HELD {i}. {nodes[i]['title']} — risk: irreversible; settle it with "
                   f"`plan gate {slug} {i} --attended`")
 
@@ -2399,7 +2685,10 @@ def cmd_run(a):
                 st2 = analyse(nodes2, order2, mal2)
                 if nid not in st2["ready"]:
                     continue
-                set_node(path, lines, nodes2[nid], mark=">", lease=now_iso(), owner=owner)
+                extra = {}
+                if nodes2[nid].get("_versioned"):
+                    extra = {"version_claim": version_module().claim(path, lines, nodes2, nid), "version_run": None}
+                set_node(path, lines, nodes2[nid], mark=">", lease=now_iso(), owner=owner, **extra)
                 ensure_record(slug, nodes2[nid])
                 claimed.append(nid)
         if not claimed:
@@ -2415,9 +2704,12 @@ def cmd_run(a):
         snapshot = {i: render_node(snapNodes[i]) for i in snapOrder}
         snapFields = {i: {"gate": snapNodes[i]["fields"].get("gate"),
                           "risk": snapNodes[i]["fields"].get("risk"),
+                          "tier": snapNodes[i]["fields"].get("tier"),
                           "owner": snapNodes[i]["fields"].get("owner"),
                           "mark": snapNodes[i]["mark"],
                           "title": snapNodes[i]["title"]} for i in snapOrder}
+        for i in snapOrder:
+            snapFields[i]["version_claim"] = snapNodes[i]["fields"].get("version_claim")
         # H4 (external certification): RC-3's exemption read snapFields[i]["owner"],
         # but snapFields never stored one — heldBy was None for every input, so the
         # exemption was dead code that has never fired and every change made by a
@@ -2455,6 +2747,7 @@ def cmd_run(a):
         # every gate in a large graph every round is real cost for no gain.
         _groot = os.path.dirname(os.path.dirname(os.path.abspath(plan_path(slug))))
         gatepins = {}
+        routes = {i: route_for(snapNodes[i]) for i in claimed}
         for i in claimed:
             gcmd = snapNodes[i]["fields"].get("gate", "") if i in snapNodes else ""
             gctx = [c.strip() for c in
@@ -2498,7 +2791,8 @@ def cmd_run(a):
         try:
             futs = [ex.submit(_work_one, slug, i, a.timeout, a.model, owner,
                               snapFields.get(i, {}).get("gate"),
-                              gatepins.get(i)) for i in claimed]
+                              gatepins.get(i), snapFields.get(i, {}).get("version_claim"),
+                              routes.get(i)) for i in claimed]
             pending = set(futs)
             while pending:
                 _settled, pending = cf_wait(pending, timeout=0.5)
@@ -2568,6 +2862,7 @@ def cmd_run(a):
                         expect = expected_mark.get(i)
                         if (nA["fields"].get("gate") != was.get("gate")
                                 or nA["fields"].get("risk") != was.get("risk")
+                                or nA["fields"].get("tier") != was.get("tier")
                                 or nA["title"] != was.get("title")
                                 or (expect is not None and nA["mark"] != expect)):
                             tampered.append(i)
@@ -2703,10 +2998,12 @@ def cmd_run(a):
                 print(f"  note: record {os.path.basename(rp)} changed outside this "
                       f"orchestrator's own writes")
 
-        dispatched += len(results)
+        dispatched += sum(not r.get("route_hold") for r in results)
         for r in results:
             nid = r["id"]
             spent += r.get("cost", 0) or 0
+            if "usage" in r:
+                record_worker_usage(slug, nid, r["usage"], route=r.get("route"))
             if r.get("auth"):
                 ns = type("A", (), {"slug": slug, "id": nid,
                                     "reason": [f"dispatch halted: worker could not "
@@ -2762,6 +3059,8 @@ def cmd_run(a):
                     _, lines5, nodes5, _, _ = load(slug)
                     append_note(path, lines5, nodes5[nid], f"dispatch failed — {r['why']}")
                 print(f"  node {nid}: DISPATCH FAILED — {r['why']} (not gated)")
+                if r.get("route_hold"):
+                    halt = True
                 continue
             if r.get("denials"):
                 path = plan_path(slug)
@@ -2836,12 +3135,50 @@ def _install_signal_handlers():
                 pass
 
 
+def cmd_versions(a):
+    path, lines, nodes, _, _ = load(a.slug)
+    v = version_module()
+    mode = v.enabled(lines, nodes)
+    states = v.Versions(path, lines, nodes) if mode else None
+    result = {str(nid): states.state(nid) if states else {"state": "unversioned", "receipt": None}
+              for nid in nodes}
+    print(json.dumps({"mode": "v1" if mode else "legacy", "nodes": result}))
+    return 0
+
+
+def cmd_refresh(a):
+    path = plan_path(a.slug)
+    with Lock(path):
+        _, lines, nodes, _, mal = load(a.slug)
+        if not version_module().enabled(lines, nodes) or mal:
+            die("refresh requires a valid explicitly versioned graph", 8)
+        affected = [n for n in nodes.values() if n["mark"] == "x" and n.get("_version_stale")
+                    and not n.get("_version_hold")]
+        # Reverse line order permits one atomic graph replacement without shifting earlier nodes.
+        for n in sorted(affected, key=lambda node: node["line"], reverse=True):
+            n["mark"] = " "
+            n["fields"].pop("lease", None)
+            lines[n["line"]] = render_node(n)
+            at = (n["note_lines"][-1] if n["note_lines"] else n["line"]) + 1
+            lines.insert(at, f"      {now_iso()} VERSION INVALIDATED {_clean(n['_version_stale'])}")
+        if affected:
+            save(path, lines)
+    for n in affected:
+        print(f"INVALIDATED {n['id']}: {n['_version_stale']}")
+    print(f"{len(affected)} stale completed node(s) reopened; live leases and old evidence retained")
+    return 0
+
+
 def main():
     _install_signal_handlers()
     p = argparse.ArgumentParser(prog="plan", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
-    q = sub.add_parser("new"); q.add_argument("slug"); q.add_argument("goal", nargs="*"); q.set_defaults(fn=cmd_new)
+    q = sub.add_parser("new")
+    mode = q.add_mutually_exclusive_group()
+    mode.add_argument("--attended", action="store_true")
+    mode.add_argument("--autonomous", action="store_true")
+    q.add_argument("slug"); q.add_argument("goal", nargs="*"); q.set_defaults(fn=cmd_new)
     # `dir` is optional so that bare `plan init` means "here", the way `git
     # init` does. It was required, so the zero-argument bootstrap printed a
     # usage error; `plan new` then walked UP out of the uninitialised directory
@@ -2851,7 +3188,12 @@ def main():
     q.add_argument("--slug", default=None)
     q.add_argument("--python", action="store_true"); q.set_defaults(fn=cmd_init)
     q = sub.add_parser("ready"); q.add_argument("slug"); q.set_defaults(fn=cmd_ready)
+    q = sub.add_parser("versions", help="inspect input/result bindings without changing the graph")
+    q.add_argument("slug"); q.set_defaults(fn=cmd_versions)
+    q = sub.add_parser("refresh", help="reopen stale completed results; preserve current workers and evidence")
+    q.add_argument("slug"); q.set_defaults(fn=cmd_refresh)
     q = sub.add_parser("claim"); q.add_argument("slug")
+    q.add_argument("--id", type=int, help="claim this ready node only; never fall back or override a live lease")
     q.add_argument("--owner", default=os.environ.get("PLAN_OWNER") or sessionid()); q.set_defaults(fn=cmd_claim)
     q = sub.add_parser("release", help="yield a node: plan release <slug> <id> <why...> [--owner O] [--force]")
     q.add_argument("slug"); q.add_argument("id", type=int)

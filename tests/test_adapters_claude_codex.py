@@ -58,9 +58,11 @@ class ClaudeCode(Ctxd):
         self.assertIn("_hook-stop", s["hooks"]["Stop"][0]["hooks"][0]["command"])
         self.assertIn("_hook-prompt", s["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"])
         self.assertIn("memory digest", s["hooks"]["SessionStart"][0]["hooks"][0]["command"])
-        self.assertEqual(len(s["hooks"]["SessionStart"]), 2)
+        self.assertEqual(len(s["hooks"]["SessionStart"]), 3)
         self.assertIn("state print", s["hooks"]["SessionStart"][1]["hooks"][0]["command"])
         self.assertEqual(s["hooks"]["SessionStart"][1]["matcher"], "startup|resume|compact")
+        self.assertIn("_hook-op", s["hooks"]["SessionStart"][2]["hooks"][0]["command"])
+        self.assertEqual(s["hooks"]["SessionStart"][2]["matcher"], "startup|resume|compact")
         self.assertIn("state_save", s["hooks"]["PreCompact"][0]["hooks"][0]["command"])
         self.assertEqual(s["autoMemoryDirectory"], str(self.hh / "memory" / "claude-code"))
         mcp = ch[".claude.json"].content["mcpServers"]["harness"]
@@ -90,7 +92,8 @@ class ClaudeCode(Ctxd):
         merged = I.json_merge(mine, ours)
         self.assertEqual(merged["env"], {"A": "1"})
         self.assertEqual(merged["hooks"]["SessionStart"][0], mine["hooks"]["SessionStart"][0])
-        self.assertEqual(len(merged["hooks"]["SessionStart"]), 3)
+        self.assertEqual(len(merged["hooks"]["SessionStart"]), 4)
+        self.assertIn("_hook-op", merged["hooks"]["SessionStart"][3]["hooks"][0]["command"])
         self.assertEqual(merged["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"], "mine2")
         self.assertEqual(len(merged["hooks"]["UserPromptSubmit"]), 2)
         self.assertEqual(I.json_merge(merged, ours), merged)  # idempotent
@@ -112,7 +115,8 @@ class ClaudeCode(Ctxd):
         self.assertNotIn("old state print", json.dumps(got))
         self.assertEqual(got["model"], "x")
         self.assertIn("mine", json.dumps(got["hooks"]["Stop"]))
-        self.assertEqual(len(got["hooks"]["SessionStart"]), 2)
+        self.assertEqual(len(got["hooks"]["SessionStart"]), 3)
+        self.assertIn("_hook-op", got["hooks"]["SessionStart"][2]["hooks"][0]["command"])
         I.uninstall(self.hh, log=lambda m: None)
         self.assertEqual(json.loads((claude / "settings.json").read_text()), mine)
 

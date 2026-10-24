@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from .redact import redact
+from .native_evidence import NativeEvidence as NativeEvidence
 
 STORE = "candidates.jsonl"
 # A check is a command whose PROGRAM is a test runner or linter, in any step of the command line: `grep -rn

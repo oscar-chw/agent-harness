@@ -11,6 +11,11 @@ Codex; on a held-out set, the v0.2 guard blocked 39 of 45 dangerous commands and
 
 [Quick start](#quick-start) · [Docs](docs/README.md) · [All diagrams](docs/DIAGRAMS.md)
 
+> **v0.9 development candidate:** this branch packages newer local task-state,
+> source-backed memory, and explicit launch code for evaluation. It is not a
+> v1 release or a verified performance improvement. Read the [candidate scope
+> and limits](docs/v09-candidate.md) before installing into any active client.
+
 What one install writes into each tool, and what the tools then call; only Claude Code gets the guard:
 
 ```mermaid
@@ -89,7 +94,7 @@ tedious and rarely kept up.
 - **The guard** analyses a command rather than pattern-matching its text: it tokenises like a shell, unwraps
   `env`, `xargs`, `bash -c`, `eval`, `$(...)` and heredocs, resolves a relative path against an earlier `cd`,
   classifies each target, and fails closed on a payload it cannot parse.
-- **The work graph** (v0.3, off by default): one markdown file per goal. A node is done only when its gate
+- **The work graph** (v0.3, on by the owner's explicit decision): one markdown file per goal. A node is done only when its gate
   command exits 0, run by the graph after the guard has passed it; a failed gate returns the node to pending
   with its output, and claims are atomic with a lease, so parallel sessions never take the same node.
 - **A keep rule decides what ships on:** accuracy no worse, a measurable gain, token overhead within +15%;

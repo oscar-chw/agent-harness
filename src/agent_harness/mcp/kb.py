@@ -598,7 +598,9 @@ class KB:
     def _section_list(page: str, rows: List[sqlite3.Row]) -> str:
         lines = ["Sections of %s (kb_get <id> fetches one):" % page]
         for r in rows:
-            if re.search(r"-p\d+$", r["sid"]) or not r["level"]:
+            # A heading-free page still has a #top section. Hiding level zero
+            # made real memory indexes appear empty despite indexed content.
+            if re.search(r"-p\d+$", r["sid"]):
                 continue
             lines.append("%s%s  %s  (%d B)" % ("  " * max(0, (r["level"] or 1) - 1), r["sid"], r["title"], r["bytes"]))
         return "\n".join(lines) + "\n"

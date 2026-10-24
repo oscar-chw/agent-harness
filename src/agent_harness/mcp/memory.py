@@ -4,7 +4,7 @@ Source of truth: one small JSON file per item, human-readable and hand-editable:
     <HARNESS_HOME>/memory/<scope>/<id>.json      scope = "user" | "project"
     <HARNESS_HOME>/lessons/<id>.json
 Archived items move to an ``archive/`` subfolder (never deleted). The files are mirrored into a
-separate table (+ FTS5 table when available) in the shared ``index.sqlite``, synced by mtime.
+separate table (+ FTS5 table when available) in the shared ``index.sqlite``, synced by content.
 
 CLI (session-start and per-prompt hooks; both print nothing when there is nothing to say):
     python3 -m agent_harness.mcp.memory digest [--project DIR] [--max-bytes 2048]
@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as _dt
+import hashlib
 import json
 import os
 import re
@@ -34,7 +35,6 @@ else:
     from .state import State, project_root
 
 CAPS = {"memory": 500, "lessons": 200}
-DUP_JACCARD = 0.8
 SCOPES = ("user", "project")
 RECALL_TTL_DAYS = 7
 # Relevance threshold on the normalised score (kb.relevance with doc_coverage=True), calibrated on the
@@ -50,15 +50,18 @@ MEM_MIN_SCORE = 0.2
 SNAPSHOT_CHARS = 2200     # Hermes' MEMORY.md cap
 
 
-def _norm_set(text: str) -> set:
-    return set(re.findall(r"[0-9a-zÀ-￿]+", text.lower()))
+def _duplicate_key(text: str) -> tuple:
+    """Ignore sentence separators, not meaning-bearing words, order or operators.
 
-
-def jaccard(a: str, b: str) -> float:
-    sa, sb = _norm_set(a), _norm_set(b)
-    if not sa and not sb:
-        return 1.0
-    return len(sa & sb) / float(len(sa | sb))
+    Similarity is useful for retrieval but cannot authorize discarding a new fact:
+    one negation, number or reversed relationship can change the entire instruction.
+    Keep code spans and internal punctuation/case; tolerate initial capitalization.
+    """
+    parts = re.findall(r"`[^`]*`|\.\d+|\w+(?:[.,]\w+)*|[^\w\s.,]", text.strip())
+    if not parts:
+        return (text.strip(),)
+    first = parts[0].casefold() if parts[0].istitle() else parts[0]
+    return (first, *parts[1:])
 
 
 class Memory:
@@ -93,7 +96,7 @@ class Memory:
 
     @staticmethod
     def _text(kind: str, item: dict) -> str:
-        if kind == "lesson":
+        if kind in ("lesson", "procedure"):
             return "%s\n%s\n%s" % (item.get("trigger", ""), item.get("mistake", ""), item.get("fix", ""))
         return item.get("text", "")
 
@@ -106,7 +109,8 @@ class Memory:
     def sync(self) -> None:
         """Mirror the JSON files into SQLite: (re)index new/changed files, drop vanished ones."""
         c = self.con
-        known = {r["file"]: (r["rowid"], r["mtime"]) for r in c.execute("SELECT rowid, file, mtime FROM mem_items")}
+        known = {r["file"]: (r["rowid"], json.loads(r["data"]))
+                 for r in c.execute("SELECT rowid, file, data FROM mem_items")}
         seen = set()
         for kind, scope, d in self._dirs():
             if not d.is_dir():
@@ -118,11 +122,12 @@ class Memory:
                 seen.add(key)
                 mt = f.stat().st_mtime
                 k = known.get(key)
-                if k and k[1] == mt:
-                    continue
                 try:
                     item = json.loads(f.read_text(encoding="utf-8"))
-                except (OSError, ValueError):
+                except (OSError, ValueError) as exc:
+                    raise ValueError("cannot read memory source " + f.name) from exc
+                # Restores and sync tools can preserve mtime while changing a fact.
+                if k and k[1] == item:
                     continue
                 self._upsert(kind, scope, item, key, mt, k[0] if k else None)
         for key, (rowid, _) in known.items():
@@ -183,7 +188,7 @@ class Memory:
         text = self._text(kind, item)
         vis, params = self._visible(kind, scope or None)
         for r in self.con.execute("SELECT * FROM mem_items WHERE " + vis, params).fetchall():
-            if jaccard(text, r["text"]) > DUP_JACCARD:
+            if _duplicate_key(text) == _duplicate_key(r["text"]):
                 existing = json.loads(r["data"])
                 self._bump(r, existing)
                 self.con.commit()
@@ -233,6 +238,10 @@ class Memory:
         present, only narrows the candidates.
         """
         self.sync()
+        return self._score_index(kind, query, min_score)
+
+    def _score_index(self, kind, query, min_score=None):
+        """Score one kind from the current snapshot without resyncing all files."""
         min_score = MEM_MIN_SCORE if min_score is None else float(min_score)
         qt = _kb.query_terms(query or "")
         if not qt:
@@ -282,14 +291,16 @@ class Memory:
         return res
 
     def mem_search(self, query: str, k: int = 5, min_score: Optional[float] = None) -> List[dict]:
-        return [{"id": i["id"], "text": i["text"], "tags": i.get("tags", []), "uses": i["uses"]}
-                for i in self._search("memory", query, k, min_score)]
+        items = self._search("memory", query, k, min_score)
+        return [{"id": i["id"], "text": i["text"], "tags": i.get("tags", []), "uses": i["uses"],
+                 **({"scope": "project", "project": i["project"]} if i.get("project") else {})}
+                for i in items]
 
     def mem_forget(self, id: str) -> dict:
         """Forgotten items are archived (moved to archive/), never deleted; the index drops them."""
         self.sync()
         r = self.con.execute("SELECT * FROM mem_items WHERE id=?", (id,)).fetchone()
-        if not r:
+        if not r or (r["kind"] == "memory" and r["scope"] == "project" and r["project"] != self.project):
             return {"ok": False, "error": "no item %r" % id}
         self._archive(r, reason="forgotten")
         self.con.commit()
@@ -302,8 +313,18 @@ class Memory:
                                         "trigger": trigger.strip(), "project": self.project})
 
     def lesson_search(self, query: str, k: int = 3, min_score: Optional[float] = None) -> List[dict]:
-        return [{"id": i["id"], "trigger": i.get("trigger", ""), "mistake": i["mistake"], "fix": i["fix"],
-                 "uses": i["uses"]} for i in self._search("lesson", query, k, min_score)]
+        from agent_harness.procedures import matches
+        hits = [(sc, json.loads(row["data"]), row) for sc, row in self.scored("lesson", query, min_score)]
+        hits.extend((sc, item, None) for sc, item in matches(
+            self.home, self.project, query, MEM_MIN_SCORE if min_score is None else min_score))
+        out = []
+        for _, item, row in sorted(hits, key=lambda hit: -hit[0])[:max(1, min(int(k), 50))]:
+            if row is not None:
+                item = self._bump(row, item)
+            out.append({key: item[key] for key in ("id", "trigger", "mistake", "fix", "uses")}
+                       | ({"project": item["project"], "sha256": item["sha256"]} if row is None else {}))
+        self.con.commit()
+        return out
 
     # ------------------------------------------------------------ session hooks
     def digest(self, max_bytes: int = 2048) -> str:
@@ -347,10 +368,83 @@ class Memory:
             size += len(line)
         return "".join(out)
 
+    def _recall_path(self, session: str) -> Path:
+        sid = re.sub(r"[^A-Za-z0-9_.-]", "_", session)[:120] or "default"
+        sid += "-" + hashlib.sha256(json.dumps([self.project, session]).encode()).hexdigest()[:24]
+        return self.home / "sessions" / ("recalled-%s.txt" % sid)
+
+    @staticmethod
+    def _recalled_id(line):
+        prefix, _, digest = line.rpartition(":")
+        return prefix if re.fullmatch(r"[0-9a-f]{64}", digest) else line
+
+    def resume_context(self, session: str, max_bytes: int = 1200) -> str:
+        """Rehydrate current whole records; reset suppression after context loss.
+
+        Prior content is never recovered from the marker: it contains IDs/hashes
+        only. Missing records and over-budget records remain explicit handles.
+        """
+        self.sync()
+        seen_file = self._recall_path(session)
+        ids = list(dict.fromkeys(self._recalled_id(line) for line in
+                   (seen_file.read_text().splitlines() if seen_file.exists() else [])))
+        vis, params = self._visible("memory")
+        rows = {r["id"]: r for r in self.con.execute("SELECT * FROM mem_items WHERE " + vis, params)}
+        for identity, row in rows.items():
+            if json.loads(row["data"]).get("pinned") and identity not in ids:
+                ids.append(identity)
+        # Legacy lessons were originally global. Replay only those actually
+        # supplied to this session, never unrelated lesson contents.
+        for row in self.con.execute("SELECT * FROM mem_items WHERE kind='lesson'"):
+            if row["id"] in ids:
+                rows[row["id"]] = row
+        from agent_harness.procedures import recover, withdrawn
+        methods = recover(self.home, self.project, ids)
+        revoked = set(withdrawn(self.home, self.project, ids))
+        lines, included, omitted = [], [], []
+        for identity in ids:
+            if identity in rows:
+                row = rows[identity]
+                item = json.loads(row["data"])
+                line = "- %s: %s\n" % (identity, self._text(row["kind"], item))
+            elif identity in methods:
+                line = "- %s: when %s -> %s\n" % (
+                    identity, methods[identity]["trigger"], methods[identity]["fix"])
+            elif identity in revoked:
+                line = "- %s: withdrawn; do not rely on that advice.\n" % identity
+            elif identity.startswith("skill:"):
+                line = "- %s: use skill_manage view %s to reload the current method.\n" % (
+                    identity, identity.removeprefix("skill:"))
+            else:
+                line = "- %s: prior context unavailable; retrieve and verify before reuse.\n" % identity
+            if len(("".join(lines) + line).encode()) > max_bytes:
+                omitted.append(identity)
+            else:
+                lines.append(line)
+                included.append(identity)
+        if omitted:
+            def notice():
+                return "- omitted %d records (%s); use mem_search/lesson_search/skill_manage.\n" % (
+                    len(omitted), ", ".join(omitted[:2]))
+            while lines and len(("".join(lines) + notice()).encode()) > max_bytes:
+                lines.pop()
+                omitted.insert(0, included.pop())
+            message = notice()
+            if len(message.encode()) > max_bytes:
+                raise ValueError("recovery budget cannot include omission handles")
+            lines.append(message)
+        if ids:
+            seen_file.parent.mkdir(parents=True, exist_ok=True)
+            # Keep identity provenance for repeated recovery/rollback notices,
+            # but remove delivery hashes so the next prompt may supply content.
+            seen_file.write_text("".join(identity + "\n" for identity in ids), encoding="utf-8")
+        return "".join(lines)
+
     def recall(self, prompt: str, session: str, max_bytes: int = 1200,
                min_score: Optional[float] = None) -> str:
         """Memories and lessons relevant to `prompt`, most relevant first, within max_bytes, skipping
-        ids already recalled in this session. Empty string when nothing is relevant."""
+        unchanged records already recalled in this project/session. Empty when irrelevant.
+        Over-budget records get an explicit omission instead of a partial instruction."""
         sdir = self.home / "sessions"
         sdir.mkdir(parents=True, exist_ok=True)
         cutoff = time.time() - RECALL_TTL_DAYS * 86400
@@ -360,22 +454,60 @@ class Memory:
                     f.unlink()
             except OSError:
                 pass
-        sid = re.sub(r"[^A-Za-z0-9_.-]", "_", session)[:120] or "default"
-        seen_f = sdir / ("recalled-%s.txt" % sid)
-        seen = set(seen_f.read_text(encoding="utf-8").split()) if seen_f.exists() else set()
-        hits = [(sc, r) for kind in ("memory", "lesson") for sc, r in self.scored(kind, prompt, min_score)
-                if r["id"] not in seen]
+        seen_f = self._recall_path(session)
+        previous = seen_f.read_text(encoding="utf-8").splitlines() if seen_f.exists() else []
+        latest = {self._recalled_id(line): line for line in previous}
+        seen = set(latest.values())
+
+        def recall_key(row):
+            if row["kind"] == "skill":
+                content = [row["name"], row["description"]]
+            else:
+                item = json.loads(row["data"])
+                content = [row["kind"], row["scope"], row["project"],
+                           self._text(row["kind"], item), item.get("tags", [])]
+            digest = hashlib.sha256(json.dumps(content, ensure_ascii=False).encode()).hexdigest()
+            return row["id"] + ":" + digest
+
+        self.sync()  # One coherent source snapshot for both record kinds.
+        hits = [(sc, r) for kind in ("memory", "lesson") for sc, r in self._score_index(kind, prompt, min_score)
+                if recall_key(r) not in seen]
+        tracked = {identity for identity in latest if re.fullmatch(r"[ml]-[0-9a-f]{12}", identity)}
+        if tracked:
+            vis, params = self._visible("memory")
+            active = {row[0] for row in self.con.execute("SELECT id FROM mem_items WHERE " + vis, params)}
+            active.update(row[0] for row in self.con.execute("SELECT id FROM mem_items WHERE kind='lesson'"))
+            for identity in sorted(tracked - active):
+                row = {"kind": "notice", "id": identity, "scope": "project", "project": self.project,
+                       "data": json.dumps({"text": "Previously recalled memory %s is no longer active; "
+                                           "do not rely on that advice." % identity})}
+                if recall_key(row) not in seen:
+                    hits.append((float("inf"), row))
+        from agent_harness.procedures import matches, withdrawn
+        for identity in withdrawn(self.home, self.project, set(latest)):
+            row = {"kind": "notice", "id": identity, "scope": "project", "project": self.project,
+                   "data": json.dumps({"text": "Previously recalled procedure %s is withdrawn; "
+                                       "do not rely on that advice." % identity})}
+            if recall_key(row) not in seen:
+                hits.append((float("inf"), row))
+        for score, item in matches(self.home, self.project, prompt,
+                                   MEM_MIN_SCORE if min_score is None else min_score):
+            row = {"kind": "procedure", "id": item["id"], "scope": "project", "project": self.project,
+                   "data": json.dumps(item)}
+            if recall_key(row) not in seen:
+                hits.append((score, row))
         # learned skills: Claude Code does not list ~/.agents/skills, so a relevant one is named here
         try:
-            hits += [(sc, {"id": "skill:" + n, "kind": "skill", "name": n, "description": d})
-                     for sc, n, d in Skills(home=self.home, user_home=self.user_home).scored(prompt)
-                     if "skill:" + n not in seen]
+            for sc, n, d in Skills(home=self.home, user_home=self.user_home).scored(prompt):
+                row = {"id": "skill:" + n, "kind": "skill", "name": n, "description": d}
+                if recall_key(row) not in seen:
+                    hits.append((sc, row))
         except OSError:
             pass
         hits.sort(key=lambda x: -x[0])
         if not hits:
             return ""
-        lines, used = ["Recalled from harness memory (relevant to this prompt):\n"], []
+        lines, used, omitted = ["Recalled from harness memory (relevant to this prompt):\n"], [], []
         size = len(lines[0].encode("utf-8"))
         for _, r in hits:
             if r["kind"] == "skill":
@@ -386,28 +518,48 @@ class Memory:
                     lines.append(line)
                     size += b
                     used.append(r)
+                else:
+                    omitted.append(r)
                 continue
             i = json.loads(r["data"])
-            if r["kind"] == "lesson":
+            if r["kind"] in ("lesson", "procedure"):
                 line = "- lesson: when %s -> %s (mistake was: %s)\n" % (
-                    _one_line(i.get("trigger", "") or "relevant", 120), _one_line(i["fix"], 200),
-                    _one_line(i["mistake"], 160))
+                    i.get("trigger", "") or "relevant", i["fix"], i["mistake"])
             else:
-                line = "- %s\n" % _one_line(i["text"])
+                line = "- %s\n" % i["text"]
             b = len(line.encode("utf-8"))
             if size + b > max_bytes:
+                omitted.append(r)
                 continue
             lines.append(line)
             size += b
             used.append(r)
-        if not used:
+        if omitted:
+            def omission_notice():
+                return "- omitted %d (%s); retrieve with mem_search/lesson_search/skill_manage.\n" % (
+                    len(omitted), ", ".join(r["id"] for r in omitted[:2]))
+
+            # Reserve room for honest omission evidence instead of filling the
+            # packet with matches and then silently dropping its qualifications.
+            notice = omission_notice()
+            while used and size + len(notice.encode()) > max_bytes:
+                omitted.insert(0, used.pop())
+                size -= len(lines.pop().encode())
+                notice = omission_notice()
+            if size + len(notice.encode()) > max_bytes:
+                notice = "- omitted %d; use mem_search/lesson_search.\n" % len(omitted)
+            if size + len(notice.encode()) > max_bytes:
+                raise ValueError("recall budget cannot include omission notice")
+            lines.append(notice)
+        if not used and not omitted:
             return ""
         for r in used:
-            if r["kind"] != "skill":
+            if r["kind"] not in ("skill", "procedure", "notice"):
                 self._bump(r, json.loads(r["data"]))
         self.con.commit()
-        with open(seen_f, "a", encoding="utf-8") as f:
-            f.write("".join(r["id"] + "\n" for r in used))
+        for r in used:
+            latest[r['id']] = recall_key(r)
+        seen_f.write_text("".join(line + "\n" for line in latest.values()), encoding="utf-8")
         return "".join(lines)
 
     def close(self) -> None:
