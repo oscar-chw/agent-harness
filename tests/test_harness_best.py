@@ -735,8 +735,10 @@ class TestReviewFindings(Base):
         # This checks storage reporting, not editor installation. A real
         # `code` binary must not run while this fixture has --yes set.
         with mock.patch("agent_harness.extensions.detect_editors", return_value=[]) as editors:
-            self.assertEqual(harness(self.home, "install", "--yes", "--tools", "claude-code")[0], 0)
+            with mock.patch("agent_harness.extensions._run", side_effect=AssertionError("live editor invoked")) as editor_run:
+                self.assertEqual(harness(self.home, "install", "--yes", "--tools", "claude-code")[0], 0)
         editors.assert_called()
+        editor_run.assert_not_called()
         big = self.hh() / "state" / "blob.bin"
         big.parent.mkdir(parents=True, exist_ok=True)
         with open(big, "wb") as out:
