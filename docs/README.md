@@ -18,6 +18,8 @@ Start with the [project README](../README.md); every page below goes one level d
 | [how-it-works.md, the guard corpus](how-it-works.md#the-guard-against-a-wider-corpus-and-a-held-out-set) | Where the guard corpus came from, the disagreement table, and what changed in scope in v0.3 |
 | [eval/README.md](../eval/README.md) | How the A/B eval runs, its conditions, and whose usage a full pass spends |
 | [eval/results/historical.md](../eval/results/historical.md) | The original eval's numbers (private corpus) and the deviations its reports record |
+| [v1/source-evidence-graph.md](v1/source-evidence-graph.md) | Selected RAW-RAG/TextFold sources, partial social leads, existing components, and checks required before adoption |
+| [v1/ACCEPTANCE-MATRIX.md](v1/ACCEPTANCE-MATRIX.md) | Candidate qualification state and the blocked independent promotion boundary |
 
 ## Reference
 
