@@ -176,6 +176,12 @@ The rules ask for good behaviour; the harness enforces a floor where the tool al
   `plan run` gives each worker a tier from `content/routing.toml`: a node's own `tier:`, else `standard`, and
   `deep` once its gate has failed. The tier's model and effort are passed explicitly (`--model`/`--effort`
   for Claude Code, `-m`/`model_reasoning_effort` for Codex), read from the `harness-<tier>` agent files.
+  Separately, disabled-by-default `routing.next_decision` can select a minimum tier from a typed task
+  profile: only low-impact, low-uncertainty mechanical work starts `quick`; ordinary work starts
+  `standard`; high-impact or high-uncertainty work, design and review start `deep`. Unknown inputs,
+  unsupported model/effort pairs, stale context or route state, and exhausted budgets return `HOLD`.
+  It is advisory and has no measured model-quality or token advantage; task labels are caller claims,
+  not independently verified facts.
 - **Memory recall** (Claude Code): relevant memories are attached to each prompt, within a strict
   time limit, so the agent does not need to search for them.
 

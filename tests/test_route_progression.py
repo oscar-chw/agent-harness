@@ -26,7 +26,8 @@ def configured(tmp_path):
         "quick": {"codex": "m-small", "effort": "low"},
         "standard": {"codex": "m-strong", "effort": "high"},
         "deep": {"codex": "m-strong", "effort": "max"}},
-        "progression": {"enabled": True, "codex_steps": ["quick", "standard", "deep"]}}}
+        "progression": {"enabled": True, "selector": "declared",
+                        "codex_steps": ["quick", "standard", "deep"]}}}
     return profile
 
 
@@ -47,6 +48,98 @@ def attempt(decision, status="FAIL", *, context=CONTEXT, tokens=20, tools=1, sec
                       "tool_calls": tools, "wall_seconds": seconds},
             "gate": {"schema": "harness.gate-result/v1", "status": status,
                      "check_id": "independent-test", "artifact_sha256": ARTIFACT}}
+
+
+def task_state(**changes):
+    record = state()
+    record.pop("start_tier")
+    record.pop("start_reason")
+    record["task"] = {"schema": "harness.task-profile/v1", "kind": "implementation",
+                      "impact": "normal", "uncertainty": "low"}
+    return {**record, **changes}
+
+
+def test_task_selector_starts_at_a_tier_supported_by_the_task_evidence(tmp_path):
+    profile = configured(tmp_path)
+    profile["routing"]["progression"]["selector"] = "task"
+    mechanical = task_state(task={"schema": "harness.task-profile/v1", "kind": "mechanical",
+                                  "impact": "low", "uncertainty": "low"})
+    quick = routing.next_decision(CONTENT, tmp_path, mechanical,
+                                  current_context_sha256=CONTEXT, profile=profile)
+    assert (quick["decision"], quick["tier"], quick["model"], quick["effort"]) == (
+        "DISPATCH", "quick", "m-small", "low")
+
+    ordinary = routing.next_decision(CONTENT, tmp_path, task_state(),
+                                     current_context_sha256=CONTEXT, profile=profile)
+    assert (ordinary["decision"], ordinary["tier"], ordinary["model"], ordinary["effort"]) == (
+        "DISPATCH", "standard", "m-strong", "high")
+    assert ordinary["reason"] == "task_selected_start"
+
+    for kind, impact, uncertainty in (("design", "low", "low"),
+                                      ("review", "low", "low"),
+                                      ("mechanical", "high", "low"),
+                                      ("implementation", "normal", "high")):
+        record = task_state(task={"schema": "harness.task-profile/v1", "kind": kind,
+                                  "impact": impact, "uncertainty": uncertainty})
+        deep = routing.next_decision(CONTENT, tmp_path, record,
+                                     current_context_sha256=CONTEXT, profile=profile)
+        assert (deep["decision"], deep["tier"], deep["model"], deep["effort"]) == (
+            "DISPATCH", "deep", "m-strong", "max")
+
+
+def test_task_selector_refuses_unknown_or_underqualified_task(tmp_path):
+    profile = configured(tmp_path)
+    profile["routing"]["progression"]["selector"] = "task"
+    for record in (state(), task_state(task={"schema": "harness.task-profile/v1",
+                                        "kind": "unknown", "impact": "low", "uncertainty": "low"}),
+                   task_state(task={"schema": "harness.task-profile/v1", "kind": "implementation",
+                                    "impact": "normal", "uncertainty": "low", "extra": "surprise"})):
+        result = routing.next_decision(CONTENT, tmp_path, record,
+                                       current_context_sha256=CONTEXT, profile=profile)
+        assert result["decision"] == "HOLD" and result["reason"] == "invalid_task"
+    low = routing.next_decision(CONTENT, tmp_path,
+                                task_state(start_tier="quick", start_reason="save tokens"),
+                                current_context_sha256=CONTEXT, profile=profile)
+    assert (low["decision"], low["reason"]) == ("HOLD", "tier_underqualified")
+    high = routing.next_decision(CONTENT, tmp_path,
+                                 task_state(start_tier="deep", start_reason="sensitive API change"),
+                                 current_context_sha256=CONTEXT, profile=profile)
+    assert (high["decision"], high["tier"]) == ("DISPATCH", "deep")
+    ceiling = routing.next_decision(CONTENT, tmp_path,
+                                    task_state(task={"schema": "harness.task-profile/v1", "kind": "design",
+                                                     "impact": "normal", "uncertainty": "high"},
+                                               max_tier="standard"),
+                                    current_context_sha256=CONTEXT, profile=profile)
+    assert (ceiling["decision"], ceiling["reason"]) == ("HOLD", "tier_ceiling")
+    profile["routing"]["progression"]["codex_steps"] = ["deep", "quick", "standard"]
+    reordered = routing.next_decision(CONTENT, tmp_path, task_state(),
+                                      current_context_sha256=CONTEXT, profile=profile)
+    assert (reordered["decision"], reordered["reason"]) == ("HOLD", "invalid_policy")
+
+
+def test_task_profile_is_bound_to_route_history_and_gate_result(tmp_path):
+    profile = configured(tmp_path)
+    profile["routing"]["progression"]["selector"] = "task"
+    first = routing.next_decision(CONTENT, tmp_path, task_state(),
+                                  current_context_sha256=CONTEXT, profile=profile)
+    assert first["tier"] == "standard"
+    history = task_state(route_version=first["route_version"], attempts=[attempt(first)])
+    changed = routing.next_decision(CONTENT, tmp_path,
+                                    {**history, "task": {"schema": "harness.task-profile/v1",
+                                                         "kind": "mechanical", "impact": "low",
+                                                         "uncertainty": "low"}},
+                                    current_context_sha256=CONTEXT, profile=profile)
+    assert (changed["decision"], changed["reason"]) == ("HOLD", "stale_route")
+    escalated = routing.next_decision(CONTENT, tmp_path, history,
+                                      current_context_sha256=CONTEXT, profile=profile)
+    assert (escalated["decision"], escalated["tier"], escalated["reason"]) == (
+        "DISPATCH", "deep", "independent_gate_failed")
+    passed = routing.next_decision(CONTENT, tmp_path,
+                                   task_state(route_version=first["route_version"],
+                                              attempts=[attempt(first, status="PASS")]),
+                                   current_context_sha256=CONTEXT,
+                                   current_artifact_sha256=ARTIFACT, profile=profile)
+    assert (passed["decision"], passed["reason"]) == ("STOP", "independent_gate_passed")
 
 
 def test_minimum_start_escalates_only_after_independent_gate_failure(tmp_path):

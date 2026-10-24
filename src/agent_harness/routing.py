@@ -125,6 +125,21 @@ def resolve(content: Path, home: Path, profile: Optional[dict] = None) -> Dict[s
     return out
 
 
+def _task_minimum(task: dict) -> Optional[str]:
+    """Deterministic minimum from explicit task facts; never infer capability from a model name."""
+    if (not isinstance(task, dict) or set(task) != {"schema", "kind", "impact", "uncertainty"}
+            or task["schema"] != "harness.task-profile/v1"
+            or task["kind"] not in ("mechanical", "implementation", "investigation", "design", "review")
+            or task["impact"] not in ("low", "normal", "high")
+            or task["uncertainty"] not in ("low", "normal", "high")):
+        return None
+    if task["impact"] == "high" or task["uncertainty"] == "high" or task["kind"] in ("design", "review"):
+        return "deep"
+    if task["kind"] == "mechanical" and task["impact"] == task["uncertainty"] == "low":
+        return "quick"
+    return "standard"
+
+
 def next_decision(content: Path, home: Path, state: dict, *, current_context_sha256: str,
                   current_artifact_sha256: Optional[str] = None,
                   profile: Optional[dict] = None) -> dict:
@@ -164,6 +179,9 @@ def next_decision(content: Path, home: Path, state: dict, *, current_context_sha
             or any(not isinstance(s, str) or s not in tiers for s in steps)
             or len(set(steps)) != len(steps)):
         return finish("HOLD", "invalid_policy")
+    selector_mode = policy.get("selector", "declared")
+    if selector_mode not in ("declared", "task"):
+        return finish("HOLD", "invalid_policy")
     resolved = resolve(content, home, profile)
     cx = t.get("codex") or {}
     models = codex_models(home, list(cx.get("visible") or ["list"]))
@@ -181,19 +199,31 @@ def next_decision(content: Path, home: Path, state: dict, *, current_context_sha
             or not math.isfinite(limits["max_wall_seconds"])
             or limits["max_wall_seconds"] <= 0):
         return finish("HOLD", "invalid_budget")
-    start = state.get("start_tier", steps[0])
+    minimum = None
+    if selector_mode == "task":
+        if steps != ["quick", "standard", "deep"]:
+            return finish("HOLD", "invalid_policy")
+        minimum = _task_minimum(state.get("task"))
+        if minimum is None:
+            return finish("HOLD", "invalid_task")
+    start = state.get("start_tier", minimum or steps[0])
     max_tier = state.get("max_tier", steps[-1])
     if start not in steps or max_tier not in steps:
         return finish("HOLD", "invalid_state")
     start_index, max_index = steps.index(start), steps.index(max_tier)
+    if minimum is not None and start_index < steps.index(minimum):
+        return finish("HOLD", "tier_underqualified")
     if start_index > max_index:
         return finish("HOLD", "tier_ceiling")
-    if start_index and (not isinstance(state.get("start_reason"), str)
-                        or not 1 <= len(state["start_reason"].strip()) <= 256):
+    overridden_start = (start != minimum if minimum is not None else start_index > 0)
+    if overridden_start and (not isinstance(state.get("start_reason"), str)
+                             or not 1 <= len(state["start_reason"].strip()) <= 256):
         return finish("HOLD", "unjustified_start")
     version_material = {"steps": steps, "tiers": {s: tiers[s] for s in steps},
                         "resolved": {s: resolved[s]["codex"] for s in steps},
                         "ceiling": ceiling, "models": models, "limits": limits,
+                        "selector": selector_mode,
+                        "task": state.get("task") if selector_mode == "task" else None,
                         "start_tier": start, "start_reason": state.get("start_reason"),
                         "max_tier": max_tier, "context_sha256": current_context_sha256,
                         "check_id": state["check_id"]}
@@ -259,19 +289,20 @@ def next_decision(content: Path, home: Path, state: dict, *, current_context_sha
         return finish("HOLD", "tier_ceiling")
     if not model or model not in by_slug:
         return finish("HOLD", "model_unavailable")
-    selector = tiers[tier].get("codex") or "default"
-    if selector == "fast" and not any(
+    model_selector = tiers[tier].get("codex") or "default"
+    if model_selector == "fast" and not any(
             any(word in (candidate.get("description") or "").lower()
                 for word in (cx.get("fast_words") or [])) for candidate in models):
         return finish("HOLD", "model_unavailable")
-    if selector not in ("fast", "default") and selector != model:
+    if model_selector not in ("fast", "default") and model_selector != model:
         return finish("HOLD", "model_unavailable")
     offered = {x.get("effort") for x in by_slug[model].get("supported_reasoning_levels") or []
                if isinstance(x, dict)}
     if want not in offered or selected["effort"] != want:
         return finish("HOLD", "pair_unsupported")
     reason = ("independent_gate_failed" if attempts else
-              "declared_direct_start" if start_index else "configured_minimum_start")
+              "declared_direct_start" if overridden_start else
+              "task_selected_start" if selector_mode == "task" else "configured_minimum_start")
     return finish("DISPATCH", reason, tier=tier, model=model, effort=want,
                   index=len(attempts) + 1)
 
