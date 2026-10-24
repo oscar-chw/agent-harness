@@ -239,14 +239,17 @@ def freeze_case(home, project, identity, task_id, task, answer):
         _, development_inputs = _episodes(payload["candidate"], project)
         if task_sha in development_inputs:
             raise ValueError("frozen task overlaps a development input")
+        prior = con.execute("SELECT task_sha256,answer_sha256 FROM procedure_frozen_cases "
+                            "WHERE id=? AND task_id=?", (identity, task_id)).fetchone()
+        if prior:
+            if tuple(prior) == (task_sha, answer_sha):
+                return {"task_id": task_id, "task_sha256": task_sha, "answer_sha256": answer_sha}
+            raise ValueError("frozen task id conflicts with changed task or answer")
         if con.execute("SELECT 1 FROM procedure_frozen_cases WHERE id=? AND task_sha256=?",
                        (identity, task_sha)).fetchone():
             raise ValueError("frozen task input is already registered")
-        try:
-            con.execute("INSERT INTO procedure_frozen_cases VALUES (?,?,?,?)",
-                        (identity, task_id, task_sha, answer_sha))
-        except sqlite3.IntegrityError:
-            raise ValueError("frozen task id already exists") from None
+        con.execute("INSERT INTO procedure_frozen_cases VALUES (?,?,?,?)",
+                    (identity, task_id, task_sha, answer_sha))
     return {"task_id": task_id, "task_sha256": task_sha, "answer_sha256": answer_sha}
 
 
@@ -285,9 +288,6 @@ def bind_hold(home, project, identity, task_id, task, answer,
                              "WHERE id=? AND task_id=?", (identity, task_id)).fetchone()
         if not frozen or (task_sha, answer_sha) != tuple(frozen):
             raise ValueError("frozen task or answer receipt is missing or changed")
-        if con.execute("SELECT 1 FROM procedure_binder_receipts WHERE id=? AND task_id=?",
-                       (identity, task_id)).fetchone():
-            raise ValueError("binder receipt already exists; immutable task result")
         grader = {"version": "exact-bytes-v1",
                   "sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
         result = {"schema": 1, "project": project, "procedure_id": identity,
@@ -302,6 +302,12 @@ def bind_hold(home, project, identity, task_id, task, answer,
                   "tokens": {"base": base_tokens, "candidate": cand_tokens},
                   "decision": "HOLD_UNVERIFIED_BOUNDARY",
                   "hold_reason": "actor answer isolation, effective model and receipt provenance unverified"}
+        prior = con.execute("SELECT receipt FROM procedure_binder_receipts WHERE id=? AND task_id=?",
+                            (identity, task_id)).fetchone()
+        if prior:
+            if json.loads(prior[0]) == result:
+                return result
+            raise ValueError("binder receipt conflicts with changed artifact, usage or grader")
         con.execute("INSERT INTO procedure_binder_receipts VALUES (?,?,?)",
                     (identity, task_id, encoded(result).decode()))
     return result

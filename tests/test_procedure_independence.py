@@ -1,7 +1,9 @@
 """A caller cannot promote a method by inventing scores and a grader hash."""
 
 import hashlib
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from threading import Barrier
 
 import pytest
 
@@ -68,9 +70,8 @@ def test_local_binder_hashes_frozen_task_artifacts_grader_and_provider_usage(lab
         row = con.execute("SELECT receipt FROM procedure_binder_receipts WHERE id=? AND task_id=?",
                           (proposal["id"], "new-task")).fetchone()
         assert row is not None and "correct output" not in row[0] and "task without answer" not in row[0]
-    with pytest.raises(ValueError, match="already exists"):
-        procedures.bind_hold(home, project, proposal["id"], "new-task", task, answer,
-                             b"wrong output", answer, native_usage(20), native_usage(10))
+    assert procedures.bind_hold(home, project, proposal["id"], "new-task", task, answer,
+                                b"wrong output", answer, native_usage(20), native_usage(10)) == result
     # Neither a scored binder receipt nor a fabricated caller comparison can activate.
     with pytest.raises(ValueError, match="independent|receipt"):
         procedures.change(home, project, proposal["id"], result)
@@ -107,3 +108,54 @@ def test_old_caller_scored_active_row_is_quarantined_from_recall(lab):
     assert procedures.inspect(home, project, proposal["id"])["status"] == "held_unverified"
     assert procedures.list_active(home, project) == []
     assert procedures.matches(home, project, "archive recovery") == []
+
+
+def test_concurrent_same_task_retry_is_idempotent_but_conflict_is_refused(lab):
+    _, proposal = draft(lab)
+    home, project = lab[0] / "harness", str(lab[1][1])
+    task, answer = b"frozen task", b"correct output"
+    start = Barrier(6)
+
+    def freeze(_):
+        start.wait(timeout=5)
+        return procedures.freeze_case(home, project, proposal["id"], "heldout", task, answer)
+
+    # Each worker opens its own SQLite connection; a retried caller can race
+    # another caller after a timeout without creating two frozen cases.
+    with ThreadPoolExecutor(max_workers=6) as workers:
+        freezes = list(workers.map(freeze, range(6)))
+    assert all(item == freezes[0] for item in freezes)
+    with procedures._db(home) as con:
+        assert con.execute("SELECT count(*) FROM procedure_frozen_cases").fetchone()[0] == 1
+    with pytest.raises(ValueError, match="conflict|changed"):
+        procedures.freeze_case(home, project, proposal["id"], "heldout", task, b"different answer")
+
+    start = Barrier(6)
+
+    def bind(_):
+        start.wait(timeout=5)
+        return procedures.bind_hold(home, project, proposal["id"], "heldout", task, answer,
+                                    b"wrong output", answer, native_usage(20), native_usage(10))
+
+    with ThreadPoolExecutor(max_workers=6) as workers:
+        receipts = list(workers.map(bind, range(6)))
+    assert all(item == receipts[0] for item in receipts)
+    with procedures._db(home) as con:
+        assert con.execute("SELECT count(*) FROM procedure_binder_receipts").fetchone()[0] == 1
+    with pytest.raises(ValueError, match="conflict|changed"):
+        procedures.bind_hold(home, project, proposal["id"], "heldout", task, answer,
+                             b"different output", answer, native_usage(20), native_usage(10))
+    assert procedures.inspect(home, project, proposal["id"])["status"] == "proposed"
+
+
+def test_quarantined_legacy_active_row_can_be_withdrawn_without_resurrection(lab):
+    _, proposal = draft(lab)
+    home, project = lab[0] / "harness", str(lab[1][1])
+    with procedures._db(home) as con:
+        con.execute("UPDATE procedures SET status='active',evidence=? WHERE id=?",
+                    (procedures.encoded(receipt(proposal)).decode(), proposal["id"]))
+    assert procedures.change(home, project, proposal["id"], rollback=True)["status"] == "rolled_back"
+    assert procedures.inspect(home, project, proposal["id"])["status"] == "rolled_back"
+    assert procedures.list_active(home, project) == []
+    with pytest.raises(ValueError, match="proposed"):
+        procedures.freeze_case(home, project, proposal["id"], "heldout", b"task", b"answer")
