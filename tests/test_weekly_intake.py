@@ -11,6 +11,13 @@ from pathlib import Path
 SRC = Path(__file__).resolve().parents[1] / "src"
 
 
+def cli_env():
+    # Other suite fixtures may install into a separate HARNESS_HOME. These
+    # subprocesses intentionally exercise only their own temporary --home.
+    return {**{k: v for k, v in os.environ.items() if not k.startswith("HARNESS_")},
+            "PYTHONPATH": str(SRC), "PYTHONNOUSERSITE": "1"}
+
+
 def candidate(identity, count=1, last="2026-01-01T00:00:00"):
     return {"id": identity, "key": identity + "abcd", "source": "gate",
             "summary": "A check failed and later passed", "evidence": "fixture failure line",
@@ -24,10 +31,9 @@ def save(home, rows):
 
 
 def intake(home, *args):
-    env = dict(os.environ, PYTHONPATH=str(SRC), PYTHONNOUSERSITE="1")
     run = subprocess.run([sys.executable, "-m", "agent_harness.cli", "--home", str(home),
                           "improve", "--weekly-intake", "--json", *args],
-                         cwd=home, env=env, capture_output=True, text=True, timeout=10)
+                         cwd=home, env=cli_env(), capture_output=True, text=True, timeout=10)
     return run.returncode, json.loads(run.stdout) if run.returncode == 0 else run.stdout + run.stderr
 
 
@@ -52,12 +58,12 @@ def test_weekly_intake_advances_only_delivered_changes_with_a_bounded_audit(tmp_
     assert rc == 0 and repeat["candidates"][0]["count"] == 2
     raw = subprocess.run([sys.executable, "-m", "agent_harness.cli", "--home", str(tmp_path),
                           "improve", "--weekly-intake", "--json", "--since", "3"],
-                         cwd=tmp_path, env=dict(os.environ, PYTHONPATH=str(SRC)),
+                         cwd=tmp_path, env=cli_env(),
                          capture_output=True, text=True, timeout=10)
     assert raw.returncode == 0 and len(raw.stdout.encode("utf-8")) == json.loads(raw.stdout)["output_bytes"]
     plain = subprocess.run([sys.executable, "-m", "agent_harness.cli", "--home", str(tmp_path),
                             "improve", "--weekly-intake", "--since", "3"],
-                           cwd=tmp_path, env=dict(os.environ, PYTHONPATH=str(SRC)),
+                           cwd=tmp_path, env=cli_env(),
                            capture_output=True, text=True, timeout=10)
     assert plain.returncode == 0 and len(plain.stdout.encode("utf-8")) == json.loads(plain.stdout)["output_bytes"]
     assert not (tmp_path / ".agent-harness/procedures.sqlite").exists()
@@ -130,7 +136,7 @@ def test_a_real_capture_summary_can_exceed_the_evidence_line_limit(tmp_path):
     raw = subprocess.run([sys.executable, "-m", "agent_harness.cli", "--home", str(tmp_path),
                           "improve", "--weekly-intake", "--since", "0",
                           "--max-output-bytes", "512"],
-                         cwd=tmp_path, env=dict(os.environ, PYTHONPATH=str(SRC)),
+                         cwd=tmp_path, env=cli_env(),
                          capture_output=True, text=True, timeout=10)
     assert raw.returncode == 0, raw.stdout + raw.stderr
     result = json.loads(raw.stdout)
@@ -139,7 +145,7 @@ def test_a_real_capture_summary_can_exceed_the_evidence_line_limit(tmp_path):
     assert len(result["candidates"][0]["summary"]) <= 120
     conflict = subprocess.run([sys.executable, "-m", "agent_harness.cli", "--home", str(tmp_path),
                                "improve", "--weekly-intake", "--apply", "anything", "--since", "1"],
-                              cwd=tmp_path, env=dict(os.environ, PYTHONPATH=str(SRC)),
+                              cwd=tmp_path, env=cli_env(),
                               capture_output=True, text=True, timeout=10)
     assert conflict.returncode != 0 and "cannot also" in conflict.stdout
 
@@ -148,7 +154,7 @@ def test_two_weekly_readers_cannot_deliver_the_same_row_twice(tmp_path):
     save(tmp_path, [candidate("one")])
     cmd = [sys.executable, "-m", "agent_harness.cli", "--home", str(tmp_path),
            "improve", "--weekly-intake", "--json", "--since", "0"]
-    env = dict(os.environ, PYTHONPATH=str(SRC), PYTHONNOUSERSITE="1")
+    env = cli_env()
     readers = [subprocess.Popen(cmd, cwd=tmp_path, env=env, text=True,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE) for _ in range(2)]
     results = [reader.communicate(timeout=10) for reader in readers]
@@ -174,3 +180,11 @@ def test_a_directory_at_the_capture_path_is_not_reported_as_no_change(tmp_path):
     source.mkdir()
     rc, result = intake(tmp_path, "--since", "0")
     assert rc != 0 and "invalid_candidate" in result
+
+
+def test_fixture_targets_its_own_home_despite_external_harness_home(tmp_path, monkeypatch):
+    monkeypatch.setenv("HARNESS_HOME", str(tmp_path / "unrelated"))
+    save(tmp_path, [candidate("local")])
+    rc, result = intake(tmp_path, "--since", "0")
+    assert rc == 0 and [item["id"] for item in result["candidates"]] == ["local"]
+    assert not (tmp_path / "unrelated").exists()
