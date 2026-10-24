@@ -31,6 +31,14 @@ not move. A stale dependency blocks new claims and renewals; a current holder
 can still release its lease. No old fact is silently made
 current. This is advisory within one OS user, not an access-control service.
 
+New `ProjectMemory` claims labelled `verified` retain that label only when the
+whole cited source span matches the assertion verbatim. A proposed paraphrase
+is stored as `pending`: ordinary search returns a receipt-only omission,
+recovery holds it, and an explicit scoped read marks it unusable for current
+decisions. This checks source correspondence, not real-world truth or conflicts
+between separate exact quotations. Existing historical `verified` records are
+not retroactively reclassified; review them before relying on the label.
+
 The event, task projection, and request-id replay record commit in one SQLite
 transaction. `expected` is the version from a snapshot. A stale version fails
 closed; the caller reads `changes` from its prior cursor, then takes a new

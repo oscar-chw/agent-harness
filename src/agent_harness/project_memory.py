@@ -2,6 +2,8 @@
 
 Not a native memory migration, authorization service, or defense against a user rewriting the
 whole project. Receipts bind reads to retained evidence; metadata labels do not confer authority.
+The verified label requires a direct citation match; other proposed verified claims are retained
+as pending until an independent semantic check is available.
 """
 import json
 import re
@@ -30,7 +32,7 @@ def _validate(item, project_id):
         raise ValueError("memory identity or project scope is invalid")
     if LAYERS.get(item["layer"]) != item["kind"]:
         raise ValueError("memory layer and kind disagree")
-    if item["confidence"] not in ("user_stated", "verified", "inferred"):
+    if item["confidence"] not in ("user_stated", "verified", "inferred", "pending"):
         raise ValueError("unknown evidence classification")
     if item["kind"] == "authority" and item["confidence"] != "user_stated":
         raise ValueError("inferred or model-verified content cannot be authority")
@@ -134,9 +136,11 @@ class ProjectMemory:
 
     def _resolve_sources(self, item, historical):
         vault = SourceVault(self.root, self.project_id)
+        spans = []
         for entry in item["provenance"]:
-            vault.resolve(entry["source"], start_line=entry["start_line"], end_line=entry["end_line"],
-                          historical=historical)
+            spans.append(vault.resolve(entry["source"], start_line=entry["start_line"],
+                                       end_line=entry["end_line"], historical=historical)["text"])
+        return spans
 
     def append(self, item, *, expected):
         _validate(item, self.project_id)
@@ -144,7 +148,14 @@ class ProjectMemory:
             _validate_receipt(expected, self.project_id)
         # Work on a private immutable representation; a caller cannot mutate provenance mid-save.
         item = json.loads(_bytes(item))
-        self._resolve_sources(item, historical=False)
+        spans = self._resolve_sources(item, historical=False)
+        if item["confidence"] == "verified":
+            # A source receipt proves the cited bytes exist, not that a paraphrase follows
+            # from them. Only an entire cited assertion can retain this label without an
+            # independent semantic check. Keep uncertain claims, but mark them pending.
+            claim = item["text"].rstrip("\r\n")
+            if not all(span.rstrip("\r\n") == claim for span in spans):
+                item["confidence"] = "pending"
         for _ in range(8):
             events, latest, total = self._load()
             old = latest.get(item["id"])
@@ -213,7 +224,10 @@ class ProjectMemory:
 
     def read(self, receipt, *, allowed_sensitivities, historical=False):
         result = self._selected_receipt(receipt, historical)
-        return self._visible(result, allowed_sensitivities, historical)
+        result = self._visible(result, allowed_sensitivities, historical)
+        if result["item"]["confidence"] == "pending":
+            raise ValueError("pending memory requires an explicit scoped read for review")
+        return result
 
     def read_scoped(self, receipt, *, allowed_sensitivities, allowed_scopes, layers,
                     historical=False, max_bytes=8192):
@@ -228,8 +242,12 @@ class ProjectMemory:
             raise PermissionError("memory item is outside the caller's declared scope")
         # Check scope before touching provenance, including historical source snapshots.
         self._visible(result, sensitivities, historical)
-        packet = {"schema": "harness.project-memory-read/v1", "kind": "retrieved-memory-data",
+        pending = item["confidence"] == "pending"
+        packet = {"schema": "harness.project-memory-read/v1",
+                  "kind": "pending-memory-data" if pending else "retrieved-memory-data",
                   "project_id": self.project_id, "historical": historical, **result}
+        if pending:
+            packet["usable_for_current_decisions"] = False
         if len(json.dumps(packet, ensure_ascii=False).encode("utf-8")) > max_bytes:
             raise ValueError("resolved memory and receipt exceed budget")
         return packet
@@ -238,7 +256,10 @@ class ProjectMemory:
         _, latest, _ = self._load()
         if identity not in latest:
             raise KeyError("memory item is not recorded")
-        return self._visible(latest[identity], allowed_sensitivities, False)
+        result = self._visible(latest[identity], allowed_sensitivities, False)
+        if result["item"]["confidence"] == "pending":
+            raise ValueError("pending memory requires an explicit scoped read for review")
+        return result
 
     def recover(self, receipt, *, phase, depends_on_memory, allowed_sensitivities,
                 allowed_scopes, layers, verified_receipt=None, max_bytes=8192):
@@ -270,7 +291,11 @@ class ProjectMemory:
         result = {"decision": "REFUSE_WITHDRAWN" if status == "withdrawn" else "HOLD",
                   "receipt": current["receipt"], "current_status": status}
         if status == "current":
-            if verified_receipt == current["receipt"]:
+            if current["item"]["confidence"] == "pending":
+                # A receipt cannot promote an unreviewed claim to a reusable fact.
+                self._visible(self._selected_receipt(current["receipt"], False), sensitivities, False)
+                result["reason"] = "pending"
+            elif verified_receipt == current["receipt"]:
                 # Reuse still validates retained currentness and source bytes,
                 # but its output budget need not fit content it won't emit.
                 self._visible(self._selected_receipt(current["receipt"], False), sensitivities, False)
@@ -298,16 +323,22 @@ class ProjectMemory:
             raise ValueError("scoped record text exceeds the 4 MiB search budget")
         exact = query.strip() if query.strip() in visible else None
         terms = set(query_terms(query))
-        corpus, expired = [], []
+        corpus, omitted = [], []
         for identity, result in sorted(visible.items()):
             words = tokens(identity + "\n" + result["item"]["text"])
+            matches = identity == exact or (exact is None and terms.intersection(words))
             if result["item"]["freshness"] in ("expired", "withdrawn"):
-                if identity == exact or (exact is None and terms.intersection(words)):
-                    expired.append({"receipt": result["receipt"], "reason": result["item"]["freshness"]})
+                if matches:
+                    omitted.append({"receipt": result["receipt"], "reason": result["item"]["freshness"]})
+            elif result["item"]["confidence"] == "pending":
+                if matches:
+                    self._visible(result, allowed_sensitivities, False)
+                    omitted.append({"receipt": result["receipt"], "reason": "pending"})
             else:
                 corpus.append((identity, words))
         if exact is not None:
-            ranked = [(exact, 1.0)] if visible[exact]["item"]["freshness"] not in ("expired", "withdrawn") else []
+            ranked = [(exact, 1.0)] if (visible[exact]["item"]["freshness"] not in ("expired", "withdrawn")
+                                         and visible[exact]["item"]["confidence"] != "pending") else []
         else:
             ranked = BM25(corpus).search(terms, len(corpus))
             ranked.sort(key=lambda pair: (-pair[1], pair[0]))
@@ -318,30 +349,30 @@ class ProjectMemory:
         head = {"sequence": len(events), "sha256": events[-1]["receipt"]["sha256"] if events else None}
         scope = {"query": query.strip(), "sensitivities": sorted(allowed_sensitivities),
                  "scopes": sorted(allowed_scopes), "layers": sorted(layers)}
-        return hits, expired, _sha(_bytes(head)), scope
+        return hits, omitted, _sha(_bytes(head)), scope
 
     def search(self, query, *, allowed_sensitivities, allowed_scopes, layers,
                max_results=5, max_bytes=8192):
         """Retrieve advisory current records in an explicit scope, never infer authority.
 
-        Expired matches have receipt-only omissions; stale matching source evidence and corrupt
-        history raise. Different matching identities remain separate, even when their text
+        Expired and pending matches have receipt-only omissions; stale matching source evidence
+        and corrupt history raise. Different matching identities remain separate, even when their text
         disagrees. Scores express lexical overlap, not truth or confidence. No index is persisted.
         """
         if type(max_results) is not int or not 1 <= max_results <= 100:
             raise ValueError("max_results must be an integer from 1 to 100")
         if type(max_bytes) is not int or max_bytes <= 0:
             raise ValueError("budget must be a positive integer")
-        hits, expired, _, _ = self._search_matches(query, allowed_sensitivities, allowed_scopes, layers)
+        hits, withheld, _, _ = self._search_matches(query, allowed_sensitivities, allowed_scopes, layers)
         selected = set()
 
         def packet():
             return {"schema": "harness.project-memory-search/v1", "kind": "retrieved-memory-data",
                     "project_id": self.project_id,
                     "status": "matches" if selected else "omitted" if hits else
-                              "unavailable" if expired else "no_match",
+                              "unavailable" if withheld else "no_match",
                     "hits": [hit for i, hit in enumerate(hits) if i in selected],
-                    "omitted": expired + [{"receipt": hit["receipt"],
+                    "omitted": withheld + [{"receipt": hit["receipt"],
                                            "reason": "limit" if i >= max_results else "budget"}
                                           for i, hit in enumerate(hits) if i not in selected]}
 
@@ -382,10 +413,10 @@ class ProjectMemory:
                     or any(not isinstance(cursor[k], str) or not re.fullmatch(r"[0-9a-f]{64}", cursor[k])
                            for k in ("binding", "sha256"))):
                 raise ValueError("malformed memory cursor")
-        hits, expired, head, scope = self._search_matches(query, allowed_sensitivities, allowed_scopes, layers)
+        hits, withheld, head, scope = self._search_matches(query, allowed_sensitivities, allowed_scopes, layers)
         binding = _sha(_bytes({"schema": "harness.project-memory-page/v1", "project_id": self.project_id,
                                "head": head, **scope}))
-        total = len(hits) + len(expired)
+        total = len(hits) + len(withheld)
 
         def continuation(offset):
             data = {"schema": 1, "binding": binding, "offset": offset}
@@ -407,10 +438,10 @@ class ProjectMemory:
                     "status": "matches" if selected else
                               "omitted" if any(o["reason"] == "budget" for o in omitted) else
                               "unavailable" if omitted else "no_match",
-                    "total_matches": len(hits), "total_expired": sum(e["reason"] == "expired" for e in expired),
+                    "total_matches": len(hits), "total_expired": sum(e["reason"] == "expired" for e in withheld),
                     "hits": selected, "omitted": omitted, "remaining": total - end,
                     "next_cursor": continuation(end) if end < total else None}
-            withdrawn = sum(e["reason"] == "withdrawn" for e in expired)
+            withdrawn = sum(e["reason"] == "withdrawn" for e in withheld)
             if withdrawn:
                 result["total_withdrawn"] = withdrawn
             return result
@@ -424,7 +455,7 @@ class ProjectMemory:
             raise ValueError("budget cannot fit the memory page and continuation metadata")
         while end < min(total, start + page_size):
             hit = hits[end] if end < len(hits) else None
-            missing = expired[end - len(hits)] if hit is None else None
+            missing = withheld[end - len(hits)] if hit is None else None
             proposed_hits = selected + ([hit] if hit is not None else [])
             proposed_omitted = omitted + ([missing] if missing is not None else [])
             candidate = packet(end + 1, proposed_hits, proposed_omitted)

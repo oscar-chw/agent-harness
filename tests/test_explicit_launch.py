@@ -40,6 +40,8 @@ def prepare(root):
 def test_prepare_resolves_correction_without_copying_history(launch_request):
     root, data, item = launch_request
     item["text"] = "Current qualification: NOT_DEPLOYED; limit 5."
+    (root / "decision.md").write_text(item["text"] + "\n")
+    item["provenance"][0]["source"] = SourceVault(root, data["project_id"]).capture("decision.md")
     current = ProjectMemory(root, data["project_id"]).append(item, expected=data["references"][0])
     packet = prepare(root)
     assert packet["memory_receipts"] == [current]
@@ -384,6 +386,8 @@ def test_resume_refuses_stale_memory_before_native_spawn(launch_request, monkeyp
                 "native_completion": "TIMEOUT", "thread_id": "01a16828-6ebc-7e82-9fd6-99f867c645fc"}
     (root / "previous.json").write_text(json.dumps(previous))
     item["text"] = "Corrected project fact."
+    (root / "decision.md").write_text(item["text"] + "\n")
+    item["provenance"][0]["source"] = SourceVault(root, data["project_id"]).capture("decision.md")
     ProjectMemory(root, data["project_id"]).append(item, expected=data["references"][0])
     stub(root, "raise SystemExit('must not run on stale context')")
     monkeypatch.setenv("PATH", str(root))

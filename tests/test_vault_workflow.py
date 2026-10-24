@@ -73,7 +73,10 @@ def save_decision(project, port, previous=None, freshness="current"):
         "downstream": ["a.txt", "b.txt"],
     }
     (root / "decision.json").write_text(json.dumps(decision))
-    source = SourceVault(root, identity).capture("decision.json")
+    # The decision JSON remains the independent gate input. Cite the complete
+    # assertion that the memory record actually makes.
+    (root / "decision.txt").write_text(f"Port: {port}\n")
+    source = SourceVault(root, identity).capture("decision.txt")
     item = {
         "id": "port", "project_id": identity, "layer": "project_facts", "kind": "fact",
         "scope": "task", "text": f"Port: {port}",
