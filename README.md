@@ -90,7 +90,8 @@ tedious and rarely kept up.
   `skill_manage draft` records a source-bound project method; an independent comparison is required before
   `harness improve --apply` activates it. Rollback withdraws it. Existing learned `SKILL.md` files remain
   readable, but direct `skill_manage create/update` no longer publishes untested skills. `state_save` /
-  `state_load` carry unfinished work across a compaction.
+  `state_load` carry unfinished work across a compaction. [On-demand weekly intake](docs/v1/weekly-learning-intake.md)
+  reads only changed candidate evidence under a bounded output budget; it never schedules a model or promotes a method.
 - **Past conversations.** `session_search` indexes your own Claude Code and Codex transcripts incrementally,
   user and assistant messages only, secrets masked before storage, capped at 64 MB.
 - **The guard** analyses a command rather than pattern-matching its text: it tokenises like a shell, unwraps

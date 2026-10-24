@@ -731,6 +731,21 @@ def cmd_self_update(args) -> int:
 def cmd_improve(args) -> int:
     from . import improve
     _, hh = _paths(args)
+    if args.weekly_intake:
+        if any((args.propose, args.draft_procedure, args.rollback, args.apply, args.trend)):
+            _out("intake: HOLD — weekly intake cannot also draft, apply, roll back or judge a release")
+            return 1
+        from .weekly_intake import take
+        try:
+            result = take(hh, since=args.since, max_items=args.max_items,
+                          max_output_bytes=args.max_output_bytes)
+        except (OSError, ValueError) as error:
+            _out("intake: HOLD — " + str(error))
+            return 1
+        # One compact wire format regardless of --json: otherwise the human
+        # rendering could exceed the budget after the cursor had advanced.
+        _out(json.dumps(result, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+        return 0
     if args.draft_procedure or args.rollback or (args.apply and args.apply.startswith("pr-")):
         from . import procedures
         try:
@@ -1115,6 +1130,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--check", action="store_true", help="say what it would do, change nothing")
     p.add_argument("--now", action="store_true", help="ignore the once-a-day limit")
     p = sub.add_parser("improve", help="turn repeated lessons into proposals; apply one only behind an eval gain")
+    p.add_argument("--weekly-intake", action="store_true", help="on-demand changed evidence only; no model or promotion")
+    p.add_argument("--since", type=int, help="expected intake cursor; refuse stale readers")
+    p.add_argument("--max-items", type=int, default=10, help="maximum changed candidates, 1..20")
+    p.add_argument("--max-output-bytes", type=int, default=2048, help="conservative output budget, 120..4096 bytes")
     p.add_argument("--propose", action="store_true")
     p.add_argument("--draft-procedure", metavar="FILE", help="draft a scoped v1 method from source episodes")
     p.add_argument("--project", help="absolute project directory for v1 procedures")
