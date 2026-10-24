@@ -112,23 +112,21 @@ returns a few dated excerpts with the session id and project; `session=<id>` nar
   (`HARNESS_SESSIONS_MAX_BYTES`), dropping the oldest sessions first. A transcript deleted by its tool
   leaves the index too. The session asking is never its own result.
 
-## Skills learned from experience: skill_manage
+## Methods learned from work: skill_manage and procedure promotion
 
-When a task took an agent several tool calls to find the working method (a data query, a command
-sequence, a fix), or the user corrected how to do it, the agent saves the method with `skill_manage create` as
-`~/.agents/skills/learned/<name>/SKILL.md` (the agentskills.io format: `name`, `description`, then
-`## When to Use`, `## Procedure`, `## Pitfalls`, `## Verification`). The next session, in any tool,
-starts from the working path.
+`skill_manage draft` takes a project and a concrete candidate with at least two distinct task-input
+episodes bound to source paths and SHA-256 hashes. A draft is **not active**. An independently run,
+matched held-out comparison supplies `harness improve --apply ID --eval FILE`; promotion rejects
+per-case quality regressions and aggregate tokens above the baseline. A matching prompt then recalls
+the active project method with its exclusions. `skill_manage view ID` shows its source bindings and
+evidence status; a changed source makes it stale and stops recall. `harness improve --rollback ID`
+withdraws it and warns sessions that previously received its advice. The receipt format checks
+consistency but cannot authenticate who actually ran the evaluator.
 
-- Codex, Gemini CLI, Cursor and Copilot list learned skills natively. Claude Code does not read
-  `~/.agents/skills`, and a listing costs every request, so for Claude the per-prompt recall names a
-  learned skill only when the prompt is about it.
-- A near-duplicate of any installed or learned skill is refused with the name to update instead;
-  `update` takes a new body or replaces one exact passage (`old` -> `new`) and bumps the version.
-- Limits: a body over 12,000 characters is refused (warning over 6,000); at most 40 learned skills are
-  active, and beyond that the least used (views and updates through `skill_manage`; a tool reading the
-  file natively is not counted) move to `~/.agent-harness/skills-archive/`, never deleted. Secrets are
-  masked before writing.
+Direct `skill_manage create/update` is blocked: it used to write globally visible, untested
+`SKILL.md` files immediately. Previously written learned skills remain listable, viewable and
+archivable for recovery; their presence does not grant a new qualification. The historical skill
+results below describe the older behavior, not this promotion path.
 
 ## Task state: surviving compaction
 
@@ -165,8 +163,9 @@ The rules ask for good behaviour; the harness enforces a floor where the tool al
   more tool calls with no skill saved, to save what it worked out. `HARNESS_ENABLE=memory_snapshot,skill_nudge`
   turns them on. In the v0.2 eval neither showed a gain: the snapshot answered 10/10 like relevance-only
   recall at the same tokens, and the nudge made Claude save skills but its repeat runs were 2/3 correct at
-  1.42x tokens. `session_search` and `skill_manage` ship on: past-conversation recall went from 1/6 to 6/6,
-  and Codex saved and reused a skill in 3/3 repeated procedures; Claude saved none unprompted.
+  1.42x tokens. `session_search` ships on: past-conversation recall went from 1/6 to 6/6.
+  The earlier direct-write `skill_manage` saved and reused a skill in 3/3 Codex repeat procedures;
+  that result does not evaluate the current draft-and-promotion path.
 - **The work graph, on by default (v0.3.3)**: the `plan` MCP tool drives `src/agent_harness/workgraph`, a
   graph of gated nodes merged in from agentic-os (181 of 203 real nodes gated there, and adversarially
   certified). Its evidence is use and an attack, not a gain measured against plain; the owner turned it on by

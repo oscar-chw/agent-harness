@@ -398,9 +398,10 @@ class Memory:
         for row in self.con.execute("SELECT * FROM mem_items WHERE kind='lesson'"):
             if row["id"] in ids:
                 rows[row["id"]] = row
-        from agent_harness.procedures import recover, withdrawn
+        from agent_harness.procedures import recover, stale, withdrawn
         methods = recover(self.home, self.project, ids)
         revoked = set(withdrawn(self.home, self.project, ids))
+        outdated = set(stale(self.home, self.project, ids))
         lines, included, omitted = [], [], []
         for identity in ids:
             if identity in rows:
@@ -412,6 +413,8 @@ class Memory:
                     identity, methods[identity]["trigger"], methods[identity]["fix"])
             elif identity in revoked:
                 line = "- %s: withdrawn; do not rely on that advice.\n" % identity
+            elif identity in outdated:
+                line = "- %s: source stale; do not rely on that advice.\n" % identity
             elif identity.startswith("skill:"):
                 line = "- %s: use skill_manage view %s to reload the current method.\n" % (
                     identity, identity.removeprefix("skill:"))
@@ -483,10 +486,16 @@ class Memory:
                                            "do not rely on that advice." % identity})}
                 if recall_key(row) not in seen:
                     hits.append((float("inf"), row))
-        from agent_harness.procedures import matches, withdrawn
+        from agent_harness.procedures import matches, stale, withdrawn
         for identity in withdrawn(self.home, self.project, set(latest)):
             row = {"kind": "notice", "id": identity, "scope": "project", "project": self.project,
                    "data": json.dumps({"text": "Previously recalled procedure %s is withdrawn; "
+                                       "do not rely on that advice." % identity})}
+            if recall_key(row) not in seen:
+                hits.append((float("inf"), row))
+        for identity in stale(self.home, self.project, set(latest)):
+            row = {"kind": "notice", "id": identity, "scope": "project", "project": self.project,
+                   "data": json.dumps({"text": "Previously recalled procedure %s has stale source evidence; "
                                        "do not rely on that advice." % identity})}
             if recall_key(row) not in seen:
                 hits.append((float("inf"), row))

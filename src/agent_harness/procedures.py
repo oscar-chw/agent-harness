@@ -107,7 +107,8 @@ def draft(home, project, candidate):
     fields = {"schema", "title", "trigger", "steps", "exceptions", "episodes"}
     if (not isinstance(candidate, dict) or set(candidate) != fields
             or type(candidate["schema"]) is not int or candidate["schema"] != 1):
-        raise ValueError("invalid procedure candidate schema")
+        raise ValueError("candidate needs schema=1, title, trigger, steps, exceptions, episodes; "
+                         "each episode needs task_id, path, sha256, task_path, task_sha256")
     for key in ("title", "trigger"):
         if not isinstance(candidate[key], str) or not candidate[key].strip():
             raise ValueError(key + " is required")
@@ -240,6 +241,45 @@ def _active(home, project):
     return records
 
 
+def _source_current(record):
+    try:
+        _episodes(record["candidate"], record["project"])
+        return True
+    except (OSError, ValueError, TypeError, KeyError):
+        return False
+
+
+def inspect(home, project, identity):
+    """Show one method's source and promotion status without copying evaluator data."""
+    project = _scope(project)
+    path = Path(home) / "procedures.sqlite"
+    if not path.is_file():
+        raise ValueError("no procedure in this project")
+    con = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)
+    try:
+        row = con.execute("SELECT payload,status,evidence FROM procedures WHERE id=? AND project=?",
+                          (identity, project)).fetchone()
+    finally:
+        con.close()
+    if row is None:
+        raise ValueError("no procedure in this project")
+    payload = json.loads(row[0])
+    status = "stale" if row[1] == "active" and not _source_current(payload) else row[1]
+    try:
+        evidence_sha = digest(json.loads(row[2])) if row[2] else None
+    except ValueError:
+        raise ValueError("procedure evidence is unreadable") from None
+    return {"id": identity, "project": project, "status": status,
+            "candidate": payload["candidate"], "evidence_sha256": evidence_sha}
+
+
+def list_active(home, project):
+    project = _scope(project)
+    return [{"name": r["id"], "origin": "qualified-procedure",
+             "description": r["candidate"]["title"] + ": " + r["candidate"]["trigger"]}
+            for r in _active(home, project) if _source_current(r)]
+
+
 def _item(record):
     method = record["candidate"]
     fix = "Advisory procedure %s: %s Exceptions: %s" % (
@@ -250,7 +290,8 @@ def _item(record):
 
 
 def recover(home, project, ids):
-    return {r["id"]: _item(r) for r in _active(home, project) if r["id"] in ids}
+    return {r["id"]: _item(r) for r in _active(home, project)
+            if r["id"] in ids and _source_current(r)}
 
 
 def matches(home, project, query, min_score=0.2):
@@ -264,7 +305,7 @@ def matches(home, project, query, min_score=0.2):
         method = record["candidate"]
         tokens = kb.tokens(method["title"] + " " + method["trigger"])
         score = kb.relevance(terms, tokens, 1, len(tokens), {t: 1 for t in set(tokens)}, doc_coverage=True)
-        if score < min_score:
+        if score < min_score or not _source_current(record):
             continue
         out.append((score, _item(record)))
     return sorted(out, key=lambda match: -match[0])
@@ -282,3 +323,9 @@ def withdrawn(home, project, recalled_ids):
                 if r[0] in recalled_ids]
     finally:
         con.close()
+
+
+def stale(home, project, recalled_ids):
+    """Previously supplied active advice whose pinned sources no longer match."""
+    return [r["id"] for r in _active(home, project)
+            if r["id"] in recalled_ids and not _source_current(r)]

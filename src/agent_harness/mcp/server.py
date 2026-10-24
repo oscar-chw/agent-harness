@@ -8,6 +8,7 @@ from __future__ import annotations
 import datetime
 import json
 import os
+import re
 import sys
 import time
 import traceback
@@ -169,13 +170,13 @@ TOOLS = [
                        session={"type": "string", "description": "only this session id (prefix)"},
                        project={"type": "string"})},
     {"name": "skill_manage",
-     "description": "Learned methods. create one when finding the working method took several tool calls, or the "
-                    "user corrected how; body: ## When to Use, ## Procedure, ## Pitfalls, ## Verification. "
-                    "update (body, or old -> new); list, view, archive.",
-     "inputSchema": _s(action={"type": "string", "enum": ["create", "update", "list", "view", "archive"],
+     "description": "Draft a source-bound project method; activate only after independent harness improve --apply. "
+                    "list/view; direct create/update blocked.",
+     "inputSchema": _s(action={"type": "string", "enum": ["draft", "create", "update", "list", "view", "archive"],
                                "_req": True},
-                       name={"type": "string"}, description={"type": "string"}, body={"type": "string"},
-                       old={"type": "string"}, new={"type": "string"})},
+                       name={"type": "string"}, project={"type": "string"},
+                       candidate={"type": "object", "description": "schema=1,title,trigger,steps,exceptions,"
+                                  "episodes[{task_id,path,sha256,task_path,task_sha256}]"})},
     {"name": "plan",
      "description": "Multi-step work as plan/<slug>.md: a node is done only when its gate exits 0. args: "
                     "new <slug> \"<goal>\" | ready | context <slug> <id> | gate <slug> <id> | status | resume.",
@@ -257,20 +258,30 @@ class Server:
 
     def skill_manage(self, a: Dict[str, Any]) -> Any:
         act, name = a.get("action"), (a.get("name") or "").strip()
+        from agent_harness import procedures
+        home = harness_home(self._home)
+        if act == "draft":
+            return procedures.draft(home, a.get("project"), a.get("candidate"))
         if act == "list":
-            return self.skills.list()
+            result = self.skills.list()
+            if a.get("project"):
+                result += procedures.list_active(home, a["project"])
+            return result
         if not name:
             raise ValueError("missing argument: name")
-        if act == "create":
-            return self.skills.create(name, a.get("description") or "", a.get("body") or "")
-        if act == "update":
-            return self.skills.update(name, a.get("description") or "", a.get("body") or "", a.get("old") or "",
-                                      a.get("new") or "")
+        if act in ("create", "update"):
+            raise ValueError("direct skill writes are disabled; draft a source-bound procedure with skill_manage, "
+                             "then harness improve --apply with an independent comparison")
+        procedure_id = re.fullmatch(r"pr-[0-9a-f]{24}", name) is not None
         if act == "view":
+            if procedure_id:
+                return procedures.inspect(home, a.get("project"), name)
             return self.skills.view(name)
         if act == "archive":
+            if procedure_id:
+                raise ValueError("use harness improve --rollback ID --project PATH for a qualified procedure")
             return self.skills.archive(name)
-        raise ValueError("action must be create, update, list, view or archive")
+        raise ValueError("action must be draft, create, update, list, view or archive")
 
     # ------------------------------------------------------------ tools
     def call_tool(self, name: str, args: Dict[str, Any]) -> Any:

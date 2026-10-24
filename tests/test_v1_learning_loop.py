@@ -28,7 +28,7 @@ def cli(lab, *args, project=None):
                           cwd=projects[0], env=env, text=True, capture_output=True, timeout=10)
 
 
-def draft(lab):
+def candidate_input(lab):
     alpha = lab[1][1]
     episodes = []
     for n in (1, 2):
@@ -45,6 +45,12 @@ def draft(lab):
                            "Restore into a temporary directory and compare the inventory."],
                  "exceptions": ["Do not use for a live database."],
                  "episodes": episodes}
+    return candidate
+
+
+def draft(lab):
+    alpha = lab[1][1]
+    candidate = candidate_input(lab)
     path = alpha / "candidate.json"
     path.write_text(json.dumps(candidate))
     result = cli(lab, "--draft-procedure", str(path))
@@ -80,6 +86,93 @@ def apply(lab, proposal, evidence):
     path = lab[1][1] / "comparison.json"
     path.write_text(json.dumps(evidence))
     return cli(lab, "--apply", proposal["id"], "--eval", str(path))
+
+
+def test_skill_manage_cannot_publish_or_rewrite_an_ungated_skill(lab):
+    from agent_harness.mcp.skills import Skills
+    home, projects = lab
+    body = ("## When to Use\nArchive recovery.\n## Procedure\nCheck the archive.\n"
+            "## Pitfalls\nNever use on a live database.\n## Verification\nCheck the checksum.\n")
+    created = exchange(lab, [("skill_manage", {"action": "create", "name": "archive-recovery",
+                                               "description": "Recover a project archive.", "body": body})])[0]
+    assert created["isError"] is True
+    assert "procedure" in created["content"][0]["text"]
+    assert not (home / ".agents/skills/learned/archive-recovery/SKILL.md").exists()
+
+    # An older locally learned skill stays available, but an agent cannot
+    # silently replace it with an untested body through the MCP tool.
+    legacy = Skills(home=home / "harness", user_home=home)
+    legacy.create("archive-recovery", "Recover a project archive.", body)
+    path = home / ".agents/skills/learned/archive-recovery/SKILL.md"
+    before = path.read_bytes()
+    updated = exchange(lab, [("skill_manage", {"action": "update", "name": "archive-recovery",
+                                               "body": body.replace("Check the archive.", "Ignore the checksum.")})])[0]
+    assert updated["isError"] is True
+    assert path.read_bytes() == before
+
+
+def test_skill_manage_draft_is_dormant_until_promoted_then_teaches_and_withdraws(lab):
+    home, projects = lab
+    alpha, bravo = projects[1:]
+    candidate = candidate_input(lab)
+    proposal = value(exchange(lab, [("skill_manage", {"action": "draft", "project": str(alpha),
+                                                       "candidate": candidate})])[0])
+    assert proposal["status"] == "proposed"
+    assert not (home / ".agents/skills/learned/archive-recovery/SKILL.md").exists()
+    assert prompt(lab, "archive recovery").stdout == ""
+    proposed = value(exchange(lab, [("skill_manage", {"action": "view", "name": proposal["id"],
+                                                       "project": str(alpha)})])[0])
+    assert proposed["status"] == "proposed" and proposed["evidence_sha256"] is None
+    assert proposed["candidate"]["episodes"] == candidate["episodes"]
+    assert exchange(lab, [("skill_manage", {"action": "view", "name": proposal["id"],
+                                           "project": str(bravo)})])[0]["isError"] is True
+
+    promoted = apply(lab, proposal, receipt(proposal))
+    assert promoted.returncode == 0, promoted.stdout + promoted.stderr
+    active = value(exchange(lab, [("skill_manage", {"action": "view", "name": proposal["id"],
+                                                     "project": str(alpha)})])[0])
+    assert active["status"] == "active" and len(active["evidence_sha256"]) == 64
+    listed = exchange(lab, [("skill_manage", {"action": "list", "project": str(alpha)})])[0]
+    assert proposal["id"] in listed["content"][0]["text"]
+    assert "qualified-procedure" in listed["content"][0]["text"]
+    assert exchange(lab, [("skill_manage", {"action": "archive", "name": proposal["id"],
+                                           "project": str(alpha)})])[0]["isError"] is True
+    assert "Validate the archive checksum" in prompt(lab, "archive recovery", session="new").stdout
+    assert "Do not use for a live database" in prompt(lab, "archive recovery", session="another").stdout
+    assert prompt(lab, "archive recovery", project=bravo).stdout == ""
+
+    revoked = cli(lab, "--rollback", proposal["id"])
+    assert revoked.returncode == 0, revoked.stdout + revoked.stderr
+    withdrawn = value(exchange(lab, [("skill_manage", {"action": "view", "name": proposal["id"],
+                                                        "project": str(alpha)})])[0])
+    assert withdrawn["status"] == "rolled_back"
+    assert "Validate the archive checksum" not in prompt(lab, "archive recovery", session="later").stdout
+
+
+def test_skill_manage_draft_explains_its_required_source_contract(lab):
+    bad = exchange(lab, [("skill_manage", {"action": "draft", "project": str(lab[1][1]),
+                                           "candidate": {}})])[0]
+    assert bad["isError"] is True
+    assert "episodes" in bad["content"][0]["text"]
+    assert "task_sha256" in bad["content"][0]["text"]
+
+
+def test_a_promoted_skill_stops_recall_when_its_bound_source_changes(lab):
+    alpha = lab[1][1]
+    candidate = candidate_input(lab)
+    proposal = value(exchange(lab, [("skill_manage", {"action": "draft", "project": str(alpha),
+                                                       "candidate": candidate})])[0])
+    assert apply(lab, proposal, receipt(proposal)).returncode == 0
+    assert "Validate the archive checksum" in prompt(lab, "archive recovery", session="before-edit").stdout
+    (alpha / "episode-1.json").write_text("source changed after promotion")
+    status = value(exchange(lab, [("skill_manage", {"action": "view", "name": proposal["id"],
+                                                     "project": str(alpha)})])[0])
+    assert status["status"] == "stale"
+    listed = exchange(lab, [("skill_manage", {"action": "list", "project": str(alpha)})])[0]
+    assert proposal["id"] not in listed["content"][0]["text"]
+    assert "Validate the archive checksum" not in prompt(lab, "archive recovery", session="after-edit").stdout
+    notice = prompt(lab, "archive recovery", session="before-edit").stdout
+    assert proposal["id"] in notice and "stale" in notice.lower()
 
 
 def test_procedure_is_dormant_then_recalled_in_scope_and_revoked(lab):

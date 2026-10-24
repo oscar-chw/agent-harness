@@ -43,7 +43,7 @@ Use `kb_search` only when no index entry fits. Do not read whole documents.
   Empty means no saved-fact match; use `session_search` for prior conversations, KB for documents.
 - When asked to remember: `mem_add` one short fact, with explicit scope/project. No secrets or
   personal data. After fail-to-pass evidence or a user correction: `lesson_add`.
-- A hard-won or corrected method: use `skill_manage` before answering.
+- Hard-won method: `skill_manage draft` needs source episodes; independent checks precede use.
 - Outside a plan: `state_save` unfinished work; `state_load` after compaction. Check project and
   freshness against current files. One-shot questions need neither.
 

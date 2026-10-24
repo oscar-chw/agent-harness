@@ -86,9 +86,11 @@ tedious and rarely kept up.
 - **Partial retrieval.** Documents are split into sections at their headings and indexed in SQLite FTS5 with
   BM25. The rules carry a compact index of section ids; the agent fetches one section with `kb_get(id)` and
   calls `kb_search(query)` only when nothing in the index fits.
-- **Memory, lessons, task state, learned skills.** Small files in `~/.agent-harness`, one store per machine
-  shared by every tool. `skill_manage` saves a working procedure as `SKILL.md`; `state_save` / `state_load`
-  carry unfinished work across a compaction.
+- **Memory, lessons, task state, learned methods.** Local stores are shared by the tools on one machine.
+  `skill_manage draft` records a source-bound project method; an independent comparison is required before
+  `harness improve --apply` activates it. Rollback withdraws it. Existing learned `SKILL.md` files remain
+  readable, but direct `skill_manage create/update` no longer publishes untested skills. `state_save` /
+  `state_load` carry unfinished work across a compaction.
 - **Past conversations.** `session_search` indexes your own Claude Code and Codex transcripts incrementally,
   user and assistant messages only, secrets masked before storage, capped at 64 MB.
 - **The guard** analyses a command rather than pattern-matching its text: it tokenises like a shell, unwraps
@@ -228,8 +230,8 @@ Each with its cost in full, the keep rule and the setups this replaced: [docs/de
 
 Each lesson is drawn from a conclusion an eval record states ([where they come from](docs/results.md#where-the-readmes-lessons-come-from)).
 
-1. **Set the keep rule before the eval, and let it decide.** It shipped `session_search` (recall 6/6 against 1/6 and
-   0/6) and learned skills, and kept the two arms off (no gain). The reports call the rule pre-set; no committed record
+1. **Set the keep rule before the eval, and let it decide.** Historical evaluations shipped `session_search` (recall 6/6 against 1/6 and
+   0/6) and earlier direct-write learned skills; the current draft-and-promotion path has no comparison against plain. The reports call the rule pre-set; no committed record
    here shows it predates the eval ([source](eval/results/historical.md), "Decisions the report made with its keep rule").
 2. **At n=3 a gain can be indistinguishable from noise.** Claude's second runs spread 0.56x to 1.91x with no
    skill involved, and creating a skill costs the first run (Codex: 1.73M tokens against 1.34M)
