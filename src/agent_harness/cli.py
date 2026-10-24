@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import secrets
 import shlex
 import shutil
 import signal
@@ -964,6 +965,66 @@ def cmd_op(args) -> int:
     return 0
 
 
+def cmd_task(args) -> int:
+    """Human-facing view of the same host-scoped operational ledger as MCP op_state."""
+    from .operational_state import OperationalState, dispatch
+    try:
+        checkpoint_fields = ("goal", "stage", "summary", "next", "resource", "checkpoint", "evidence")
+        if args.action != "checkpoint" and any(getattr(args, key) is not None for key in checkpoint_fields):
+            raise ValueError("checkpoint fields require the checkpoint action")
+        if args.action != "stop" and args.reason is not None:
+            raise ValueError("reason requires the stop action")
+        if args.action in ("status", "evidence") and (args.expected is not None or args.request_id is not None):
+            raise ValueError("read-only task actions do not accept mutation fields")
+        store = OperationalState.for_host()
+        if args.action in ("status", "evidence"):
+            if args.action == "evidence" and not args.task:
+                raise ValueError("evidence needs a task id")
+            result = dispatch(store, {"action": args.action, **({"task": args.task} if args.task else {})})
+        else:
+            if not args.task:
+                raise ValueError("checkpoint, stop and resume need a task id")
+            snapshot = store.snapshot()
+            row = next((item for item in snapshot["tasks"] if item["task"] == args.task), None)
+            expected = args.expected if args.expected is not None else row["version"] if row else 0
+            request = {"action": args.action, "task": args.task, "expected": expected,
+                       "request_id": args.request_id or "cli-" + secrets.token_hex(16)}
+            if args.action == "checkpoint":
+                value = dict(row["value"]) if row else {}
+                for key in ("goal", "stage", "summary", "next", "resource", "checkpoint"):
+                    supplied = getattr(args, key)
+                    if supplied is not None:
+                        value[key] = supplied
+                if args.evidence is not None:
+                    value["evidence"] = args.evidence
+                    value["evidence_sha256"] = store.bind_evidence(args.evidence)
+                request["value"] = value
+            elif args.action == "stop":
+                request["reason"] = args.reason
+            result = dispatch(store, request)
+    except (OSError, ValueError) as error:
+        print(f"harness task: {error}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False))
+    elif args.action == "status":
+        if not result["tasks"]:
+            _out("No local tasks in this project.")
+        for row in result["tasks"]:
+            value = row["value"]
+            _out(f"{row['task']} v{row['version']} {row['activity']}")
+            for key in ("goal", "stage", "checkpoint", "next", "blocked_on"):
+                if value.get(key):
+                    _out(f"  {key}: {value[key]}")
+            if value.get("evidence"):
+                _out(f"  evidence: {value['evidence']} ({row['evidence_status']}; reference only)")
+    elif args.action == "evidence":
+        _out(f"{result['task']}: {result['path'] or 'none'} ({result['status']}; reference only)")
+    else:
+        _out(f"{result['task']} v{result['version']}: {args.action} recorded; run the graph gate to prove completion")
+    return 0
+
+
 def cmd_launch(args) -> int:
     from .launch import execute, prepare
     try:
@@ -1134,6 +1195,20 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("action", choices=("snapshot", "changes", "put", "claim", "renew", "release", "withdraw"))
     p.add_argument("--cursor", type=int, default=0, help="for changes: prior cursor")
     p.add_argument("--limit", type=int, default=100, help="for changes: maximum events")
+    p = sub.add_parser("task", help="shared project task state: status, checkpoint, stop, resume, evidence")
+    p.add_argument("action", choices=("status", "checkpoint", "stop", "resume", "evidence"))
+    p.add_argument("task", nargs="?", help="task id; optional only for status")
+    p.add_argument("--goal")
+    p.add_argument("--stage")
+    p.add_argument("--summary")
+    p.add_argument("--next")
+    p.add_argument("--resource")
+    p.add_argument("--checkpoint", help="existing project-local plan or checkpoint file")
+    p.add_argument("--evidence", help="project-local receipt path (reference only, not proof of PASS)")
+    p.add_argument("--reason", help="why new claims must stop; does not kill an active worker")
+    p.add_argument("--expected", type=int, help="task version from status; omitted uses latest with CAS")
+    p.add_argument("--request-id", help="idempotency key; omitted generates a fresh one")
+    p.add_argument("--json", action="store_true", help="machine-readable result of the same task contract")
     p = sub.add_parser("launch", help="prepare scoped current context; optionally invoke one bounded native Codex turn")
     p.add_argument("--project-root", required=True)
     p.add_argument("--request", required=True, help="project-relative launch request JSON")
@@ -1184,7 +1259,7 @@ def main(argv: Optional[List[str]] = None) -> int:
           "improve": cmd_improve, "self-update": cmd_self_update, "vault-read": cmd_vault_read,
           "vault-document": cmd_vault_document, "vault-search": cmd_vault_search,
           "memory-page": cmd_memory_page, "memory-read": cmd_memory_read,
-          "launch": cmd_launch, "method": cmd_method, "op": cmd_op}.get(args.cmd)
+          "launch": cmd_launch, "method": cmd_method, "op": cmd_op, "task": cmd_task}.get(args.cmd)
     if args.cmd == "_hook-stop":
         return stop_hook()
     if args.cmd == "_hook-prompt":

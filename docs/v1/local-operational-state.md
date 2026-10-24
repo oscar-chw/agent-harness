@@ -3,7 +3,8 @@
 This ledger gives Claude Code, Codex, and another MCP client connected to the
 same local project and harness home a common task-coordination interface. The
 host derives the project from its working directory; an MCP caller cannot pick
-another project with a model-supplied label. `harness op` and the MCP `op_state`
+another project with a model-supplied label. `harness task`, the lower-level
+`harness op`, and the opt-in MCP `op_state`
 tool use the same SQLite database under `<HARNESS_HOME>/operational/`, keyed by
 the full SHA-256 digest of the resolved project path. Distinct local paths do
 not share a ledger merely because their short legacy project keys collide.
@@ -42,6 +43,31 @@ After a crashed client, a later claim can take over after expiry and the old
 token/fence cannot release it. Lease duration is 1–3600 seconds. `withdraw` is
 terminal for a task ID. The event cap is 10,000; reaching it refuses new work
 without silently discarding history.
+
+The normal human entrypoint is `harness task`; MCP callers use the corresponding
+`op_state` actions `status`, `checkpoint`, `stop`, `resume`, and `evidence`.
+Both reach the same project-scoped ledger and report its current version and
+activity. CLI mutations read the latest version when `--expected` is omitted;
+the same CAS check still refuses a concurrent change. MCP mutations require an
+explicit expected version and request ID. Neither surface creates another plan.
+
+```sh
+harness task checkpoint release --goal 'Qualify release' --checkpoint plan/release.md --next 'Run the gate'
+harness task status release
+harness task stop release --reason 'Independent receipt missing'
+harness task resume release
+harness task evidence release
+```
+
+`stop` prevents new claims; it does not kill a running worker and refuses to
+claim it has stopped one with an active lease. `resume` clears a block only
+while the checkpoint, pinned evidence (if supplied), and linked memory remain
+current. Checkpoint, stop, and resume retain an existing source-memory receipt;
+none silently clears a stale dependency. The optional `--evidence` file is bound to a SHA-256 digest, is limited
+to 1 MiB inside the project, and becomes stale when it changes. Its status is
+**reference only**: even a file containing `PASS` cannot mark a graph node done.
+Run `plan gate` to establish completion. `--json` exposes the same status to a
+script; `harness op` remains available for exact cursors and lease fencing.
 
 CLI reads mutation fields as JSON from stdin, and returns one JSON result:
 
@@ -85,9 +111,9 @@ printf '%s\n' '{"task":"release","value":{"goal":"Qualify release","checkpoint":
 harness op snapshot
 ```
 
-`snapshot` is the cold-session recovery view. Its `activity` says `blocked`,
+`snapshot` and `task status` are cold-session recovery views. Its `activity` says `blocked`,
 `idle_ready`, `idle_unprepared`, `checkpoint_missing`, `stale_memory`,
-`leased_unverified`, `expired_reclaimable`, or `withdrawn`. A lease is a claim,
+`evidence_stale`, `leased_unverified`, `expired_reclaimable`, or `withdrawn`. A lease is a claim,
 not evidence that a model is still running; an expired lease permits a fenced
 takeover. `blocked_on` and a missing checkpoint prevent a new claim. After the
 prerequisite is resolved, use a versioned `put` without `blocked_on`, then

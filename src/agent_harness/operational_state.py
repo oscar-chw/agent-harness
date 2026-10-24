@@ -21,8 +21,10 @@ from pathlib import Path
 from .mcp.state import project_root
 
 KEY = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}\Z")
-VALUE_FIELDS = {"goal", "stage", "summary", "next", "resource", "checkpoint", "blocked_on"}
+VALUE_FIELDS = {"goal", "stage", "summary", "next", "resource", "checkpoint", "blocked_on",
+                "evidence", "evidence_sha256"}
 MAX_EVENTS = 10000
+MAX_EVIDENCE_BYTES = 1024 * 1024
 
 
 class Conflict(ValueError):
@@ -134,6 +136,34 @@ class OperationalState:
         except (OSError, ValueError):
             return "invalid"
 
+    def bind_evidence(self, name):
+        """Hash a bounded project-local reference, without reading its text into task state."""
+        if not isinstance(name, str) or not name or Path(name).is_absolute() or ".." in Path(name).parts:
+            raise ValueError("evidence must name a project-local file")
+        try:
+            path = (self.root / name).resolve(strict=True)
+            path.relative_to(self.root)
+            if not path.is_file() or path.stat().st_size > MAX_EVIDENCE_BYTES:
+                raise ValueError("evidence must be a file of at most 1 MiB")
+            with path.open("rb") as stream:
+                raw = stream.read(MAX_EVIDENCE_BYTES + 1)
+            if len(raw) > MAX_EVIDENCE_BYTES:
+                raise ValueError("evidence exceeds 1 MiB")
+            return hashlib.sha256(raw).hexdigest()
+        except (OSError, ValueError) as exc:
+            raise ValueError("evidence is missing, outside the project, or too large") from exc
+
+    def _evidence_status(self, value):
+        name, sha = value.get("evidence"), value.get("evidence_sha256")
+        if name is None and sha is None:
+            return "none"
+        if not isinstance(name, str) or not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{64}", sha):
+            return "invalid"
+        try:
+            return "current" if self.bind_evidence(name) == sha else "stale"
+        except ValueError:
+            return "missing_or_invalid"
+
     def _activity(self, row):
         if row["status"] == "withdrawn":
             return "withdrawn"
@@ -145,6 +175,8 @@ class OperationalState:
             return "blocked"
         if row["checkpoint_status"] in ("missing", "invalid"):
             return "checkpoint_missing"
+        if row["evidence_status"] not in ("none", "current"):
+            return "evidence_stale"
         if not all(row["value"].get(field) for field in ("goal", "checkpoint", "next")):
             return "idle_unprepared"
         return "idle_ready"
@@ -180,6 +212,7 @@ class OperationalState:
         for row in rows:
             row["memory_status"] = self._memory_status(row["memory_receipt"])
             row["checkpoint_status"] = self._checkpoint_status(row["value"])
+            row["evidence_status"] = self._evidence_status(row["value"])
             row["activity"] = self._activity(row)
         return {"project": str(self.root), "cursor": cursor, "tasks": rows,
                 "consistency": "one operational transaction; memory receipts revalidated separately"}
@@ -203,7 +236,7 @@ class OperationalState:
             raise ValueError("operational brief budget cannot fit omission metadata")
         for row in rows:
             entry = {"task": row["task"], "version": row["version"], "activity": row["activity"],
-                     "memory": row["memory_status"]}
+                     "memory": row["memory_status"], "evidence": row["evidence_status"]}
             if row["memory_status"] != "stale":
                 for field, limit in (("goal", 100), ("stage", 80), ("checkpoint", 120),
                                      ("next", 120), ("blocked_on", 120)):
@@ -263,15 +296,20 @@ class OperationalState:
             db.execute("INSERT INTO requests VALUES (?,?,?)", (request_id, digest, _json(result)))
             return result
 
-    def put(self, task, value, *, expected, request_id, memory_receipt=None):
+    def _validate_value(self, value):
         if (not isinstance(value, dict) or not set(value) <= VALUE_FIELDS
                 or any(not isinstance(v, str) or len(v) > 1024 for v in value.values())
                 or len(_json(value).encode("utf-8")) > 4096):
             raise ValueError("operational value must contain only bounded task fields, not sourced facts")
         if "checkpoint" in value and self._checkpoint_status(value) == "invalid":
             raise ValueError("checkpoint must name a project-local file")
+        if self._evidence_status(value) not in ("none", "current"):
+            raise ValueError("evidence must match a bounded project-local file")
         if any(field in value and not value[field].strip() for field in ("goal", "next", "blocked_on")):
             raise ValueError("goal, next and blocked_on must be nonempty when supplied")
+
+    def put(self, task, value, *, expected, request_id, memory_receipt=None):
+        self._validate_value(value)
         def change(row):
             if memory_receipt is not None and self._memory_status(memory_receipt) != "current":
                 raise ValueError("memory dependency is not a current source-backed receipt")
@@ -283,6 +321,66 @@ class OperationalState:
             return (_json(value), "open", fence, None, None,
                     _json(memory_receipt) if memory_receipt is not None else None), {"status": "open"}
         return self._mutate(task, expected, request_id, "put", [value, memory_receipt], change)
+
+    def checkpoint(self, task, value, *, expected, request_id):
+        if (not isinstance(value, dict) or not all(value.get(field) for field in ("goal", "checkpoint", "next"))
+                or self._checkpoint_status(value) != "present"):
+            raise ValueError("checkpoint needs a goal, existing project-local file and next action")
+        self._validate_value(value)
+        def change(row):
+            if row and row["status"] == "withdrawn":
+                raise Conflict("withdrawal is terminal; choose a new task id")
+            if row and row["status"] == "leased" and row["until"] > self.clock():
+                raise Conflict("active lease prevents an unowned task update")
+            return (_json(value), "open", row["fence"] if row else 0, None, None,
+                    row["memory"] if row else None), {"status": "open"}
+        return self._mutate(task, expected, request_id, "checkpoint", [value], change)
+
+    def status(self, task=None):
+        snapshot = self.snapshot()
+        if task is not None:
+            self._check_key(task, "task")
+            snapshot["tasks"] = [row for row in snapshot["tasks"] if row["task"] == task]
+            if not snapshot["tasks"]:
+                raise ValueError("task is absent from this project")
+        return snapshot
+
+    def evidence(self, task):
+        row = self.status(task)["tasks"][0]
+        return {"task": task, "path": row["value"].get("evidence"),
+                "sha256": row["value"].get("evidence_sha256"),
+                "status": row["evidence_status"], "claim": "reference_only"}
+
+    def stop(self, task, reason, *, expected, request_id):
+        if not isinstance(reason, str) or not reason.strip() or len(reason) > 1024:
+            raise ValueError("stop needs a bounded reason")
+        def change(row):
+            if row is None or row["status"] == "withdrawn":
+                raise Conflict("task is absent or withdrawn")
+            if row["status"] == "leased" and row["until"] > self.clock():
+                raise Conflict("active lease cannot be stopped by a ledger flag; stop the worker separately")
+            value = json.loads(row["value"])
+            value["blocked_on"] = reason
+            return (_json(value), "open", row["fence"], None, None, row["memory"]), {
+                "status": "open", "blocked_on": reason}
+        return self._mutate(task, expected, request_id, "stop", [reason], change)
+
+    def resume(self, task, *, expected, request_id):
+        def change(row):
+            if row is None or row["status"] == "withdrawn":
+                raise Conflict("task is absent or withdrawn")
+            if row["status"] == "leased" and row["until"] > self.clock():
+                raise Conflict("active lease prevents an unowned resume")
+            value = json.loads(row["value"])
+            if not value.get("blocked_on"):
+                raise Conflict("task is not stopped or blocked")
+            if self._checkpoint_status(value) != "present" or self._evidence_status(value) not in ("none", "current"):
+                raise Conflict("checkpoint or evidence changed; update it before resuming")
+            if row["memory"] and self._memory_status(json.loads(row["memory"])) != "current":
+                raise Conflict("memory dependency changed; revalidate before resuming")
+            del value["blocked_on"]
+            return (_json(value), "open", row["fence"], None, None, row["memory"]), {"status": "open"}
+        return self._mutate(task, expected, request_id, "resume", [], change)
 
     def claim(self, task, *, expected, request_id, ttl=300):
         if type(ttl) is not int or not 1 <= ttl <= 3600:
@@ -296,6 +394,8 @@ class OperationalState:
                 raise Conflict("task is blocked; update the checkpoint after resolving the reason")
             if self._checkpoint_status(value) in ("missing", "invalid"):
                 raise Conflict("task checkpoint is missing or outside the project")
+            if self._evidence_status(value) not in ("none", "current"):
+                raise Conflict("task evidence changed; update the checkpoint before claiming")
             if row["memory"] and self._memory_status(json.loads(row["memory"])) != "current":
                 raise Conflict("memory dependency changed; revalidate before claiming")
             if row["status"] == "leased" and row["until"] > self.clock():
@@ -319,6 +419,8 @@ class OperationalState:
             self._owned(row, token, fence)
             if row["memory"] and self._memory_status(json.loads(row["memory"])) != "current":
                 raise Conflict("memory dependency changed; lease cannot be renewed")
+            if self._evidence_status(json.loads(row["value"])) not in ("none", "current"):
+                raise Conflict("evidence changed; lease cannot be renewed")
             until = self.clock() + ttl
             return (row["value"], "leased", fence, row["token_hash"], until, row["memory"]), {
                 "status": "leased", "fence": fence, "until": until}
@@ -348,6 +450,10 @@ def dispatch(store, request):
     action = request.get("action")
     fields = {
         "snapshot": {"action"}, "changes": {"action", "cursor", "limit"},
+        "status": {"action", "task"}, "evidence": {"action", "task"},
+        "checkpoint": {"action", "task", "value", "expected", "request_id"},
+        "stop": {"action", "task", "reason", "expected", "request_id"},
+        "resume": {"action", "task", "expected", "request_id"},
         "put": {"action", "task", "value", "expected", "request_id", "memory_receipt"},
         "claim": {"action", "task", "expected", "request_id", "ttl"},
         "renew": {"action", "task", "expected", "request_id", "token", "fence", "ttl"},
@@ -356,6 +462,10 @@ def dispatch(store, request):
     }
     required = {
         "snapshot": {"action"}, "changes": {"action", "cursor"},
+        "status": {"action"}, "evidence": {"action", "task"},
+        "checkpoint": {"action", "task", "value", "expected", "request_id"},
+        "stop": {"action", "task", "reason", "expected", "request_id"},
+        "resume": {"action", "task", "expected", "request_id"},
         "put": {"action", "task", "value", "expected", "request_id"},
         "claim": {"action", "task", "expected", "request_id"},
         "renew": {"action", "task", "expected", "request_id", "token", "fence"},
