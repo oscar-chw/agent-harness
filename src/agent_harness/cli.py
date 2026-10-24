@@ -560,7 +560,8 @@ def stop_hook(stdin=None) -> int:
         data = json.loads((stdin or sys.stdin).read() or "{}")
         try:   # candidate lessons first, also after the harness's own block: its marker records a turn once
             from . import capture
-            capture.capture_turn(I.harness_home(Path.home()), data["transcript_path"], str(data.get("session_id")))
+            capture.capture_turn(I.harness_home(Path.home()), data["transcript_path"],
+                                 str(data.get("session_id")), project=Path.cwd())
         except Exception:
             pass
         if data.get("stop_hook_active"):
@@ -615,7 +616,8 @@ def capture_hook(stdin=None) -> int:
     try:
         data = json.loads((stdin or sys.stdin).read() or "{}")
         from . import capture
-        capture.capture_turn(I.harness_home(Path.home()), data["transcript_path"], str(data.get("session_id")))
+        capture.capture_turn(I.harness_home(Path.home()), data["transcript_path"],
+                             str(data.get("session_id")), project=Path.cwd())
     except Exception:
         pass
     return 0

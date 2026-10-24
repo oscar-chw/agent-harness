@@ -19,6 +19,7 @@ from .redact import redact
 MAX_SOURCE_BYTES = 2 * 1024 * 1024
 MAX_AUDIT = 52
 ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}\Z")
+SHA = re.compile(r"[0-9a-f]{64}\Z")
 
 
 def _json(value):
@@ -55,6 +56,8 @@ def _source(path):
                 or not isinstance(row.get("summary"), str) or len(row["summary"]) > 512
                 or not isinstance(row.get("evidence"), str) or len(row["evidence"]) > 300
                 or not isinstance(row.get("last"), str) or len(row["last"]) > 64
+                or ("project_sha256" in row and (not isinstance(row["project_sha256"], str)
+                                                 or not SHA.fullmatch(row["project_sha256"])))
                 or redact(row["summary"]) != row["summary"]
                 or redact(row["evidence"]) != row["evidence"]):
             raise ValueError("invalid_candidate: missing, duplicate, untrusted or unsanitized row")
@@ -129,6 +132,8 @@ def take(home, *, since=None, max_items=10, max_output_bytes=2048):
         for row, sha in changed[:max_items]:
             item = {"id": row["id"], "source": row["source"], "count": row["count"],
                     "summary": row["summary"][:120]}
+            if "project_sha256" in row:
+                item["project_sha256"] = row["project_sha256"]
             proposal = result["candidates"] + [item]
             audit = {**receipt, "selected_ids": [x[0]["id"] for x in selected] + [row["id"]]}
             result.update(candidates=proposal, remaining=len(changed) - len(proposal),

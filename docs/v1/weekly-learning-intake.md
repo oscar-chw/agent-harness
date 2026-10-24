@@ -9,12 +9,14 @@ harness improve --weekly-intake --since 0 --max-items 10 --max-output-bytes 2048
 ```
 
 A user message beginning with an explicit correction or teaching cue such as
-“Please remember that…” becomes a *candidate observation*. The capture keeps
-the redacted excerpt and hashes of the source message and transcript event;
-those hashes can match a retained event but do not authenticate the speaker,
-establish project scope, supply distinct task episodes, or make a procedure
-active. A later draft still needs project-local source files and independent
-task evidence.
+“Please remember that…” becomes a *candidate observation*. The Stop hook binds
+it to its actual current directory (the git root when present) by a local path
+hash. It keeps the redacted excerpt plus hashes of the source message and
+transcript event. A replayed event does not increment the count, and at most 20 event hashes are
+retained per candidate. Intake returns the project hash for routing. These
+hashes can match retained events but do not authenticate the speaker, establish
+that two tasks were independent or relevant, or make a procedure active. A
+later draft still needs project-local source files and distinct task inputs.
 
 The `--since` value is the last returned cursor. The capture store is
 atomically rewritten and capped, so a byte offset would silently miss edits.

@@ -180,8 +180,11 @@ def test_conflicting_sourced_facts_remain_separate_and_withdrawal_invalidates(tm
                 "provenance": [{"source": source, "start_line": line, "end_line": line}],
                 "confidence": "verified", "sensitivity": "private", "access_boundary": "local_user",
                 "owner": "project-owner", "freshness": "current"}
-    first = item("site", "service on", 1)
-    second = item("operator", "service off", 2)
+    unsupported = facts.append(item("unsupported", "service on", 1), expected=None)
+    with pytest.raises(ValueError, match="not a current source-backed receipt"):
+        db.put("unverified", {}, expected=0, request_id="reject-unsupported", memory_receipt=unsupported)
+    first = item("site", "site reports on", 1)
+    second = item("operator", "operator reports off", 2)
     first_receipt = facts.append(first, expected=None)
     second_receipt = facts.append(second, expected=None)
     db.put("inspect", {"stage": "resolve conflict"}, expected=0, request_id="p", memory_receipt=first_receipt)
@@ -195,7 +198,7 @@ def test_conflicting_sourced_facts_remain_separate_and_withdrawal_invalidates(tm
         db.claim("inspect", expected=1, request_id="blocked", ttl=10)
     with pytest.raises(ValueError):
         db.put("new", {}, expected=0, request_id="no", memory_receipt=first_receipt)
-    assert facts.read(second_receipt, allowed_sensitivities=["private"])["item"]["text"] == "service off"
+    assert facts.read(second_receipt, allowed_sensitivities=["private"])["item"]["text"] == "operator reports off"
 
 
 def test_withdrawal_blocks_lease_renewal_but_not_exact_prior_replay(tmp_path):
