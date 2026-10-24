@@ -25,6 +25,7 @@ import getpass
 import json
 import os
 import re
+import signal
 import shutil
 import socket
 import subprocess
@@ -783,13 +784,13 @@ def read_record(slug, node):
 
 # -------------------------------------------------------------------- io
 
-def restore_notes(path, n, keep):
-    """Drop every note line on node `n` past the first len(keep). Used only by
-    the reconcile, to undo a worker that forged or rewrote gate evidence."""
+def restore_notes(path, n, original):
+    """Put back exact pre-dispatch note lines; deleting only surplus lines leaves rewritten evidence."""
     with open(path, encoding="utf-8") as f:
         lines = f.readlines()
-    drop = set(n["note_lines"][len(keep):])
+    drop = set(n["note_lines"])
     out = [ln for i, ln in enumerate(lines) if i not in drop]
+    out[n["line"] + 1:n["line"] + 1] = [ln + "\n" for ln in original]
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         f.writelines(out)
@@ -1470,6 +1471,7 @@ def cmd_gate(a):
             append_note(path, lines, n,
                         f"gate ran to exit {code} in {secs}s but the node had been "
                         f"re-claimed by {n['fields'].get('owner', '?')} — result NOT applied")
+            a.gate_conflict = True
             print(f"CONFLICT {a.id}: re-claimed while the gate ran; result not applied",
                   file=sys.stderr)
             return 5
@@ -2381,15 +2383,33 @@ def _dispatch(slug, nid, timeout, model=None, route=None):
 def _dispatch_codex(nid, prompt, tier, timeout, model=None):
     cmd = _sandbox_prefix() + codex_cmd(prompt, tier, model)
     t0 = time.time()
+    proc = None
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True, stdin=subprocess.DEVNULL,
+                                start_new_session=(os.name == "posix"))
+        proc._plan_worker_group = (os.name == "posix")
+        _LIVE.add(proc)
+        out, err = proc.communicate(timeout=timeout)
+        if proc.returncode is not None and proc.returncode < 0:
+            return {"id": nid, "ok": False, "why": f"worker killed by signal {-proc.returncode}",
+                    "quota": False, "dispatch_failed": True, "denials": 0,
+                    "secs": int(time.time() - t0), "cost": 0, "text": "", "usage": worker_usage("codex", None)}
     except subprocess.TimeoutExpired:
+        if proc is not None:
+            try:
+                _kill_worker(proc); proc.communicate(timeout=5)
+            except Exception:
+                pass
         return {"id": nid, "ok": False, "why": f"worker timed out after {timeout}s", "quota": False,
                 "dispatch_failed": True, "denials": 0, "secs": int(time.time() - t0), "cost": 0, "text": "", "usage": worker_usage("codex", None)}
     except Exception as e:
         return {"id": nid, "ok": False, "why": f"dispatch crashed: {e}", "quota": False,
                 "dispatch_failed": True, "denials": 0, "secs": int(time.time() - t0), "cost": 0, "text": "", "usage": worker_usage("codex", None)}
-    info = codex_info(proc.returncode, proc.stdout, proc.stderr)
+    finally:
+        if proc is not None:
+            _LIVE.discard(proc)
+    info = codex_info(proc.returncode, out, err)
     return {"id": nid, "secs": int(time.time() - t0), "cost": 0, "denials": 0,
             "text": str(info["result"])[:300], "tier": tier, "usage": info["usage"],
             "observed_tool_calls": info["observed_tool_calls"],
@@ -2562,6 +2582,8 @@ def _work_one(slug, nid, timeout, model, owner, authorised=None, gatepin=None,
             return r
     try:
         r["gate_rc"] = cmd_gate(g)
+        if getattr(g, "gate_conflict", False):
+            r["gate_conflict"] = True
     except SystemExit as e:
         r["gate_rc"] = e.code if isinstance(e.code, int) else 1
     except Exception as e:
@@ -2700,7 +2722,7 @@ def cmd_run(a):
         # rewriting its own gate, stripping `risk: irreversible`, deleting a
         # node. "A worker cannot mark a node done" was enforced by a PROMPT.
         # Snapshot every node line now; reconcile after the round.
-        _, _, snapNodes, snapOrder, _ = load(slug)
+        _, snapLines, snapNodes, snapOrder, _ = load(slug)
         snapshot = {i: render_node(snapNodes[i]) for i in snapOrder}
         snapFields = {i: {"gate": snapNodes[i]["fields"].get("gate"),
                           "risk": snapNodes[i]["fields"].get("risk"),
@@ -2740,6 +2762,8 @@ def cmd_run(a):
         # ONE legitimate append per claimed node per round and a hash cannot
         # tell that from a forgery.
         snapNotes = {i: list(snapNodes[i]["notes"]) for i in snapOrder}
+        snapNoteLines = {i: [snapLines[j] for j in snapNodes[i]["note_lines"]]
+                         for i in snapOrder}
         # Pin the SCRIPTS each claimed gate depends on, not just the gate string
         # in the plan file. A worker that rewrites ./bin/run-tests.sh gets a real
         # exit 0 from a real command, and every check that looks at the plan file
@@ -2828,7 +2852,7 @@ def cmd_run(a):
         # other way was written by something else.
         expected_mark = {}
         for r in results:
-            if r.get("quota") or r.get("dispatch_failed") or r.get("gate_error"):
+            if r.get("quota") or r.get("dispatch_failed") or r.get("gate_error") or r.get("gate_conflict"):
                 continue
             if "gate_rc" in r:
                 expected_mark[r["id"]] = "x" if r["gate_rc"] == 0 else " "
@@ -2909,7 +2933,7 @@ def cmd_run(a):
                     if now_[:len(was)] != was or len(now_) > len(was) + allowed:
                         if i not in tampered:
                             tampered.append(i)
-                        restore_notes(path, afterNodes[i], now_[:len(was) + allowed])
+                        restore_notes(path, afterNodes[i], snapNoteLines[i])
                         _, aLines, afterNodes, afterOrder, _ = load(slug)
                         repaired += 1
 
@@ -3049,6 +3073,9 @@ def cmd_run(a):
                 crashed += 1
                 print(f"  node {nid}: GATE CRASHED — {r['gate_error']} (node left pending)")
                 continue
+            if r.get("gate_conflict"):
+                print(f"  node {nid}: GATE NOT APPLIED — another owner took the lease")
+                continue
             if r.get("dispatch_failed"):  # includes worker timeout
                 # The worker never ran. Record that, and do NOT let it become
                 # gate evidence — two of these would otherwise burn the node to
@@ -3102,6 +3129,18 @@ _LIVE = set()
 _LIVE_LOCK = None
 
 
+def _kill_worker(proc):
+    # Codex may leave a subprocess holding its pipes after its parent exits.
+    # Its dedicated process group must die before the graph releases the lease.
+    if getattr(proc, "_plan_worker_group", False) and hasattr(os, "killpg"):
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    else:
+        proc.kill()
+
+
 def _kill_workers():
     """Signals reach the main thread, but it is parked in the executor's join,
     which waits for every worker — so a closed laptop did not release its nodes
@@ -3109,7 +3148,7 @@ def _kill_workers():
     the release in `finally` actually run."""
     for proc in list(_LIVE):
         try:
-            proc.kill()
+            _kill_worker(proc)
         except Exception:
             pass
 
@@ -3120,8 +3159,6 @@ def _install_signal_handlers():
     in-flight node stayed [>] under a dead owner for the full lease. That is the
     previous ledger's dead-lease defect, reachable today. Raising SystemExit
     lets the existing cleanup do its job."""
-    import signal
-
     def _bail(signum, _frame):
         _kill_workers()
         raise SystemExit(128 + signum)

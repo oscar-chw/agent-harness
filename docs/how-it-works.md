@@ -176,6 +176,9 @@ The rules ask for good behaviour; the harness enforces a floor where the tool al
   `plan run` gives each worker a tier from `content/routing.toml`: a node's own `tier:`, else `standard`, and
   `deep` once its gate has failed. The tier's model and effort are passed explicitly (`--model`/`--effort`
   for Claude Code, `-m`/`model_reasoning_effort` for Codex), read from the `harness-<tier>` agent files.
+  On POSIX hosts, a Codex worker and its ordinary children use a separate process group so a timeout or
+  terminal hangup can stop them before releasing a node. Windows currently has only direct-child
+  termination; descendant containment and unattended worker cleanup there remain unverified.
   Separately, disabled-by-default `routing.next_decision` can select a minimum tier from a typed task
   profile: only low-impact, low-uncertainty mechanical work starts `quick`; ordinary work starts
   `standard`; high-impact or high-uncertainty work, design and review start `deep`. Unknown inputs,
