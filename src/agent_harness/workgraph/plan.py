@@ -1534,10 +1534,10 @@ def cmd_mark(a):
         if a.id not in nodes:
             die(f"no node {a.id}")
         n = nodes[a.id]
-        if n.get("_versioned") and a.state == "done":
-            die("versioned nodes require an actual gate result; mark done is unavailable", 8)
         _assert_owner(n, getattr(a, "owner", None), getattr(a, "force", False), a.id)
         assert_sound(a.slug, a.id, getattr(a, "force", False))
+        if a.state == "done":
+            die("mark done is unavailable; only an actual gate result can complete a node", 8)
         if a.note:
             append_note(path, lines, n, a.note)
             _, lines, nodes, _, _ = load(a.slug); n = nodes[a.id]

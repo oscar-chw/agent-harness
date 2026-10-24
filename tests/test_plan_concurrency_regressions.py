@@ -199,3 +199,21 @@ def test_normal_codex_worker_still_reaches_an_independent_gate(tmp_path):
     assert result.returncode == 0, result.stdout + result.stderr
     assert (tmp_path / "GATE-RAN").exists()
     assert "- [x] 1." in (tmp_path / "plan/g.md").read_text()
+
+
+def test_unversioned_mark_done_cannot_bypass_a_failing_gate(tmp_path):
+    env = setup(tmp_path)
+    graph = tmp_path / "plan/g.md"
+    graph.write_text("## goal: only gate results complete work\n\n- [ ] 1. work | gate: false\n")
+    for extra in ([], ["--force"]):
+        marked = subprocess.run([sys.executable, str(ENGINE), "mark", "g", "1", "done", *extra],
+                                cwd=tmp_path, env=env, capture_output=True, text=True, timeout=5)
+        assert marked.returncode == 8, marked.stdout + marked.stderr
+        assert "- [ ] 1." in graph.read_text()
+    failed_gate = subprocess.run([sys.executable, str(ENGINE), "gate", "g", "1"],
+                                 cwd=tmp_path, env=env, capture_output=True, text=True, timeout=5)
+    assert failed_gate.returncode != 0 and "- [ ] 1." in graph.read_text()
+    graph.write_text("## goal: only gate results complete work\n\n- [ ] 1. work | gate: true\n")
+    passed_gate = subprocess.run([sys.executable, str(ENGINE), "gate", "g", "1"],
+                                 cwd=tmp_path, env=env, capture_output=True, text=True, timeout=5)
+    assert passed_gate.returncode == 0 and "- [x] 1." in graph.read_text()
