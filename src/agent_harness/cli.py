@@ -999,6 +999,8 @@ def cmd_task(args) -> int:
         else:
             if not args.task:
                 raise ValueError("checkpoint, stop and resume need a task id")
+            if args.request_id is not None and args.expected is None:
+                raise ValueError("--request-id requires --expected so a retry preserves its original version")
             snapshot = store.snapshot()
             row = next((item for item in snapshot["tasks"] if item["task"] == args.task), None)
             expected = args.expected if args.expected is not None else row["version"] if row else 0
@@ -1226,7 +1228,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--evidence", help="project-local receipt path (reference only, not proof of PASS)")
     p.add_argument("--reason", help="why new claims must stop; does not kill an active worker")
     p.add_argument("--expected", type=int, help="task version from status; omitted uses latest with CAS")
-    p.add_argument("--request-id", help="idempotency key; omitted generates a fresh one")
+    p.add_argument("--request-id", help="idempotency key; requires --expected for stable retries")
     p.add_argument("--json", action="store_true", help="machine-readable result of the same task contract")
     p = sub.add_parser("launch", help="prepare scoped current context; optionally invoke one bounded native Codex turn")
     p.add_argument("--project-root", required=True)

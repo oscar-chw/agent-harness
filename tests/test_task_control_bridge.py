@@ -19,6 +19,27 @@ def task_cli(root, env, *args):
     return run.returncode, (json.loads(run.stdout) if "--json" in args else run.stdout) if run.stdout else run.stderr
 
 
+def test_explicit_request_id_requires_pinned_expected_version(tmp_path):
+    env = env_for(tmp_path)
+    (tmp_path / "plan").mkdir()
+    (tmp_path / "plan/goal.md").write_text("## goal: verify release\n")
+    code, message = task_cli(tmp_path, env, "checkpoint", "release", "--goal", "Verify release",
+                             "--checkpoint", "plan/goal.md", "--next", "Run gate",
+                             "--request-id", "replay-me")
+    assert code != 0 and "--expected" in message
+    status_code, status = task_cli(tmp_path, env, "status", "--json")
+    assert status_code == 0 and status["tasks"] == []
+
+    code, created = task_cli(tmp_path, env, "checkpoint", "release", "--goal", "Verify release",
+                             "--checkpoint", "plan/goal.md", "--next", "Run gate",
+                             "--request-id", "replay-me", "--expected", "0", "--json")
+    assert code == 0 and created["version"] == 1
+    code, replayed = task_cli(tmp_path, env, "checkpoint", "release", "--goal", "Verify release",
+                              "--checkpoint", "plan/goal.md", "--next", "Run gate",
+                              "--request-id", "replay-me", "--expected", "0", "--json")
+    assert code == 0 and replayed == created
+
+
 def test_human_and_agent_share_checkpoint_stop_resume_and_evidence(tmp_path):
     env = env_for(tmp_path)
     (tmp_path / "plan").mkdir()
