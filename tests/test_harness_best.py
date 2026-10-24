@@ -732,7 +732,11 @@ class TestReviewFindings(Base):
         self.assertFalse([t for t, row in m.items() if any("not described" in v for v in row.values())])
 
     def test_doctor_names_what_is_over_the_cap(self):
-        self.assertEqual(harness(self.home, "install", "--yes", "--tools", "claude-code")[0], 0)
+        # This checks storage reporting, not editor installation. A real
+        # `code` binary must not run while this fixture has --yes set.
+        with mock.patch("agent_harness.extensions.detect_editors", return_value=[]) as editors:
+            self.assertEqual(harness(self.home, "install", "--yes", "--tools", "claude-code")[0], 0)
+        editors.assert_called()
         big = self.hh() / "state" / "blob.bin"
         big.parent.mkdir(parents=True, exist_ok=True)
         with open(big, "wb") as out:
