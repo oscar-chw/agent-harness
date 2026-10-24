@@ -40,7 +40,7 @@ flowchart LR
         IDX[("index.sqlite<br/>FTS5")]
         MJ[("memory/<br/>lessons/")]
         NJ[("notices.json")]
-        LRN[("learned<br/>skills")]
+        LRN[("procedures.sqlite<br/>project methods")]
     end
     TR[("Claude Code,<br/>Codex<br/>transcripts")]
 
@@ -52,7 +52,7 @@ flowchart LR
     TR -- "secrets<br/>masked" --> SS
     MEM -- "JSON<br/>per item" --> MJ
     NT -- "once<br/>a day" --> NJ
-    SM -- "SKILL.md" --> LRN
+    SM -- "draft, view" --> LRN
 
     classDef data fill:#dbeafe,stroke:#1d4ed8,color:#0b1220
     classDef step fill:#f1f5f9,stroke:#475569,color:#0b1220
@@ -129,8 +129,10 @@ Where in the code: `content/hooks/guard.py` (`main`, `verdict_for_payload`, `ver
 
 ## 3. The A/B eval and its keep rule
 
-How the v0.2 eval is run and decided: two passes, one per installed version, then the keep rule part by part.
+How the v0.2 eval was run and decided: two passes, one per installed version, then the historical keep rule part by part.
 The public phase uses the same runner on the SYNTHETIC set and has no results yet.
+The current project-procedure gate instead requires no held-out per-case quality regression and aggregate
+tokens including overhead no greater than baseline; its promotion generates no learned `SKILL.md`.
 
 ```mermaid
 flowchart TB

@@ -18,8 +18,9 @@ Python 3.9 or newer, standard library only, under 20 MB. `harness` below is `pyt
 | `harness run <plan>` | drain a plan autonomously: each node to a worker on its tier, every gate run by the engine; `plan/<plan>.STOP` halts it |
 | `harness discover "<need>"` | search the Claude/Codex plugin lists, the MCP Registry and Open VSX; vet each item (pinned? hidden text? runs code?) |
 | `harness discover --install ID --approve SHA256` | install exactly the command shown, approved by its hash; a Claude Code plugin is checked afterwards against the approved commit and removed if it differs; recorded in `~/.agent-harness/installed-extensions.jsonl` |
-| `harness improve --propose` / `--apply ID --eval FILE` | lessons captured at each turn's end (a check that failed then passed, your corrections) that recur become proposals; one is applied only when a paired eval shows a gain within +15% tokens |
-| `harness improve --trend eval/results/history.jsonl [--release V]` | refuse a release (default: this version) that scores more than one question below the best earlier release, per tool and on the same questions, or costs more than +15% tokens, or has no measured result |
+| `harness improve --propose` | list recurring captured lessons as legacy proposals; these are evidence and cannot be applied directly |
+| `harness improve --draft-procedure FILE --project PATH` / `--apply ID --eval FILE --project PATH` / `--rollback ID --project PATH` | store a dormant project procedure in `procedures.sqlite`; promote its `pr-…` ID only after an independent matched held-out comparison with no per-case quality regression, a measurable gain, and aggregate tokens including overhead no greater than baseline; rollback withdraws it. No learned `SKILL.md` is generated |
+| `harness improve --trend eval/results/history.jsonl [--release V]` | refuse a release (default: this version) with any lower score than the best accepted earlier release on the same questions, greater aggregate tokens, or no measured result; +15% was a historical allowance |
 | `harness doctor` | also prunes every store to its cap and names the largest parts when the harness is over its footprint cap |
 
 A real install (without `--dry-run`) **replaces `~/.claude/CLAUDE.md`** and the other tools' instruction files

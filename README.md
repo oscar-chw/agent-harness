@@ -42,7 +42,7 @@ flowchart LR
         IDX[("index.sqlite<br/>FTS5")]
         MJ[("memory/<br/>lessons/")]
         NJ[("notices.json")]
-        LRN[("learned<br/>skills")]
+        LRN[("procedures.sqlite<br/>project methods")]
     end
     TR[("Claude Code,<br/>Codex<br/>transcripts")]
 
@@ -54,7 +54,7 @@ flowchart LR
     TR -- "secrets<br/>masked" --> SS
     MEM -- "JSON<br/>per item" --> MJ
     NT -- "once<br/>a day" --> NJ
-    SM -- "SKILL.md" --> LRN
+    SM -- "draft, view" --> LRN
 
     classDef data fill:#dbeafe,stroke:#1d4ed8,color:#0b1220
     classDef step fill:#f1f5f9,stroke:#475569,color:#0b1220
@@ -87,10 +87,12 @@ tedious and rarely kept up.
   BM25. The rules carry a compact index of section ids; the agent fetches one section with `kb_get(id)` and
   calls `kb_search(query)` only when nothing in the index fits.
 - **Memory, lessons, task state, learned methods.** Local stores are shared by the tools on one machine.
-  `skill_manage draft` records a source-bound project method; an independent comparison is required before
-  `harness improve --apply` activates it. Rollback withdraws it. Existing learned `SKILL.md` files remain
-  readable, but direct `skill_manage create/update` no longer publishes untested skills. `state_save` /
-  `state_load` carry unfinished work across a compaction. [On-demand weekly intake](docs/v1/weekly-learning-intake.md)
+  `skill_manage draft` records a dormant, source-bound project method in `procedures.sqlite`. A matched,
+  independent held-out comparison must show no quality regression on any case or dimension and aggregate
+  tokens, including overhead, no greater than baseline before `harness improve --apply` activates it.
+  Rollback withdraws it; no new learned `SKILL.md` is generated. Existing learned skills remain readable,
+  but direct `skill_manage create/update` and automatic application of legacy proposals are refused.
+  `state_save` / `state_load` carry unfinished work across a compaction. [On-demand weekly intake](docs/v1/weekly-learning-intake.md)
   reads only changed candidate evidence under a bounded output budget; it never schedules a model or promotes a method.
 - **Past conversations.** `session_search` indexes your own Claude Code and Codex transcripts incrementally,
   user and assistant messages only, secrets masked before storage, capped at 64 MB.
@@ -100,8 +102,9 @@ tedious and rarely kept up.
 - **The work graph** (v0.3, on by the owner's explicit decision): one markdown file per goal. A node is done only when its gate
   command exits 0, run by the graph after the guard has passed it; a failed gate returns the node to pending
   with its output, and claims are atomic with a lease, so parallel sessions never take the same node.
-- **A keep rule decides what ships on:** accuracy no worse, a measurable gain, token overhead within +15%;
-  parts that fail stay off ([the rule and its provenance](docs/design-decisions.md#the-keep-rule)).
+- **The current learning gate** requires no held-out per-case quality regression, a measurable quality or
+  token gain, and aggregate tokens including overhead no greater than baseline. The +15% allowance describes
+  historical component evaluations ([the rule and its provenance](docs/design-decisions.md#the-keep-rule)).
 
 How the guard decides one command: every check can raise `Blocked`; only a command that passes all of them runs.
 
