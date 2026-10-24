@@ -116,6 +116,7 @@ EXIT_LINE = re.compile(r"\A\s*Exit code (-?\d+)")
 # Strict on purpose: "Stop the server" is an instruction, not a correction.
 CORRECTION = re.compile(r"^\s*(no[,.!]|nope\b|don'?t\b|do not\b|wrong\b|that'?s (wrong|not)|not like that)"
                         r"|\b(instead of|use \S+ (instead|not))\b", re.I)
+TEACH = re.compile(r"^\s*(?:please\s+)?remember\s+(?:that\b|for this project\b)|^\s*from now on\b", re.I)
 FAIL_LINE = re.compile(r"(FAILED|ERROR|Error|Traceback|assert|FAIL\b|failed)")
 MAX_TEXT = 300
 
@@ -203,9 +204,14 @@ def candidates(transcript: str, events: Optional[list] = None) -> List[dict]:
     found = []
     first = events[0] if events else {}
     prompt = _text((first.get("message") or {}).get("content")) if first.get("type") == "user" else ""
-    if prompt and CORRECTION.search(prompt):
+    if prompt and (CORRECTION.search(prompt) or TEACH.search(prompt)):
         t = redact(prompt.strip())[:MAX_TEXT]       # redact the whole text first, then cut
-        found.append({"source": "user", "summary": t, "evidence": t, "key": _key("user", t)})
+        found.append({"source": "user", "summary": t, "evidence": t, "key": _key("user", t),
+                      # A retained transcript event can be matched later; neither hash
+                      # authenticates the speaker or promotes the text to a method.
+                      "source_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+                      "source_event_sha256": hashlib.sha256(json.dumps(first, sort_keys=True,
+                                                                         ensure_ascii=False).encode()).hexdigest()})
     checks = _checks(events)
     for i, c in enumerate(checks):
         if c["exit"] == 0:

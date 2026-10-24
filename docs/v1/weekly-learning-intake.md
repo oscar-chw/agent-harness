@@ -8,6 +8,14 @@ change rules. Run it by hand when reviewing a week of work:
 harness improve --weekly-intake --since 0 --max-items 10 --max-output-bytes 2048 --json
 ```
 
+A user message beginning with an explicit correction or teaching cue such as
+“Please remember that…” becomes a *candidate observation*. The capture keeps
+the redacted excerpt and hashes of the source message and transcript event;
+those hashes can match a retained event but do not authenticate the speaker,
+establish project scope, supply distinct task episodes, or make a procedure
+active. A later draft still needs project-local source files and independent
+task evidence.
+
 The `--since` value is the last returned cursor. The capture store is
 atomically rewritten and capped, so a byte offset would silently miss edits.
 The intake instead compares each retained candidate's count and digest with
