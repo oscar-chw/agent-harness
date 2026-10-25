@@ -88,7 +88,7 @@ def _episodes(candidate, project):
     episodes = candidate.get("episodes")
     if not isinstance(episodes, list) or not 2 <= len(episodes) <= 20:
         raise ValueError("at least two bounded development episodes are required")
-    ids, fingerprints = set(), set()
+    ids, fingerprints, sources = set(), set(), set()
     for episode in episodes:
         if not isinstance(episode, dict) or set(episode) != {
                 "task_id", "path", "sha256", "task_path", "task_sha256"}:
@@ -101,6 +101,9 @@ def _episodes(candidate, project):
         ids.add(identity)
         _bound_file(project, name, sha)
         _bound_file(project, episode["task_path"], episode["task_sha256"])
+        if sha in sources:
+            raise ValueError("development episodes repeat the same source evidence")
+        sources.add(sha)
         if episode["task_sha256"] in fingerprints:
             raise ValueError("development episodes repeat the same task inputs")
         fingerprints.add(episode["task_sha256"])

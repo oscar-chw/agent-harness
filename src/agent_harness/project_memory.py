@@ -216,10 +216,14 @@ class ProjectMemory:
         result = events[receipt["sequence"] - 1]
         if not historical and latest[receipt["id"]]["receipt"] != receipt:
             raise ValueError("superseded memory requires an explicit historical read")
-        if historical and latest[receipt["id"]]["item"]["freshness"] == "withdrawn":
-            # Retain the old words for diagnosis, but never present an old grant
-            # without the current withdrawal when recovering historical evidence.
-            return {**result, "current_status": "withdrawn", "usable_for_current_decisions": False}
+        if historical:
+            current = latest[receipt["id"]]
+            if current["receipt"] != receipt or current["item"]["freshness"] != "current":
+                # Keep superseded words for diagnosis, but a historical receipt
+                # must never look like a presently usable fact or old grant.
+                status = current["item"]["freshness"]
+                return {**result, "current_status": status if status != "current" else "superseded",
+                        "usable_for_current_decisions": False}
         return result
 
     def read(self, receipt, *, allowed_sensitivities, historical=False):

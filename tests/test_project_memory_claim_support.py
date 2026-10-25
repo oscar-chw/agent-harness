@@ -88,3 +88,29 @@ def test_pending_claim_is_not_a_normal_search_or_recovery_hit(tmp_path):
         store.read(receipt, allowed_sensitivities=["internal"])
     with pytest.raises(ValueError, match="pending memory"):
         store.latest("service-port", allowed_sensitivities=["internal"])
+
+
+def test_historical_superseded_fact_is_explicitly_unusable_for_current_decisions(tmp_path):
+    project_id = initialize(tmp_path)
+    store = ProjectMemory(tmp_path, project_id)
+    policy = {"allowed_sensitivities": ["internal"], "allowed_scopes": ["project"],
+              "layers": ["project_facts"]}
+
+    def item(text):
+        (tmp_path / "source.txt").write_text(text + "\n")
+        source = SourceVault(tmp_path, project_id).capture("source.txt")
+        return {"id": "service-port", "project_id": project_id, "layer": "project_facts",
+                "kind": "fact", "scope": "project", "text": text,
+                "provenance": [{"source": source, "start_line": 1, "end_line": 1}],
+                "confidence": "verified", "sensitivity": "internal",
+                "access_boundary": "local_user", "owner": "fixture", "freshness": "current"}
+
+    old = store.append(item("Port: 8081"), expected=None)
+    new = store.append(item("Port: 8082"), expected=old)
+    historical = store.read_scoped(old, historical=True, **policy)
+    assert historical["historical"] is True
+    assert historical["item"]["text"] == "Port: 8081"
+    assert historical["usable_for_current_decisions"] is False
+    current = store.read_scoped(new, **policy)
+    assert current["item"]["text"] == "Port: 8082"
+    assert current.get("usable_for_current_decisions", True) is True

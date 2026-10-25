@@ -360,3 +360,23 @@ def test_two_episodes_of_one_input_do_not_establish_recurrence(lab):
     path = lab[1][1] / "repeated-input.json"
     path.write_text(json.dumps(candidate))
     assert cli(lab, "--draft-procedure", str(path)).returncode != 0
+
+
+def test_two_task_inputs_one_observation_do_not_establish_recurrence(lab):
+    candidate = candidate_input(lab)
+    alpha = lab[1][1]
+    first, second = candidate["episodes"]
+    # Different task inputs do not make a copied observation two independent
+    # development episodes. Renaming the source must not bypass the check.
+    (alpha / second["path"]).write_bytes((alpha / first["path"]).read_bytes())
+    second["sha256"] = first["sha256"]
+    assert first["task_sha256"] != second["task_sha256"]
+    path = alpha / "reused-source.json"
+    path.write_text(json.dumps(candidate))
+    refused = cli(lab, "--draft-procedure", str(path))
+    assert refused.returncode != 0 and "source evidence" in refused.stdout
+
+    distinct = candidate_input(lab)
+    path.write_text(json.dumps(distinct))
+    accepted = cli(lab, "--draft-procedure", str(path))
+    assert accepted.returncode == 0, accepted.stdout + accepted.stderr

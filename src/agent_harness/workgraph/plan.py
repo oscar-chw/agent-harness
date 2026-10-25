@@ -196,7 +196,8 @@ def plan_dir():
         cand = os.path.join(cur, "plan")
         if os.path.isdir(cand):
             return cand
-        if os.path.isdir(os.path.join(cur, ".git")) or cur == "/":
+        git_marker = os.path.join(cur, ".git")
+        if os.path.isdir(git_marker) or os.path.isfile(git_marker) or cur == "/":
             return os.path.join(cur, "plan")
         cur = os.path.dirname(cur)
 
