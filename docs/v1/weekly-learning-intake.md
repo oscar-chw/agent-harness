@@ -41,15 +41,18 @@ not the captured summary or evidence. This reader neither authenticates a
 claim's truth nor distinguishes two independent tasks merely from a repeat
 count.
 
-An item with `count >= 2` is still only a **candidate signal**. To turn a
-repeatable method into advice, use the existing source-bound
+An item with `count >= 2` is still only a **candidate signal**. To draft a
+repeatable method, use the existing source-bound
 `skill_manage draft` / `harness improve --draft-procedure` path with distinct
-task-input episodes. Promotion still requires a matched independent held-out
-comparison through `harness improve --apply` with no per-case quality
-regression and aggregate tokens no greater than the baseline. Rollback and
-source-staleness checks remain in that existing procedure lifecycle. No
-promotion is performed by weekly intake, and no gain has been measured for
-the intake itself.
+task-input episodes. `harness improve --apply` currently rejects caller-attested
+scores; local freeze/bind receipts stay `HOLD_UNVERIFIED_BOUNDARY` and do not
+activate advice. Future promotion requires verified native actor isolation,
+effective model and usage-to-artifact provenance, independent frozen grading,
+and a matched held-out comparison with no per-case quality regression, a
+measurable gain and aggregate tokens including overhead no greater than the
+baseline. Legacy active rows without native verification are withheld from
+recall; rollback and source-staleness checks remain. Weekly intake performs no
+promotion, and no gain has been measured for the intake itself.
 
 A recurring schedule would need a separately authorized scheduler and a
 bounded run policy. This candidate command does not install one, wake chats,

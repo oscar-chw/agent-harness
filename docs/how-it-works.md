@@ -84,10 +84,12 @@ written to `~/.agent-harness/candidates.jsonl`, never straight into lessons.
 
 **Getting better, only where measured.** `harness improve --propose` turns a candidate seen at least twice
 into a legacy proposal, which remains evidence and cannot be applied directly. The current path drafts a
-source-bound project procedure, then promotes it only after a matched, independent held-out comparison shows
-no quality regression on any case or dimension and aggregate tokens including overhead no greater than
-baseline. `--trend` refuses a release with any lower score or greater aggregate tokens than the best accepted
-earlier release on the same questions (`eval/results/history.jsonl`). The former +15% token and one-question
+source-bound project procedure but holds activation: `harness improve --apply` rejects caller-attested
+scores, and local freeze/bind receipts remain `HOLD_UNVERIFIED_BOUNDARY`. A future native qualification
+must show no quality regression on any held-out case or dimension, a measurable gain, and aggregate tokens
+including overhead no greater than baseline. `--trend` refuses a release with any lower score or greater
+aggregate tokens than the best accepted earlier release on the same questions (`eval/results/history.jsonl`).
+The former +15% token and one-question
 noise allowances describe historical evaluations. Why this strict: skills agents wrote
 for themselves scored 8-11.5 points below no skills at all (SkillsBench), while curated ones gained 16.6, and
 lessons from a false signal made Reflexion worse.
@@ -118,14 +120,17 @@ returns a few dated excerpts with the session id and project; `session=<id>` nar
 
 `skill_manage draft` takes a project and a concrete candidate with at least two distinct task-input
 episodes bound to source paths and SHA-256 hashes, and stores it in `procedures.sqlite`. A draft is
-**not active**. An independently run, matched held-out comparison supplies
-`harness improve --apply ID --eval FILE`; promotion rejects
-per-case quality regressions and aggregate tokens, including adaptation, retrieval, review, retries and
-maintenance overhead, above the baseline. It also requires a measurable quality or token gain. A matching
-prompt then recalls the active project method with its exclusions. `skill_manage view ID` shows its source
-bindings and evidence status; a changed source makes it stale and stops recall. `harness improve --rollback ID`
-withdraws it and warns sessions that previously received its advice. The receipt format checks
-consistency but cannot authenticate who actually ran the evaluator.
+**not active**. `harness improve --apply ID --eval FILE` currently rejects caller-written comparison
+scores, even with a plausible grader hash. The local binder pins task and answer hashes, records artifact
+and native-format usage hashes, and computes an exact-byte grade, but its receipt stays
+`HOLD_UNVERIFIED_BOUNDARY`: it cannot prove the actor was denied the answer or authenticate the model,
+usage-to-artifact link, or evaluator. Future promotion requires those native boundaries and an independent,
+matched held-out comparison: no per-case quality regression, a measurable quality or token gain, and
+aggregate tokens including adaptation, retrieval, review, retries and maintenance overhead no greater than
+baseline. Until then, no new procedure is activated. Legacy active rows without native verification are
+withheld from recall. `skill_manage view ID` shows source bindings and evidence status; a changed source
+makes a verified active method stale and stops recall. `harness improve --rollback ID` withdraws an active
+method and warns sessions that previously received its advice.
 
 Direct `skill_manage create/update` is blocked: it used to write globally visible, untested
 `SKILL.md` files immediately. The procedure path generates no `SKILL.md`. Previously written learned skills
