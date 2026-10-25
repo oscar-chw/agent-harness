@@ -170,9 +170,9 @@ TOOLS = [
                        session={"type": "string", "description": "only this session id (prefix)"},
                        project={"type": "string"})},
     {"name": "skill_manage",
-     "description": "Draft a source-bound project method; promotion is held pending independent native evidence. "
-                    "list/view; direct create/update blocked.",
-     "inputSchema": _s(action={"type": "string", "enum": ["draft", "create", "update", "list", "view", "archive"],
+     "description": "Draft or correct a source-bound method. Old advice is withdrawn; replacement stays "
+                    "proposed. Promotion and direct writes held.",
+     "inputSchema": _s(action={"type": "string", "enum": ["draft", "correct", "create", "update", "list", "view", "archive"],
                                "_req": True},
                        name={"type": "string"}, project={"type": "string"},
                        candidate={"type": "object", "description": "schema=1,title,trigger,steps,exceptions,"
@@ -269,6 +269,8 @@ class Server:
             return result
         if not name:
             raise ValueError("missing argument: name")
+        if act == "correct":
+            return procedures.correct(home, a.get("project"), name, a.get("candidate"))
         if act in ("create", "update"):
             raise ValueError("direct skill writes are disabled; draft a source-bound procedure with skill_manage, "
                              "then qualify it against an independently graded native comparison; "
@@ -282,7 +284,7 @@ class Server:
             if procedure_id:
                 raise ValueError("use harness improve --rollback ID --project PATH for a qualified procedure")
             return self.skills.archive(name)
-        raise ValueError("action must be draft, create, update, list, view or archive")
+        raise ValueError("action must be draft, correct, create, update, list, view or archive")
 
     # ------------------------------------------------------------ tools
     def call_tool(self, name: str, args: Dict[str, Any]) -> Any:

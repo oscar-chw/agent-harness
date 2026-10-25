@@ -1,6 +1,6 @@
 ## goal: Qualify the CPU memory correction and teaching-to-method hold boundary without model calls
 
-Done-condition: the memory, teaching-source and explicit negative-cue checks pass with their positive controls; the configured CPU suite exits 0 on the final source, and lint, diff and privacy checks pass. No claim of native model transfer.
+Done-condition: the memory, teaching-source, explicit negative-cue and correction/withdrawal checks pass with their controls; the configured CPU suite exits 0 on the final source, and lint, diff and privacy checks pass. No claim of native model transfer.
 
 ## analysis
 
@@ -25,11 +25,17 @@ The user's existing autonomous-work authorization covers this bounded reversible
 - Supplemental CPU tests for procedure, Codex-hook, legacy-promotion and vendored work-graph behavior: 55 passed in 76.00s.
 - Clean-commit baseline `13fc76f98d9b7572fbf3b211a42c5df1cf83f23a`: `HARNESS_STAGING_PYTHON=/opt/homebrew/bin/python3.11 PYTHONPATH=src python3 -m pytest -q tests ./eval` exited 0 with 1334 passed, 2 skipped, 2 xfailed in 360.86s. This is source evidence, not an installed/native runtime check.
 - Explicit-negative test failed before the matcher change because "Do not use archive recovery" injected that method. Four direct negative phrasings and an unrelated-warning positive control then passed. Final affected gate: 54 passed in 21.84s. Final-source configured CPU gate: 1335 passed, 2 skipped, 2 xfailed in 364.76s, exit 0. Native model effectiveness remains untested.
+- Correction tests were red before code: no `procedures.correct` or MCP action. The first implementation exposed a read-only legacy-store failure (`no such table: procedure_corrections`), repaired without mutating the legacy store. Core, MCP/CLI, and concurrent-retry gates then passed; affected lifecycle/recall gate passed 59 tests in 22.28s.
+- First correction-source full suite failed: MCP tools 4629 bytes exceeded the fixed 4600-byte cap. The description was shortened by 51 bytes without changing the cap; focused context budget passed 7 tests, and the rerun full suite passed 1340 tests, 2 skipped, 2 xfailed in 363.21s (exit 0). The failed attempt remains in node 22's record.
 - Native actor isolation, independent grader provenance, model transfer and rollout: NOT_RUN or BLOCKED by their separate acceptance boundaries.
 
 ## continuation
 
 The next non-model lifecycle check is deliberately narrow: an explicit instruction not to use a procedure must not cause that procedure to be injected by lexical overlap. A warning about an unrelated target must still allow the relevant offline method. Failure-first test, smallest matcher change, affected tests, final CPU suite, lint and privacy are separate gates. No unattended `plan run` or model worker is authorized here.
+
+## correction continuation
+
+An explicit correction names the old source-bound method and a replacement candidate. The safe result is one auditable link, old advice withdrawn, replacement proposed, no fresh-session recall of either until independent promotion, and no duplicate replacement under concurrent retries. Invalid replacement data must leave the old row unchanged and produce an explicit error so the caller can roll it back separately. These are CPU lifecycle checks, not native model learning evidence.
 
 - [x] 1. Analyse the observed defect and bounded done-condition | gate: python3 src/agent_harness/workgraph/phase_check.py v1-memory-teaching-acceptance analysis
       2026-10-25T08:40:22Z exit 0 in 0s [730c08b7] — phase analysis: OK (47 words)
@@ -61,5 +67,23 @@ The next non-model lifecycle check is deliberately narrow: an explicit instructi
 - [x] 16. Screen the public candidate tree | needs: 15 | gate: bash scripts/secret-scan.sh --tree-only
       2026-10-25T09:00:49Z exit 0 in 2s [057fcc92] — SECRET-SCAN: PASS
 - [x] 17. Reject malformed final diff | needs: 16 | gate: git diff --check
+- [x] 18. Atomically withdraw old method and propose linked correction | needs: 17 | ctx: src/agent_harness/procedures.py | gate: PYTHONPATH=src python3 -m pytest -q tests/test_v1_learning_loop.py -k correct_procedure_atomic
+      2026-10-25T09:28:13Z exit 0 in 0s [05893eb4] — .                                                                        [100%] / 1 passed, 34 deselected in 0.37s
+- [x] 19. Verify MCP and CLI correction with fresh recall and legacy readback | needs: 18 | ctx: src/agent_harness/mcp/server.py | gate: PYTHONPATH=src python3 -m pytest -q tests/test_v1_learning_loop.py -k 'skill_manage_correct or cli_correct_procedure or legacy_procedure_database'
+      2026-10-25T09:28:20Z exit 0 in 1s [36c3812c] — ...                                                                      [100%] / 3 passed, 32 deselected in 1.54s
+- [x] 20. Verify concurrent correction retries cannot fork versions | needs: 19 | gate: PYTHONPATH=src python3 -m pytest -q tests/test_v1_learning_loop.py -k concurrent_correction
+      2026-10-25T09:28:23Z exit 0 in 0s [05893eb4] — .                                                                        [100%] / 1 passed, 34 deselected in 0.36s
+- [x] 21. Run affected lifecycle and recall tests | needs: 20 | gate: PYTHONPATH=src python3 -m pytest -q tests/test_v1_learning_loop.py tests/test_procedure_independence.py tests/test_v1_prompt_recall.py
+      2026-10-25T09:28:50Z exit 0 in 22s [62eb41d0] — ...........................................................              [100%] / 59 passed in 22.28s
+- [x] 22. Run configured CPU suite on correction source | needs: 21 | gate: HARNESS_STAGING_PYTHON=/opt/homebrew/bin/python3.11 PYTHONPATH=src python3 -m pytest -q tests ./eval
+      2026-10-25T09:35:04Z exit 1 in 359s [325a3649] — =========================== short test summary info ============================ / FAILED tests/test_context_budget.py::test_each_part_within_its_cap[tools] - A... / 1 failed, 1339 passed, 2 skipped, 2 xfailed in 359.41s (0:05:59)
+      2026-10-25T09:35:34Z First full gate failed: MCP tools 4629 bytes exceeded 4600-byte cap. Shortened skill_manage description by 51 bytes; focused context-budget suite now 7 passed. Rerun full gate on corrected source.
+      2026-10-25T09:41:40Z exit 0 in 363s [22d20ab9] — ........................................................................ [ 96%] / ................................................                         [100%] / 1340 passed, 2 skipped, 2 xfailed in 363.21s (0:06:03)
+- [x] 23. Lint correction code and tests | needs: 22 | gate: python3 -m ruff check src/agent_harness/procedures.py src/agent_harness/mcp/server.py src/agent_harness/cli.py tests/test_v1_learning_loop.py
+      2026-10-25T09:41:48Z exit 0 in 0s [e857c711] — All checks passed!
+- [x] 24. Screen public candidate tree after correction | needs: 23 | gate: bash scripts/secret-scan.sh --tree-only
+      2026-10-25T09:41:54Z exit 0 in 2s [057fcc92] — SECRET-SCAN: PASS
+- [x] 25. Reject malformed correction diff | needs: 24 | gate: git diff --check
       2026-10-25T08:42:16Z exit 0 in 0s [da39a3ee] — (no output)
       2026-10-25T09:00:52Z exit 0 in 0s [da39a3ee] — (no output)
+      2026-10-25T09:41:56Z exit 0 in 0s [da39a3ee] — (no output)

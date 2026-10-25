@@ -740,7 +740,8 @@ def cmd_improve(args) -> int:
     from . import improve
     _, hh = _paths(args)
     if args.weekly_intake:
-        if any((args.propose, args.draft_procedure, args.rollback, args.apply, args.trend)):
+        if any((args.propose, args.draft_procedure, args.correct_procedure,
+                args.rollback, args.apply, args.trend)):
             _out("intake: HOLD — weekly intake cannot also draft, apply, roll back or judge a release")
             return 1
         from .weekly_intake import take
@@ -754,11 +755,16 @@ def cmd_improve(args) -> int:
         # rendering could exceed the budget after the cursor had advanced.
         _out(json.dumps(result, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
         return 0
-    if args.draft_procedure or args.rollback or (args.apply and args.apply.startswith("pr-")):
+    if args.draft_procedure or args.correct_procedure or args.rollback or (args.apply and args.apply.startswith("pr-")):
         from . import procedures
         try:
+            if args.correct_procedure and (not args.draft_procedure or any((args.rollback, args.apply,
+                                                                            args.trend, args.propose, args.eval))):
+                raise ValueError("--correct-procedure needs one --draft-procedure file and no other action")
             if args.draft_procedure:
-                result = procedures.draft(hh, args.project, procedures.read_json(args.draft_procedure))
+                candidate = procedures.read_json(args.draft_procedure)
+                result = (procedures.correct(hh, args.project, args.correct_procedure, candidate)
+                          if args.correct_procedure else procedures.draft(hh, args.project, candidate))
             else:
                 evidence = procedures.read_json(args.eval) if args.eval else None
                 result = procedures.change(hh, args.project, args.rollback or args.apply,
@@ -1146,6 +1152,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-output-bytes", type=int, default=2048, help="conservative output budget, 120..4096 bytes")
     p.add_argument("--propose", action="store_true")
     p.add_argument("--draft-procedure", metavar="FILE", help="draft a scoped v1 method from source episodes")
+    p.add_argument("--correct-procedure", metavar="ID",
+                   help="withdraw this scoped method and link a proposed replacement from --draft-procedure")
     p.add_argument("--project", help="absolute project directory for v1 procedures")
     p.add_argument("--rollback", metavar="ID", help="revoke an active v1 procedure; preserve its evidence")
     p.add_argument("--apply", metavar="ID")

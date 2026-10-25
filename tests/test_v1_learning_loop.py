@@ -4,12 +4,14 @@ The evaluator receipts below are test fixtures. Real promotion still requires a
 matched, independently graded native campaign; no native campaign is run here.
 """
 import copy
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import os
 from pathlib import Path
 import subprocess
 import sys
+from threading import Barrier
 
 import pytest
 
@@ -228,6 +230,112 @@ def test_explicit_negative_procedure_does_not_trigger_but_unrelated_warning_does
     assert "Validate the archive checksum" in prompt(
         lab, "Do not use a live database; help with archive recovery offline.",
         session="unrelated-warning").stdout
+
+
+def corrected_candidate(lab):
+    candidate = candidate_input(lab)
+    candidate["steps"] = ["Refuse extraction when the checksum differs.",
+                          "Restore only into a temporary directory after validation."]
+    return candidate
+
+
+def test_correct_procedure_atomic_withdrawal_and_historical_link(lab):
+    from agent_harness import procedures
+    _, old = draft(lab)
+    synthetic_active(lab, old, receipt(old))  # consumer fixture, never native qualification
+    home, project = lab[0] / "harness", str(lab[1][1])
+    old_evidence = procedures.inspect(home, project, old["id"])["evidence_sha256"]
+    with procedures._db(home) as con:
+        old_raw = con.execute("SELECT evidence FROM procedures WHERE id=?", (old["id"],)).fetchone()[0]
+    with pytest.raises(ValueError):
+        procedures.correct(home, project, old["id"], {})
+    assert procedures.inspect(home, project, old["id"])["status"] == "active"
+
+    new = procedures.correct(home, project, old["id"], corrected_candidate(lab))
+    assert new["id"] != old["id"] and new["status"] == "proposed"
+    assert new["supersedes"] == old["id"]
+    retired = procedures.inspect(home, project, old["id"])
+    assert retired["status"] == "rolled_back" and retired["superseded_by"] == new["id"]
+    assert retired["evidence_sha256"] == old_evidence
+    with procedures._db(home) as con:
+        assert con.execute("SELECT evidence FROM procedures WHERE id=?", (old["id"],)).fetchone()[0] == old_raw
+    assert procedures.inspect(home, project, new["id"])["status"] == "proposed"
+    assert procedures.matches(home, project, "archive recovery") == []
+    assert procedures.recover(home, project, {old["id"], new["id"]}) == {}
+    assert procedures.draft(home, project, old["candidate"])["status"] == "rolled_back"
+    with pytest.raises(ValueError, match="independent"):
+        procedures.change(home, project, new["id"], receipt(new))
+
+
+def test_skill_manage_correct_withdraws_bad_advice_in_fresh_session(lab):
+    _, old = draft(lab)
+    synthetic_active(lab, old, receipt(old))  # synthetic old method only
+    assert "Validate the archive checksum" in prompt(lab, "archive recovery", session="before").stdout
+    corrected = value(exchange(lab, [("skill_manage", {"action": "correct", "name": old["id"],
+                                                  "project": str(lab[1][1]),
+                                                  "candidate": corrected_candidate(lab)})])[0])
+    assert corrected["status"] == "proposed" and corrected["supersedes"] == old["id"]
+    old_session = prompt(lab, "archive recovery", session="before").stdout
+    assert "withdrawn" in old_session.lower() and "Validate the archive checksum" not in old_session
+    assert prompt(lab, "archive recovery", session="fresh-after-correction").stdout == ""
+    assert prompt(lab, "Do not use archive recovery", session="negative-after-correction").stdout == ""
+
+
+def test_cli_correct_procedure_requires_one_named_old_method_and_draft(lab):
+    from agent_harness import procedures
+    _, old = draft(lab)
+    synthetic_active(lab, old, receipt(old))
+    home, project = lab[0] / "harness", str(lab[1][1])
+    path = lab[1][1] / "replacement.json"
+    path.write_text(json.dumps(corrected_candidate(lab)))
+    assert cli(lab, "--correct-procedure", old["id"]).returncode != 0
+    assert cli(lab, "--correct-procedure", old["id"], "--draft-procedure", str(path),
+               "--rollback", old["id"]).returncode != 0
+    assert procedures.inspect(home, project, old["id"])["status"] == "active"
+    result = cli(lab, "--correct-procedure", old["id"], "--draft-procedure", str(path))
+    assert result.returncode == 0, result.stdout + result.stderr
+    new = json.loads(result.stdout)
+    assert new["status"] == "proposed" and new["supersedes"] == old["id"]
+    assert procedures.inspect(home, project, old["id"])["status"] == "rolled_back"
+    assert prompt(lab, "archive recovery", session="fresh-cli-correction").stdout == ""
+
+
+def test_legacy_procedure_database_without_correction_table_remains_readable(lab):
+    from agent_harness import procedures
+    _, proposal = draft(lab)
+    home, project = lab[0] / "harness", str(lab[1][1])
+    with procedures._db(home) as con:
+        con.execute("DROP TABLE procedure_corrections")
+    viewed = procedures.inspect(home, project, proposal["id"])
+    assert viewed["status"] == "proposed" and "superseded_by" not in viewed
+
+
+def test_concurrent_correction_retries_return_one_proposed_version(lab):
+    from agent_harness import procedures
+    _, old = draft(lab)
+    synthetic_active(lab, old, receipt(old))
+    home, project = lab[0] / "harness", str(lab[1][1])
+    candidate = corrected_candidate(lab)
+    start = Barrier(6)
+
+    def correct(_):
+        start.wait(timeout=5)
+        return procedures.correct(home, project, old["id"], candidate)
+
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        results = list(pool.map(correct, range(6)))
+    assert len({result["id"] for result in results}) == 1
+    assert all(result == results[0] for result in results)
+    with procedures._db(home) as con:
+        statuses = {row["id"]: row["status"] for row in con.execute("SELECT id,status FROM procedures")}
+        links = con.execute("SELECT old_id,new_id FROM procedure_corrections").fetchall()
+    assert statuses == {old["id"]: "rolled_back", results[0]["id"]: "proposed"}
+    assert [tuple(row) for row in links] == [(old["id"], results[0]["id"])]
+    assert procedures.matches(home, project, "archive recovery") == []
+    changed = copy.deepcopy(candidate)
+    changed["steps"] = ["Different proposed replacement."]
+    with pytest.raises(ValueError, match="different|conflict"):
+        procedures.correct(home, project, old["id"], changed)
 
 
 @pytest.mark.parametrize("fault", ["cost", "regression", "overlap", "duplicate", "context",

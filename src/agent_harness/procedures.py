@@ -61,6 +61,8 @@ def _db(home):
                     "PRIMARY KEY(id,task_id))")
         con.execute("CREATE TABLE IF NOT EXISTS procedure_binder_receipts "
                     "(id TEXT, task_id TEXT, receipt TEXT, PRIMARY KEY(id,task_id))")
+        con.execute("CREATE TABLE IF NOT EXISTS procedure_corrections "
+                    "(old_id TEXT PRIMARY KEY, new_id TEXT UNIQUE, project TEXT, at REAL)")
         con.execute("BEGIN IMMEDIATE")
         yield con
         con.commit()
@@ -110,8 +112,7 @@ def _episodes(candidate, project):
     return ids, fingerprints
 
 
-def draft(home, project, candidate):
-    project = _scope(project)
+def _prepared_candidate(project, candidate):
     fields = {"schema", "title", "trigger", "steps", "exceptions", "episodes"}
     if (not isinstance(candidate, dict) or set(candidate) != fields
             or type(candidate["schema"]) is not int or candidate["schema"] != 1):
@@ -131,6 +132,12 @@ def draft(home, project, candidate):
     sha = digest({"project": project, "candidate": candidate})
     identity = "pr-" + sha[:24]
     payload = {"id": identity, "project": project, "sha256": sha, "candidate": candidate}
+    return identity, payload
+
+
+def draft(home, project, candidate):
+    project = _scope(project)
+    identity, payload = _prepared_candidate(project, candidate)
     with _db(home) as con:
         row = con.execute("SELECT * FROM procedures WHERE id=?", (identity,)).fetchone()
         if row:
@@ -141,6 +148,48 @@ def draft(home, project, candidate):
                     (identity, project, "proposed", encoded(payload).decode(), None))
         con.execute("INSERT INTO procedure_events(id,action,at) VALUES (?,?,?)",
                     (identity, "proposed", time.time()))
+    return {**payload, "status": "proposed"}
+
+
+def correct(home, project, old_id, candidate):
+    """Withdraw one named method and draft its replacement in one local commit.
+
+    This is a correction of stored advice, not evidence that the replacement
+    has passed independent evaluation. A failed validation leaves the old row
+    intact so the caller can explicitly roll it back if the draft is not ready.
+    """
+    project = _scope(project)
+    new_id, payload = _prepared_candidate(project, candidate)
+    if new_id == old_id:
+        raise ValueError("a correction must change the candidate")
+    payload = {**payload, "supersedes": old_id}
+    with _db(home) as con:
+        old = con.execute("SELECT * FROM procedures WHERE id=? AND project=?", (old_id, project)).fetchone()
+        if not old:
+            raise ValueError("no procedure in this project")
+        link = con.execute("SELECT new_id FROM procedure_corrections WHERE old_id=? AND project=?",
+                           (old_id, project)).fetchone()
+        if link:
+            row = con.execute("SELECT * FROM procedures WHERE id=? AND project=?", (new_id, project)).fetchone()
+            if link["new_id"] == new_id and old["status"] == "rolled_back" and row \
+                    and row["status"] == "proposed" and json.loads(row["payload"]) == payload:
+                return {**payload, "status": "proposed"}
+            raise ValueError("correction conflicts with an existing replacement")
+        if old["status"] not in ("active", "proposed"):
+            raise ValueError("only an active or proposed method can be corrected")
+        if con.execute("SELECT 1 FROM procedures WHERE id=?", (new_id,)).fetchone():
+            raise ValueError("replacement candidate already exists")
+        if con.execute("SELECT count(*) FROM procedures").fetchone()[0] >= MAX_RECORDS:
+            raise ValueError("procedure storage is full; archive deliberately, not silently")
+        con.execute("INSERT INTO procedures VALUES (?,?,?,?,?)",
+                    (new_id, project, "proposed", encoded(payload).decode(), None))
+        con.execute("UPDATE procedures SET status='rolled_back' WHERE id=? AND project=?", (old_id, project))
+        con.execute("INSERT INTO procedure_corrections VALUES (?,?,?,?)",
+                    (old_id, new_id, project, time.time()))
+        con.execute("INSERT INTO procedure_events(id,action,at) VALUES (?,?,?)",
+                    (old_id, "rolled_back", time.time()))
+        con.execute("INSERT INTO procedure_events(id,action,at) VALUES (?,?,?)",
+                    (new_id, "proposed", time.time()))
     return {**payload, "status": "proposed"}
 
 
@@ -375,6 +424,12 @@ def inspect(home, project, identity):
                           (identity, project)).fetchone()
         verified = con.execute("SELECT 1 FROM procedure_events WHERE id=? "
                                "AND action='native_verified_active'", (identity,)).fetchone()
+        # Older read-only stores predate the correction table. Viewing one must
+        # not turn a safe draft or withdrawal into an unavailable record.
+        has_links = con.execute("SELECT 1 FROM sqlite_master WHERE type='table' "
+                                "AND name='procedure_corrections'").fetchone()
+        replacement = (con.execute("SELECT new_id FROM procedure_corrections WHERE old_id=? AND project=?",
+                                   (identity, project)).fetchone() if has_links else None)
     finally:
         con.close()
     if row is None:
@@ -386,8 +441,13 @@ def inspect(home, project, identity):
         evidence_sha = digest(json.loads(row[2])) if row[2] else None
     except ValueError:
         raise ValueError("procedure evidence is unreadable") from None
-    return {"id": identity, "project": project, "status": status,
-            "candidate": payload["candidate"], "evidence_sha256": evidence_sha}
+    result = {"id": identity, "project": project, "status": status,
+              "candidate": payload["candidate"], "evidence_sha256": evidence_sha}
+    if replacement:
+        result["superseded_by"] = replacement[0]
+    if payload.get("supersedes"):
+        result["supersedes"] = payload["supersedes"]
+    return result
 
 
 def list_active(home, project):
