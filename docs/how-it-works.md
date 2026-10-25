@@ -132,6 +132,15 @@ withheld from recall. `skill_manage view ID` shows source bindings and evidence 
 makes a verified active method stale and stops recall. `harness improve --rollback ID` withdraws an active
 method and warns sessions that previously received its advice.
 
+To correct a named bad method, use `skill_manage correct` with the old ID, project and a source-bound
+replacement candidate, or `harness improve --correct-procedure OLD_ID --draft-procedure FILE --project PATH`.
+One local transaction links the versions, preserves the old evidence and withdraws the old advice. A fresh
+session receives neither method from that corrected chain: the replacement is only **proposed**. A session
+that previously received the old method gets a withdrawal notice. Identical correction retries reuse the
+same proposed version; changed retries fail. An invalid replacement leaves the old row unchanged and says
+so; `--rollback OLD_ID` is the separate immediate withdrawal route. This CPU behavior does not qualify
+the corrected method or prove a native client actually applied the correction.
+
 Direct `skill_manage create/update` is blocked: it used to write globally visible, untested
 `SKILL.md` files immediately. The procedure path generates no `SKILL.md`. Previously written learned skills
 remain listable, viewable and archivable for recovery; their presence does not grant a new qualification.

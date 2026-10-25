@@ -95,6 +95,8 @@ tedious and rarely kept up.
   `HOLD_UNVERIFIED_BOUNDARY` until native actor answer isolation and evaluator provenance are observed.
   Previously active methods without native verification are quarantined from recall as `held_unverified`;
   their rows and evidence are retained for inspection or rollback.
+  An explicit correction withdraws a named old method and links a source-bound replacement, which remains
+  proposed; neither the correction nor its CPU tests promote a new skill.
   Rollback withdraws it; no new learned `SKILL.md` is generated. Existing learned skills remain readable,
   but direct `skill_manage create/update` and automatic application of legacy proposals are refused.
   `state_save` / `state_load` carry unfinished work across a compaction. [On-demand weekly intake](docs/v1/weekly-learning-intake.md)
