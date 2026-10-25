@@ -216,6 +216,20 @@ def test_procedure_is_dormant_then_recalled_in_scope_and_revoked(lab):
     assert apply(lab, proposal, receipt(proposal)).returncode != 0
 
 
+def test_explicit_negative_procedure_does_not_trigger_but_unrelated_warning_does(lab):
+    _, proposal = draft(lab)
+    synthetic_active(lab, proposal, receipt(proposal))
+    assert "Validate the archive checksum" in prompt(
+        lab, "How should I perform archive recovery?", session="positive").stdout
+    for n, text in enumerate(("Do not use archive recovery.", "Don't use archive recovery.",
+                              "Never run archive recovery.", "Avoid archive recovery.")):
+        rejected = prompt(lab, text, session="negative-%d" % n).stdout
+        assert "Validate the archive checksum" not in rejected, text
+    assert "Validate the archive checksum" in prompt(
+        lab, "Do not use a live database; help with archive recovery offline.",
+        session="unrelated-warning").stdout
+
+
 @pytest.mark.parametrize("fault", ["cost", "regression", "overlap", "duplicate", "context",
                                   "unknown-usage", "stale-candidate", "wrong-project", "nan",
                                   "missing-dimension", "no-gain", "negative-overhead",

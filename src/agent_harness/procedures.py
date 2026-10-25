@@ -411,6 +411,19 @@ def recover(home, project, ids):
             if r["id"] in ids and _source_current(r)}
 
 
+def _explicitly_rejected(query, method):
+    """A narrow literal stop cue; lexical overlap alone must not undo it."""
+    for phrase in (method["title"], method["trigger"]):
+        words = re.findall(r"[a-z0-9]+", phrase.lower())
+        if not words:
+            continue
+        target = r"\W+".join(map(re.escape, words))
+        cue = r"\b(?:do\s+not|don['’]t|never|avoid)\s+(?:(?:use|apply|run|perform|do)\s+)?(?:the\s+)?"
+        if re.search(cue + target + r"\b", query, re.I):
+            return True
+    return False
+
+
 def matches(home, project, query, min_score=0.2):
     """Active project procedures only; uses the existing lexical relevance model."""
     from .mcp import kb
@@ -420,6 +433,8 @@ def matches(home, project, query, min_score=0.2):
     out = []
     for record in _active(home, project):
         method = record["candidate"]
+        if _explicitly_rejected(query, method):
+            continue
         tokens = kb.tokens(method["title"] + " " + method["trigger"])
         score = kb.relevance(terms, tokens, 1, len(tokens), {t: 1 for t in set(tokens)}, doc_coverage=True)
         if score < min_score or not _source_current(record):
