@@ -11,6 +11,11 @@ Codex; on a held-out set, the v0.2 guard blocked 39 of 45 dangerous commands and
 
 [Quick start](#quick-start) · [Docs](docs/README.md) · [All diagrams](docs/DIAGRAMS.md)
 
+> **v0.9 development candidate:** this branch packages newer local task-state,
+> source-backed memory, and explicit launch code for evaluation. It is not a
+> v1 release or a verified performance improvement. Read the [candidate scope
+> and limits](docs/v09-candidate.md) before installing into any active client.
+
 What one install writes into each tool, and what the tools then call; only Claude Code gets the guard:
 
 ```mermaid
@@ -37,7 +42,7 @@ flowchart LR
         IDX[("index.sqlite<br/>FTS5")]
         MJ[("memory/<br/>lessons/")]
         NJ[("notices.json")]
-        LRN[("learned<br/>skills")]
+        LRN[("procedures.sqlite<br/>project methods")]
     end
     TR[("Claude Code,<br/>Codex<br/>transcripts")]
 
@@ -49,7 +54,7 @@ flowchart LR
     TR -- "secrets<br/>masked" --> SS
     MEM -- "JSON<br/>per item" --> MJ
     NT -- "once<br/>a day" --> NJ
-    SM -- "SKILL.md" --> LRN
+    SM -- "draft, view" --> LRN
 
     classDef data fill:#dbeafe,stroke:#1d4ed8,color:#0b1220
     classDef step fill:#f1f5f9,stroke:#475569,color:#0b1220
@@ -81,19 +86,34 @@ tedious and rarely kept up.
 - **Partial retrieval.** Documents are split into sections at their headings and indexed in SQLite FTS5 with
   BM25. The rules carry a compact index of section ids; the agent fetches one section with `kb_get(id)` and
   calls `kb_search(query)` only when nothing in the index fits.
-- **Memory, lessons, task state, learned skills.** Small files in `~/.agent-harness`, one store per machine
-  shared by every tool. `skill_manage` saves a working procedure as `SKILL.md`; `state_save` / `state_load`
-  carry unfinished work across a compaction.
+- **Memory, lessons, task state, learned methods.** Local stores are shared by the tools on one machine;
+  [the memory placement map](docs/v1/memory-placement.md) distinguishes facts, source knowledge, work state,
+  project evidence and rebuildable search indexes.
+  `skill_manage draft` records a dormant, source-bound project method in `procedures.sqlite`. A matched,
+  independent held-out comparison must show no quality regression on any case or dimension and aggregate
+  tokens, including overhead, no greater than baseline. **Promotion is currently held:** caller-written
+  scores cannot activate a method. The local binder pins task and answer hashes before artifacts exist,
+  then hashes artifacts, computes a narrow exact-byte grade and validates reported usage. It records
+  `HOLD_UNVERIFIED_BOUNDARY` until native actor answer isolation and evaluator provenance are observed.
+  Previously active methods without native verification are quarantined from recall as `held_unverified`;
+  their rows and evidence are retained for inspection or rollback.
+  An explicit correction withdraws a named old method and links a source-bound replacement, which remains
+  proposed; neither the correction nor its CPU tests promote a new skill.
+  Rollback withdraws it; no new learned `SKILL.md` is generated. Existing learned skills remain readable,
+  but direct `skill_manage create/update` and automatic application of legacy proposals are refused.
+  `state_save` / `state_load` carry unfinished work across a compaction. [On-demand weekly intake](docs/v1/weekly-learning-intake.md)
+  reads only changed candidate evidence under a bounded output budget; it never schedules a model or promotes a method.
 - **Past conversations.** `session_search` indexes your own Claude Code and Codex transcripts incrementally,
   user and assistant messages only, secrets masked before storage, capped at 64 MB.
 - **The guard** analyses a command rather than pattern-matching its text: it tokenises like a shell, unwraps
   `env`, `xargs`, `bash -c`, `eval`, `$(...)` and heredocs, resolves a relative path against an earlier `cd`,
   classifies each target, and fails closed on a payload it cannot parse.
-- **The work graph** (v0.3, off by default): one markdown file per goal. A node is done only when its gate
+- **The work graph** (v0.3, on by the owner's explicit decision): one markdown file per goal. A node is done only when its gate
   command exits 0, run by the graph after the guard has passed it; a failed gate returns the node to pending
   with its output, and claims are atomic with a lease, so parallel sessions never take the same node.
-- **A keep rule decides what ships on:** accuracy no worse, a measurable gain, token overhead within +15%;
-  parts that fail stay off ([the rule and its provenance](docs/design-decisions.md#the-keep-rule)).
+- **The current learning gate** requires no held-out per-case quality regression, a measurable quality or
+  token gain, and aggregate tokens including overhead no greater than baseline. The +15% allowance describes
+  historical component evaluations ([the rule and its provenance](docs/design-decisions.md#the-keep-rule)).
 
 How the guard decides one command: every check can raise `Blocked`; only a command that passes all of them runs.
 
@@ -223,8 +243,8 @@ Each with its cost in full, the keep rule and the setups this replaced: [docs/de
 
 Each lesson is drawn from a conclusion an eval record states ([where they come from](docs/results.md#where-the-readmes-lessons-come-from)).
 
-1. **Set the keep rule before the eval, and let it decide.** It shipped `session_search` (recall 6/6 against 1/6 and
-   0/6) and learned skills, and kept the two arms off (no gain). The reports call the rule pre-set; no committed record
+1. **Set the keep rule before the eval, and let it decide.** Historical evaluations shipped `session_search` (recall 6/6 against 1/6 and
+   0/6) and earlier direct-write learned skills; the current draft-and-promotion path has no comparison against plain. The reports call the rule pre-set; no committed record
    here shows it predates the eval ([source](eval/results/historical.md), "Decisions the report made with its keep rule").
 2. **At n=3 a gain can be indistinguishable from noise.** Claude's second runs spread 0.56x to 1.91x with no
    skill involved, and creating a skill costs the first run (Codex: 1.73M tokens against 1.34M)

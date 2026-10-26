@@ -30,7 +30,11 @@ class Base(unittest.TestCase):
         self.tmp = Path(tempfile.mkdtemp(prefix="merge-"))
         self.home = self.tmp / "home"
         self.home.mkdir()
-        env = mock.patch.dict(os.environ, {"HOME": str(self.home), "HARNESS_HOME": str(self.home / ".agent-harness")})
+        # A temporary HOME alone does not isolate editor CLIs from a running
+        # desktop. Keep real code/cursor binaries out of installer fixtures.
+        env = mock.patch.dict(os.environ, {"HOME": str(self.home),
+                                          "HARNESS_HOME": str(self.home / ".agent-harness"),
+                                          "PATH": os.defpath})
         env.start()
         self.addCleanup(env.stop)
 
@@ -194,6 +198,54 @@ class TestSelfUpdate(Base):
         self.install_version("0.9.0")
         self.assertIn("is current", self.go()[1])
 
+    def test_self_update_never_downgrades_a_newer_development_build(self):
+        self.install_version("0.9.0.dev0")
+        rc, msg, _ = self.go()
+        self.assertEqual(rc, 0, msg)
+        self.assertIn("is current", msg)
+        self.assertEqual(json.loads((self.hh() / "state" / "self-update.json").read_text())["result"], "current")
+
+    def test_self_update_refuses_an_unrecognised_installed_version(self):
+        self.install_version("local-private-snapshot")
+        rc, msg, _ = self.go()
+        self.assertNotEqual(rc, 0, msg)
+        self.assertIn("unsupported installed version", msg)
+
+    def test_self_update_refuses_a_missing_installed_version(self):
+        rc, msg, _ = self.go()
+        self.assertNotEqual(rc, 0, msg)
+        self.assertIn("unsupported installed version", msg)
+
+    def test_self_update_refuses_a_malformed_installed_version(self):
+        self.install_version("0.4.1")
+        (self.hh() / "lib" / "agent_harness" / "__init__.py").write_text("not_a_version = 1\n")
+        rc, msg, _ = self.go()
+        self.assertNotEqual(rc, 0, msg)
+        self.assertIn("unsupported installed version", msg)
+
+    def test_final_release_can_replace_its_own_development_build(self):
+        from agent_harness import selfupdate
+        self.install_version("0.9.0.dev0")
+        def get(url):
+            if url.endswith("/tags?per_page=100"):
+                return json.dumps([{"name": "v0.9.0", "commit": {"sha": "d" * 40}}]).encode()
+            if "/check-runs" in url:
+                return json.dumps({"check_runs": [{"name": "ci", "status": "completed", "conclusion": "success"}]}).encode()
+            raise AssertionError(url)
+        rc, msg = selfupdate.run(self.hh(), self.home, check_only=True, get=get)
+        self.assertEqual(rc, 0, msg)
+        self.assertIn("would update 0.9.0.dev0 -> v0.9.0", msg)
+        self.assertFalse((self.hh() / "state" / "self-update.json").exists())
+
+    def test_supported_prerelease_order_matches_the_release_channel(self):
+        from agent_harness.selfupdate import version_key
+        self.assertLess(version_key("0.9.0.dev0"), version_key("0.9.0a1"))
+        self.assertLess(version_key("0.9.0a1"), version_key("0.9.0b1"))
+        self.assertLess(version_key("0.9.0b1"), version_key("0.9.0rc1"))
+        self.assertLess(version_key("0.9.0rc1"), version_key("0.9.0"))
+        self.assertLess(version_key("0.9.0"), version_key("0.9.0.post1"))
+        self.assertGreater(version_key("0.9.0.dev0"), version_key("0.4.5"))
+
     def test_self_update_refuses_an_archive_that_escapes(self):
         self.install_version("0.4.1")
         rc, msg, _ = self.go(get=self.fake_get(tar=release_tarball(evil=True)))
@@ -228,8 +280,7 @@ class TestSelfUpdate(Base):
 
 
 class TestStrict(Base):
-    """4: the release trend: a single run is strict; repeated runs allow one run in 54 below the BEST accepted
-    release (the owner, 2026-10-07: "it is ok to iterate not to give up updating"), never compounding."""
+    """Personal-v1 supersedes the historical noise allowance; every run is strict."""
 
     def check(self, rows):
         f = self.tmp / "h.jsonl"
@@ -243,10 +294,10 @@ class TestStrict(Base):
         self.assertNotEqual(self.check([self.r("0.3.3", 17, 18), self.r("0.4.1", 16, 18)]), 0)
         self.assertEqual(self.check([self.r("0.3.3", 17, 18), self.r("0.4.2", 17, 18)]), 0)
 
-    def test_strict_three_runs_allow_one_run_below_but_not_two(self):
-        self.assertEqual(self.check([self.r("0.3.3", 51, 54), self.r("0.4.3", 50, 54)]), 0)
+    def test_strict_three_runs_reject_one_or_more_losses(self):
+        self.assertNotEqual(self.check([self.r("0.3.3", 51, 54), self.r("0.4.3", 50, 54)]), 0)
         self.assertNotEqual(self.check([self.r("0.3.3", 51, 54), self.r("0.4.3", 49, 54)]), 0)
-        self.assertEqual(self.check([self.r("0.3.3", 102, 108), self.r("0.4.3", 100, 108)]), 0)
+        self.assertNotEqual(self.check([self.r("0.3.3", 102, 108), self.r("0.4.3", 100, 108)]), 0)
         self.assertNotEqual(self.check([self.r("0.3.3", 102, 108), self.r("0.4.3", 99, 108)]), 0)
 
     def test_strict_allowance_never_compounds(self):
@@ -256,8 +307,8 @@ class TestStrict(Base):
 
     def test_strict_is_the_documented_owner_decision(self):
         from agent_harness import improve
-        self.assertEqual(improve.RUNS_PER_ALLOWED_MISS, 54)
-        self.assertIn("one run in 54", (ROOT / "docs" / "design-decisions.md").read_text())
+        self.assertEqual(improve.TOKEN_OVERHEAD, 0)
+        self.assertIn("Personal-v1 supersedes", (ROOT / "docs" / "design-decisions.md").read_text())
 
 
 if __name__ == "__main__":

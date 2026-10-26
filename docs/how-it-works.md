@@ -83,10 +83,14 @@ you ("no, ...", "use X instead"). They are redacted, kept apart by source, dedup
 written to `~/.agent-harness/candidates.jsonl`, never straight into lessons.
 
 **Getting better, only where measured.** `harness improve --propose` turns a candidate seen at least twice
-into a proposal; `--apply ID --eval FILE` adds it as a lesson only when a paired eval on the same tasks,
-naming that proposal, shows more passes at no more than +15% tokens. `--trend` refuses a release that scores
-more than one question below the best earlier release (the measured single-run noise), per tool and on the
-same questions, or that costs more than +15% tokens against the cheapest such release (`eval/results/history.jsonl`). Why this strict: skills agents wrote
+into a legacy proposal, which remains evidence and cannot be applied directly. The current path drafts a
+source-bound project procedure but holds activation: `harness improve --apply` rejects caller-attested
+scores, and local freeze/bind receipts remain `HOLD_UNVERIFIED_BOUNDARY`. A future native qualification
+must show no quality regression on any held-out case or dimension, a measurable gain, and aggregate tokens
+including overhead no greater than baseline. `--trend` refuses a release with any lower score or greater
+aggregate tokens than the best accepted earlier release on the same questions (`eval/results/history.jsonl`).
+The former +15% token and one-question
+noise allowances describe historical evaluations. Why this strict: skills agents wrote
 for themselves scored 8-11.5 points below no skills at all (SkillsBench), while curated ones gained 16.6, and
 lessons from a false signal made Reflexion worse.
 
@@ -112,23 +116,35 @@ returns a few dated excerpts with the session id and project; `session=<id>` nar
   (`HARNESS_SESSIONS_MAX_BYTES`), dropping the oldest sessions first. A transcript deleted by its tool
   leaves the index too. The session asking is never its own result.
 
-## Skills learned from experience: skill_manage
+## Methods learned from work: skill_manage and procedure promotion
 
-When a task took an agent several tool calls to find the working method (a data query, a command
-sequence, a fix), or the user corrected how to do it, the agent saves the method with `skill_manage create` as
-`~/.agents/skills/learned/<name>/SKILL.md` (the agentskills.io format: `name`, `description`, then
-`## When to Use`, `## Procedure`, `## Pitfalls`, `## Verification`). The next session, in any tool,
-starts from the working path.
+`skill_manage draft` takes a project and a concrete candidate with at least two distinct task-input
+episodes bound to source paths and SHA-256 hashes, and stores it in `procedures.sqlite`. A draft is
+**not active**. `harness improve --apply ID --eval FILE` currently rejects caller-written comparison
+scores, even with a plausible grader hash. The local binder pins task and answer hashes, records artifact
+and native-format usage hashes, and computes an exact-byte grade, but its receipt stays
+`HOLD_UNVERIFIED_BOUNDARY`: it cannot prove the actor was denied the answer or authenticate the model,
+usage-to-artifact link, or evaluator. Future promotion requires those native boundaries and an independent,
+matched held-out comparison: no per-case quality regression, a measurable quality or token gain, and
+aggregate tokens including adaptation, retrieval, review, retries and maintenance overhead no greater than
+baseline. Until then, no new procedure is activated. Legacy active rows without native verification are
+withheld from recall. `skill_manage view ID` shows source bindings and evidence status; a changed source
+makes a verified active method stale and stops recall. `harness improve --rollback ID` withdraws an active
+method and warns sessions that previously received its advice.
 
-- Codex, Gemini CLI, Cursor and Copilot list learned skills natively. Claude Code does not read
-  `~/.agents/skills`, and a listing costs every request, so for Claude the per-prompt recall names a
-  learned skill only when the prompt is about it.
-- A near-duplicate of any installed or learned skill is refused with the name to update instead;
-  `update` takes a new body or replaces one exact passage (`old` -> `new`) and bumps the version.
-- Limits: a body over 12,000 characters is refused (warning over 6,000); at most 40 learned skills are
-  active, and beyond that the least used (views and updates through `skill_manage`; a tool reading the
-  file natively is not counted) move to `~/.agent-harness/skills-archive/`, never deleted. Secrets are
-  masked before writing.
+To correct a named bad method, use `skill_manage correct` with the old ID, project and a source-bound
+replacement candidate, or `harness improve --correct-procedure OLD_ID --draft-procedure FILE --project PATH`.
+One local transaction links the versions, preserves the old evidence and withdraws the old advice. A fresh
+session receives neither method from that corrected chain: the replacement is only **proposed**. A session
+that previously received the old method gets a withdrawal notice. Identical correction retries reuse the
+same proposed version; changed retries fail. An invalid replacement leaves the old row unchanged and says
+so; `--rollback OLD_ID` is the separate immediate withdrawal route. This CPU behavior does not qualify
+the corrected method or prove a native client actually applied the correction.
+
+Direct `skill_manage create/update` is blocked: it used to write globally visible, untested
+`SKILL.md` files immediately. The procedure path generates no `SKILL.md`. Previously written learned skills
+remain listable, viewable and archivable for recovery; their presence does not grant a new qualification.
+The historical skill results below describe the older behavior, not this promotion path.
 
 ## Task state: surviving compaction
 
@@ -165,8 +181,9 @@ The rules ask for good behaviour; the harness enforces a floor where the tool al
   more tool calls with no skill saved, to save what it worked out. `HARNESS_ENABLE=memory_snapshot,skill_nudge`
   turns them on. In the v0.2 eval neither showed a gain: the snapshot answered 10/10 like relevance-only
   recall at the same tokens, and the nudge made Claude save skills but its repeat runs were 2/3 correct at
-  1.42x tokens. `session_search` and `skill_manage` ship on: past-conversation recall went from 1/6 to 6/6,
-  and Codex saved and reused a skill in 3/3 repeated procedures; Claude saved none unprompted.
+  1.42x tokens. `session_search` ships on: past-conversation recall went from 1/6 to 6/6.
+  The earlier direct-write `skill_manage` saved and reused a skill in 3/3 Codex repeat procedures;
+  that result does not evaluate the current draft-and-promotion path.
 - **The work graph, on by default (v0.3.3)**: the `plan` MCP tool drives `src/agent_harness/workgraph`, a
   graph of gated nodes merged in from agentic-os (181 of 203 real nodes gated there, and adversarially
   certified). Its evidence is use and an attack, not a gain measured against plain; the owner turned it on by
@@ -177,6 +194,15 @@ The rules ask for good behaviour; the harness enforces a floor where the tool al
   `plan run` gives each worker a tier from `content/routing.toml`: a node's own `tier:`, else `standard`, and
   `deep` once its gate has failed. The tier's model and effort are passed explicitly (`--model`/`--effort`
   for Claude Code, `-m`/`model_reasoning_effort` for Codex), read from the `harness-<tier>` agent files.
+  On POSIX hosts, a Codex worker and its ordinary children use a separate process group so a timeout or
+  terminal hangup can stop them before releasing a node. Windows currently has only direct-child
+  termination; descendant containment and unattended worker cleanup there remain unverified.
+  Separately, disabled-by-default `routing.next_decision` can select a minimum tier from a typed task
+  profile: only low-impact, low-uncertainty mechanical work starts `quick`; ordinary work starts
+  `standard`; high-impact or high-uncertainty work, design and review start `deep`. Unknown inputs,
+  unsupported model/effort pairs, stale context or route state, and exhausted budgets return `HOLD`.
+  It is advisory and has no measured model-quality or token advantage; task labels are caller claims,
+  not independently verified facts.
 - **Memory recall** (Claude Code): relevant memories are attached to each prompt, within a strict
   time limit, so the agent does not need to search for them.
 

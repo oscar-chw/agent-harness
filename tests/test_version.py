@@ -13,10 +13,20 @@ from agent_harness import __version__  # noqa: E402
 
 
 def as_tuple(v):
-    return tuple(int(x) for x in v.split("."))
+    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)(?:\.dev\d+)?", v)
+    if match is None:
+        raise ValueError(f"unsupported version: {v}")
+    # A development build of the next release is newer than every older
+    # release, but still precedes the final release with the same numbers.
+    return tuple(int(x) for x in match.groups()) + (0 if ".dev" in v else 1,)
 
 
 class Version(unittest.TestCase):
+    def test_development_version_still_respects_release_order(self):
+        self.assertGreater(as_tuple("0.9.0.dev0"), as_tuple("0.4.5"))
+        self.assertLess(as_tuple("0.9.0.dev0"), as_tuple("0.9.0"))
+        self.assertLess(as_tuple("0.4.4"), as_tuple("0.4.5"))
+
     def test_version_not_behind_an_ancestor_tag(self):
         try:
             tags = subprocess.run(["git", "tag", "--merged", "HEAD", "--list", "v*"], cwd=ROOT, capture_output=True,

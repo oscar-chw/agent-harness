@@ -7,8 +7,9 @@
 Why every change waits on an eval: skills agents wrote for themselves scored 8-11.5 points BELOW no skills at
 all (SkillsBench), while curated ones gained 16.6; a lesson from a false signal made Reflexion worse. So a
 candidate (agent_harness.capture) becomes a proposal only once it has recurred, and a proposal becomes a lesson
-only when a paired with/without eval on the same tasks shows more passes at no more than +15% tokens: the repo's
-keep rule (accuracy no worse, a measurable gain, token overhead within +15%).
+only after a concrete scoped procedure passes the personal-v1 comparison:
+quality cannot regress and aggregate tokens cannot increase. Historical captured
+events remain evidence, not executable methods or correct fixes by themselves.
 
 The eval file names the proposal it measured: {"proposal": ID, "base": {"pass", "n", "tokens"}, "cand": {...}},
 tokens on both sides (a missing count is not "no overhead").
@@ -24,7 +25,7 @@ from typing import List, Tuple
 from .capture import STORE
 
 MIN_COUNT = 2
-TOKEN_OVERHEAD = 0.15
+TOKEN_OVERHEAD = 0.0  # personal-v1: aggregate tokens <= baseline, no historic allowance
 
 
 def _candidates(hh: Path) -> List[dict]:
@@ -73,7 +74,7 @@ def keep_rule(result: dict) -> Tuple[bool, str]:
         return False, "token counts must be measured on both sides (%s vs %s)" % (bt, ct)
     if bn != cn or bn <= 0:
         return False, "base and candidate ran a different number of tasks (%d vs %d); not a paired eval" % (bn, cn)
-    if cp <= bp:
+    if cp < bp or (cp == bp and ct >= bt):
         return False, "no measurable gain: %d/%d with it vs %d/%d without" % (cp, cn, bp, bn)
     if ct > bt * (1 + TOKEN_OVERHEAD):
         return False, "token overhead %+.0f%% is over the +%d%% the keep rule allows" % (
@@ -85,34 +86,11 @@ def apply(hh: Path, pid: str, eval_path: str = None) -> Tuple[int, str]:
     f = hh / "proposals" / ("%s.json" % pid)
     if not f.is_file():
         return 2, "improve: no proposal %s" % pid
-    if not eval_path:
-        return 1, "improve: %s not applied: no eval. Run the paired eval, then --eval FILE" % pid
-    try:
-        result = json.loads(Path(eval_path).read_text(encoding="utf-8"))
-    except (OSError, ValueError) as e:
-        return 2, "improve: cannot read the eval (%s)" % e
-    prop = json.loads(f.read_text(encoding="utf-8"))
-    if prop.get("status") != "proposed":
-        return 1, "improve: %s is already %s" % (pid, prop.get("status"))
-    if not isinstance(result, dict) or result.get("proposal") != pid:
-        return 1, "improve: that eval measured %r, not %s" % (
-            result.get("proposal") if isinstance(result, dict) else None, pid)
-    ok, why = keep_rule(result)
-    if not ok:
-        return 1, "improve: %s not applied: %s" % (pid, why)
-    from .mcp.memory import Memory
-    Memory(home=hh).lesson_add(mistake=str(prop.get("summary") or ""), fix=str(prop.get("evidence") or ""),
-                               trigger="learned from %s (seen %s times); eval: %s" % (
-                                   prop.get("source"), prop.get("count"), why))
-    prop.update(status="applied", applied=time.strftime("%Y-%m-%dT%H:%M:%S"), eval=why)
-    f.write_text(json.dumps(prop, indent=1) + "\n", encoding="utf-8")
-    return 0, "improve: %s applied as a lesson (%s)" % (pid, why)
-
-
-RUNS_PER_ALLOWED_MISS = 54   # a release may score n // 54 below the BEST accepted release: a single run (n=18) is
-#                              strict, three runs of 18 allow one. The owner, 2026-10-07, after one run of noise held
-#                              a measured gain back: "it is ok to iterate not to give up updating". The reference is
-#                              always the best accepted release, so misses cannot compound. docs/design-decisions.md
+    # Capture records an observation, often a failing command/output. Reusing
+    # that as Memory.lesson_add(fix=...) was not method derivation. Keep the
+    # source proposal, but require the scoped lifecycle with heldout evidence.
+    return 1, ("improve: legacy capture is evidence, not a procedure; draft a concrete method with "
+               "--draft-procedure FILE --project PATH, then evaluate its pr- id. Proposal retained.")
 
 
 def _cost(r) -> float:
@@ -138,7 +116,7 @@ def _judge(cur: dict, earlier: list, first_ok: bool = True) -> Tuple[bool, str]:
     bt, ct = _cost(best), _cost(cur)
     tok_ok = bt != float("inf") and ct != float("inf") and ct <= bt * (1 + TOKEN_OVERHEAD)
     better = c_rate > b_rate and tok_ok
-    same = c_rate <= b_rate and b_rate - c_rate <= (int(n) // RUNS_PER_ALLOWED_MISS) / n + 1e-12 and tok_ok
+    same = c_rate == b_rate and tok_ok
     ok = better or same
     return ok, "best accepted %s %s/%s -> %s %s/%s %s" % (best.get("version"), best["pass"], best["n"],
                                                           cur.get("version"), cur["pass"], cur["n"],
@@ -147,8 +125,8 @@ def _judge(cur: dict, earlier: list, first_ok: bool = True) -> Tuple[bool, str]:
 
 def trend(history: str, release: str = None, new_baseline: bool = False) -> Tuple[int, str]:
     """`release` (default: this harness's own version) against the BEST earlier release, per tool, on the same
-    number of questions: more than one question fewer (the measured single-run noise), or more than +15% tokens
-    for passes within that one question, is a regression. Refused as well: no history, a release
+    number of questions: any lower quality or greater aggregate tokens is a regression.
+    Historical noise/overhead allowances are superseded for personal-v1. Refused as well: no history, a release
     recorded twice for a tool (it would hide the first result), a tool the previous release measured and this
     one did not, and a row with no tasks."""
     rows = []

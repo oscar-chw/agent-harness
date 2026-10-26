@@ -51,6 +51,10 @@ def state_command(ctx: Ctx) -> str:
     return _lib_cmd(ctx, "agent_harness.mcp.state print") + " 2>/dev/null; true"
 
 
+def op_command(ctx: Ctx) -> str:
+    return _lib_cmd(ctx, "agent_harness.cli _hook-op")
+
+
 def prompt_command(ctx: Ctx) -> str:
     """Per-prompt recall of relevant memories and lessons (stdout -> context only when non-empty)."""
     return _lib_cmd(ctx, "agent_harness.cli _hook-prompt")
@@ -111,6 +115,8 @@ class ClaudeCodeAdapter(Adapter):
                 {"matcher": "startup|resume|compact", "hooks": [{"type": "command", "command": digest_command(ctx)}]},
                 # prints only when this project has a saved state file; nothing (no tokens) otherwise
                 {"matcher": "startup|resume|compact", "hooks": [{"type": "command", "command": state_command(ctx)}]},
+                {"matcher": "startup|resume|compact", "hooks": [{"type": "command", "command": op_command(ctx),
+                                                                     "timeout": 5}]},
             ],
             "UserPromptSubmit": [{"hooks": [{"type": "command", "command": prompt_command(ctx), "timeout": 5}]}],
             "PreCompact": [{"hooks": [{"type": "command", "command": "echo " + shlex.quote(PRECOMPACT_LINE)}]}],

@@ -47,7 +47,7 @@ def _names(var: str) -> set:
 # "plan" (the work graph) is ON by default since v0.3.3, by the owner's decision (2026-10-06): it is how a model
 # writes the goal and each step's check to disk, so the work loop, the gates and the eval keep running through
 # context loss and compaction -- the backbone of the harness, not an optional arm. HARNESS_DISABLE=plan turns it off.
-OFF_BY_DEFAULT = {"run_checks", "check_guard", "memory_snapshot", "skill_nudge"}   # docs/how-it-works.md
+OFF_BY_DEFAULT = {"run_checks", "check_guard", "memory_snapshot", "skill_nudge", "op_state"}
 
 
 def disabled(name: str) -> bool:

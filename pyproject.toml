@@ -17,10 +17,11 @@ harness = "agent_harness.cli:main"
 [tool.setuptools]
 # content/ (rules, hooks, skills, prompts) ships inside the package, so an install from a wheel finds it
 package-dir = {"" = "src", "agent_harness.content" = "content"}
-packages = ["agent_harness", "agent_harness.adapters", "agent_harness.mcp", "agent_harness.content"]
+packages = ["agent_harness", "agent_harness.adapters", "agent_harness.mcp", "agent_harness.workgraph", "agent_harness.content"]
 
 [tool.setuptools.package-data]
-"agent_harness.content" = ["*.md", "*.toml", "hooks/*.py", "prompts/*.md", "skills/*/*"]
+"agent_harness.content" = ["*.md", "*.toml", "hooks/*.py", "prompts/*.md", "skills/*/*", "presets/*.json"]
+"agent_harness.workgraph" = ["bin/*", "tiers/*.ini"]
 
 [tool.setuptools.dynamic]
 version = {attr = "agent_harness.__version__"}
