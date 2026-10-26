@@ -1,6 +1,6 @@
 # v0.9 development candidate
 
-Package version `0.9.0.dev0` identifies a **development branch**, not a tagged
+Package version `0.9.1.dev0` identifies a **development branch**, not a tagged
 release. This branch consolidates general-purpose source-backed local memory,
 durable project task state, versioned work-graph checks, explicit bounded
 Codex launch, and Claude Code/Codex/Copilot adapter work. The source remains
