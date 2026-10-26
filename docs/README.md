@@ -6,6 +6,7 @@ Start with the [project README](../README.md); every page below goes one level d
 
 | Page | What it answers |
 |---|---|
+| [v1/architecture.md](v1/architecture.md) | Integrated v1 boundaries, source weighting, decisions and qualification gaps |
 | [how-it-works.md](how-it-works.md) | What each part does: rules, retrieval, memory, lessons, past sessions, learned skills, hooks, the work graph, supported tools, privacy |
 | [DIAGRAMS.md](DIAGRAMS.md) | Every diagram, numbered: system overview, the guard's decision, the eval and its keep rule, history |
 | [design-decisions.md](design-decisions.md) | Why it is built this way, what each choice costs, the keep rule, and the setups it replaced |

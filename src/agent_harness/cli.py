@@ -259,6 +259,14 @@ def cmd_uninstall(args) -> int:
     return 0
 
 
+def cmd_cache_status(args) -> int:
+    from .cache_status import inspect_cache
+    _, hh = _paths(args)
+    result = inspect_cache(hh)
+    print(json.dumps(result, sort_keys=True))
+    return 2 if result["status"] == "UNREADABLE" else 0
+
+
 def cmd_status(args) -> int:
     if getattr(args, "runtime", False):
         from . import runtime_inventory
@@ -1129,6 +1137,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--session", help="transcript path (default: the newest for this client and folder)")
     p.add_argument("--json", action="store_true")
     sub.add_parser("doctor", help="check the installation")
+    sub.add_parser("cache-status", help="read-only scoped index inventory; no pruning or source text")
     p = sub.add_parser("warmup", help="build the knowledge index and install optional plugins")
     p.add_argument("--background", action="store_true")
     p.add_argument("--include-optional", action="store_true", help="also install plugins marked optional")
@@ -1290,7 +1299,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.cmd == "continuation":
         from .continuation import command
         return command(args)
-    fn = {"install": cmd_install, "uninstall": cmd_uninstall, "status": cmd_status, "doctor": cmd_doctor, "explain": cmd_explain,
+    fn = {"install": cmd_install, "uninstall": cmd_uninstall, "status": cmd_status, "cache-status": cmd_cache_status, "doctor": cmd_doctor, "explain": cmd_explain,
           "warmup": cmd_warmup, "update": cmd_update, "learn": cmd_learn, "sync": cmd_sync,
           "review": cmd_review, "run": cmd_run, "discover": cmd_discover,
           "improve": cmd_improve, "self-update": cmd_self_update, "vault-read": cmd_vault_read,
