@@ -1,11 +1,14 @@
 """Real-process checks for the shared local memory store."""
 
 import json
+import errno
 import os
 import subprocess
 import sys
 import time
+import types
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -77,3 +80,44 @@ def test_simultaneous_process_writes_keep_every_fact(tmp_path, same_fact, presee
             if process.poll() is None:
                 process.kill()
             process.wait(timeout=5)
+
+
+def test_windows_lock_retries_without_reading_a_locked_byte(tmp_path):
+    from agent_harness.mcp import memory
+
+    real_open = Path.open
+
+    class LockedByte:
+        def __init__(self, handle):
+            self.handle = handle
+
+        def __enter__(self):
+            self.handle.__enter__()
+            return self
+
+        def __exit__(self, *args):
+            return self.handle.__exit__(*args)
+
+        def read(self, *args):
+            raise PermissionError(errno.EACCES, "another process owns the byte")
+
+        def __getattr__(self, name):
+            return getattr(self.handle, name)
+
+    def open_lock(path, *args, **kwargs):
+        handle = real_open(path, *args, **kwargs)
+        return LockedByte(handle) if path.name == ".memory.lock" else handle
+
+    calls = []
+
+    def locking(_fd, operation, _length):
+        calls.append(operation)
+        if operation == 1 and calls.count(1) == 1:
+            raise PermissionError(errno.EACCES, "busy")
+
+    fake_msvcrt = types.SimpleNamespace(LK_NBLCK=1, LK_UNLCK=2, locking=locking)
+    with mock.patch.object(memory.os, "name", "nt"), mock.patch.dict(sys.modules, {"msvcrt": fake_msvcrt}), \
+            mock.patch.object(Path, "open", open_lock):
+        with memory._store_lock(tmp_path / "store"):
+            pass
+    assert calls == [1, 1, 2]

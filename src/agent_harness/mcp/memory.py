@@ -62,10 +62,8 @@ def _store_lock(home: Path):
         deadline = time.monotonic() + 30
         if os.name == "nt":
             import msvcrt
-            lock_file.seek(0)
-            if not lock_file.read(1):
-                lock_file.write(b"\0")
-                lock_file.flush()
+            # Windows byte-range locks may extend past EOF. Reading a byte held
+            # by another process would fail before the contention retry below.
             def acquire():
                 msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK, 1)
 
