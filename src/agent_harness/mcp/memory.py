@@ -13,12 +13,16 @@ CLI (session-start and per-prompt hooks; both print nothing when there is nothin
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as _dt
+import errno
+import functools
 import hashlib
 import json
 import os
 import re
 import sys
+import tempfile
 import time
 import uuid
 from pathlib import Path
@@ -48,6 +52,57 @@ RECALL_TTL_DAYS = 7
 # 0.2 sits in the gap between the second and third rows.
 MEM_MIN_SCORE = 0.2
 SNAPSHOT_CHARS = 2200     # Hermes' MEMORY.md cap
+
+
+@contextlib.contextmanager
+def _store_lock(home: Path):
+    """Serialize memory operations across MCP processes, including duplicate detection."""
+    home.mkdir(parents=True, exist_ok=True)
+    with (home / ".memory.lock").open("a+b") as lock_file:
+        deadline = time.monotonic() + 30
+        if os.name == "nt":
+            import msvcrt
+            lock_file.seek(0)
+            if not lock_file.read(1):
+                lock_file.write(b"\0")
+                lock_file.flush()
+            def acquire():
+                msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK, 1)
+
+            def release():
+                msvcrt.locking(lock_file.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+
+            def acquire():
+                fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+            def release():
+                fcntl.flock(lock_file, fcntl.LOCK_UN)
+        lock_file.seek(0)
+        while True:
+            try:
+                acquire()
+                break
+            except OSError as exc:
+                if exc.errno not in (errno.EACCES, errno.EAGAIN):
+                    raise
+                if time.monotonic() >= deadline:
+                    raise TimeoutError("memory store is busy for 30 seconds") from exc
+                time.sleep(.01)
+        try:
+            yield
+        finally:
+            lock_file.seek(0)
+            release()
+
+
+def _serialized(method):
+    @functools.wraps(method)
+    def call(self, *args, **kwargs):
+        with _store_lock(self.home):
+            return method(self, *args, **kwargs)
+    return call
 
 
 def _duplicate_key(text: str) -> tuple:
@@ -102,9 +157,13 @@ class Memory:
 
     def _write(self, path: Path, item: dict) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_suffix(".tmp")
-        tmp.write_text(json.dumps(item, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        os.replace(str(tmp), str(path))
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                         prefix=path.name + ".", suffix=".tmp", delete=False) as tmp:
+            tmp.write(json.dumps(item, indent=2, ensure_ascii=False) + "\n")
+        try:
+            os.replace(tmp.name, str(path))
+        finally:
+            Path(tmp.name).unlink(missing_ok=True)
 
     def sync(self) -> None:
         """Mirror the JSON files into SQLite: (re)index new/changed files, drop vanished ones."""
@@ -271,6 +330,7 @@ class Memory:
         return out
 
     # ------------------------------------------------------------ tools
+    @_serialized
     def mem_add(self, text: str, tags: Sequence[str] = (), scope: str = "user", pin: bool = False) -> dict:
         if scope not in SCOPES:
             raise ValueError("scope must be 'user' or 'project'")
@@ -290,12 +350,14 @@ class Memory:
                 self.con.commit()
         return res
 
+    @_serialized
     def mem_search(self, query: str, k: int = 5, min_score: Optional[float] = None) -> List[dict]:
         items = self._search("memory", query, k, min_score)
         return [{"id": i["id"], "text": i["text"], "tags": i.get("tags", []), "uses": i["uses"],
                  **({"scope": "project", "project": i["project"]} if i.get("project") else {})}
                 for i in items]
 
+    @_serialized
     def mem_forget(self, id: str) -> dict:
         """Forgotten items are archived (moved to archive/), never deleted; the index drops them."""
         self.sync()
@@ -306,12 +368,14 @@ class Memory:
         self.con.commit()
         return {"ok": True}
 
+    @_serialized
     def lesson_add(self, mistake: str, fix: str, trigger: str) -> dict:
         if not (mistake.strip() and fix.strip()):
             raise ValueError("mistake and fix are required")
         return self._add("lesson", "", {"mistake": mistake.strip(), "fix": fix.strip(),
                                         "trigger": trigger.strip(), "project": self.project})
 
+    @_serialized
     def lesson_search(self, query: str, k: int = 3, min_score: Optional[float] = None) -> List[dict]:
         from agent_harness.procedures import matches
         hits = [(sc, json.loads(row["data"]), row) for sc, row in self.scored("lesson", query, min_score)]
@@ -327,6 +391,7 @@ class Memory:
         return out
 
     # ------------------------------------------------------------ session hooks
+    @_serialized
     def digest(self, max_bytes: int = 2048) -> str:
         """Session-start digest: pinned facts, a one-line count, the open-work pointer. Never bumps uses.
 
@@ -352,6 +417,7 @@ class Memory:
                          % _dt.datetime.fromtimestamp(st.stat().st_mtime).strftime("%Y-%m-%d %H:%M"))
         return _fit(lines, max_bytes)
 
+    @_serialized
     def snapshot(self, max_chars: int = SNAPSHOT_CHARS) -> str:
         """Arm memory_snapshot (off by default): the saved facts visible here, most used and newest first, as
         Hermes injects MEMORY.md, frozen once per session; cut at max_chars. Does not bump uses."""
@@ -378,6 +444,7 @@ class Memory:
         prefix, _, digest = line.rpartition(":")
         return prefix if re.fullmatch(r"[0-9a-f]{64}", digest) else line
 
+    @_serialized
     def resume_context(self, session: str, max_bytes: int = 1200) -> str:
         """Rehydrate current whole records; reset suppression after context loss.
 
@@ -443,6 +510,7 @@ class Memory:
             seen_file.write_text("".join(identity + "\n" for identity in ids), encoding="utf-8")
         return "".join(lines)
 
+    @_serialized
     def recall(self, prompt: str, session: str, max_bytes: int = 1200,
                min_score: Optional[float] = None) -> str:
         """Memories and lessons relevant to `prompt`, most relevant first, within max_bytes, skipping

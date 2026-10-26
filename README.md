@@ -86,7 +86,9 @@ tedious and rarely kept up.
 - **Partial retrieval.** Documents are split into sections at their headings and indexed in SQLite FTS5 with
   BM25. The rules carry a compact index of section ids; the agent fetches one section with `kb_get(id)` and
   calls `kb_search(query)` only when nothing in the index fits.
-- **Memory, lessons, task state, learned methods.** Local stores are shared by the tools on one machine.
+- **Memory, lessons, task state, learned methods.** Local stores are shared by the tools on one machine;
+  [the memory placement map](docs/v1/memory-placement.md) distinguishes facts, source knowledge, work state,
+  project evidence and rebuildable search indexes.
   `skill_manage draft` records a dormant, source-bound project method in `procedures.sqlite`. A matched,
   independent held-out comparison must show no quality regression on any case or dimension and aggregate
   tokens, including overhead, no greater than baseline. **Promotion is currently held:** caller-written
