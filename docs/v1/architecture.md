@@ -135,3 +135,12 @@ recovery, observable traces/evals and execution authority are core requirements;
 MCP is a complementary interface, multiagent use requires task evidence, and a
 gateway is conditional on provider needs. Pricing ratios depend on actual models
 and usage. No dependency was installed from these references.
+
+[Chroma's Context Rot report](https://www.trychroma.com/research/context-rot),
+primary report inspected, measures nonuniform degradation as context grows across
+its tested models and controlled tasks. **Complement** focused context and durable,
+source-bearing state; it does not prove this harness improves a task. The supplied
+IG `DeBl1GmsVLJ` brief identifies its 3/6-to-6/6 and 94%-to-25% figures as simulated;
+they are not empirical acceptance evidence. Selective subagents and on-demand
+skills remain optional mechanisms. Any promotion comparison must count the whole
+system's tokens, retries and quality, not merely a smaller coordinator window.

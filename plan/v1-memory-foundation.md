@@ -94,3 +94,35 @@ No live migration, default profile change, deployment, model campaign or deletio
       2026-10-26T10:47:39Z exit 0 in 384s [fbbb251e] — DEMO: PASS / CHECK: PASS / agent-harness guard blocked this: rm -r on ~ (the home directory). If it is really intended, ask the human to run it themselves.
 
 Node 10 gate strengthened before completion: parser tests alone do not check the actual source denominator. The independent receipt join now verifies the bound inventory, all source IDs, metadata and admission labels. Private paths are supplied by environment, not committed. Original receipts, including a corrected intermediate admission tally, remain private.
+
+## Fourth milestone — explicit scope, corrections and copy maintenance
+
+existing: ProjectMemory already provides immutable source-bound corrections,
+compare-and-swap receipts, pending semantic claims and explicit historical reads;
+SourceVault verifies current source revisions. Reuse these rather than invent a
+second learning engine. Missing, conflicting or unapproved project mappings are
+quarantined; a declared cwd is not permission. Safe maintenance operates on an
+explicit disposable source copy and publishes a separate verified copy. Original
+histories, deployed package, native configs and live migration stay unchanged.
+
+Main owns scope decisions and task-level cold process canaries. A bounded worker
+owns only copy-maintenance code/tests. Actual native model invocation needs a
+fresh applicable budget/trust grant; transport/task canaries must not be relabeled
+as model memory or token-performance evidence. No new model calls in this slice.
+
+- [x] 12. Resolve only explicitly mapped source scopes and retain deterministic quarantine reasons | ctx: src/agent_harness/source_scope.py | gate: PYTHONPATH=src python3 -m pytest -q tests/test_source_scope.py
+      2026-10-26T11:53:49Z exit 0 in 0s [adfac73b] — ..........                                                               [100%] / 10 passed in 0.14s
+      2026-10-26T12:02:15Z exit 0 in 0s [39a45f94] — ...........                                                              [100%] / 11 passed in 0.14s
+- [x] 13. Compact only a disposable index copy with verified equivalent logical content | ctx: src/agent_harness/index_copy.py | gate: PYTHONPATH=src python3 -m pytest -q tests/test_index_copy.py
+      2026-10-26T12:02:15Z exit 0 in 0s [fa7a7780] — ........                                                                 [100%] / 8 passed in 0.22s
+- [x] 14. Prove correction, stale-source and privacy task outcomes with cold scoped clients | needs: 12 | ctx: eval/memory_task_canary.py | gate: PYTHONPATH=src python3 -m pytest -q tests/test_memory_task_canary.py
+      2026-10-26T12:02:17Z exit 0 in 1s [d388a45f] — ...                                                                      [100%] / 3 passed in 1.28s
+- [x] 15. Recheck integrated source scope and copy-maintenance checkpoint | needs: 12,13,14 | gate: bash scripts/check.sh
+      2026-10-26T12:10:59Z exit 0 in 381s [0527f091] — DEMO: PASS / CHECK: PASS / agent-harness guard blocked this: rm -r on ~ (the home directory). If it is really intended, ask the human to run it themselves.
+
+Native acceptance remains NOT_RUN: a separate, prepared three-invocation Codex
+recall smoke check (90 seconds each, zero retries, included account quota only)
+is awaiting its new action-specific grant. The earlier fixture grant is not
+reused. Private ACTION/RUNS/MANIFEST files retain the exact scope. Source-process
+and offline-copy passes above do not settle this native gate or authorize live
+migration. Studio remains on its deployed patch.

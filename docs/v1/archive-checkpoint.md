@@ -102,3 +102,7 @@ is small relative to its uncertainty. These local measurements remove the earlie
 large selective regression on these fixtures; they do not prove universal speed
 or token savings. The deployed package and oversized-index doctor failure remain
 unchanged. Real migration, cache maintenance and native recovery remain open.
+
+The subsequent [scope/correction checkpoint](scope-correction-checkpoint.md)
+qualifies explicit alias decisions, task-level correction replay and maintenance
+of disposable index copies. Live activation remains separate.

@@ -116,7 +116,8 @@ def inspect_source(path, root, max_bytes=131072):
     return out
 
 
-def extract_copy(path, root, expected_project, destination, max_bytes=8*1024*1024):
+def extract_copy(path, root, expected_project, destination, max_bytes=8*1024*1024,
+                 *, scope_registry=None, allowed_projects=None):
     """Stage a complete bounded source revision, preserving all selected history as history.
 
     Project identity must match the source's explicit cwd. Corrections are retained in
@@ -165,12 +166,25 @@ def extract_copy(path, root, expected_project, destination, max_bytes=8*1024*102
                     'timestamp':redact(str(e.get('timestamp') or ''))[:128],'current_fact':False})
     except (AttributeError,TypeError,ValueError,RecursionError):
         result['status']='MALFORMED';return result
-    if projects!={expected_project}:
+    decision=None
+    project_id=_hash(expected_project.encode())
+    if scope_registry is not None:
+        from .source_scope import resolve_scope
+        decision=resolve_scope({'source_id':meta['source_id'],'revision':revision,'sensitivity':'private'},
+                               sorted(projects),scope_registry,allowed_projects)
+        if decision['status']!='RESOLVED' or decision['project_id']!=expected_project:
+            result.update(status='SCOPE_UNRESOLVED',scope_reason=decision['reason'] if
+                          decision['status']!='RESOLVED' else 'PROJECT_MISMATCH')
+            return result
+        project_id=decision['project_id']
+    elif projects!={expected_project}:
         result['status']='SCOPE_UNRESOLVED';return result
     if not records:
         result['status']='NO_CONVERSATION';return result
     packet={'schema':'harness.archive-copy/v1','source_id':meta['source_id'],'revision':revision,
-        'format':kind,'project_id':_hash(expected_project.encode()),'privacy':'private-project',
+        'format':kind,'project_id':project_id,'privacy':'private-project',
+        'scope_decision':decision,'scope_basis':'explicit_registry' if decision else 'declared_scope_hash',
+        'activation_allowed':False,
         'authority':'source-data','correction_resolution':'NOT_INFERRED','records':records,
         'excluded_records':excluded,'source_bytes':len(data),'semantic_extraction':'NOT_VERIFIED'}
     destination=Path(destination).absolute()
