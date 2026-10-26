@@ -167,6 +167,9 @@ def _end_group(process):
         # Keep checking the group; never assert cleanup from leader exit alone.
         process.terminate()
     for _ in range(20):
+        # Reap the owned leader: on Linux its zombie keeps the group observable.
+        # Still probe the whole group so a surviving descendant cannot pass.
+        process.poll()
         try:
             os.killpg(pid, 0)
         except ProcessLookupError:
@@ -184,6 +187,9 @@ def _end_group(process):
         if process.poll() is None:
             process.kill()
     for _ in range(20):
+        # Reap the owned leader: on Linux its zombie keeps the group observable.
+        # Still probe the whole group so a surviving descendant cannot pass.
+        process.poll()
         try:
             os.killpg(pid, 0)
         except ProcessLookupError:

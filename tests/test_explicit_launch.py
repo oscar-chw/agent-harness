@@ -662,3 +662,36 @@ def test_explicit_workspace_write_uses_native_sandbox_and_creates_an_artifact(la
     assert run.returncode == 0, run.stderr
     assert (root / "artifact.txt").read_text() == "real fixture artifact"
     assert json.loads(run.stdout)["task_evaluation"] == "NOT_RUN"
+
+
+@pytest.mark.parametrize("descendant_survives", [False, True])
+def test_cleanup_reaps_leader_but_still_checks_descendants(monkeypatch, descendant_survives):
+    from agent_harness import launch
+
+    class Child:
+        pid = 12345
+        reaped = False
+
+        def poll(self):
+            self.reaped = True
+            return -15
+
+    child = Child()
+    signals = []
+
+    def killpg(pid, signum):
+        assert pid == child.pid
+        signals.append(signum)
+        if signum == 0 and child.reaped and not descendant_survives:
+            raise ProcessLookupError
+
+    monkeypatch.setattr(launch.os, "killpg", killpg)
+    monkeypatch.setattr(launch.time, "sleep", lambda _: None)
+    if descendant_survives:
+        with pytest.raises(RuntimeError, match="cleanup could not be verified"):
+            launch._end_group(child)
+        assert launch.signal.SIGKILL in signals
+    else:
+        launch._end_group(child)
+        assert launch.signal.SIGKILL not in signals
+    assert child.reaped
