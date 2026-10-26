@@ -33,3 +33,35 @@ Bounds: local CPU development and synthetic fixtures, one substantive checkpoint
 - [x] 3. Run complete source verification on the integrated checkpoint | needs: 1,2 | gate: bash scripts/check.sh
       2026-10-26T08:31:51Z exit 1 in 379s [495e84b7] — FAILED tests/test_harness_best.py::TestV041::test_every_skip_in_the_suite_is_environmental / FAILED tests/test_harness_best.py::TestV041b::test_every_skip_names_an_environmental_reason / 2 failed, 1358 passed, 2 skipped, 2 xfailed in 378.84s (0:06:18)
       2026-10-26T08:40:43Z exit 0 in 387s [8699aaec] — DEMO: PASS / CHECK: PASS / agent-harness guard blocked this: rm -r on ~ (the home directory). If it is really intended, ask the human to run it themselves.
+
+## Second milestone — source denominator, canaries and latency
+
+Continue from committed first checkpoint 5bf8d32. Inventories count declared,
+authorized roots and distinguish them from cached rows; neither is semantic
+extraction or proof of complete migration. Metadata-first trial, bounded samples,
+then a full metadata scan only if measured cheap. Original histories stay in
+place. Use synthetic copied sources for fresh-process canaries and privacy tests.
+Existing native history readers cover Claude Code and Codex; unsupported client
+history and selected archive roots must be explicit, never assumed absent.
+No source deletion, live migration, model campaign or deployment is authorized.
+The performance worker owns only kb.py and its new cache tests; main owns the
+inventory, CLI, canaries, integration and final verification.
+
+- [x] 4. Reconcile declared source inventory against index progress without reading message bodies | ctx: src/agent_harness/source_inventory.py | gate: PYTHONPATH=src python3 -m pytest -q tests/test_source_inventory.py
+      2026-10-26T09:09:57Z exit 0 in 0s [fa7a7780] — ........                                                                 [100%] / 8 passed in 0.21s
+      2026-10-26T09:32:10Z exit 0 in 0s [adfac73b] — ..........                                                               [100%] / 10 passed in 0.24s
+- [x] 5. Prove fresh process retrieval and correction/privacy isolation on copied synthetic sources | needs: 4 | gate: PYTHONPATH=src python3 -m pytest -q tests/test_retrieval_canaries.py
+      2026-10-26T09:22:25Z exit 0 in 1s [d388a45f] — ...                                                                      [100%] / 3 passed in 0.95s
+      2026-10-26T09:32:11Z exit 0 in 1s [d388a45f] — ...                                                                      [100%] / 3 passed in 0.98s
+- [x] 6. Preserve scoped correctness while addressing measured query overhead | ctx: src/agent_harness/mcp/kb.py | gate: PYTHONPATH=src python3 -m pytest -q tests/test_kb_scope.py tests/test_kb_performance_cache.py
+      2026-10-26T09:28:07Z exit 0 in 0s [fa7a7780] — ........                                                                 [100%] / 8 passed in 0.25s
+      2026-10-26T09:32:12Z exit 0 in 0s [fa7a7780] — ........                                                                 [100%] / 8 passed in 0.26s
+- [x] 7. Recheck the integrated second checkpoint | needs: 4,5,6 | gate: bash scripts/check.sh
+      2026-10-26T09:42:09Z exit 0 in 395s [a4e5031d] — DEMO: PASS / CHECK: PASS / agent-harness guard blocked this: rm -r on ~ (the home directory). If it is really intended, ask the human to run it themselves.
+
+## Development publication
+
+The human subsequently requested publishing the development version too.
+Publish this separate development branch and open a draft comparison against
+the v0.9 candidate for CI. This authorizes no main merge, release tag or live
+installation. The checkpoint document records remaining acceptance gaps.

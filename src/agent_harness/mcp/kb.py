@@ -7,6 +7,7 @@ Search is BM25: SQLite FTS5 when available, a pure-Python BM25 otherwise. The in
 """
 from __future__ import annotations
 
+from functools import lru_cache
 import heapq
 import math
 import os
@@ -78,7 +79,7 @@ they this those through to too under until up very was we were what when where w
 with would you your yours please can't don't use using used make want need get got let lets like also""".split())
 
 
-def _stem(w: str) -> str:
+def _stem_uncached(w: str) -> str:
     """Tiny suffix stripper (rotate/rotating/rotation -> rot, backups -> backup). Stdlib-only stand-in
     for a real stemmer; the same function stems documents and queries, so it only has to be consistent."""
     for suf in _SUFFIXES:
@@ -88,6 +89,17 @@ def _stem(w: str) -> str:
     if w.endswith("e") and len(w) > 4:
         w = w[:-1]
     return w
+
+
+@lru_cache(maxsize=1024)
+def _short_stem(w: str) -> str:
+    return _stem_uncached(w)
+
+
+def _stem(w: str) -> str:
+    # Stemming is pure. Cache only short words, never documents or query results;
+    # an arbitrary long token must not consume a retained cache entry.
+    return _short_stem(w) if len(w) <= 64 else _stem_uncached(w)
 
 
 def tokens(text: str) -> List[str]:
@@ -469,11 +481,14 @@ class KB:
         live = set()
         for p, rel in found:
             key = str(p)
-            live.add(key)
             try:
                 st = p.stat()
+                # Cached text does not grant access after source permissions change.
+                if not os.access(p, os.R_OK):
+                    continue
             except OSError:
                 continue
+            live.add(key)
             k = known.get(key)
             if k and k[0] == st.st_mtime and k[1] == st.st_size and k[2] == rel:
                 continue

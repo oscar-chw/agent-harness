@@ -88,3 +88,10 @@ SQLite may maintain its normal WAL reader metadata. `PRESENT` means the database
 readable, not that storage or retrieval is healthy; `ABSENT` does not create a store,
 and `UNREADABLE` exits 2. Outside-current-discovery rows may still serve other clients.
 This report does not authorize eviction or change `harness doctor`'s budget.
+
+`harness source-inventory` reports declared transcript metadata and index offsets.
+Use `--archive-root PATH` for an additional metadata-only archive, `--details` for
+hashed file identifiers, and `--limit`/`--seconds` to bound discovery. Exit 2 means
+an incomplete scan or unreadable index; exit 0 never means complete migration.
+See the [development checkpoint](v1/development-checkpoint.md) for verified scope,
+latency measurements and outstanding v1 acceptance.
