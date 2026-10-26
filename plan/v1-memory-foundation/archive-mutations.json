@@ -1,0 +1,18 @@
+{
+  "control": {
+    "exit": 0,
+    "expected_failure": false
+  },
+  "current_fact": {
+    "exit": 1,
+    "expected_failure": true
+  },
+  "root_traversal": {
+    "exit": 1,
+    "expected_failure": true
+  },
+  "timestamp_redaction": {
+    "exit": 1,
+    "expected_failure": true
+  }
+}

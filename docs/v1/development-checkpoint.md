@@ -4,6 +4,10 @@ This development branch is separate from the deployed 0.9.1.dev0 patch. The
 package version is still inherited from that patch; this is not a v1 release,
 automatic update, or completed memory migration.
 
+The subsequent [archive and latency checkpoint](archive-checkpoint.md) adds
+copy-only format adapters, an exact inventory-reconciliation gate and a measured
+fix for the selective-query overhead described below.
+
 ## What changed
 
 - Scoped retrieval cannot use other projects' cache statistics to rank its hits.

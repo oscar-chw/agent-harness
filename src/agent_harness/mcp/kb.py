@@ -417,6 +417,7 @@ def _doc_tokens(title: str, body: str) -> List[str]:
 def discover_files(roots: Sequence[Path]) -> List[Tuple[Path, str]]:
     found: List[Tuple[Path, str]] = []
     used: set = set()
+    parents = {}
     for root in roots:
         if _ok(Path.is_file, root):
             items = [(root, root.name)]
@@ -434,7 +435,16 @@ def discover_files(roots: Sequence[Path]) -> List[Tuple[Path, str]]:
             if rel in used:
                 rel = "%s/%s" % (root.resolve().parent.name, rel)
             used.add(rel)
-            found.append((p.resolve(), rel))
+            # Resolve a shared directory once per discovery, not once per file.
+            # Symlinks still resolve individually; this cache never survives a
+            # refresh, and refresh still checks every source's stat and access.
+            if p.is_symlink():
+                resolved = p.resolve()
+            else:
+                if p.parent not in parents:
+                    parents[p.parent] = p.parent.resolve()
+                resolved = parents[p.parent] / p.name
+            found.append((resolved, rel))
     return found
 
 

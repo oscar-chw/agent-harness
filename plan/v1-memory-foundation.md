@@ -65,3 +65,32 @@ The human subsequently requested publishing the development version too.
 Publish this separate development branch and open a draft comparison against
 the v0.9 candidate for CI. This authorizes no main merge, release tag or live
 installation. The checkpoint document records remaining acceptance gaps.
+
+## Third milestone — archive access, correction provenance and selective latency
+
+existing: current native session readers already parse Claude message envelopes and
+Codex response items; archived directories are absent from their discovery roots.
+Reuse their redaction and role filters, but qualify a copy-only archive adapter
+before any live activation. Source-inventory is metadata only. Inspect bounded
+headers under the declared archive roots, never denied stores or credentials.
+A format match does not establish extraction completeness or authorize import.
+Native memory Markdown remains private and scoped; metadata inventory is not
+permission to inject every memory into every project.
+
+Main owns archive classification, copy-only staging, reconciliation and final gates.
+A bounded independent worker may optimize kb.py and its own new regression test;
+never remove per-query source permission checks or serve stale cached results.
+No live migration, default profile change, deployment, model campaign or deletion.
+
+- [x] 8. Qualify bounded archive format inspection and copy-only provenance-preserving extraction | ctx: src/agent_harness/archive_sources.py | gate: PYTHONPATH=src python3 -m pytest -q tests/test_archive_sources.py
+      2026-10-26T10:29:04Z exit 0 in 0s [290e62a8] — ............                                                             [100%] / 12 passed in 0.15s
+      2026-10-26T10:34:59Z exit 0 in 0s [0be71bdd] — ..............                                                           [100%] / 14 passed in 0.13s
+- [x] 9. Diagnose selective retrieval overhead without weakening freshness or scope | ctx: src/agent_harness/mcp/kb.py | gate: PYTHONPATH=src python3 -m pytest -q tests/test_kb_scope.py tests/test_retrieval_canaries.py tests/test_kb_performance_cache.py
+      2026-10-26T10:29:06Z exit 0 in 1s [39a45f94] — ...........                                                              [100%] / 11 passed in 1.19s
+      2026-10-26T10:35:00Z exit 0 in 1s [39a45f94] — ...........                                                              [100%] / 11 passed in 1.05s
+- [x] 10. Reconcile source denominator and native memory boundaries with bounded receipts | needs: 8 | ctx: docs/v1/archive-checkpoint.md | gate: PYTHONPATH=src python3 -m pytest -q tests/test_archive_sources.py tests/test_source_inventory.py tests/test_archive_reconciliation.py && python3 eval/check_source_reconciliation.py --inventory "${HARNESS_SOURCE_INVENTORY:?}" --report "${HARNESS_SOURCE_RECONCILIATION:?}"
+      2026-10-26T10:40:54Z exit 0 in 0s [162aae7a] — ...............................                                          [100%] / 31 passed in 0.27s / {"admission": {"CANDIDATE_COPY_ONLY": 2405, "EXCLUDED_DERIVED_RECORDS": 85, "EXISTING_READER_BYTE_OFFSET_COVERED": 183, "EXISTING_READER_EVICTED": 520, "EXISTING_READER_STALE": 2, "EXISTING_READER_UNINDEXED": 2}, "complete_migration": false, "sources": 3197, "status": "RECONCILED_METADATA"}
+- [x] 11. Verify the integrated archive development checkpoint | needs: 8,9,10 | gate: bash scripts/check.sh
+      2026-10-26T10:47:39Z exit 0 in 384s [fbbb251e] — DEMO: PASS / CHECK: PASS / agent-harness guard blocked this: rm -r on ~ (the home directory). If it is really intended, ask the human to run it themselves.
+
+Node 10 gate strengthened before completion: parser tests alone do not check the actual source denominator. The independent receipt join now verifies the bound inventory, all source IDs, metadata and admission labels. Private paths are supplied by environment, not committed. Original receipts, including a corrected intermediate admission tally, remain private.

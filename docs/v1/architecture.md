@@ -85,3 +85,53 @@ until it beats the simpler baseline on the same work and full cost.
    separately bounded real-task comparison. No unit-test count substitutes for it.
 4. Expand learning/routing/orchestration only where those results identify a gap.
    Merge, deployment and new model-call budgets retain their own authority.
+
+## Readiness before work — design requirement, not yet a qualified feature
+
+Use risk-adaptive, evidence-backed readiness. A small read or local edit needs a
+small check; a shared schema change or irreversible operation needs stronger
+evidence. Readiness covers the goal and acceptance, uncertain assumptions and
+source currency, actual capabilities/environment/authority, ownership and
+interface/schema conflicts, resource budgets, executable verification and recovery.
+It is not a universal long checklist or a substitute for runtime checks.
+
+Bind readiness to the relevant source revisions, dependencies, scope and shared
+state. When those change, invalidate affected readiness and recheck before the
+dependent action. Compare actual changed files and observed actions against the
+declared operation where signals exist. A declared intent or advisory claim cannot
+prove what a worker actually did. Missing signals remain unknown.
+
+Qualification must include a stale plan, a missing environment dependency,
+competing interface/schema changes in disjoint files, an undeclared edit and a
+clean cheap task. Measure prevented failures, false blocks, latency and total
+token overhead against the current workflow. This requirement adds no default
+prompt, new daemon or dependency until that comparison succeeds.
+
+### Complementary source intake
+
+- [Foremerge](https://github.com/naw103/foremerge), README inspected: declared
+  semantic scopes, advisory claims and validation tied to candidate fingerprints
+  are useful coordination references. Its claims are nonexclusive, its local
+  state is not distributed consensus, and validation is not an OS sandbox.
+  **Complement/validate**, not automatic adoption. We have not audited its code
+  or established local productivity gains; declaration-versus-edit coverage needs
+  explicit qualification before relying on it.
+- [LangChain harness-engineering report](https://www.langchain.com/blog/improving-deep-agents-with-harness-engineering),
+  primary article read: it reports fixed GPT-5.2-Codex improving from 52.8 to 66.5
+  on Terminal Bench 2.0 after harness changes. **Complement** trace-based failure
+  analysis and external verification. This benchmark-specific result does not
+  isolate memory's causal effect, establish universal gains, or justify adding
+  its framework to this harness. Existing tracing/eval/recovery is the first reuse
+  target; test marginal benefit before adding overlapping infrastructure.
+- [Anthropic's agent-pattern guidance](https://www.anthropic.com/research/building-effective-agents),
+  primary article read: start with the simplest adequate solution and weigh
+  increased complexity against latency and cost. **Complement** execution choice;
+  responder, router, tool use, multiagent and generator/verifier are alternatives,
+  not a mandatory maturity ladder. The article itself warns its tooling landscape
+  has changed since publication.
+
+The related social graphics remain secondary pointers. Closed-loop verification,
+recovery, observable traces/evals and execution authority are core requirements;
+MCP is a complementary interface, multiagent use requires task evidence, and a
+gateway is conditional on provider needs. Pricing ratios depend on actual models
+and usage. No dependency was installed from these references.
