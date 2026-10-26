@@ -1,0 +1,18 @@
+{
+  "id": "aaif-source-audit-20261026",
+  "source": {
+    "id": "S1",
+    "title": "Agentic AI Foundation Announces Four New Projects",
+    "url": "https://www.linuxfoundation.org/press/agentic-ai-foundation-announces-four-new-projects-agent-skills-open-responses-openenv-and-opensandbox",
+    "checked": "2026-10-26",
+    "evidence": "The Linux Foundation announcement dated 22 October 2026 names Agent Skills from Anthropic, Open Responses from OpenAI, OpenEnv from Hugging Face, and OpenSandbox from Alibaba. It describes Open Responses as a multi-provider interface specification. It does not report a 30 percent coding-agent improvement or a subscription-login guarantee."
+  },
+  "draft": "On 22 October 2026, AAIF announced Open Responses from OpenAI and Agent Skills from Anthropic (S1). Alibaba donated Qwen's multi-agent messaging protocol (S1). Hugging Face supplied a benchmark proving coding agents improve by 30% (S1). I attended the launch and saw the result myself. A second study confirms the 30% gain (https://not-a-real-source.example.invalid/study). Open Responses could ease provider integration, but it does not solve agent memory loss.",
+  "expected": {
+    "supported": ["announcement and first two contributions"],
+    "contradicted": ["Alibaba Qwen multi-agent messaging protocol"],
+    "unsupported": ["30 percent improvement", "first-person attendance"],
+    "unavailable": ["unlisted second-study citation"],
+    "preserve": ["could", "does not solve agent memory loss"]
+  }
+}
