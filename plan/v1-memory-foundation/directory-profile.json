@@ -1,0 +1,199 @@
+{
+  "baseline_revision": "5bf8d326986db92aa3314ea4e41f58e4db402476",
+  "candidate_kb_sha256": "b1538f28f6b7edbf1f304e2ffe68c8136909b56440f98dd0e2949600f0a5ff54",
+  "scope": "synthetic CPU queries; no model quality or token claim",
+  "cases": {
+    "broad": {
+      "documents": 600,
+      "repetitions": 21,
+      "ordered_responses_equal": true,
+      "response_bytes": 1600,
+      "cold_ms": {
+        "baseline": 210.273,
+        "candidate": 95.411
+      },
+      "warm_median_ms": {
+        "baseline": 97.964,
+        "candidate": 41.688
+      },
+      "samples_ms": {
+        "baseline": [
+          98.13,
+          95.106,
+          95.56,
+          95.005,
+          95.249,
+          97.136,
+          97.964,
+          97.53,
+          95.568,
+          95.69,
+          95.155,
+          98.466,
+          106.756,
+          103.994,
+          105.732,
+          104.0,
+          105.788,
+          107.864,
+          101.349,
+          98.687,
+          95.514
+        ],
+        "candidate": [
+          43.139,
+          40.861,
+          41.358,
+          40.895,
+          41.575,
+          41.624,
+          42.474,
+          41.243,
+          41.206,
+          40.803,
+          41.475,
+          43.504,
+          47.66,
+          46.042,
+          45.711,
+          44.937,
+          45.749,
+          46.214,
+          43.865,
+          41.688,
+          41.204
+        ]
+      }
+    },
+    "selective": {
+      "documents": 600,
+      "repetitions": 21,
+      "ordered_responses_equal": true,
+      "response_bytes": 140,
+      "cold_ms": {
+        "baseline": 109.141,
+        "candidate": 64.704
+      },
+      "warm_median_ms": {
+        "baseline": 20.804,
+        "candidate": 20.33
+      },
+      "samples_ms": {
+        "baseline": [
+          22.189,
+          20.804,
+          20.671,
+          20.629,
+          20.647,
+          20.859,
+          20.793,
+          20.824,
+          20.83,
+          23.557,
+          20.907,
+          20.8,
+          20.9,
+          20.762,
+          20.879,
+          21.402,
+          20.802,
+          20.699,
+          20.739,
+          21.176,
+          20.803
+        ],
+        "candidate": [
+          22.117,
+          20.148,
+          20.237,
+          20.065,
+          20.444,
+          20.33,
+          20.389,
+          20.5,
+          20.143,
+          20.364,
+          20.545,
+          20.286,
+          20.366,
+          20.197,
+          21.396,
+          22.489,
+          20.436,
+          20.235,
+          20.177,
+          20.259,
+          20.308
+        ]
+      }
+    },
+    "changed_source": {
+      "documents": 40,
+      "repetitions": 21,
+      "ordered_responses_equal": true,
+      "response_bytes": 140,
+      "cold_ms": {
+        "baseline": 9.578,
+        "candidate": 6.394
+      },
+      "warm_median_ms": {
+        "baseline": 1.673,
+        "candidate": 1.626
+      },
+      "samples_ms": {
+        "baseline": [
+          1.761,
+          1.68,
+          1.649,
+          1.619,
+          1.696,
+          1.647,
+          1.632,
+          1.632,
+          1.675,
+          1.629,
+          1.72,
+          1.566,
+          1.682,
+          2.876,
+          1.673,
+          1.635,
+          1.75,
+          1.664,
+          1.643,
+          1.699,
+          1.682
+        ],
+        "candidate": [
+          1.687,
+          1.652,
+          1.562,
+          1.647,
+          1.606,
+          1.61,
+          1.575,
+          1.592,
+          1.6,
+          1.628,
+          1.66,
+          1.607,
+          1.554,
+          1.602,
+          1.626,
+          1.626,
+          1.648,
+          1.631,
+          1.63,
+          1.658,
+          1.666
+        ]
+      }
+    }
+  },
+  "short_stem_cache": {
+    "retained_bytes_probe": 799018,
+    "peak_bytes_probe": 836878,
+    "entries": 1024,
+    "probe": "3000 distinct 64-character wide-Unicode terms"
+  }
+}

@@ -259,6 +259,27 @@ def cmd_uninstall(args) -> int:
     return 0
 
 
+def cmd_source_inventory(args) -> int:
+    from .source_inventory import default_roots, inventory_sources
+    home, hh = _paths(args)
+    roots = default_roots(home)
+    roots += [{"kind": "archive-jsonl", "path": path, "reader_supported": False}
+              for path in args.archive_root]
+    result = inventory_sources(roots, hh / "index.sqlite", args.limit, args.seconds)
+    if not args.details:
+        result.pop("entries")
+    print(json.dumps(result, sort_keys=True))
+    return 2 if result["index_status"] == "UNREADABLE" or result["scan_status"] == "INCOMPLETE" else 0
+
+
+def cmd_cache_status(args) -> int:
+    from .cache_status import inspect_cache
+    _, hh = _paths(args)
+    result = inspect_cache(hh)
+    print(json.dumps(result, sort_keys=True))
+    return 2 if result["status"] == "UNREADABLE" else 0
+
+
 def cmd_status(args) -> int:
     if getattr(args, "runtime", False):
         from . import runtime_inventory
@@ -739,6 +760,21 @@ def cmd_self_update(args) -> int:
 def cmd_improve(args) -> int:
     from . import improve
     _, hh = _paths(args)
+    if args.prepare_procedure or args.inspect_procedure:
+        from . import procedures
+        try:
+            if sum(bool(x) for x in (args.prepare_procedure, args.inspect_procedure,
+                                     args.weekly_intake, args.propose, args.draft_procedure,
+                                     args.correct_procedure, args.rollback, args.apply,
+                                     args.trend, args.eval)) != 1:
+                raise ValueError("preparation or inspection requires exactly one action")
+            result = (procedures.prepare(args.project, procedures.read_json(args.prepare_procedure))
+                      if args.prepare_procedure else procedures.inspect(hh, args.project, args.inspect_procedure))
+            _out(json.dumps(result, ensure_ascii=False))
+            return 0
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            _out("improve: refused: " + str(exc))
+            return 1
     if args.weekly_intake:
         if any((args.propose, args.draft_procedure, args.correct_procedure,
                 args.rollback, args.apply, args.trend)):
@@ -785,7 +821,9 @@ def cmd_improve(args) -> int:
             "%s  seen %sx  [%s] %s" % (p["id"], p["count"], p["source"], p["summary"]) for p in props) or \
             "improve: nothing has recurred yet"
     else:
-        rc, msg = 2, "harness improve: --propose, --apply ID --eval FILE, or --trend HISTORY"
+        rc, msg = 2, ("harness improve: --prepare-procedure FILE, --draft-procedure FILE, "
+                      "--inspect-procedure ID, --propose, or --trend HISTORY; "
+                      "v1 promotion requires independent native evidence and remains held")
     _out(msg)
     return rc
 
@@ -1129,6 +1167,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--session", help="transcript path (default: the newest for this client and folder)")
     p.add_argument("--json", action="store_true")
     sub.add_parser("doctor", help="check the installation")
+    sub.add_parser("cache-status", help="read-only scoped index inventory; no pruning or source text")
+    p = sub.add_parser("source-inventory", help="read-only declared transcript metadata and index coverage")
+    p.add_argument("--archive-root", action="append", default=[], help="explicit archive directory; no automatic import")
+    p.add_argument("--limit", type=int, default=100_000, help="maximum filesystem entries examined")
+    p.add_argument("--seconds", type=float, default=10, help="metadata scan time budget")
+    p.add_argument("--details", action="store_true", help="include hashed source identifiers and metadata")
     p = sub.add_parser("warmup", help="build the knowledge index and install optional plugins")
     p.add_argument("--background", action="store_true")
     p.add_argument("--include-optional", action="store_true", help="also install plugins marked optional")
@@ -1145,7 +1189,10 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("self-update", help="update to the newest release whose checks passed (at most daily)")
     p.add_argument("--check", action="store_true", help="say what it would do, change nothing")
     p.add_argument("--now", action="store_true", help="ignore the once-a-day limit")
-    p = sub.add_parser("improve", help="turn repeated lessons into proposals; apply one only behind an eval gain")
+    p = sub.add_parser("improve", help="prepare, inspect and correct source-bound candidates; v1 promotion held")
+    p.add_argument("--prepare-procedure", metavar="FILE",
+                   help="emit candidate JSON with hashes from explicit project episode files; no save or activation")
+    p.add_argument("--inspect-procedure", metavar="ID", help="read one scoped method's lifecycle and correction links")
     p.add_argument("--weekly-intake", action="store_true", help="on-demand changed evidence only; no model or promotion")
     p.add_argument("--since", type=int, help="expected intake cursor; refuse stale readers")
     p.add_argument("--max-items", type=int, default=10, help="maximum changed candidates, 1..20")
@@ -1290,7 +1337,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.cmd == "continuation":
         from .continuation import command
         return command(args)
-    fn = {"install": cmd_install, "uninstall": cmd_uninstall, "status": cmd_status, "doctor": cmd_doctor, "explain": cmd_explain,
+    fn = {"install": cmd_install, "uninstall": cmd_uninstall, "status": cmd_status, "cache-status": cmd_cache_status, "source-inventory": cmd_source_inventory, "doctor": cmd_doctor, "explain": cmd_explain,
           "warmup": cmd_warmup, "update": cmd_update, "learn": cmd_learn, "sync": cmd_sync,
           "review": cmd_review, "run": cmd_run, "discover": cmd_discover,
           "improve": cmd_improve, "self-update": cmd_self_update, "vault-read": cmd_vault_read,

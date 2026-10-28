@@ -21,6 +21,34 @@ evidence only. They do not satisfy the native actor isolation, effective model,
 usage-to-artifact and independent grader boundaries. A separately authorized
 paired native A/B test is needed before claiming a taught method improves work.
 
+## Integration and rollout contract — 28 October update
+
+The [usable workflow candidate](USABLE-WORKFLOW.md) joins the existing plan and
+method lifecycle with packaged templates and read-only preparation/inspection.
+Its executable source gates live in `plan/v1-usable-loop.md`. They are not
+native learning-transfer or deployment gates. The later native recall receipt
+described in [scope/corrections](scope-correction-checkpoint.md) covers only three
+synthetic cases on `aa8a201`; it does not replace the held promotion boundary.
+
+Target inventory begins with the repository's supported adapters: Claude Code,
+Codex, VS Code Copilot, Cursor, Gemini, AGENTS.md-only clients, Claude Desktop
+and Jupyter AI. A supported adapter is not proof the tool is installed or that
+all its harness features exist. Inspect actual target capabilities first.
+
+| Target | Known installed evidence | Still required for this v1 candidate |
+| --- | --- | --- |
+| Studio | Last verified package 0.9.1.dev0 from 0774a11; fresh registered MCP readback, existing-client refresh not universal | Exact new install and loaded-client readback, native tasks and rollback |
+| MacBook Air | Current revision/loading not established by Studio receipts | Actual tools and version, install, fresh/existing-client activation, native checks and rollback |
+| Research server, owner and each user | Per-user current state not established by Studio receipts | Supported tools, role-compatible install, private adapters/memory, per-user activation and rollback |
+
+Use shared versioned binaries with private per-user adapters, memories and
+authentication. Never copy the owner's private histories to other accounts or
+create credentials/access implicitly. Authentication and security-sensitive
+changes need their own action-time authority. Default availability is a rollout
+requirement, not permission to bypass account policies or switch live versions.
+No v1 deployment, remote host edit or native settings change is performed by the
+workflow/template development slice.
+
 ## Requirement-to-evidence map for the latest CPU slice
 
 | Requirement | Code | Test and result | Production evidence | Remaining gate |

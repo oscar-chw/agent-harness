@@ -78,3 +78,20 @@ spends your Claude Code and Codex usage): [eval/README.md](../eval/README.md).
   available.
 - **The work graph is on by default (v0.3.3)**, except in Claude desktop and Jupyter AI (no shell of their own). `HARNESS_DISABLE=plan` turns the `plan` MCP tool off; `plan run`
   dispatches Claude Code workers only, and in the other tools the graph is driven one node at a time.
+
+## Read-only cache inventory (v1 candidate)
+
+`harness cache-status` returns JSON counts for the current discovered KB scope, retained
+cache outside that discovery, session-search rows, allocated SQLite pages and free pages.
+It opens the database read-only and does not refresh, prune, compact or print source text.
+SQLite may maintain its normal WAL reader metadata. `PRESENT` means the database was
+readable, not that storage or retrieval is healthy; `ABSENT` does not create a store,
+and `UNREADABLE` exits 2. Outside-current-discovery rows may still serve other clients.
+This report does not authorize eviction or change `harness doctor`'s budget.
+
+`harness source-inventory` reports declared transcript metadata and index offsets.
+Use `--archive-root PATH` for an additional metadata-only archive, `--details` for
+hashed file identifiers, and `--limit`/`--seconds` to bound discovery. Exit 2 means
+an incomplete scan or unreadable index; exit 0 never means complete migration.
+See the [development checkpoint](v1/development-checkpoint.md) for verified scope,
+latency measurements and outstanding v1 acceptance.

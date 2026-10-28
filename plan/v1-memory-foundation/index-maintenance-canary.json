@@ -1,0 +1,38 @@
+{
+  "status": "COPY_QUERY_EQUIVALENCE_PASS",
+  "source_index_unchanged_during_compaction": true,
+  "source_documents_unchanged": true,
+  "kb_hits": 1,
+  "session_hits": 1,
+  "receipt": {
+    "source_sha256": "68ba788cd2e38edbe89f1739ef0200083651b3b76f9d3c606c27557652b6449c",
+    "wal_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "destination_sha256": "0e3011322458d9867f4aa0540e5b1c70c9023122bddfea36333547ab55051d57",
+    "source_bytes": 2183168,
+    "wal_bytes": 0,
+    "destination_bytes": 86016,
+    "row_counts": {
+      "fixture_padding": 0,
+      "kb_files": 1,
+      "kb_fts": 1,
+      "kb_fts_config": 1,
+      "kb_fts_content": 1,
+      "kb_fts_data": 3,
+      "kb_fts_docsize": 1,
+      "kb_fts_idx": 1,
+      "kb_sections": 1,
+      "sess_files": 1,
+      "sess_fts": 1,
+      "sess_fts_config": 1,
+      "sess_fts_content": 1,
+      "sess_fts_data": 3,
+      "sess_fts_docsize": 1,
+      "sess_fts_idx": 1,
+      "sess_msgs": 1
+    },
+    "integrity_check": "ok",
+    "elapsed_seconds": 0.010143
+  },
+  "live_index_maintenance": false,
+  "model_evidence": "NOT_RUN"
+}

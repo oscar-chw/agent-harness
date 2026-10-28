@@ -7,6 +7,8 @@ Search is BM25: SQLite FTS5 when available, a pure-Python BM25 otherwise. The in
 """
 from __future__ import annotations
 
+from functools import lru_cache
+import heapq
 import math
 import os
 import re
@@ -77,7 +79,7 @@ they this those through to too under until up very was we were what when where w
 with would you your yours please can't don't use using used make want need get got let lets like also""".split())
 
 
-def _stem(w: str) -> str:
+def _stem_uncached(w: str) -> str:
     """Tiny suffix stripper (rotate/rotating/rotation -> rot, backups -> backup). Stdlib-only stand-in
     for a real stemmer; the same function stems documents and queries, so it only has to be consistent."""
     for suf in _SUFFIXES:
@@ -87,6 +89,17 @@ def _stem(w: str) -> str:
     if w.endswith("e") and len(w) > 4:
         w = w[:-1]
     return w
+
+
+@lru_cache(maxsize=1024)
+def _short_stem(w: str) -> str:
+    return _stem_uncached(w)
+
+
+def _stem(w: str) -> str:
+    # Stemming is pure. Cache only short words, never documents or query results;
+    # an arbitrary long token must not consume a retained cache entry.
+    return _short_stem(w) if len(w) <= 64 else _stem_uncached(w)
 
 
 def tokens(text: str) -> List[str]:
@@ -401,6 +414,40 @@ def _doc_tokens(title: str, body: str) -> List[str]:
     return tokens(title) * 2 + tokens(body)
 
 
+def discover_files(roots: Sequence[Path]) -> List[Tuple[Path, str]]:
+    found: List[Tuple[Path, str]] = []
+    used: set = set()
+    parents = {}
+    for root in roots:
+        if _ok(Path.is_file, root):
+            items = [(root, root.name)]
+        elif _ok(Path.is_dir, root):
+            items = []
+            for dirpath, dirnames, filenames in os.walk(root):
+                dirnames[:] = sorted(d for d in dirnames if d not in SKIP_DIRS and not d.startswith("."))
+                for fn in sorted(filenames):
+                    p = Path(dirpath) / fn
+                    if p.suffix.lower() in TEXT_SUFFIXES:
+                        items.append((p, "%s/%s" % (root.name, p.relative_to(root).as_posix())))
+        else:
+            continue
+        for p, rel in items:
+            if rel in used:
+                rel = "%s/%s" % (root.resolve().parent.name, rel)
+            used.add(rel)
+            # Resolve a shared directory once per discovery, not once per file.
+            # Symlinks still resolve individually; this cache never survives a
+            # refresh, and refresh still checks every source's stat and access.
+            if p.is_symlink():
+                resolved = p.resolve()
+            else:
+                if p.parent not in parents:
+                    parents[p.parent] = p.parent.resolve()
+                resolved = parents[p.parent] / p.name
+            found.append((resolved, rel))
+    return found
+
+
 class KB:
     def __init__(self, home: Optional[os.PathLike] = None, paths: Optional[Sequence[os.PathLike]] = None,
                  fts: Optional[bool] = None, db_path: Optional[os.PathLike] = None):
@@ -410,6 +457,7 @@ class KB:
         self.db_path = Path(db_path) if db_path else self.home / "index.sqlite"
         self.con = connect(self.db_path)
         self._bm25: Optional[BM25] = None
+        self._bm25_stamp = None
         self._init_schema()
 
     def _init_schema(self) -> None:
@@ -432,27 +480,7 @@ class KB:
 
     # -- discovery
     def _walk(self) -> List[Tuple[Path, str]]:
-        found: List[Tuple[Path, str]] = []
-        used: set = set()
-        for root in self.roots:
-            if _ok(Path.is_file, root):
-                items = [(root, root.name)]
-            elif _ok(Path.is_dir, root):
-                items = []
-                for dirpath, dirnames, filenames in os.walk(root):
-                    dirnames[:] = sorted(d for d in dirnames if d not in SKIP_DIRS and not d.startswith("."))
-                    for fn in sorted(filenames):
-                        p = Path(dirpath) / fn
-                        if p.suffix.lower() in TEXT_SUFFIXES:
-                            items.append((p, "%s/%s" % (root.name, p.relative_to(root).as_posix())))
-            else:
-                continue
-            for p, rel in items:
-                if rel in used:
-                    rel = "%s/%s" % (root.resolve().parent.name, rel)
-                used.add(rel)
-                found.append((p.resolve(), rel))
-        return found
+        return discover_files(self.roots)
 
     def refresh(self) -> dict:
         """Reindex files whose mtime/size changed; drop files that disappeared. Returns counts."""
@@ -463,11 +491,14 @@ class KB:
         live = set()
         for p, rel in found:
             key = str(p)
-            live.add(key)
             try:
                 st = p.stat()
+                # Cached text does not grant access after source permissions change.
+                if not os.access(p, os.R_OK):
+                    continue
             except OSError:
                 continue
+            live.add(key)
             k = known.get(key)
             if k and k[0] == st.st_mtime and k[1] == st.st_size and k[2] == rel:
                 continue
@@ -480,8 +511,13 @@ class KB:
         c.execute("DELETE FROM kb_live")
         c.executemany("INSERT OR IGNORE INTO kb_live(path) VALUES (?)", [(k,) for k in live])
         c.commit()
-        if changed or removed or self._bm25 is None:
-            self._bm25 = None if self.fts else self._build_bm25()
+        if not self.fts:
+            # Another connection may have indexed the changed file already;
+            # local changed==0 does not mean this in-memory ranker is current.
+            stamp = (c.execute("PRAGMA data_version").fetchone()[0], frozenset(live))
+            if changed or removed or self._bm25 is None or stamp != self._bm25_stamp:
+                self._bm25 = self._build_bm25()
+                self._bm25_stamp = stamp
         return {"files": len(live), "changed": changed, "removed": removed}
 
     def _drop_file(self, key: str) -> None:
@@ -522,8 +558,9 @@ class KB:
     def search(self, query: str, k: int = 5, min_score: Optional[float] = None) -> List[dict]:
         """Top-k sections scoring >= min_score (normalised 0..1, see relevance()); [] beats weak matches.
 
-        FTS5 (or the Python BM25) proposes up to CANDIDATES sections; each is re-scored with relevance()
-        so the threshold means the same thing on both backends.
+        FTS5 streams matching live sections into a bounded top-k heap. Corpus
+        statistics and ranking are scoped before truncation, so another project
+        cannot change this project's results. The fallback uses scoped BM25.
         """
         self.refresh()
         k = max(1, min(int(k), 50))
@@ -536,13 +573,14 @@ class KB:
             rows = c.execute(
                 "SELECT s.rowid, s.sid, s.title, s.rel, s.body, s.bytes FROM kb_fts f "
                 "JOIN kb_sections s ON s.rowid=f.rowid JOIN kb_live l ON l.path=s.path "
-                "WHERE kb_fts MATCH ? ORDER BY bm25(kb_fts, 5.0, 1.0) LIMIT ?",
-                (fts_query(qt.values()), CANDIDATES)).fetchall()
+                "WHERE kb_fts MATCH ?", (fts_query(qt.values()),))
             st = c.execute("SELECT COUNT(*), AVG(s.ntok) FROM kb_sections s JOIN kb_live l ON l.path=s.path"
                            ).fetchone()
             n, avgdl = st[0], st[1] or 0.0
-            df = {t: c.execute("SELECT COUNT(*) FROM kb_fts WHERE kb_fts MATCH ?", (fts_query([w]),)).fetchone()[0]
-                  for t, w in qt.items()}
+            df = {t: c.execute(
+                "SELECT COUNT(*) FROM kb_fts f JOIN kb_sections s ON s.rowid=f.rowid "
+                "JOIN kb_live l ON l.path=s.path WHERE kb_fts MATCH ?",
+                (fts_query([w]),)).fetchone()[0] for t, w in qt.items()}
         else:
             bm = self._bm25 or self._build_bm25()
             rows = []
@@ -552,14 +590,15 @@ class KB:
                 if r:
                     rows.append(r)
             n, avgdl, df = len(bm.keys), bm.avg, {t: bm.df(t) for t in qt}
-        scored = [(relevance(qt, _doc_tokens(r["title"], r["body"]), n, avgdl, df), r) for r in rows]
+        scored = ((relevance(qt, _doc_tokens(r["title"], r["body"]), n, avgdl, df), r) for r in rows)
         # The profile's own files (the machine descriptor, the rules) are the authoritative source for
         # questions about this environment, so among relevant hits they rank first: a wiki page that just
         # repeats "GPU" should not push the descriptor's Machine section out of the top few. The threshold
         # still applies to the unboosted score, so a weak descriptor match is not let through.
         auth = self._authoritative()
-        scored = sorted((x for x in scored if x[0] >= min_score),
-                        key=lambda x: -(x[0] * (DESCRIPTOR_BOOST if x[1]["rel"] in auth else 1.0)))[:k]
+        scored = heapq.nsmallest(k, (x for x in scored if x[0] >= min_score),
+                                key=lambda x: (-(x[0] * (DESCRIPTOR_BOOST if x[1]["rel"] in auth else 1.0)),
+                                               x[1]["sid"], x[1]["rel"]))
         return [{"id": r["sid"], "title": r["title"], "path": r["rel"],
                  "snippet": snippet(r["body"].split("\n", 1)[-1] if r["body"].startswith("#") else r["body"],
                                     query),

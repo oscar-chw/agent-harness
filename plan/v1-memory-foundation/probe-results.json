@@ -1,0 +1,31 @@
+{
+  "global-document-frequency": {
+    "exit": 1,
+    "caught": true
+  },
+  "global-candidate-cutoff": {
+    "exit": 1,
+    "caught": true
+  },
+  "stale-fallback-cache": {
+    "exit": 1,
+    "caught": true
+  },
+  "baseline": {
+    "median_ms": 29.82,
+    "runs": 7,
+    "documents": 600,
+    "returned": 5,
+    "serialized_bytes": 1600
+  },
+  "candidate": {
+    "median_ms": 100.85,
+    "runs": 7,
+    "documents": 600,
+    "returned": 5,
+    "serialized_bytes": 1600
+  },
+  "scope": "CPU synthetic fixture only; serialized response bytes are not measured model tokens",
+  "baseline_revision": "0774a11ede6b926f81c43933ebdf4d0819cf470e",
+  "candidate_kb_sha256": "33e283944ca541850209637834ad568f258898c97146d1a70689c785515881ff"
+}
