@@ -749,6 +749,38 @@ def prompt_hook(stdin=None) -> int:
     return 0
 
 
+def cmd_model_registry(args) -> int:
+    from . import discovery_cycle
+    home, _ = _paths(args)
+    try:
+        result = discovery_cycle.routing_candidate(home) if args.routing_candidate else discovery_cycle.registry(home)
+    except ValueError as exc:
+        _out(json.dumps({"status": "HOLD", "reason": str(exc)}))
+        return 1
+    _out(json.dumps(result, indent=2))
+    return 0
+
+
+def cmd_daily_discovery(args) -> int:
+    from . import discovery_cycle
+    home, hh = _paths(args)
+    try:
+        if args.history:
+            result = {"history": discovery_cycle.history(hh), "archives": discovery_cycle.archive_history(hh)}
+        elif args.enable_schedule or args.disable_schedule or args.schedule_status:
+            from . import daily_schedule
+            operation = (daily_schedule.enable if args.enable_schedule else daily_schedule.disable
+                         if args.disable_schedule else daily_schedule.status)
+            result = operation(hh, home)
+        else:
+            result = discovery_cycle.schedule(hh) if args.schedule else discovery_cycle.run(hh, home)
+    except (OSError, ValueError, sqlite3.Error) as exc:
+        _out(json.dumps({"status": "UNAVAILABLE", "reason": type(exc).__name__}))
+        return 1
+    _out(json.dumps(result, indent=2))
+    return 1 if result.get("status") in ("FETCH_FAILED", "RETENTION_HOLD") else 0
+
+
 def cmd_self_update(args) -> int:
     from . import selfupdate
     home, hh = _paths(args)
@@ -1186,6 +1218,15 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--ssh-cmd", help="ssh command to use (default: ssh)")
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--config", action="store_true", help="save --remote/--ssh-cmd as the default")
+    p = sub.add_parser("model-registry", help="observe four model families without changing routing")
+    p.add_argument("--routing-candidate", action="store_true", help="emit a held profile for the existing route resolver")
+    p = sub.add_parser("daily-discovery", help="bounded official-source diff; proposals only, no installs")
+    schedule_actions = p.add_mutually_exclusive_group()
+    schedule_actions.add_argument("--history", action="store_true", help="read bounded discovery audit metadata without source text")
+    schedule_actions.add_argument("--schedule", action="store_true", help="describe the inactive daily schedule without fetching")
+    schedule_actions.add_argument("--enable-schedule", action="store_true", help="enable this user's bounded macOS discovery timer")
+    schedule_actions.add_argument("--disable-schedule", action="store_true", help="disable discovery, preserving its history and runner")
+    schedule_actions.add_argument("--schedule-status", action="store_true", help="read back the native discovery timer")
     p = sub.add_parser("self-update", help="update to the newest release whose checks passed (at most daily)")
     p.add_argument("--check", action="store_true", help="say what it would do, change nothing")
     p.add_argument("--now", action="store_true", help="ignore the once-a-day limit")
@@ -1340,7 +1381,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     fn = {"install": cmd_install, "uninstall": cmd_uninstall, "status": cmd_status, "cache-status": cmd_cache_status, "source-inventory": cmd_source_inventory, "doctor": cmd_doctor, "explain": cmd_explain,
           "warmup": cmd_warmup, "update": cmd_update, "learn": cmd_learn, "sync": cmd_sync,
           "review": cmd_review, "run": cmd_run, "discover": cmd_discover,
-          "improve": cmd_improve, "self-update": cmd_self_update, "vault-read": cmd_vault_read,
+          "improve": cmd_improve, "model-registry": cmd_model_registry, "daily-discovery": cmd_daily_discovery, "self-update": cmd_self_update, "vault-read": cmd_vault_read,
           "vault-document": cmd_vault_document, "vault-search": cmd_vault_search,
           "memory-page": cmd_memory_page, "memory-read": cmd_memory_read,
           "launch": cmd_launch, "method": cmd_method, "op": cmd_op, "task": cmd_task}.get(args.cmd)

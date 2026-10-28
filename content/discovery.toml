@@ -1,0 +1,19 @@
+# Reviewed registry policy, 2026-10-28. Family roles are task hypotheses, not benchmark rankings.
+# Public guidance: https://learn.chatgpt.com/docs/models
+# Exact IDs must ALSO appear in the local client registry with the requested effort.
+[family.luna]
+model = "gpt-6-luna"
+effort = "low"
+role = "bounded extraction and individual-source triage"
+[family.terra]
+model = "gpt-6.1-terra"
+effort = "medium"
+role = "grouped notes and routine synthesis, subject to task checks"
+[family.sol]
+model = "gpt-6.1-sol"
+effort = "high"
+role = "implementation and conflicting-source synthesis"
+[family.astra]
+model = "gpt-6-astra"
+effort = "high"
+role = "explicit escalation for difficult or high-impact decisions"
