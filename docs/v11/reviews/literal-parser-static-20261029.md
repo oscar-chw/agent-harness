@@ -76,3 +76,15 @@ Approval of the exact inert classification retry remains distinct from approval
 to install a security change. A local parser correction cannot override a
 platform/PreToolUse denial. Installation requires the separately approved exact
 change, a current baseline hash, actual installed checks and a verified rollback.
+
+## Final boundary update (bridge-reported)
+
+The FYP bridge reports that the ONE specifically approved clean equivalent inert
+classification retry was submitted through normal exec_command and refused by
+PreToolUse before execution. Receipt pointer:
+`research/staging-guard-20261028/APPROVED_CLEAN_RETRY_REFUSAL_20261029.json`.
+This review did not open or independently verify that receipt. No classifier
+verdicts were produced; dynamic acceptance remains unverified. The approval is
+consumed: no retry, re-encoding or alternate route. Installation is not authorized
+by the refused test. Native proposal training remains held until a distinct
+reviewed operator/security maintenance path is explicitly resolved.

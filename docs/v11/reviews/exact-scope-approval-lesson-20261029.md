@@ -24,3 +24,10 @@ layer instead of silently substituting a different execution channel.
 Basis: sanitized FYP parser-review packet and patch, plus the owner's exact inert
 retry approval forwarded for this review. This note is a proposed operational
 lesson, not proof of autonomous learning, a promoted skill or an authority grant.
+
+A one-shot approval is consumed when its specifically authorized submission is
+made, including a platform refusal before execution. Record that outcome and
+stop that action; retained approval history must not become a reusable bypass
+permission. A distinct maintenance path needs its own explicit resolution.
+For this case the bridge reported REFUSED_BEFORE_EXECUTION; this review neither
+retried the test nor independently verified the referenced refusal receipt.
