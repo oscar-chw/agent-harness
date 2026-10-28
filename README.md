@@ -198,6 +198,10 @@ A real install (without `--dry-run`) **replaces `~/.claude/CLAUDE.md`** and the 
 with the harness rules, and merges into their settings. Every file is backed up first, and `harness uninstall`
 restores them all. Every command, the demo's output and the checks: [docs/usage.md](docs/usage.md).
 
+Development candidate: [the integrated v1 workflow](docs/v1/USABLE-WORKFLOW.md)
+connects durable plans, on-demand templates and source-bound skill preparation.
+Automatic skill promotion and v1 rollout remain held behind their acceptance gates.
+
 ## Project structure
 
 ```

@@ -760,6 +760,21 @@ def cmd_self_update(args) -> int:
 def cmd_improve(args) -> int:
     from . import improve
     _, hh = _paths(args)
+    if args.prepare_procedure or args.inspect_procedure:
+        from . import procedures
+        try:
+            if sum(bool(x) for x in (args.prepare_procedure, args.inspect_procedure,
+                                     args.weekly_intake, args.propose, args.draft_procedure,
+                                     args.correct_procedure, args.rollback, args.apply,
+                                     args.trend, args.eval)) != 1:
+                raise ValueError("preparation or inspection requires exactly one action")
+            result = (procedures.prepare(args.project, procedures.read_json(args.prepare_procedure))
+                      if args.prepare_procedure else procedures.inspect(hh, args.project, args.inspect_procedure))
+            _out(json.dumps(result, ensure_ascii=False))
+            return 0
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            _out("improve: refused: " + str(exc))
+            return 1
     if args.weekly_intake:
         if any((args.propose, args.draft_procedure, args.correct_procedure,
                 args.rollback, args.apply, args.trend)):
@@ -806,7 +821,9 @@ def cmd_improve(args) -> int:
             "%s  seen %sx  [%s] %s" % (p["id"], p["count"], p["source"], p["summary"]) for p in props) or \
             "improve: nothing has recurred yet"
     else:
-        rc, msg = 2, "harness improve: --propose, --apply ID --eval FILE, or --trend HISTORY"
+        rc, msg = 2, ("harness improve: --prepare-procedure FILE, --draft-procedure FILE, "
+                      "--inspect-procedure ID, --propose, or --trend HISTORY; "
+                      "v1 promotion requires independent native evidence and remains held")
     _out(msg)
     return rc
 
@@ -1172,7 +1189,10 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("self-update", help="update to the newest release whose checks passed (at most daily)")
     p.add_argument("--check", action="store_true", help="say what it would do, change nothing")
     p.add_argument("--now", action="store_true", help="ignore the once-a-day limit")
-    p = sub.add_parser("improve", help="turn repeated lessons into proposals; apply one only behind an eval gain")
+    p = sub.add_parser("improve", help="prepare, inspect and correct source-bound candidates; v1 promotion held")
+    p.add_argument("--prepare-procedure", metavar="FILE",
+                   help="emit candidate JSON with hashes from explicit project episode files; no save or activation")
+    p.add_argument("--inspect-procedure", metavar="ID", help="read one scoped method's lifecycle and correction links")
     p.add_argument("--weekly-intake", action="store_true", help="on-demand changed evidence only; no model or promotion")
     p.add_argument("--since", type=int, help="expected intake cursor; refuse stale readers")
     p.add_argument("--max-items", type=int, default=10, help="maximum changed candidates, 1..20")

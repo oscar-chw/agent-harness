@@ -20,7 +20,7 @@ package-dir = {"" = "src", "agent_harness.content" = "content"}
 packages = ["agent_harness", "agent_harness.adapters", "agent_harness.mcp", "agent_harness.workgraph", "agent_harness.content"]
 
 [tool.setuptools.package-data]
-"agent_harness.content" = ["*.md", "*.toml", "hooks/*.py", "prompts/*.md", "skills/*/*", "presets/*.json"]
+"agent_harness.content" = ["*.md", "*.toml", "hooks/*.py", "prompts/*.md", "templates/*", "skills/*/*", "presets/*.json"]
 "agent_harness.workgraph" = ["bin/*", "tiers/*.ini"]
 
 [tool.setuptools.dynamic]

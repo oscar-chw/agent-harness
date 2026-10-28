@@ -9,8 +9,10 @@ model learning, tenant isolation, or protection against the same OS user.
 import hashlib
 import json
 import math
+import os
 import re
 import sqlite3
+import stat
 import time
 from contextlib import contextmanager
 from pathlib import Path
@@ -31,9 +33,19 @@ def digest(value):
     return hashlib.sha256(encoded(value)).hexdigest()
 
 
-def read_json(path):
-    with Path(path).open("rb") as stream:
+def _read_regular(path):
+    # A source may change after preparation/stat. Nonblocking open plus fstat
+    # refuses a replacement FIFO instead of waiting indefinitely for a writer.
+    flags = os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_NOFOLLOW", 0)
+    with os.fdopen(os.open(path, flags), "rb") as stream:
+        if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+            raise ValueError("procedure source must be a regular file")
         raw = stream.read(MAX_BYTES + 1)
+    return raw
+
+
+def read_json(path):
+    raw = _read_regular(Path(path).resolve(strict=True))
     if len(raw) > MAX_BYTES:
         raise ValueError("procedure input exceeds 64 KiB")
     return json.loads(raw)
@@ -80,8 +92,7 @@ def _bound_file(project, name, sha):
     path = (Path(project) / name).resolve(strict=True)
     if Path(project) not in path.parents:
         raise ValueError("source escapes its project")
-    with path.open("rb") as stream:
-        raw = stream.read(MAX_BYTES + 1)
+    raw = _read_regular(path)
     if len(raw) > MAX_BYTES or hashlib.sha256(raw).hexdigest() != sha:
         raise ValueError("source changed or exceeds its bound")
 
@@ -133,6 +144,40 @@ def _prepared_candidate(project, candidate):
     identity = "pr-" + sha[:24]
     payload = {"id": identity, "project": project, "sha256": sha, "candidate": candidate}
     return identity, payload
+
+
+def prepare(project, specification):
+    """Bind explicit episode files without saving or activating any method.
+
+    Hashes show which bytes were supplied, not whether the observations are true
+    or independent. Draft revalidates them, so preparation cannot bless a later edit.
+    """
+    project = _scope(project)
+    fields = {"schema", "title", "trigger", "steps", "exceptions", "episodes"}
+    if not isinstance(specification, dict) or set(specification) != fields:
+        raise ValueError("specification needs schema, title, trigger, steps, exceptions, episodes")
+    episodes = specification["episodes"]
+    if not isinstance(episodes, list) or not 2 <= len(episodes) <= 20:
+        raise ValueError("at least two bounded development episodes are required")
+    candidate = {**specification, "episodes": []}
+    for episode in episodes:
+        if not isinstance(episode, dict) or set(episode) != {"task_id", "path", "task_path"}:
+            raise ValueError("unbound episode needs task_id, path, task_path only")
+        bound = dict(episode)
+        for key, hash_key in (("path", "sha256"), ("task_path", "task_sha256")):
+            name = episode[key]
+            if not isinstance(name, str) or not name or Path(name).is_absolute():
+                raise ValueError("episode source needs a project-relative path")
+            path = (Path(project) / name).resolve(strict=True)
+            if Path(project) not in path.parents or not path.is_file():
+                raise ValueError("episode source must be a regular file inside its project")
+            raw = _read_regular(path)
+            if not raw or len(raw) > MAX_BYTES:
+                raise ValueError("episode source must contain 1..65536 bytes")
+            bound[hash_key] = hashlib.sha256(raw).hexdigest()
+        candidate["episodes"].append(bound)
+    _prepared_candidate(project, candidate)
+    return candidate
 
 
 def draft(home, project, candidate):

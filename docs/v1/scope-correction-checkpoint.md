@@ -54,8 +54,13 @@ The replay passed all ten outcomes across five fresh harness CLI processes. A
 negative control substitutes an incorrect retrieved port and the independent
 application assertion fails. This is source-process task evidence, not an LLM
 benchmark, native Codex/Claude loading, compaction test, or model-token result.
-The proposed three-call native Codex smoke test remains separately budgeted and
-NOT_RUN until authorized; fixtures and exact actions are retained privately.
+The subsequent three-call native Codex smoke test was separately authorized and
+completed against source `aa8a201` on 26 October. Initial recall returned the
+approved value, correction recall returned its replacement, and an unsupported
+claim returned HOLD. Each trace contains the declared successful retrieval;
+all three finished within 90 seconds, with zero retries and unchanged fixtures.
+The private acceptance receipt retains a duplicate-hook diagnostic and unknown
+effective model identity. This is not a compaction or comparative quality test.
 
 ## Disposable SQLite maintenance
 
@@ -87,8 +92,8 @@ remains open.
 ## Acceptance boundary
 
 Source tests, task replay, copy-query equivalence and independent bounded review
-qualify this development slice. Native model recall, whole-corpus correction
-completeness, unresolved real mappings, model-quality/aggregate-token comparison
+qualify this development slice. Native recall beyond the bounded synthetic smoke,
+whole-corpus correction completeness, unresolved real mappings, model-quality/aggregate-token comparison
 and live activation are **NOT QUALIFIED** by those results. Original histories,
 profiles, deployed Studio package, cache cap and native trust are unchanged.
 
