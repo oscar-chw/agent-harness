@@ -201,6 +201,8 @@ restores them all. Every command, the demo's output and the checks: [docs/usage.
 Development candidate: [the integrated v1 workflow](docs/v1/USABLE-WORKFLOW.md)
 connects durable plans, on-demand templates and source-bound skill preparation.
 Automatic skill promotion and v1 rollout remain held behind their acceptance gates.
+The [v1.1 development checkpoint](docs/v11/STATUS.md) adds an observed model-family registry
+and bounded daily official-source discovery, with explicit qualification and promotion limits.
 
 ## Project structure
 
