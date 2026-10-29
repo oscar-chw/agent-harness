@@ -39,13 +39,14 @@ Use `kb_search` only when no index entry fits. Do not read whole documents.
 
 ## Memory
 
-- For missing user context, `mem_search` specific terms with the absolute project directory.
-  Empty means no saved-fact match; use `session_search` for prior conversations, KB for documents.
-- When asked to remember: `mem_add` one short fact, with explicit scope/project. No secrets or
-  personal data. After fail-to-pass evidence or a user correction: `lesson_add`.
-- Hard-won method: `skill_manage draft` needs source episodes; independent checks precede use.
-- Outside a plan: `state_save` unfinished work; `state_load` after compaction. Check project and
-  freshness against current files. One-shot questions need neither.
+- Missing context: `mem_search` with the project; `session_search` for conversations,
+  KB for documents. Empty means no saved match, not no history.
+- Multi-step work: use `session-memory`. Inspect shared handoffs; message only to activate
+  authorized work. Write checkpoints at milestones, blockers and before compaction.
+- `mem_add` scoped user facts; `lesson_add` verified fixes/corrections. No secrets or
+  personal data. `skill_manage draft` needs source episodes and independent checks before use.
+- Outside a plan: `state_save` unfinished work; `state_load` after compaction. Recheck sources
+  and project. One-shot questions need neither.
 
 ## Web
 
