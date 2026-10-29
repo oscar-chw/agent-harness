@@ -1359,6 +1359,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--uncertainty", choices=("none", "consequential"), default="none")
     from .presets import add_parser as add_preset_parser
     add_preset_parser(sub)
+    handoff = sub.add_parser("handoff", help="read bounded project handoff files; no global database")
+    handoff.add_argument("--task", help="exact task directory identifier")
     sub.add_parser("_hook-stop")
     sub.add_parser("_hook-prompt")
     sub.add_parser("_hook-context")
@@ -1369,6 +1371,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[List[str]] = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.cmd == "handoff":
+        from .handoff import command
+        return command(args)
     if args.cmd == "evidence":
         from .native_evidence import command
         return command(args)

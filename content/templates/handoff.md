@@ -1,7 +1,9 @@
 # Shared task handoff — advisory, inspect without messaging
 
 Store at `handoffs/<task>/<session>.md` in the project; one writer per packet.
-Register its path through `harness task checkpoint` when a shell is available.
+Inspect with `harness handoff --task <task>`; it needs no global task database.
+Register through `harness task checkpoint` when permitted; otherwise record
+NOT_REGISTERED and retain the project-local packet without expanding access.
 Update at material milestones, blockers, corrections and before compaction/end.
 
 - Task ID / owner / observed session ID (UNKNOWN if unavailable):

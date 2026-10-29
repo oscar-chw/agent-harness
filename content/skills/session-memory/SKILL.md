@@ -11,9 +11,9 @@ does not require a handoff. This protocol adds no access or messaging authority.
 ## Read before contacting another session
 
 1. Resolve the authorized project root. Inspect its current graph and node records.
-2. Read the relevant `handoffs/<task>/<session>.md`; use filenames and a bounded
-   search, not every document. `harness task status --json` exposes registered
-   checkpoints from any shell client in the same project. MCP `op_state status`
+2. `harness handoff --task <task>` reads project-local packets without a global
+   database; or read `handoffs/<task>/<session>.md` directly. Optional registered
+   checkpoints: `harness task status --json` in the project. MCP `op_state status`
    is optional; if disabled, use the CLI or project files, never enable it silently.
 3. Recheck source revisions, gates and artifact pointers. A handoff is advisory;
    `done` text, an expired lease or a quiet session proves neither PASS nor liveness.
@@ -27,17 +27,19 @@ does not require a handoff. This protocol adds no access or messaging authority.
 ## Write while working
 
 - For material work, create one project-local packet per task/session using the
-  shipped `templates/handoff.md`. Use an observed session ID; otherwise record
+  `${HARNESS_HOME:-$HOME/.agent-harness}/content/templates/handoff.md`. Use an observed session ID; otherwise record
   UNKNOWN and a unique local file name. Never overwrite a peer's packet.
 - Update after a material decision, milestone, failed check/recovery, blocker,
   changed assumption, and before compaction or ending unfinished work. Do not
   wait for a request to remember. A crash before a write remains unrecoverable.
 - Record outcome, owner, time, revision, changed files, exact checks/results,
   evidence links, next step and held actions. Keep FAIL/BLOCKED/NOT_RUN visible.
-- Register the packet with `harness task checkpoint <task> --goal "..."
+- When permitted, register with `harness task checkpoint <task> --goal "..."
   --checkpoint handoffs/<task>/<session>.md --next "..."` from the project.
   Use the version returned by status with `--expected` when updating; a conflict
   means reread, not overwrite. The graph gate alone establishes completion.
+  If the registry is unavailable, mark NOT_REGISTERED; keep the local packet
+  discoverable through `harness handoff`. Never broaden access or bypass a guard.
 - Save stable user-stated facts/preferences with scoped `mem_add`; record the
   source in the text, never pin without an explicit request. Observed project
   facts belong in evidence-linked KB/project memory, not user-fact assertions.

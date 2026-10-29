@@ -45,8 +45,11 @@ is exactly the id `kb_get` resolves.
 The [session-memory protocol](../content/skills/session-memory/SKILL.md) specifies
 inspection-first coordination, active checkpoint triggers and the separate homes
 for task state, facts and reusable methods. Its [handoff template](../content/templates/handoff.md)
-is project-local; `harness task status --json` finds registered packets without
-messaging another session. Native model compliance and token benefit are unmeasured.
+is project-local; `harness handoff --task <task>` reads packets without a global
+database. `harness task status --json` optionally finds registered checkpoints.
+Neither messages another session. Bounded native producer/consumer observations
+are recorded in `plan/session-memory-native.md`; universal enforcement and token
+benefit remain unproven.
 
 There is one memory store per machine, in `~/.agent-harness/memory/`, shared by every tool: a
 fact saved while working in Codex is found later by Claude Code. Each item is one small,
