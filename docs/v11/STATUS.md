@@ -1,5 +1,25 @@
 # v1.1 development checkpoint — 28 October 2026
 
+## Studio package refresh — 29 October 2026
+
+The owner-authorized package-only update is installed locally. The fresh full
+source gate passed: 1,471 passed, 2 skipped, 2 xfailed; privacy scan and disposable
+installation demo passed. All 66 installed program files match the source;
+fresh installed CLI and MCP readback passed (15 tools). Previous package retained
+for rollback. Native governance/guards, memory, profile and installed-only Copilot
+content were not rewritten; retained file metadata matched before/after.
+The discovery configuration was added without overwriting existing content.
+
+This remains declared 0.9.1.dev0, not a v1/v1.1 production release. Existing native
+sessions have not been shown reloaded, the separate PATH plan launcher remains
+unchanged, and EMMA learning is only a documented candidate. The existing daily
+discovery job remains loaded with its pinned runner. A read-only storage check
+still FAILS: 547,975,087 bytes against the configured 20 MiB cap. No history was
+purged and no cap increased. Installation is qualified independently of that
+remaining operational-health failure. See plan/studio-package-refresh.md.
+
+## Earlier checkpoint
+
 This is a runnable development checkpoint, not a v1.1 production release or
 proof of autonomous improvement. Existing shared memory and the installed
 package are preserved; the separately authorized local discovery timer is active.
