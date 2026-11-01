@@ -5,9 +5,9 @@ description: Default loop for research, coding and dev-ops - analyse, research, 
 
 # The work loop
 
-Five stages. Move forward when a stage's exit condition holds; jump back when evidence says an
-earlier stage was wrong. Record the stage with `state_save` so the loop survives compaction and
-new sessions.
+Scale these stages to the task's uncertainty and risk; simple work needs no ceremony. Clarify
+material unknowns early, then own execution and verification within the approved scope. Persist
+the goal and next step in the plan/checkpoint so compaction and new sessions can recover them.
 
 ## 1. Analyse / hypothesise
 - Coding or ops: restate the problem in one sentence, without the asker's framing. What is
@@ -56,3 +56,5 @@ declared done by assertion, use the `plan` tool: `new <slug> "<goal>"`
 gates stages 1-3 on substance; each node's **gate** is a command, and exit 0 is the only way it
 is done. `ready`, `context <slug> <id>` (rebuilt from disk) and `gate <slug> <id>`. A failed gate
 returns the node to pending with its output: the jump-back, with evidence.
+
+Blocked action: follow [recovery.md](recovery.md); preserve the goal and continue independent work.

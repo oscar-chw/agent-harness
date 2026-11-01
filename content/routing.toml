@@ -5,9 +5,9 @@
 # ~/.codex/models_cache.json; Claude Code: the ladder below). A server profile may override any key in a
 # [routing] table of its profile.toml, and a user in ~/.agent-harness/routing.toml; the last one wins.
 #
-# Why tiers and not one setting: extra reasoning on an easy task costs time and usage for nothing, and extra
-# compute pays only where a check can tell the better answer apart. So: start at the cheapest tier whose
-# check can pass, and move up only after a check failed.
+# Why tiers and not one setting: an explicit task profile sets the minimum tier;
+# a current failed check or an explicit justified higher start may move the
+# advisory route up. This is policy, not measured model capability.
 
 # Never go above this effort unless the user asks for it in the conversation.
 ceiling = "high"
@@ -26,7 +26,22 @@ ladder = ["haiku", "sonnet", "opus"]
 visible = ["list"]
 # `fast`: a candidate whose description contains one of these words; none -> `default`.
 fast_words = ["fast", "affordable", "efficient", "mini", "lightweight"]
-# `default`: the `model` in the user's ~/.codex/config.toml, else the candidate first in the picker.
+# `default`: the `model` in the user's ~/.codex/config.toml, else Codex's own unpinned default.
+
+[progression]
+# Candidate only. Enable in a project/profile after pinning every step to an
+# account-visible model and supported effort, providing a task profile, and
+# setting per-task limits. An invalid/missing task profile holds dispatch.
+# Order is declared policy, not a measured price, speed or capability ranking.
+enabled = false
+selector = "task"
+codex_steps = ["quick", "standard", "deep"]
+# When enabled, state.task must be {schema="harness.task-profile/v1",
+# kind="mechanical|implementation|investigation|design|review",
+# impact="low|normal|high", uncertainty="low|normal|high"}.
+# mechanical+low+low starts quick; high impact/uncertainty or design/review
+# starts deep; everything else starts standard. A declared higher start needs
+# a reason; a lower one is refused. Each route still needs a supported pair.
 
 [tiers.quick]
 brief = "Do exactly the task you were given, fast. Run the check that shows it is done and report the command and its result in a few lines. If it turns out not to be mechanical, stop and say so instead of guessing."

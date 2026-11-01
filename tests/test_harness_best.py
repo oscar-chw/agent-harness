@@ -344,10 +344,10 @@ class TestImprove(Base):
         self.assertNotEqual(self.apply(costly), 0, "token overhead above +15% passed the keep rule")
         self.assertEqual(self.lessons(), [])
 
-    def test_a_measured_gain_is_applied(self):
-        gain = {"base": {"pass": 15, "n": 18, "tokens": 1000}, "cand": {"pass": 17, "n": 18, "tokens": 1100}}
-        self.assertEqual(self.apply(gain), 0)
-        self.assertEqual(len(self.lessons()), 1)
+    def test_a_captured_error_needs_a_concrete_procedure_even_with_a_gain(self):
+        gain = {"base": {"pass": 15, "n": 18, "tokens": 1000}, "cand": {"pass": 17, "n": 18, "tokens": 1000}}
+        self.assertNotEqual(self.apply(gain), 0)
+        self.assertEqual(self.lessons(), [])
 
 
 # ---------------------------------------------------------------- G6 matrix
@@ -514,7 +514,7 @@ class TestTrend(Base):
     def test_equal_or_better_passes_and_each_tool_is_judged_alone(self):
         rows = [{"version": "0.3.3", "tool": "claude-code", "pass": 17, "n": 18, "tokens": 1000},
                 {"version": "0.3.3", "tool": "codex", "pass": 14, "n": 18, "tokens": 1000},
-                {"version": "0.4.0", "tool": "claude-code", "pass": 17, "n": 18, "tokens": 1050},
+                {"version": "0.4.0", "tool": "claude-code", "pass": 17, "n": 18, "tokens": 1000},
                 {"version": "0.4.0", "tool": "codex", "pass": 16, "n": 18, "tokens": 1000}]
         self.assertEqual(self.check(rows), 0)
 
@@ -700,9 +700,9 @@ class TestReviewFindings(Base):
         f.write_text(json.dumps(dict(gain, proposal="someone-else")))
         self.assertNotEqual(harness(self.home, "improve", "--apply", pid, "--eval", str(f))[0], 0)
         f.write_text(json.dumps(dict(gain, proposal=pid)))
-        self.assertEqual(harness(self.home, "improve", "--apply", pid, "--eval", str(f))[0], 0)
         self.assertNotEqual(harness(self.home, "improve", "--apply", pid, "--eval", str(f))[0], 0)
-        self.assertEqual(len(list((self.hh() / "lessons").glob("*.json"))), 1)
+        self.assertNotEqual(harness(self.home, "improve", "--apply", pid, "--eval", str(f))[0], 0)
+        self.assertEqual(len(list((self.hh() / "lessons").glob("*.json"))), 0)
 
     def test_the_trend_judges_the_release_being_shipped(self):
         def r(v, t, p, n=18):
@@ -732,7 +732,19 @@ class TestReviewFindings(Base):
         self.assertFalse([t for t, row in m.items() if any("not described" in v for v in row.values())])
 
     def test_doctor_names_what_is_over_the_cap(self):
-        self.assertEqual(harness(self.home, "install", "--yes", "--tools", "claude-code")[0], 0)
+        # This checks storage reporting, not editor installation. A real
+        # `code` binary must not run while this fixture has --yes set.
+        # HOME is patched to this fixture path. Path.home() follows that patch,
+        # but the external editor CLI may still act on the account's real home.
+        self.assertFalse(cli._real_home(self.home))
+        if os.name == "posix":
+            import pwd
+            self.assertTrue(cli._real_home(Path(pwd.getpwuid(os.getuid()).pw_dir)))
+        with mock.patch("agent_harness.extensions.detect_editors", return_value=[]) as editors:
+            with mock.patch("agent_harness.extensions._run", side_effect=AssertionError("live editor invoked")) as editor_run:
+                self.assertEqual(harness(self.home, "install", "--yes", "--tools", "claude-code")[0], 0)
+        editors.assert_not_called()
+        editor_run.assert_not_called()
         big = self.hh() / "state" / "blob.bin"
         big.parent.mkdir(parents=True, exist_ok=True)
         with open(big, "wb") as out:
@@ -812,7 +824,7 @@ class TestReReview(Base):
         self.assertNotEqual(check(same), 0, "equal passes with no token count passed")
         rose = [{"version": "0.3", "tool": "codex", "pass": 16, "n": 18}, {"version": "0.4", "tool": "codex", "pass": 17, "n": 18}]
         self.assertNotEqual(check(rose), 0, "a gain needs measured tokens too (T2 review)")
-        measured = [dict(rose[0], tokens=1000), dict(rose[1], tokens=1100)]
+        measured = [dict(rose[0], tokens=1000), dict(rose[1], tokens=1000)]
         self.assertEqual(check(measured), 0)
 
     def test_only_the_tools_own_installers_by_bare_name(self):
@@ -924,10 +936,11 @@ class TestV041(Base):
         from agent_harness import storage
         TestImprove.seed(self, 3)
         pid = json.loads(harness(self.home, "improve", "--propose", "--json")[1])[0]["id"]
-        f = self.tmp / "e.json"
-        f.write_text(json.dumps({"proposal": pid, "base": {"pass": 1, "n": 4, "tokens": 100},
-                                 "cand": {"pass": 3, "n": 4, "tokens": 100}}))
-        self.assertEqual(harness(self.home, "improve", "--apply", pid, "--eval", str(f))[0], 0)
+        # This is a historical already-applied record, not a new promotion.
+        f = self.hh() / "proposals" / (pid + ".json")
+        record = json.loads(f.read_text())
+        record['status'] = 'applied'
+        f.write_text(json.dumps(record))
         for i in range(storage.CAPS["proposals"] + 5):
             (self.hh() / "proposals" / ("p%d.json" % i)).write_text(json.dumps({"id": "p%d" % i, "status": "proposed"}))
         storage.prune(self.hh())

@@ -192,7 +192,9 @@ class RecallTest(Base):
         call = lambda args: srv.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/call",   # noqa: E731
                                         "params": {"name": "skill_manage", "arguments": args}})["result"]
         r = call({"action": "create", "name": "count-sz-fills", "description": DESC, "body": BODY})
-        self.assertFalse(r["isError"], r)
+        self.assertTrue(r["isError"], r)
+        self.assertFalse((self.home / ".agents/skills/learned/count-sz-fills/SKILL.md").exists())
+        self.sk.create("count-sz-fills", DESC, BODY)  # a pre-existing legacy skill stays inspectable
         self.assertIn("count-sz-fills (learned, 0 uses)", call({"action": "list"})["content"][0]["text"])
         self.assertIn("## Procedure", call({"action": "view", "name": "count-sz-fills"})["content"][0]["text"])
         bad = call({"action": "create", "name": "x", "description": DESC, "body": "no sections"})

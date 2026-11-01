@@ -36,7 +36,7 @@ import sys
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
-from .base import Adapter, Ctx, FileChange, list_md, mcp_servers, which
+from .base import Adapter, Ctx, FileChange, list_md, mcp_servers, shared_skills, which
 
 APPLY_ALL = '---\nname: harness\ndescription: agent-harness rules, always on\napplyTo: "**"\n---\n\n'
 
@@ -258,7 +258,7 @@ class CopilotVSCodeAdapter(Adapter):
         return changes, refused
 
     def plan(self, ctx: Ctx) -> List[FileChange]:
-        return self._changes(ctx)[0]
+        return self._changes(ctx)[0] + shared_skills(ctx)
 
     def notes(self, ctx: Ctx) -> List[str]:
         """Plan lines that are not file changes: refusals, and what covers notebooks."""

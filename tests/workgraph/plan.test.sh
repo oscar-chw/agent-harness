@@ -257,9 +257,9 @@ EOF
 "$PLAN" lint t >/dev/null 2>&1
 check "broken plan fails lint" "1" "$?"
 
-echo "== plan new: the front half is user-gated by construction =="
+echo "== plan new --attended: the front half is user-gated by construction =="
 rm -rf "$T/plan"; mkdir -p "$T/plan"
-"$PLAN" new scaf "make the thing work" >/dev/null
+"$PLAN" new --attended scaf "make the thing work" >/dev/null
 has "goal recorded"                  "$(cat plan/scaf.md)" "make the thing work"
 check "exactly 4 front nodes"        "4" "$(grep -c '^- \[' plan/scaf.md)"
 out=$("$PLAN" ready scaf 2>&1)
@@ -285,7 +285,7 @@ rm -rf "$T/plan"; mkdir -p "$T/plan"; "$PLAN" new hollow "g" >/dev/null 2>&1
 printf '## analysis\nx\n' >> plan/hollow.md
 "$PLAN" gate hollow 1 >/dev/null 2>&1
 check "a heading alone does NOT pass node 1" "- [ ] 1." "$(grep -o '^- \[.\] 1\.' plan/hollow.md)"
-rm -rf "$T/plan"; mkdir -p "$T/plan"; "$PLAN" new scaf "make the thing work" >/dev/null 2>&1
+rm -rf "$T/plan"; mkdir -p "$T/plan"; "$PLAN" new --attended scaf "make the thing work" >/dev/null 2>&1
 printf '## analysis\nAsked: x. done when: `true` exits 0.\n## research\nexisting: none — checked `bin/`.\nSource: `plan.py`, https://e.com/r\n## plan\nOne gated node.\n' >> plan/scaf.md
 printf -- '- [ ] 5. build it | needs: 4 | gate: true\n' >> plan/scaf.md
 for i in 1 2 3; do "$PLAN" gate scaf $i >/dev/null 2>&1; done

@@ -75,6 +75,17 @@ def _mark(tmp, nid):
     return None
 
 
+def test_plan_new_uses_the_worktree_root_when_git_is_a_file():
+    with tempfile.TemporaryDirectory() as tmp:
+        # Linked worktrees have a .git file, not a directory. A missing plan/
+        # must be created here rather than at the filesystem root.
+        with open(os.path.join(tmp, ".git"), "w") as stream:
+            stream.write("gitdir: /tmp/fixture-worktree-metadata\n")
+        result = _plan(tmp, "new", "worktree-root", "bounded fixture")
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert os.path.isfile(os.path.join(tmp, "plan", "worktree-root.md"))
+
+
 def test_a_gate_is_judged_by_the_guard_before_it_runs():
     """A gate is a shell command the engine runs itself, so it never passes the PreToolUse hook. In
     agentic-os that meant `gate: rm -rf ~` plus `plan gate` was arbitrary execution with no guard at

@@ -30,6 +30,9 @@ from typing import List, Optional, Tuple
 DEFAULT_REPO = "oscar-chw/agent-harness"     # the project's own home; override per profile or environment
 API = "https://api.github.com/repos/%s"
 TAG = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
+VERSION = re.compile(
+    r"^v?(\d+)\.(\d+)\.(\d+)(?:(a|b|rc)(\d+))?"
+    r"(?:\.post(\d+))?(?:\.dev(\d+))?$", re.I)
 DAY = 24 * 3600
 TIMEOUT = 20
 
@@ -55,17 +58,33 @@ def repo_for(hh: Path) -> str:
     return DEFAULT_REPO
 
 
-def version_key(v: str) -> Tuple[int, int, int]:
-    m = TAG.match(v if v.startswith("v") else "v" + v)
-    return tuple(int(x) for x in m.groups()) if m else (-1, -1, -1)
+def version_key(v: str) -> Tuple[int, ...]:
+    """Order the project's PEP 440 channels; refuse unfamiliar versions.
+
+    Returning a low sentinel for an installed development version made an older
+    stable release look like an upgrade and could replace the user's candidate.
+    """
+    m = VERSION.fullmatch(v)
+    if m is None:
+        raise ValueError("unsupported installed version")
+    major, minor, patch, pre, pre_n, post_n, dev_n = m.groups()
+    base = (int(major), int(minor), int(patch))
+    if pre is not None:
+        return base + ({"a": 0, "b": 1, "rc": 2}[pre.lower()], int(pre_n),
+                       -1 if dev_n is not None else 0, int(dev_n or 0))
+    if post_n is not None:
+        return base + (4, int(post_n), -1 if dev_n is not None else 0, int(dev_n or 0))
+    if dev_n is not None:
+        return base + (-1, int(dev_n), 0, 0)
+    return base + (3, 0, 0, 0)
 
 
 def installed_version(hh: Path) -> str:
     try:
         m = re.search(r'__version__ = "([^"]+)"', (hh / "lib" / "agent_harness" / "__init__.py").read_text())
-        return m.group(1) if m else "0.0.0"
+        return m.group(1) if m else ""
     except OSError:
-        return "0.0.0"
+        return ""
 
 
 def newest_release(repo: str, get=_get) -> Optional[dict]:
@@ -124,10 +143,16 @@ def run(hh: Path, home: Path, check_only: bool = False, now: bool = False, get=_
             pass
     repo, have = repo_for(hh), installed_version(hh)
     try:
+        have_key = version_key(have)
+    except ValueError:
+        if not check_only:
+            _record(hh, result="refused", why="unsupported installed version")
+        return 1, "self-update: unsupported installed version; no update"
+    try:
         rel = newest_release(repo, get)
         if rel is None:
             return 0, "self-update: %s has no release tags" % repo
-        if version_key(rel["tag"]) <= version_key(have):
+        if version_key(rel["tag"]) <= have_key:
             if not check_only:
                 _record(hh, result="current", version=have, newest=rel["tag"])
             return 0, "self-update: %s is current (newest release %s)" % (have, rel["tag"])

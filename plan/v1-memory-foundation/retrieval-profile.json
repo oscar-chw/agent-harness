@@ -1,0 +1,115 @@
+{
+  "baseline_revision": "5bf8d326986db92aa3314ea4e41f58e4db402476",
+  "candidate_kb_sha256": "eed880d46502762d4115ea9d91c5f98b3b24a885cffa1091d660e0995c514e40",
+  "scope": "synthetic CPU queries; no model quality or token claim",
+  "cases": {
+    "broad": {
+      "documents": 600,
+      "repetitions": 7,
+      "ordered_responses_equal": true,
+      "response_bytes": 1600,
+      "cold_ms": {
+        "baseline": 237.96,
+        "candidate": 117.372
+      },
+      "warm_median_ms": {
+        "baseline": 101.352,
+        "candidate": 54.814
+      },
+      "samples_ms": {
+        "baseline": [
+          104.425,
+          100.735,
+          101.352,
+          101.309,
+          104.689,
+          100.945,
+          102.527
+        ],
+        "candidate": [
+          61.267,
+          54.777,
+          54.928,
+          54.664,
+          53.946,
+          55.606,
+          54.814
+        ]
+      }
+    },
+    "selective": {
+      "documents": 600,
+      "repetitions": 7,
+      "ordered_responses_equal": true,
+      "response_bytes": 140,
+      "cold_ms": {
+        "baseline": 116.46,
+        "candidate": 82.545
+      },
+      "warm_median_ms": {
+        "baseline": 23.362,
+        "candidate": 32.953
+      },
+      "samples_ms": {
+        "baseline": [
+          24.396,
+          22.715,
+          22.607,
+          23.042,
+          23.362,
+          23.618,
+          23.418
+        ],
+        "candidate": [
+          34.78,
+          33.884,
+          30.517,
+          30.702,
+          32.953,
+          34.176,
+          31.59
+        ]
+      }
+    },
+    "changed_source": {
+      "documents": 40,
+      "repetitions": 7,
+      "ordered_responses_equal": true,
+      "response_bytes": 140,
+      "cold_ms": {
+        "baseline": 10.94,
+        "candidate": 8.247
+      },
+      "warm_median_ms": {
+        "baseline": 1.866,
+        "candidate": 2.29
+      },
+      "samples_ms": {
+        "baseline": [
+          1.926,
+          2.033,
+          1.866,
+          1.726,
+          1.795,
+          1.685,
+          2.091
+        ],
+        "candidate": [
+          2.29,
+          2.522,
+          2.225,
+          2.207,
+          2.311,
+          2.245,
+          2.653
+        ]
+      }
+    }
+  },
+  "short_stem_cache": {
+    "retained_bytes_probe": 799018,
+    "peak_bytes_probe": 836878,
+    "entries": 1024,
+    "probe": "3000 distinct 64-character wide-Unicode terms"
+  }
+}

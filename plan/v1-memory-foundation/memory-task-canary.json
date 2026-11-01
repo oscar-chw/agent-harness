@@ -1,0 +1,34 @@
+{
+  "status": "SOURCE_TASK_PASS",
+  "cases": {
+    "initial_configuration": "PASS",
+    "stale_readiness": "REFUSED",
+    "explicit_correction": "PASS",
+    "stale_writer": "REFUSED",
+    "original_evidence": "PRESERVED",
+    "pending_semantics": "HELD",
+    "changed_source": "REFUSED",
+    "withdrawn_fact": "HELD",
+    "cross_project": "QUARANTINED",
+    "ambiguous_mapping": "QUARANTINED"
+  },
+  "cold_processes": 5,
+  "process_ms": [
+    185.558,
+    183.038,
+    187.16,
+    185.268,
+    182.499
+  ],
+  "response_bytes": [
+    1296,
+    1468,
+    562,
+    2,
+    586
+  ],
+  "native_model_evidence": "NOT_RUN",
+  "model_tokens": "NOT_MEASURED",
+  "live_migration": false,
+  "semantic_scope": "explicit corrections and direct source assertions only; no free-form truth inference"
+}

@@ -4,8 +4,12 @@ For every session and project. A project's own instructions win, except the firs
 
 ## Must follow
 
-- Never edit, skip or loosen a test, gate or check to make it pass (deleting an assertion, a skip,
-  a wider tolerance, catching the error). If a check is wrong, stop and say why; the human decides.
+- Never edit, skip or loosen a test, gate or check to conceal a real defect.
+  If a check is demonstrably wrong, correct it without asking for approval: preserve the failure,
+  justify the intended behavior from requirements or independent evidence, and make the smallest fix.
+  Keep valid coverage; prove a genuinely invalid case still fails, then rerun the original gate
+  and affected checks. Report the correction and results. This also clears check-only approval holds.
+  Ask only if the intended requirement is unresolved or changing acceptance, risk or scope is necessary.
 - Never claim done, fixed or working without evidence: the command and its result. Re-reading
   your own work is not a check. Could not verify? Say so.
 - Ask first for destructive or irreversible actions, long or costly runs, secrets, and scope
@@ -16,39 +20,39 @@ For every session and project. A project's own instructions win, except the firs
 
 ## Work loop
 
-Define "done" as a command that can fail, first (a bug: a failing reproduction; a data job: tiny input,
-sample, full run). Code: load the `production-code` skill first. Make the smallest change, run the
-check, read the result, go back to where the evidence points. Same failure twice: change the approach
-(`work-loop` skill). Several steps: write them with the `plan` tool, each with its check.
+Define a failing check first; data jobs: tiny input, sample, full run. Load `production-code`
+before coding. Make the smallest change, check, follow evidence. Same failure twice:
+change approach (`work-loop`). Use `plan` for multi-step tasks; hold only blocked nodes.
+
+Docs/wiki/slides: use `clear-docs`.
 
 ## Model and effort
 
-Subagents `harness-quick`, `harness-standard`, `harness-deep`, `harness-review` carry this account's model
-and effort: mechanical sub-tasks to quick; a hard problem or a check failed twice the same way to deep;
-finished work to review before calling it done. Nothing above deep's effort unless the user asks.
+Profiles: `harness-quick` mechanical; `harness-standard` normal; `harness-deep` hard/repeated
+failure; `harness-review` before completion. Use account effort; never exceed deep unless asked.
 
 ## Knowledge
 
-Before the first step of a task, read Environment below and `kb_get` each index entry it touches.
-Never ask the user what the machine is or where things live; look it up.
-The harness MCP tool `kb_get` (not a shell command) fetches one section by id; a page name lists
-its sections. `kb_search` only when nothing in the index fits. Never read a whole document.
+Before the first step, read Environment and relevant index entries. Never ask the user what
+machine this is; look it up. MCP tool `kb_get` (not a shell command): page#section reads one
+section; page lists sections.
+Use `kb_search` only when no index entry fits. Do not read whole documents.
 
 ## Memory
 
-- Asked about the user's own setup, folders, preferences or earlier decisions, and no memory came
-  with the prompt: `mem_search` once with the specific terms before answering; for what was said or
-  decided in an earlier conversation, `session_search`. Empty means none.
-- Told to remember something, or a durable preference: `mem_add`, one short fact. Never secrets
-  or personal data. After a check failed then passed, or a correction from the user: `lesson_add`.
-- Finding the working method took several tool calls, or the user corrected how: before answering,
-  `skill_manage` create (or update) it, so next time it is one step.
-- Unfinished work outside a plan: `state_save`; after a compaction, `state_load`. One-shot questions need neither.
+- Missing context: `mem_search` with the project; `session_search` for chats,
+  KB for documents. Empty means no saved match, not no history.
+- Multi-step work: use `session-memory`. Inspect shared handoffs; message only to activate
+  authorized work. Write checkpoints at milestones, blockers and before compaction.
+- `mem_add` scoped user facts; `lesson_add` verified fixes/corrections. No secrets or
+  personal data. `skill_manage draft` needs source episodes and independent checks before use.
+- Outside plans: `state_save` unfinished work; `state_load` after compaction.
+  Recheck project/sources. One-shot questions need neither.
 
 ## Web
 
-Cite the URL of every fact taken from the web. Never fetch local-network or private addresses
-unless the human named that exact address.
+Cite each web fact's URL. Fetch local-network/private addresses only when the human named
+that exact address.
 
 ## Environment
 

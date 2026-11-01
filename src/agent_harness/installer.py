@@ -325,7 +325,7 @@ def _defined_elsewhere(text: str, path: Tuple[str, ...]) -> bool:
 
 
 def _set_keys(text: str, name: str, body: dict) -> str:
-    path = _norm_table(name)
+    path = _norm_table(name) if name else None  # '+' alone owns selected root keys, not a table named ''.
     blocks = _split_blocks(text)
     i = _header_index(blocks, path)
     if i is None:
@@ -339,12 +339,12 @@ def _set_keys(text: str, name: str, body: dict) -> str:
     for k, v in body.items():
         new = f"{_toml_key(k)} = {_toml_val(v)}\n"
         rx = re.compile(_KEYLINE.format(key=re.escape(_toml_key(k))))
-        hit = next((n for n, ln in enumerate(lines) if n > 0 and rx.match(ln)), None)
+        hit = next((n for n, ln in enumerate(lines) if (path is None or n > 0) and rx.match(ln)), None)
         if hit is not None:
             lines[hit] = new
         else:
-            last = max(n for n, ln in enumerate(lines) if n == 0 or ln.strip())   # after the last non-blank line
-            if not lines[last].endswith("\n"):
+            last = max((n for n, ln in enumerate(lines) if n == 0 or ln.strip()), default=-1)
+            if last >= 0 and not lines[last].endswith("\n"):
                 lines[last] += "\n"
             lines.insert(last + 1, new)
     blocks[i] = (path, "".join(lines))
@@ -354,7 +354,7 @@ def _set_keys(text: str, name: str, body: dict) -> str:
 def _drop_keys(text: str, name: str, body: dict, orig: str) -> str:
     """Our keys out of the user's [name]; a key the original had gets the original's line back; the header
     goes too when we created the table and nothing else is left in it."""
-    path = _norm_table(name)
+    path = _norm_table(name) if name else None
     blocks = _split_blocks(text)
     i = _header_index(blocks, path)
     if i is None:
@@ -365,8 +365,8 @@ def _drop_keys(text: str, name: str, body: dict, orig: str) -> str:
     lines = blocks[i][1].splitlines(keepends=True)
     for k in body:
         rx = re.compile(_KEYLINE.format(key=re.escape(_toml_key(k))))
-        hit = next((n for n, ln in enumerate(lines) if n > 0 and rx.match(ln)), None)
-        was = next((ln for n, ln in enumerate(olines) if n > 0 and rx.match(ln)), None)
+        hit = next((n for n, ln in enumerate(lines) if (path is None or n > 0) and rx.match(ln)), None)
+        was = next((ln for n, ln in enumerate(olines) if (path is None or n > 0) and rx.match(ln)), None)
         if hit is not None:
             if was is not None:
                 lines[hit] = was if was.endswith("\n") else was + "\n"

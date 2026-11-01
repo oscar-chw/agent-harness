@@ -190,11 +190,14 @@ class Consent(Base):
         self.assertIn("this replaces your current Claude Code setup", out)
 
     def test_asks_per_tool(self):
-        answers = iter(["y", "n"])
+        # A new first-install policy choice precedes the same per-tool consent.
+        # Keep the negative tool choice: choosing a posture must not approve Codex.
+        answers = iter(["3", "y", "n"])
         with mock.patch.object(I, "is_tty", return_value=True), \
                 mock.patch("builtins.input", lambda q: next(answers)):
             rc, out = self.install()
         self.assertEqual(rc, 0, out)
+        self.assertIn("Permission profile: preserve", out)
         self.assertTrue((self.home / ".claude" / "CLAUDE.md").exists())
         self.assertFalse((self.home / ".codex").exists())
 
@@ -345,8 +348,11 @@ class Extensions(Base):
         def fake(hh, state, tools=None, yes=False, **kw):
             state["extensions"] = {"code": [{"id": "x.y", "size_mb": 1}]}
             return state
-        with mock.patch.object(Path, "home", return_value=self.home), \
-                mock.patch.object(self.X, "install", side_effect=fake) as inst:
+        # The editor decision uses the OS account home on POSIX, not the
+        # patchable HOME/Path.home that a test or editor CLI can ignore.
+        account = (mock.patch("pwd.getpwuid", return_value=mock.Mock(pw_dir=str(self.home)))
+                   if os.name == "posix" else mock.patch.object(Path, "home", return_value=self.home))
+        with account, mock.patch.object(self.X, "install", side_effect=fake) as inst:
             rc, out = self.install("--yes")
         self.assertEqual(rc, 0, out)
         self.assertEqual(inst.call_args.kwargs["tools"], ["claude-code", "codex"])

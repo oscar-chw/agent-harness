@@ -1,5 +1,8 @@
-"""Procedural skills learned from experience (skill_manage): the agent writes down a procedure it worked out,
-so the next session, in any tool, starts from the working path instead of rediscovering it.
+"""Legacy learned SKILL.md storage and readback.
+
+The MCP skill_manage tool now drafts project-scoped, evidence-gated procedures;
+its create/update actions no longer call this legacy writer. Existing files stay
+readable and archivable instead of being silently deleted during migration.
 
     ~/.agents/skills/learned/<name>/SKILL.md     agentskills.io format; Codex, Gemini CLI, Cursor and Copilot
                                                  list it natively (Codex finds nested folders: probed 2026-09-30)
@@ -206,7 +209,7 @@ class Skills:
             raise ValueError("; ".join(errors))
         other = self._similar(name, description)
         if other:
-            raise ValueError("a similar skill exists: %r. Improve it with skill_manage update (view it first)"
+            raise ValueError("a similar skill exists: %r. Draft a source-bound procedure instead"
                              % other)
         f = self._write(name, self._render(name, description, body, 1))
         archived = self._enforce_cap(keep=name)
