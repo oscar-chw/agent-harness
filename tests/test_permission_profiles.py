@@ -1,5 +1,6 @@
 """Permission choice is explicit, persists, and never removes another owner's hooks."""
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -10,9 +11,25 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def call(home, *args):
-    return subprocess.run([sys.executable, str(ROOT/'bin/harness'), '--home', str(home),
+    env = dict(os.environ, HOME=str(home), HARNESS_HOME=str(home/'.agent-harness'))
+    return subprocess.run([sys.executable, '-B', str(ROOT/'bin/harness'), '--home', str(home),
                            'install', '--yes', '--tools', 'claude-code,codex', *args],
-                          capture_output=True, text=True, timeout=30)
+                          capture_output=True, text=True, timeout=30, env=env)
+
+
+def test_fixture_does_not_reuse_the_callers_harness_home(tmp_path, monkeypatch):
+    outside = tmp_path/'outside'
+    outside.mkdir()
+    marker = outside/'owner-data'
+    marker.write_text('unchanged')
+    monkeypatch.setenv('HARNESS_HOME', str(outside))
+    home = tmp_path/'home'
+    home.mkdir()
+    result = call(home, '--permission-profile', 'explicit')
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert (home/'.agent-harness/installed.json').is_file()
+    assert list(outside.iterdir()) == [marker]
+    assert marker.read_text() == 'unchanged'
 
 
 def test_explicit_and_autonomous_profiles_change_only_owned_policy(tmp_path):

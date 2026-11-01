@@ -18,13 +18,17 @@ Owner authorization: current request explicitly authorizes v2 dev push. Publicat
 - [ ] 2. Qualify integrated dev package with existing release checks in its clean publication snapshot | needs: 1,4 | ctx: docs/v2-development.md | gate: cd .harness-work/v2-development/scratch/candidate && bash scripts/check.sh
       2026-11-01T19:09:04Z exit 0 in 439s [060a1adb] — DEMO: PASS / CHECK: PASS / agent-harness guard blocked this: rm -r on ~ (the home directory). If it is really intended, ask the human to run it themselves.
       2026-11-01T19:17:27Z The permission-profile and workspace privacy fixes postdate 490a5ec; retain its gate as historical evidence and requalify the final candidate.
+      2026-11-01T19:25:15Z exit 1 in 419s [61d0af9b] — FAILED tests/test_permission_profiles.py::test_invalid_saved_posture_is_reported_without_partial_install / FAILED tests/test_permission_profiles.py::test_explicit_native_posture_and_uninstall_restore_original_settings / 4 failed, 1510 passed, 2 skipped, 2 xfailed in 418.79s (0:06:58)
 - [ ] 3. Publish reviewed development commit without changing stable main | needs: 2 | gate: git diff --quiet HEAD refs/remotes/origin/codex/v2-development-20261102
 - [x] 4. Offer and retain a native permission posture without stacking owned blockers in autonomy mode | ctx: src/agent_harness/permission_profiles.py | gate: PYTHONPATH=src python3 -m pytest -q tests/test_permission_profiles.py tests/test_installer.py tests/test_routing_adapters.py tests/test_context_budget.py
       2026-11-01T19:17:32Z exit 0 in 5s [9b0e80d2] — ............................................                             [100%] / 44 passed in 4.96s
       2026-11-01T19:18:01Z exit 0 in 5s [f10840aa] — .............................................                            [100%] / 45 passed in 5.09s
+      2026-11-01T19:26:48Z exit 0 in 7s [02c6f8a7] — ..............................................                           [100%] / 46 passed in 7.29s
 
 Policy requirement: explicit review or native workspace autonomy is a deliberate installer choice, reused on update. No live settings are touched in this work. Other owners' restrictions remain. Unattended --yes alone cannot grant broader access. Preserve must retain current native values, including a manual edit after an earlier owned profile.
 
 Check correction: the old per-tool consent fixture supplied only y/n; the new first-install permission question consumed y as an invalid posture. Its fixture now supplies preserve, then the same y/n. Codex refusal remains asserted. This aligns the check with the new requirement without removing negative coverage.
 
 Negative evidence: the new preserve-after-autonomy case first failed with missing defaultMode; invalid saved posture first failed on a traceback. After repair the focused integration set passed 67 tests. Workspace index overwrite mutation was rejected while the unmodified implementation preserved the owner's edit.
+
+Integrated check correction: the first final-candidate run retained 4 failed, 1510 passed, 2 skipped, 2 xfailed. New installer fixtures inherited another suite's temporary HARNESS_HOME, so their assertions read a different store. Pin both HOME and HARNESS_HOME to the fixture. No production behavior or assertion is relaxed. Add a caller-store sentinel control and rerun the original full gate.
