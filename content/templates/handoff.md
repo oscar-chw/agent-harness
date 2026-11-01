@@ -14,6 +14,7 @@ Update at material milestones, blockers, corrections and before compaction/end.
 - Completed checks: command, result and evidence location:
 - Failed or unrun checks and cause, if known:
 - Changed files and integration dependencies:
+- Existing task artifact index / final output / owned scratch; reuse locations rather than duplicating files:
 - Current blocker / precise next action:
 - Remaining worker, retry and usage budget:
 - Held promotion, deployment or irreversible action:

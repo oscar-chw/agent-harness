@@ -21,6 +21,7 @@ truncate or overwrite: rm/rmdir/unlink/shred/truncate/mv on it, find -delete in 
 dd of= into it, a > redirect onto a file in it, zfs destroy/rollback/rename/set, and an interpreter whose
 code names it together with a delete or write call. Reading it is untouched. No file: no protected paths.
 """
+import ast
 import json
 import os
 import posixpath
@@ -608,6 +609,27 @@ def check_system(name, args, flags, ops):
         block("scutil --nc stop drops a VPN connection")
 
 
+def literal_python_output(code):
+    """Recognize only standalone prints of literals; never exempt an executable expression."""
+    if len(code) > 8192:
+        return False
+    try:
+        body = ast.parse(code).body
+        if not body:
+            return False
+        for statement in body:
+            if not (isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call)):
+                return False
+            call = statement.value
+            if not isinstance(call.func, ast.Name) or call.func.id != "print":
+                return False
+            for value in [*call.args, *(keyword.value for keyword in call.keywords)]:
+                ast.literal_eval(value)
+    except (SyntaxError, ValueError, TypeError, RecursionError):
+        return False
+    return True
+
+
 def check_interpreter(name, args, depth):
     """Deletion through an interpreter: no `rm` token ever appears, so read the program text."""
     if not (name in INTERPRETERS or re.match(r"^python3(\.\d+)?$", name)
@@ -618,6 +640,10 @@ def check_interpreter(name, args, depth):
     else:
         codes = [args[k + 1] for k, a in enumerate(args) if a in CODE_FLAGS and k + 1 < len(args)]
     for code in codes:
+        # Regexes also match example text. Only this bounded AST-proven literal-output
+        # subset is data; imports, nested calls and interpolated strings stay checked.
+        if (name in ("python", "python3") or re.fullmatch(r"python3\.\d+", name)) and literal_python_output(code):
+            continue
         for m in EMBEDDED_SHELL.finditer(code):           # os.system("rm -rf ~"), do shell script "..."
             check(m.group(2).replace('\\"', '"').replace("\\'", "'"), depth + 1)
         if re.search(r"wi-?fi\s+power\s+to\s+off|set\s+airport\s+power", code, re.I):

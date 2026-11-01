@@ -8,6 +8,9 @@
 - Existing implementation/interface and simplest viable change:
 - Baseline and acceptance cases, including one negative control:
 - File ownership, dependencies and integration check:
+- Artifact home, final deliverables and scratch: reuse an existing task location;
+  otherwise `harness workspace --task <id> --init` prepares one index and two folders.
+  Keep its index current, link sources instead of copying, and create no workspace for a simple reply.
 - Worker/time/retry/usage limits; no worker needed is a valid choice:
 - Recovery: current checkpoint, next action and explicit stop conditions:
 

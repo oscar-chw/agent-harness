@@ -161,6 +161,35 @@ class TestCommands(unittest.TestCase):
                 os.environ["HARNESS_GUARD_TRUSTED_HOSTS"] = old
 
 
+class TestLiteralPythonOutput(unittest.TestCase):
+    def test_literal_output_passes_the_hook_entrypoint(self):
+        command = "python3 -c " + guard.shlex.quote('print("os.unlink(Path.home())")')
+        result = run([], json.dumps({"tool_name": "Bash", "tool_input": {"command": command}}))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr, "")
+
+    def test_printed_examples_are_data(self):
+        examples = [
+            'print("os.unlink(Path.home())")',
+            'print({"example": "os.remove(Path.home())"})',
+            'print("wi-fi power to off", end="\\n")',
+        ]
+        for code in examples:
+            with self.subTest(code=code):
+                self.assertIsNone(guard.verdict("python3 -c " + guard.shlex.quote(code)))
+
+    def test_executable_expressions_and_mixed_programs_stay_checked(self):
+        programs = [
+            'print("example"); import os; os.unlink(Path.home())',
+            'print(os.unlink(Path.home()))',
+            'print(f"{os.unlink(Path.home())}")',
+            'print(*[os.unlink(Path.home())])',
+        ]
+        for code in programs:
+            with self.subTest(code=code):
+                self.assertIsNotNone(guard.verdict("python3 -c " + guard.shlex.quote(code)))
+
+
 def run(args, stdin=""):
     return subprocess.run([sys.executable, str(GUARD)] + args, input=stdin,
                           capture_output=True, text=True, timeout=30)
