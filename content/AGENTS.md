@@ -21,14 +21,15 @@ For every session and project. A project's own instructions win, except the firs
 ## Work loop
 
 Define a failing check first; data jobs: tiny input, sample, full run. Load `production-code`
-before coding. Make the smallest change, check, then follow the evidence. Same failure twice:
-change approach (`work-loop`). Track multi-step work with `plan`, each step with its check.
+before coding. Make the smallest change, check, follow evidence. Same failure twice:
+change approach (`work-loop`). Use `plan` for multi-step work, with a check per step.
+
+Docs/wiki/slides: use `clear-docs`.
 
 ## Model and effort
 
-Use account profiles `harness-quick` for mechanical work, `harness-standard` normally,
-`harness-deep` for hard problems or repeated failure, `harness-review` before completion.
-Do not exceed deep's effort unless asked.
+Profiles: `harness-quick` mechanical; `harness-standard` normal; `harness-deep` hard/repeated
+failure; `harness-review` before completion. Use account effort; never exceed deep unless asked.
 
 ## Knowledge
 
@@ -39,19 +40,19 @@ Use `kb_search` only when no index entry fits. Do not read whole documents.
 
 ## Memory
 
-- Missing context: `mem_search` with the project; `session_search` for conversations,
+- Missing context: `mem_search` with the project; `session_search` for chats,
   KB for documents. Empty means no saved match, not no history.
 - Multi-step work: use `session-memory`. Inspect shared handoffs; message only to activate
   authorized work. Write checkpoints at milestones, blockers and before compaction.
 - `mem_add` scoped user facts; `lesson_add` verified fixes/corrections. No secrets or
   personal data. `skill_manage draft` needs source episodes and independent checks before use.
-- Outside a plan: `state_save` unfinished work; `state_load` after compaction. Recheck sources
-  and project. One-shot questions need neither.
+- Outside plans: `state_save` unfinished work; `state_load` after compaction.
+  Recheck project/sources. One-shot questions need neither.
 
 ## Web
 
-Cite the URL of every fact taken from the web. Never fetch local-network or private addresses
-unless the human named that exact address.
+Cite each web fact's URL. Fetch local-network/private addresses only when the human named
+that exact address.
 
 ## Environment
 

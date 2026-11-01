@@ -1,5 +1,17 @@
 # V2 development candidate — 2.0.0.dev0
 
+## Quick read
+
+This is a testable development build, not a live upgrade.
+
+- Choose permission control once at installation; updates retain the choice.
+- Reuse one task workspace instead of scattering temporary files.
+- Keep documents readable: answer first, linked detail, and visuals chosen for the task.
+- Existing memory and workflow features remain; lossless recall and all-device rollout are unproven.
+
+The mechanisms and evidence below are reference detail. Start with the relevant
+section; a simple question does not require reading this whole note.
+
 2 November 2026. This branch integrates the existing memory/discovery development
 line with bounded project artifact navigation and a tested literal-output guard
 correction. The version is a development milestone, not a stable v2 qualification,
@@ -89,6 +101,27 @@ measurement. Rewriting reusable prefixes may hurt provider cache reuse; that is
 a design risk to measure, not an observed regression here. Existing bounded
 source retrieval and metadata-only workspace output reduce unnecessary injected
 text mechanically, but do not establish end-to-end token savings.
+
+## Readable output and appropriate visuals
+
+The owner's requested output policy is delivered through the on-demand
+[`clear-docs` skill](../content/skills/clear-docs/SKILL.md): plain language,
+an immediately useful overview and detail behind links. It routes exact lookup
+to tables, relationships to diagrams, real numerical patterns to charts and
+specific interface locations to screenshots. Motion needs a reason; simple
+answers and straight steps can stay as text. The rule adds no hook or model judge.
+
+Its [source notes](../content/skills/clear-docs/references.md) distinguish official
+guidance and specific learning studies from an unmeasured application to AI output.
+[Positive and negative cases](../content/skills/clear-docs/cases.md) make the intended
+decisions inspectable. Structural validation and prompt-budget checks do not prove
+that readers understand faster or that aggregate token usage improved.
+
+The separately requested [Unslop UI skill](https://github.com/heydamir/unslop/tree/a6f121eee5f29c2f74976b75456feae8b66afb3a)
+is an optional external extension, not a new mandatory backend/research pipeline.
+It is not bundled here or claimed installed on other devices. Its attribution
+license, optional browser/video tooling and separately authorized image services
+remain distinct from this standard-library harness.
 
 ## Capability and qualification boundaries
 
