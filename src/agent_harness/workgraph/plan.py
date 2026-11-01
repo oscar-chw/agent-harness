@@ -106,7 +106,7 @@ FENCE_RE = re.compile(r"^\s*(```|~~~)")
 # The trailing [xxxxxxxx] is a signature over the whole normalised output. The
 # group is optional so notes written before this existed still parse.
 NOTE_RE = re.compile(r"exit (-?\d+)(?: in (\d+)s)?(?: \[([0-9a-f]{8})\])? — (.*)$")
-FIELD_ORDER = ("needs", "ctx", "risk", "tier", "owner", "lease", "gate")
+FIELD_ORDER = ("needs", "ctx", "risk", "hold", "tier", "owner", "lease", "gate")
 
 
 def now_iso():
@@ -575,6 +575,13 @@ def find_cycles(nodes):
     return bad
 
 
+def hold_reason(node):
+    """A scheduling hold is not a permission grant or a failed test."""
+    if node["fields"].get("hold"):
+        return f"{node['fields']['hold']} hold — resolve the rejecting layer before retrying"
+    return node.get("_version_hold") or "risk: irreversible; needs --attended with a human"
+
+
 def analyse(nodes, order, malformed):
     eff = {nid: effective_mark(n) for nid, n in nodes.items()}
     cycles = find_cycles(nodes)
@@ -609,7 +616,7 @@ def analyse(nodes, order, malformed):
         # written after the gate was not merely swallowed but silently un-warned,
         # and the destructive gate then ran unattended. A shift key disarmed the
         # single most important safety marker in the tool.
-        swallowed = re.search(r"\|\s*(needs|ctx|risk|owner|lease)\s*:", gate_txt, re.I)
+        swallowed = re.search(r"\|\s*(needs|ctx|risk|hold|owner|lease)\s*:", gate_txt, re.I)
         if self_gating:
             broken.append((nid, f"ctx names {self_gating[0]!r}, which its own gate runs — "
                                 "a node cannot be allowed to edit its acceptance criteria"))
@@ -636,7 +643,7 @@ def analyse(nodes, order, malformed):
             unmet = [d for d in deps if eff.get(d) != "x"]
             if unmet:
                 blocked.append((nid, unmet))
-            elif n.get("_version_hold") or is_irreversible(n):
+            elif n["fields"].get("hold") or n.get("_version_hold") or is_irreversible(n):
                 held.append(nid)          # G4: never auto-dispatched
             else:
                 ready.append(nid)
@@ -1091,7 +1098,7 @@ def _report_defects(st, nodes):
     for nid, why in st["broken"]:
         print(f"BROKEN {nid}. {nodes[nid]['title']} — {why}")
     for nid in st["held"]:
-        reason = nodes[nid].get("_version_hold") or "risk: irreversible, needs a human"
+        reason = hold_reason(nodes[nid])
         print(f"HELD {nid}. {nodes[nid]['title']} — {reason}")
     for nid, n in nodes.items():
         if n.get("_version_stale"):
@@ -1303,7 +1310,11 @@ def build_context(slug, nid):
         out.append(""); out.append("--- THIS NODE'S RECORD ---")
         out.append(body.strip())
         out.append("--- end record ---")
-    out.append(""); out.append(f"WHEN DONE: plan gate {a.slug} {a.id}")
+    out.append("")
+    if n["fields"].get("hold"):
+        out.append(f"HELD: {hold_reason(n)}; keep the checkpoint, do not retry the denied effect")
+    else:
+        out.append(f"WHEN DONE: plan gate {a.slug} {a.id}")
     return "\n".join(out)
 
 
@@ -1358,6 +1369,8 @@ def cmd_gate(a):
     if a.id not in nodes:
         die(f"no node {a.id}")
     n = nodes[a.id]
+    if n["fields"].get("hold"):
+        die(f"node {a.id}: {hold_reason(n)}; --force/--attended do not clear a permission hold", 4)
     gate = n["fields"].get("gate")
     if not gate:
         die(f"node {a.id} has no gate; a node without one can never be settled")
@@ -1411,6 +1424,7 @@ def cmd_gate(a):
 
     print(f"$ {gate}", file=sys.stderr)
     t0 = time.time()
+    refused = None
     try:
         root = os.path.dirname(plan_dir())
         # Gates call `plan` and `phase-check` by name; this directory resolves them wherever the
@@ -1421,8 +1435,8 @@ def cmd_gate(a):
         if not_run:
             code, blob = 8, f"NOT_RUN: version check refused: {not_run}\n"
         elif refused:
-            # Not run at all. Recorded as an ordinary failed attempt, so the node returns to pending
-            # with the reason as evidence and the same refusal twice reads as STUCK.
+            # A refusal is NOT_RUN, not a failing test. Persist its hold so a cold
+            # resume cannot send the same denied action through the worker again.
             code, blob = 126, "refused by the guard before it ran: %s\n" % refused
         elif sb:
             r = subprocess.run(sb + ["-c", gate], capture_output=True, text=True,
@@ -1476,8 +1490,12 @@ def cmd_gate(a):
             print(f"CONFLICT {a.id}: re-claimed while the gate ran; result not applied",
                   file=sys.stderr)
             return 5
+        if refused:
+            n["fields"]["hold"] = "permission"
+            a.permission_hold = True
         if versioned:
-            text = (f"NOT_RUN version check — {not_run}" if not_run
+            text = (f"NOT_RUN permission — {tail}" if refused else
+                    f"NOT_RUN version check — {not_run}" if not_run
                     else f"exit {code} in {secs}s [{sig}] — {tail}")
             if receipt:
                 text += f" @version={receipt}"
@@ -1489,14 +1507,19 @@ def cmd_gate(a):
             at = (n["note_lines"][-1] if n["note_lines"] else n["line"]) + 1
             lines.insert(at, f"      {now_iso()} {_clean(text)}")
             save(path, lines)
-            print(("PASS " if code == 0 else "NOT_RUN " if not_run else "FAIL ")
+            print(("PASS " if code == 0 else "NOT_RUN " if not_run or refused else "FAIL ")
                   + f"{a.id} (exit {code}, {secs}s)")
             return 0 if code == 0 else 1
-        append_note(path, lines, n, f"exit {code} in {secs}s [{sig}] — {tail}")
+        # append_note saves the current line array, so publish the hold there too.
+        if refused:
+            lines[n["line"]] = render_node(n)
+        append_note(path, lines, n, (f"NOT_RUN permission — {tail}" if refused
+                                    else f"exit {code} in {secs}s [{sig}] — {tail}"))
         _, lines, nodes, _, _ = load(a.slug)
         n = nodes[a.id]
         set_node(path, lines, n, mark=("x" if code == 0 else " "), lease=None)
-    print(("PASS " if code == 0 else "FAIL ") + f"{a.id} (exit {code}, {secs}s)")
+    print(("PASS " if code == 0 else "NOT_RUN " if refused else "FAIL ")
+          + f"{a.id} (exit {code}, {secs}s)")
     return 0 if code == 0 else 1
 
 
@@ -1644,7 +1667,8 @@ def _classify(slug):
         return ("stuck", f"{len(stuck)} node(s) failed the same way twice",
                 done, total, False)
     if st["held"]:
-        return ("held", f"{len(st['held'])} irreversible node(s) need --attended",
+        reasons = "; ".join(dict.fromkeys(hold_reason(nodes[i]) for i in st["held"]))
+        return ("held", f"{len(st['held'])} held node(s): {reasons}",
                 done, total, False)
     if st["blocked"]:
         return ("blocked", f"{len(st['blocked'])} node(s) waiting on a dependency",
@@ -1784,7 +1808,7 @@ def cmd_status(a):
         else:
             row("ready", nid)
     for nid in st["held"]:
-        row("HELD", nid, nodes[nid].get("_version_hold") or "risk: irreversible")
+        row("HELD", nid, hold_reason(nodes[nid]))
     for nid, why in st["broken"]:
         row("BROKEN", nid, why[:40])
     blocked = [str(b[0]) for b in st["blocked"]]
@@ -2583,6 +2607,8 @@ def _work_one(slug, nid, timeout, model, owner, authorised=None, gatepin=None,
             return r
     try:
         r["gate_rc"] = cmd_gate(g)
+        if getattr(g, "permission_hold", False):
+            r["permission_hold"] = True
         if getattr(g, "gate_conflict", False):
             r["gate_conflict"] = True
     except SystemExit as e:
@@ -2679,6 +2705,9 @@ def cmd_run(a):
         for i in skipped:
             print(f"STUCK {i}. {nodes[i]['title']} — same failure twice, left for a human")
         for i in st["held"]:
+            if nodes[i]["fields"].get("hold"):
+                print(f"HELD {i}. {nodes[i]['title']} — {hold_reason(nodes[i])}")
+                continue
             if nodes[i].get("_version_hold"):
                 print(f"HELD {i}. {nodes[i]['title']} — {nodes[i]['_version_hold']}")
                 continue
@@ -3070,12 +3099,42 @@ def cmd_run(a):
                     print(f"    {f}")
                 halt = True
                 continue
+            if r.get("gate_conflict"):
+                print(f"  node {nid}: GATE NOT APPLIED — another owner took the lease")
+                continue
+            if r.get("permission_hold") or (r.get("denials") and r.get("gate_rc") != 0):
+                # A passing gate can accept work after an incidental denial. If
+                # work remains, hold just this node instead of consuming quota to repeat
+                # a blocked action or stopping independent branches of the goal.
+                path = plan_path(slug)
+                applied = False
+                with Lock(path):
+                    _, lh, nh, _, _ = load(slug)
+                    n = nh[nid]
+                    if n["mark"] != "x" and n["fields"].get("owner") == owner:
+                        set_node(path, lh, n, mark=" ", lease=None, hold="permission")
+                        applied = True
+                        if not r.get("permission_hold"):
+                            _, lh, nh, _, _ = load(slug)
+                            reason = (f"permission hold — worker hit {r['denials']} permission denial(s); "
+                                      "the denial is not a task failure; "
+                                      "completion not established; resolve the rejecting layer before retrying")
+                            if r.get("gate_error"):
+                                reason += f"; gate crashed: {r['gate_error']}"
+                            append_note(path, lh, nh[nid], reason)
+                            append_record(slug, nh[nid], f"Permission hold {now_iso()}", reason)
+                detail = (f"worker hit {r['denials']} permission denial(s); " if r.get("denials")
+                          else "gate NOT_RUN; ")
+                state = "HELD — permission" if applied else "hold NOT APPLIED — node completed or lease changed"
+                print(f"  node {nid}: {state}; {detail}independent nodes may continue")
+                if r.get("dispatch_failed") or r.get("gate_error"):
+                    crashed += 1
+                elif not r.get("permission_hold"):
+                    failed += 1
+                continue
             if r.get("gate_error"):
                 crashed += 1
                 print(f"  node {nid}: GATE CRASHED — {r['gate_error']} (node left pending)")
-                continue
-            if r.get("gate_conflict"):
-                print(f"  node {nid}: GATE NOT APPLIED — another owner took the lease")
                 continue
             if r.get("dispatch_failed"):  # includes worker timeout
                 # The worker never ran. Record that, and do NOT let it become

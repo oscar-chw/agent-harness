@@ -22,7 +22,7 @@ For every session and project. A project's own instructions win, except the firs
 
 Define a failing check first; data jobs: tiny input, sample, full run. Load `production-code`
 before coding. Make the smallest change, check, follow evidence. Same failure twice:
-change approach (`work-loop`). Use `plan` for multi-step work, with a check per step.
+change approach (`work-loop`). Use `plan` for multi-step tasks; hold only blocked nodes.
 
 Docs/wiki/slides: use `clear-docs`.
 

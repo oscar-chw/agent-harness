@@ -147,6 +147,18 @@ See [Codex sandbox defaults](https://learn.chatgpt.com/docs/sandboxing#configure
 Other client adapters do not acquire a universal policy API from this choice;
 their native approval controls remain unchanged.
 
+An individual refusal preserves the goal. The development runner persists a
+`hold: permission` on unfinished work after a worker denial or guard-refused gate,
+and continues independent nodes. Dependants stay blocked; completion remains
+unproven. A guard-refused gate is `NOT_RUN`, not a failed test. An incidental
+worker denial does not invalidate a real passing gate. The hold survives a cold
+resume; it is not a native permission grant. See the [recovery contract](../content/skills/work-loop/recovery.md)
+for checkpoints, supported approvals and resolution. Authentication, quota,
+STOP and integrity failures retain their existing wider stop conditions.
+Structured worker-denial ingestion is currently Claude-specific; the Codex adapter
+does not report that signal. Gate-guard holds apply to both. This is not native
+approval authentication, automatic rule repair, or a claim of universal unattended success.
+
 This is not unrestricted host access, a password provider, a new per-command LLM
 hook, or proof that every sudo/remote-admin operation will run. Root/home-wide
 deletion, protected secrets and external authority restrictions must not be
