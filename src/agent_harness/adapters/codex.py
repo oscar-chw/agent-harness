@@ -42,6 +42,21 @@ class CodexAdapter(Adapter):
                 tables[name[1:]].update(body)
             else:
                 tables[name] = body
+        if ctx.permission_profile != "preserve":
+            tables.setdefault("+", {}).update({
+                "sandbox_mode": "workspace-write" if ctx.permission_profile == "autonomous" else "read-only",
+                "approval_policy": "on-request",
+                "approvals_reviewer": "auto_review" if ctx.permission_profile == "autonomous" else "user",
+            })
+        else:
+            # Carry current values through removal of a formerly owned patch.
+            # Omitting them would restore the pre-install backup, not preserve.
+            from ..installer import load_toml
+            config = codex / "config.toml"
+            current = load_toml(config.read_text(encoding="utf-8")) if config.is_file() else {}
+            for key in ("sandbox_mode", "approval_policy", "approvals_reviewer"):
+                if key in current:
+                    tables.setdefault("+", {})[key] = current[key]
         note = "agent rules (replaces the file)"
         if not project and (codex / "AGENTS.override.md").is_file():
             note += "; NOTE: your AGENTS.override.md takes precedence and hides it"

@@ -68,7 +68,7 @@ def test_invalid_task_cannot_write(tmp_path, task):
     assert list(tmp_path.iterdir()) == []
 
 
-@pytest.mark.parametrize('part', ['root', 'task', 'index', 'output', 'nested'])
+@pytest.mark.parametrize('part', ['root', 'task', 'index', 'ignore', 'output', 'nested'])
 def test_symlinks_are_refused_without_following_them(tmp_path, part):
     project = tmp_path / 'project'
     project.mkdir()
@@ -87,6 +87,9 @@ def test_symlinks_are_refused_without_following_them(tmp_path, part):
         if part == 'index':
             (base / 'README.md').unlink()
             (base / 'README.md').symlink_to(secret)
+        elif part == 'ignore':
+            (base.parent / '.gitignore').unlink(missing_ok=True)
+            (base.parent / '.gitignore').symlink_to(secret)
         elif part == 'output':
             (base / 'outputs/link').symlink_to(secret)
         else:
@@ -163,3 +166,30 @@ def test_missing_index_is_incomplete_and_deep_tree_is_refused(tmp_path):
         deep.mkdir()
     result = call(tmp_path, '--task', 'one')
     assert result.returncode == 2 and 'depth' in result.stderr
+
+
+def test_new_project_scratch_is_ignored_without_changing_project_rules(tmp_path):
+    subprocess.run(['git', 'init', '-q', str(tmp_path)], check=True)
+    rules = tmp_path / '.gitignore'
+    rules.write_text('owner-pattern\n')
+    assert call(tmp_path, '--task', 'one', '--init').returncode == 0
+    base = tmp_path / '.harness-work/one'
+    (base/'scratch/private.log').write_text('keep private')
+    (base/'outputs/result.md').write_text('deliberate publication only')
+    result = subprocess.run(['git', 'check-ignore', '.harness-work/one/README.md',
+                             '.harness-work/one/scratch/private.log',
+                             '.harness-work/one/outputs/result.md'], cwd=tmp_path,
+                            capture_output=True, text=True, check=False)
+    assert result.returncode == 0 and len(result.stdout.splitlines()) == 3
+    assert rules.read_text() == 'owner-pattern\n'
+
+
+def test_existing_custom_workspace_ignore_is_preserved_and_not_certified(tmp_path):
+    base = tmp_path / '.harness-work'
+    base.mkdir()
+    custom = base/'.gitignore'
+    custom.write_text('!outputs/\n')
+    result = call(tmp_path, '--task', 'one', '--init')
+    assert result.returncode == 0, result.stderr
+    assert custom.read_text() == '!outputs/\n'
+    assert 'EXISTING_IGNORE_NOT_VERIFIED' in json.loads(result.stdout)['warnings']

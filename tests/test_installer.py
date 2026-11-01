@@ -190,11 +190,14 @@ class Consent(Base):
         self.assertIn("this replaces your current Claude Code setup", out)
 
     def test_asks_per_tool(self):
-        answers = iter(["y", "n"])
+        # A new first-install policy choice precedes the same per-tool consent.
+        # Keep the negative tool choice: choosing a posture must not approve Codex.
+        answers = iter(["3", "y", "n"])
         with mock.patch.object(I, "is_tty", return_value=True), \
                 mock.patch("builtins.input", lambda q: next(answers)):
             rc, out = self.install()
         self.assertEqual(rc, 0, out)
+        self.assertIn("Permission profile: preserve", out)
         self.assertTrue((self.home / ".claude" / "CLAUDE.md").exists())
         self.assertFalse((self.home / ".codex").exists())
 

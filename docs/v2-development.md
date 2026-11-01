@@ -30,10 +30,12 @@ harness workspace --task example
 ```
 
 ```text
-.harness-work/example/
-  README.md       current output/evidence pointers and next action
-  outputs/        deliverables worth keeping
-  scratch/        reusable intermediate logs and experiments
+.harness-work/
+  .gitignore      protects newly created untracked workspaces from ordinary add
+  example/
+    README.md     current output/evidence pointers and next action
+    outputs/      deliverables worth keeping
+    scratch/      reusable intermediate logs and experiments
 ```
 
 There is one index, not a new dated summary on every turn. Repeated initialization
@@ -51,7 +53,10 @@ over 1,000 entries. It lists at most 40 files within an 8 KiB compact metadata
 budget, with full bounded totals and explicit omitted counts. Scratch above
 32 MiB triggers a warning, not deletion or a disk quota. Keep final artifacts at
 the agreed delivery path; links do not replace verifying their contents.
-The workspace is ignored by Git by default: explicitly copy selected publishable
+Initialization creates the managed root's ignore file if absent, without editing
+the project's own rules. An existing custom file is preserved and reported as
+unverified. Ignore rules do not untrack files already committed or prevent a
+deliberate force-add. For a newly prepared root, explicitly copy selected publishable
 deliverables to the repository's established output location. Do not force-add
 private scratch or histories. The tool does not eliminate arbitrary files that a
 native model chooses to create elsewhere, and is not a filesystem sandbox.
@@ -86,6 +91,61 @@ source retrieval and metadata-only workspace output reduce unnecessary injected
 text mechanically, but do not establish end-to-end token savings.
 
 ## Capability and qualification boundaries
+
+### Installation policy choice
+
+An interactive first installation asks once for explicit review, native workspace
+autonomy, or preserving current settings. Later updates reuse the recorded choice.
+Unattended `--yes` by itself preserves settings; it never selects more autonomy.
+Use `--permission-profile explicit`, `autonomous` or `preserve` to choose deliberately.
+
+Claude's autonomous candidate selects native `auto` and replaces only this
+installer's blocking command/edit/Stop hooks with passive capture/recall. Other
+owners' hooks and deny rules are preserved. Project-only auto installs are refused
+before writing because the documented setting needs user scope. Explicit review
+selects native `default` and retains the harness checks.
+See [Claude permission modes](https://code.claude.com/docs/en/permission-modes).
+
+Codex's autonomous candidate selects workspace-write, on-request and native
+automatic approval review; explicit review selects read-only and human review.
+The obsolete untrusted policy is not generated. Native or organization restrictions
+still win; unsupported client versions may reject or limit these settings.
+See [Codex sandbox defaults](https://learn.chatgpt.com/docs/sandboxing#configure-defaults).
+Other client adapters do not acquire a universal policy API from this choice;
+their native approval controls remain unchanged.
+
+This is not unrestricted host access, a password provider, a new per-command LLM
+hook, or proof that every sudo/remote-admin operation will run. Root/home-wide
+deletion, protected secrets and external authority restrictions must not be
+described as harmless routine work. A fully unrestricted mode cannot honestly
+promise a narrow safety net where the client lacks that mechanism. Exact native
+behavior still needs an authorized client trial; generated configuration tests do
+not remove that qualification requirement. No live policy was changed here.
+
+### Historical failure review and controller responsibility
+
+The supplied conversation contains repeated concrete failures: printed examples
+blocked as execution, permanently blocking hooks phrased as approval requests,
+repeated consent without a consumer, stale version/install identity, and guards
+duplicating native checks. A prior bounded inspection covered four relevant
+threads/twelve returned turns. This is not an exhaustive read of every private
+chat; indexed search also reported evictions, so absence is not a history census.
+
+The central controller should own intent, shared state, source authority, a scoped
+policy choice and concise receipts. Native clients execute their own permissions;
+the controller must distinguish task consent, native trust and organization rules.
+Never ask twice for the same valid grant or promise that chat consent can override
+an interface with no approval consumer. Keep a refusal receipt and diagnose the
+specific layer, with tests for benign text, real side effects, stale grants,
+changed targets and cancellation. Do not add a second arbitrary classifier to
+every command or silently remove another owner's protection.
+
+Current local readback found installed agent-harness declared 0.9.1.dev0, source
+declared 2.0.0.dev0 on this dev branch, and a different PATH plan launcher. No v1.2
+tag/source was established in the inspected repository, install or bounded task
+search. A named v1.2 milestone elsewhere is unresolved, not disproved. Reconcile
+those identities before any live migration; do not overwrite a different active
+controller based on this branch name.
 
 | Area | Development functionality | What this does not establish |
 |---|---|---|

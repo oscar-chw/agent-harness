@@ -106,6 +106,11 @@ def memory_digest(hh: Path, project=None) -> str:
 def build_ctx(home: Path, hh: Path, content: Path, profile_dir: Optional[Path], project, extra_mcp,
               with_index: bool):
     ctx = I.make_ctx(home, hh, content, profile_dir, project, extra_mcp)
+    from .permission_profiles import validate
+    try:
+        ctx.permission_profile = validate(I.load_state(hh).get("permission_profile", "preserve"))
+    except ValueError as exc:
+        raise I.InstallError(str(exc)) from exc
     if with_index:
         for extra_part in (kb_index(hh, ctx.profile, profile_dir), memory_digest(hh, project)):
             if extra_part:
@@ -148,6 +153,16 @@ def cmd_install(args) -> int:
     if not args.dry_run and not args.yes and not I.is_tty():
         _out("Refusing to change your tool setup without a terminal to ask you. Re-run with --yes to accept.")
         return 2
+    from .permission_profiles import choose
+    try:
+        selected_policy = choose(getattr(args, "permission_profile", None),
+                                 state.get("permission_profile"),
+                                 not args.dry_run and not args.yes and I.is_tty())
+    except ValueError as exc:
+        _out("harness: " + str(exc))
+        return 2
+    ctx.permission_profile = selected_policy
+    _out("Permission profile: " + selected_policy + "; native/organization restrictions and other owners' hooks stay.")
     chosen = []
     for name in tools:
         a = adapters[name]
@@ -167,13 +182,15 @@ def cmd_install(args) -> int:
     I.copy_harness(hh, source, profile_dir if profile_dir != hh / "profile" else None)
     installed_profile = hh / "profile" if (hh / "profile").is_dir() else None
     ctx = build_ctx(home, hh, hh / "content", installed_profile, project, extra, with_index=True)
+    ctx.permission_profile = selected_policy
     # the content folder was just replaced, so the tools installed earlier are refreshed too (as `update` does):
     # their files live there, and every tool on the machine gets the same rules
     earlier = [n for n in state.get("tools", []) if n in adapters and n not in chosen]
     changes = [(n, adapters[n].plan(ctx)) for n in chosen + earlier]
     state = I.apply(hh, changes, state, [home] + ([project] if project else []))
     state.update({"source": str(source), "project": str(project) if project else None,
-                  "tools": sorted(set(state.get("tools", [])) | set(chosen))})
+                  "tools": sorted(set(state.get("tools", [])) | set(chosen)),
+                  "permission_profile": selected_policy})
     I.save_state(hh, state)
     state = extensions_step(home, hh, state, ctx, args.yes)
     for n in chosen:
@@ -1185,6 +1202,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--tools", help="comma-separated tool names, or 'all' (default: the ones found)")
     p.add_argument("--yes", action="store_true", help="accept every tool without asking")
     p.add_argument("--profile", help="profile directory (profile.toml + descriptor)")
+    p.add_argument("--permission-profile", choices=("preserve", "explicit", "autonomous"),
+                   help="choose native review posture; --yes alone never increases autonomy")
     p.add_argument("--project", help="install into this project instead of your user settings")
     p.add_argument("--dry-run", action="store_true", help="show the plan, write nothing")
     p.add_argument("--source", help=argparse.SUPPRESS)

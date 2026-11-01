@@ -31,15 +31,25 @@ def inspect(root, task, initialize=False):
     for path in (base, work, work / 'scratch', work / 'outputs'):
         _directory(path)
     index = work / 'README.md'
-    if index.is_symlink():
-        raise ValueError('workspace symlink refused: README.md')
-    if index.exists() and not index.is_file():
-        raise ValueError('workspace index must be regular')
+    ignore = base / '.gitignore'
+    for path in (index, ignore):
+        if path.is_symlink():
+            raise ValueError('workspace symlink refused: ' + path.name)
+        if path.exists() and not path.is_file():
+            raise ValueError('workspace index/ignore must be regular')
     # Validate all existing descendants before initialization writes anything.
     rows = _inventory(work) if work.is_dir() else []
+    ignore_state = 'NOT_CHECKED'
     if initialize:
         for path in (base, work, work / 'scratch', work / 'outputs'):
             path.mkdir(mode=0o700, exist_ok=True)
+        try:
+            with ignore.open('x', encoding='utf-8') as handle:
+                handle.write('*\n')
+            ignore_state = 'CREATED'
+        except FileExistsError:
+            with ignore.open('rb') as handle:
+                ignore_state = 'TEMPLATE_PRESENT' if handle.read(3) == b'*\n' else 'CUSTOM_UNVERIFIED'
         try:
             with index.open('x', encoding='utf-8') as handle:
                 handle.write(f'# Task workspace: {task}\n\n'
@@ -62,6 +72,8 @@ def inspect(root, task, initialize=False):
         output_bytes += cost
     complete = index.is_file() and all((work / name).is_dir() for name in ('scratch', 'outputs'))
     warnings = ['SCRATCH_BUDGET_EXCEEDED'] if scratch > SCRATCH_BYTES else []
+    if ignore_state == 'CUSTOM_UNVERIFIED':
+        warnings.append('EXISTING_IGNORE_NOT_VERIFIED')
     if len(visible) < len(rows):
         warnings.append('INVENTORY_SUMMARIZED')
     return {'schema': 'harness.workspace/v1', 'task': task,
@@ -71,6 +83,7 @@ def inspect(root, task, initialize=False):
             'files': visible, 'file_count': len(rows), 'omitted_files': len(rows) - len(visible),
             'total_bytes': sum(row['bytes'] for row in rows),
             'scratch_bytes': scratch,
+            'ignore_rule': ignore_state,
             'warnings': warnings,
             'cleanup': 'NO_DELETION; review owned scratch separately',
             'authority': 'metadata only; use original gates and source evidence'}

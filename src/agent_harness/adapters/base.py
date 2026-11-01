@@ -22,6 +22,7 @@ class Ctx:
     project: Optional[Path] = None
     extra_mcp: dict = field(default_factory=dict)  # name -> command list, from `harness warmup`
     extra_rules: str = ""         # the profile's extra-rules text, as it appears inside `rules`
+    permission_profile: str = "preserve"  # explicit installer choice, not inferred from --yes
 
 
 @dataclass
