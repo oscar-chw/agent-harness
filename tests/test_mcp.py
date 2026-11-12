@@ -132,7 +132,7 @@ class ToolsInProcessTests(TmpCase):
         self.assertEqual({t["name"] for t in TOOLS},
                          {"kb_search", "kb_get", "kb_toc", "mem_add", "mem_search", "mem_forget",
                           "lesson_add", "lesson_search", "state_save", "state_load", "session_note",
-                          "session_recent", "session_search", "skill_manage", "run_checks", "plan"})
+                          "session_recent", "session_search", "skill_manage", "run_checks", "plan", "op_state"})
         from agent_harness.mcp.server import tool_list
         self.assertNotIn("run_checks", [t["name"] for t in tool_list()])   # off by default (v0.1.1 eval)
         self.assertIn("plan", [t["name"] for t in tool_list()])            # on by default since v0.3.3 (owner)
@@ -600,9 +600,15 @@ class ProfileAndConflictTests(TmpCase):
         env = {k: v for k, v in os.environ.items() if k != "HARNESS_KB_PATHS"}
         env["HOME"] = str(fake_home)
         old = dict(os.environ)
+        old_cwd = os.getcwd()
         try:
             os.environ.clear()
             os.environ.update(env)
+            # hermetic: Server() defaults derive the project from cwd — from the repo
+            # root that is a real git project whose growing docs/ tree crowds the
+            # 8 KB index budget; run from the tmp (non-git) project instead so the
+            # test passes identically from any invocation cwd (eval-pipeline node 16)
+            os.chdir(project)
             paths = kbmod.default_kb_paths(self.home, project)
             self.assertIn(prof / "SERVER.md", paths)
             self.assertIn(prof / "wiki", paths)                      # relative -> profile folder
@@ -616,6 +622,7 @@ class ProfileAndConflictTests(TmpCase):
             self.assertEqual(srv.call_tool("kb_get", {"id": "profile/SERVER.md#gpu-queue"})["id"],
                              "SERVER.md#gpu-queue")          # v0.1.0's printed form still resolves
         finally:
+            os.chdir(old_cwd)
             os.environ.clear()
             os.environ.update(old)
 

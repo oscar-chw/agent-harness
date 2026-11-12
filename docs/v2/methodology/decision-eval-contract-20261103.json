@@ -1,0 +1,431 @@
+{
+  "schema": "harness.decision-eval-contract/v1",
+  "as_of": "2026-11-03",
+  "owner": "methodology worker; root integrates and verifies",
+  "publication_status": "AUTHORED_FOR_ROOT_FREEZE",
+  "split": "visible_development",
+  "responding_agent_answers_authored": false,
+  "authority": "INFORMS original node2 acceptance; root owns oracles/gates. Comparative efficacy remains original node6.",
+  "scope": "Six family-level evaluation contracts only; no responding-agent answers, evaluator implementation, source campaign or verification run.",
+  "source_context": [
+    {
+      "path": "handoffs/v2-completion/decision-cases-assignment-20261103.md",
+      "sha256": "f7911fe188ca124ced71372635e833e23758abb14d621e4270ba4e3c6604caac",
+      "artifact_kind": "assignment",
+      "read_scope": "Full bounded assignment; this worker owns only the two new decision-eval contract files.",
+      "proves": "Local bytes/context only; not primary-source availability, native use or efficacy."
+    },
+    {
+      "path": "handoffs/v2-completion/orchestrator.md",
+      "sha256": "e81296562e5bad84368384db989d9a2bb445fee3b371b3d5ba42cc890364cd97",
+      "artifact_kind": "authored_local_contract_or_notes",
+      "read_scope": "Current checkpoint and node2 versus node6 qualification boundaries; historical reports not reverified.",
+      "proves": "Local bytes/context only; not primary-source availability, native use or efficacy."
+    },
+    {
+      "path": "docs/v2/philosophy/worked-cases.md",
+      "sha256": "f22369fadf5b98acf476dc8eae24ae1053228404ce29436f3561a10c3c08f8cf",
+      "artifact_kind": "authored_local_contract_or_notes",
+      "read_scope": "Seven authored hypothetical worked decisions, constraints and reversal examples; not responding-agent outcomes.",
+      "proves": "Local bytes/context only; not primary-source availability, native use or efficacy."
+    },
+    {
+      "path": "docs/v2/philosophy/transfer-prompts.md",
+      "sha256": "40f646424959312f51e9badb41d4bcfe1ba5ffb84c69204e1efc480aab29d88c",
+      "artifact_kind": "authored_local_contract_or_notes",
+      "read_scope": "Eight public development prompts, including changed constraints; no held-out status.",
+      "proves": "Local bytes/context only; not primary-source availability, native use or efficacy."
+    },
+    {
+      "path": "docs/v2/philosophy/reviewer-notes.md",
+      "sha256": "c3efc81283677cc6fb3364d9e29201a14436641ca3cc09c1d06a54fe06b34ffb",
+      "artifact_kind": "authored_local_contract_or_notes",
+      "read_scope": "Authored acceptable/unsafe distinctions and proposed evaluation controls; not an independent executed oracle.",
+      "proves": "Local bytes/context only; not primary-source availability, native use or efficacy."
+    },
+    {
+      "path": "docs/v2/philosophy/decision-references.md",
+      "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+      "artifact_kind": "authored_local_contract_or_notes",
+      "read_scope": "Local distilled source/read-scope references and authored inferences; no primary source re-acquisition or verification here.",
+      "proves": "Local bytes/context only; not primary-source availability, native use or efficacy."
+    },
+    {
+      "path": "docs/v2/engineering-cases-20261102.md",
+      "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+      "artifact_kind": "authored_local_contract_or_notes",
+      "read_scope": "Selected local module/isolation, API replay and overload excerpts; upstream primary sources not re-read by this worker.",
+      "proves": "Local bytes/context only; not primary-source availability, native use or efficacy."
+    },
+    {
+      "path": "docs/v2/methodology/evaluation.md",
+      "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+      "artifact_kind": "authored_local_contract_or_notes",
+      "read_scope": "Existing unchanged-baseline, held-out and complete-usage contract; no campaign executed here.",
+      "proves": "Local bytes/context only; not primary-source availability, native use or efficacy."
+    }
+  ],
+  "dependencies_to_bind_before_learner_run": [
+    {
+      "path": "docs/v2/philosophy/decision-contract-20261103.json",
+      "status": "NOT_RUN",
+      "binding": "Root joins exact case/variant IDs, supplied facts, permissible decisions and irrelevant-change controls; no hash invented here."
+    },
+    {
+      "path": "docs/v2/vault/decision-source-bindings-20261103.json",
+      "status": "NOT_RUN",
+      "binding": "Root binds actual primary captures/read receipts versus authored notes, hashes, read extent and absence; no primary-source availability claim here."
+    },
+    {
+      "path": "docs/v2/framework/decision-integration-20261103.md",
+      "status": "NOT_RUN",
+      "binding": "Root binds the selected read-only case integration and wrong/stale/missing/unsafe context controls."
+    }
+  ],
+  "freeze": {
+    "before": "Before any learner/native response; this document alone does not freeze sibling facts or instantiate an evaluator.",
+    "root_must_pin": [
+      "case and variant IDs including a changed and a recommendation-invariant change",
+      "task mode decision_only or implementation_required",
+      "goal, hard constraints, supplied facts and allowed source scope/revisions",
+      "permissible alternatives and unacceptable consequences",
+      "required claim axes and absence policy for each check",
+      "task/source/context/artifact/evaluator hashes and environments",
+      "calibrated controls, response-to-artifact mapping and graders",
+      "same baseline/candidate cases, starting state, tools/model/effort/budgets for any comparison",
+      "repetitions/order/stop rules and all-invocation usage accounting"
+    ],
+    "after_exposure": "Diagnosis/tuning on a case makes it development evidence. Keep its result/failure and use independent new tasks for held-out efficacy.",
+    "criterion_change": "Version and justify any genuine requirement/oracle correction; keep original failure and invalid controls and rerun affected checks. Never alter to excuse a weak response."
+  },
+  "claim_axes": [
+    {
+      "id": "structural_binding",
+      "proves": "Required records/types, identities and current byte bindings only.",
+      "does_not_prove": "Meaning, source entailment, actual execution, reasoning or efficacy.",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "bounded_outcome",
+      "proves": "Observed finite SQL/state/trace outcomes for the exact executed response artifact or declared policy.",
+      "does_not_prove": "Unexecuted implementation, all possible worlds, causal reasoning or native compliance.",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "semantic_decision_review",
+      "proves": "Independently reviewed visible decision adequacy on supplied facts, consequences, alternatives, uncertainty and changed/irrelevant constraints.",
+      "does_not_prove": "Hidden internal thought or broad expertise.",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "source_support",
+      "proves": "Available actual evidence supports material claims within scope/read extent and revision.",
+      "does_not_prove": "Entailment from citation presence or primary-source reads from authored notes alone.",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "native_use",
+      "proves": "Observed actual learner invocation/context/response under the frozen native client and boundary.",
+      "does_not_prove": "Improvement from a model exit code or a typed response key.",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "comparative_efficacy",
+      "proves": "Authorized independent held-out paired outcomes and complete aggregate usage under original node6.",
+      "does_not_prove": "Universal superiority, model learning or savings from development examples.",
+      "status": "NOT_RUN"
+    }
+  ],
+  "mode_rule": {
+    "decision_only": "Do not require an unrequested implementation. Semantic adequacy can be evaluated independently; runtime/implementation claims remain NOT_RUN unless actually evidenced.",
+    "implementation_required": "Every frozen required execution check must run on the response-bound artifact. A prose-only solution or missing artifact cannot pass it.",
+    "typed_policy": "An independently executed finite policy/action model can establish its declared behavior for those traces, not that a proposed service implements it. Freeze the policy-to-effect interpretation before answers.",
+    "non_tradeable": "Hard authority, integrity, source-scope and supplied-domain invariant violations cannot be compensated by fluency, speed or other cases."
+  },
+  "families": [
+    {
+      "id": "DE-MODULE",
+      "family": "module/isolation",
+      "existing_note_refs": [
+        "docs/v2/philosophy/worked-cases.md#C1",
+        "docs/v2/philosophy/transfer-prompts.md#T1",
+        "docs/v2/philosophy/transfer-prompts.md#T6"
+      ],
+      "bounded_outcome": {
+        "subject": "A claimed boundary under the supplied dependency, state and failure constraints.",
+        "instrument": "For an implementation claim, independently build/start the response-bound component under only its declared dependencies and exercise the registered representative operation and failure-containment seam. Keep the import/dependency check as a separate structural observation.",
+        "predicate": "The exact claimed runtime property holds without undeclared whole-application dependency, inconsistent authoritative writes or leaked failure effects.",
+        "cannot_prove": "A static import pass cannot establish independent execution, deployability or a universally best architecture."
+      },
+      "semantic_review": "Check that the chosen boundary addresses the supplied ownership, atomicity, resource/failure and operational constraints; distinguish organizational grouping, in-process module, constrained worker and independent service claims.",
+      "bad_but_fluent_control": "Polished boundary/simplicity vocabulary accompanies an independently-deployable claim while the registered start/operation trace still requires the full application.",
+      "acceptable_alternative_control": "A different permitted boundary satisfies the same claimed property and supplied costs. It must not fail merely because its architecture label differs from the reference label.",
+      "discriminating_mutation": "Keep forbidden-import count at zero while withholding an undeclared application dependency; independent-execution evidence must fail while the structural import result may remain valid.",
+      "non_discriminating_change": "Rename a team/component or change an irrelevant display label without changing state/failure/ownership requirements. No forced architectural reversal."
+    },
+    {
+      "id": "DE-REPLAY",
+      "family": "API replay/unknown outcome",
+      "existing_note_refs": [
+        "docs/v2/philosophy/worked-cases.md#C2",
+        "docs/v2/philosophy/transfer-prompts.md#T2",
+        "docs/v2/philosophy/transfer-prompts.md#T3"
+      ],
+      "bounded_outcome": {
+        "subject": "A response-bound operation policy/implementation under the frozen intent and service contract.",
+        "instrument": "Run finite traces for commit-then-lost-response, duplicate delivery, same identity with changed intent, distinct intents with equal parameters and a late old retry after newer state. Observe durable effects and user-visible pending/unknown/confirmed states.",
+        "predicate": "Effects, identity and state ordering meet the actual supplied invariant; ambiguous completion is not asserted as confirmed without authority. Record total effects and unresolved outcomes independently of the response label.",
+        "cannot_prove": "A client-generated key, typed idempotent=true or named HTTP method does not establish durable binding, lifetime, replay behavior or exactly-once runtime semantics."
+      },
+      "semantic_review": "Relate operation intent, parameter/version binding, authoritative status and uncertainty to the supplied domain. A desired-state update and a side-effecting creation need not receive identical machinery.",
+      "bad_but_fluent_control": "Correct idempotency/recovery terminology accompanies a trace that confirms an unknown outcome, duplicates one intent, or merges two intentional equal-parameter operations.",
+      "acceptable_alternative_control": "A permitted replay or reconciliation policy with different mechanism choices preserves the same intent/effect/status invariants; a safely unresolved state is not falsely scored as completed.",
+      "discriminating_mutation": "Change only the operation-identity handling while preserving fluent prose; finite effect/status traces must detect the resulting duplicate or merged intent.",
+      "non_discriminating_change": "Change presentation text while preserving intent, authoritative semantics, order and replay scope; no required policy flip."
+    },
+    {
+      "id": "DE-OVERLOAD",
+      "family": "overload",
+      "existing_note_refs": [
+        "docs/v2/philosophy/worked-cases.md#C3",
+        "docs/v2/philosophy/transfer-prompts.md#T4"
+      ],
+      "bounded_outcome": {
+        "subject": "A declared retry/admission policy on a supplied bounded arrival, rejection and capacity trace.",
+        "instrument": "Execute a frozen event trace with one retry owner, initial/retry calls, useful completion timestamps, expiry/disposition and rejection cost recorded. Contrast localized verified spare capacity with widespread rejection and layered retry amplification.",
+        "predicate": "The registered useful-work, total deadline, replay-safety and finite attempt/load bounds hold; accepted work is not silently lost or counted complete after discard.",
+        "cannot_prove": "A smaller queue, zero retries, backoff/jitter word or a reused fleet retry count alone establishes neither useful recovery nor a generally optimal policy."
+      },
+      "semantic_review": "Check the distinction among localized failure, missing evidence and widespread saturation; justify the proposed probe, retry owner and work disposition from supplied facts without invented spare capacity.",
+      "bad_but_fluent_control": "A polished capacity/retry-budget explanation produces lower queue depth only by unreported discard, or the executed trace amplifies load at several layers.",
+      "acceptable_alternative_control": "A different permitted bounded admission, retry, degradation or disposition policy meets the same useful-work/deadline/replay/load contract; do not require one fixed retry count.",
+      "discriminating_mutation": "Preserve the initial workload while enabling another retry layer or relabeling expired/discarded jobs as completed; the load/completion ledger must reject it.",
+      "non_discriminating_change": "Rename workers or reorder equivalent trace records without changing timestamps, budgets, dependencies or effects; no forced retry-policy reversal."
+    },
+    {
+      "id": "DE-SQL",
+      "family": "SQL metric semantics",
+      "existing_note_refs": [
+        "docs/v2/methodology/selection-cases-20261103.json#local-sql"
+      ],
+      "bounded_outcome": {
+        "subject": "The exact response-bound query/artifact evaluated for a preregistered metric unit and data fixture.",
+        "instrument": "Run the query on an isolated local database with frozen schema/data including one-to-many fanout, equal-valued distinct entities, missing children and the defined null/empty policy. Compare against a separately derived per-entity or per-event oracle as the task requires.",
+        "predicate": "The result includes/excludes/counts each required entity/event exactly according to the supplied metric, without hiding duplicates through value deduplication.",
+        "cannot_prove": "One correct scalar or typed SQL-choice label does not prove query semantics, schema generality or business reasoning; the evaluator must execute the submitted query rather than a reference query substituted from a label."
+      },
+      "semantic_review": "Check that the explanation identifies the actual grain/denominator and the material changed constraint. A case that changes from entity revenue to event count may change which duplications are meaningful.",
+      "bad_but_fluent_control": "Correct grain/aggregation prose accompanies an executable query that inflates parent measures after fanout or removes valid equal-valued entities.",
+      "acceptable_alternative_control": "A different permitted query shape produces the independently expected results across all registered fixtures and preserves the actual grain; no required keyword, join order or single reference query.",
+      "discriminating_mutation": "Duplicate a child without changing the parent measure, and add a second equal-valued parent; the fixed metric oracle must distinguish join amplification from value-based over-deduplication.",
+      "non_discriminating_change": "Reorder input rows or change irrelevant labels without changing keys or metric facts; results remain invariant."
+    },
+    {
+      "id": "DE-EVIDENCE",
+      "family": "evidence/correction",
+      "existing_note_refs": [
+        "docs/v2/philosophy/worked-cases.md#C4",
+        "docs/v2/philosophy/transfer-prompts.md#T5"
+      ],
+      "bounded_outcome": {
+        "subject": "The response source set, retrieved spans and asserted decision under frozen authorization and revision state.",
+        "instrument": "Use local permitted-source fixtures with missing ingestion, current paraphrase evidence, an explicit correction, stale/withdrawn evidence, no evidence and a tempting forbidden-source match. Resolve returned source IDs/spans to exact bytes and record exclusions.",
+        "predicate": "Returned evidence is permitted/current and resolves; correction/absence/withdrawal outcomes meet the fixture contract. Missing evidence is not silently converted to a substantive fact or wider authority.",
+        "cannot_prove": "Lexical relevance, a valid hash or resolvable citation does not by itself establish claim entailment, semantic truth or why a retrieval route was chosen."
+      },
+      "semantic_review": "Independently check material answer claims against the cited actual spans and their temporal/authority limits. Distinguish acquisition/freshness failure from a justified scoped retrieval-method comparison.",
+      "bad_but_fluent_control": "Source-aware prose and valid-looking citations support a superseded claim, a non-entailing span, fabricated absence or unauthorized evidence.",
+      "acceptable_alternative_control": "A different permitted source/route gives an equally supported scoped answer or honest abstention with the relevant gap; do not force a single retrieval label.",
+      "discriminating_mutation": "Keep the query and response label constant while changing the authoritative correction or source-scope membership; stale/forbidden reliance must be detected.",
+      "non_discriminating_change": "Change note display title or irrelevant text while retaining the same authoritative claim, revision relation and allowed scope; do not require a route change."
+    },
+    {
+      "id": "DE-DAILY",
+      "family": "everyday choice",
+      "existing_note_refs": [
+        "docs/v2/philosophy/worked-cases.md#C6",
+        "docs/v2/philosophy/transfer-prompts.md#T7",
+        "docs/v2/philosophy/transfer-prompts.md#T8"
+      ],
+      "bounded_outcome": {
+        "subject": "A choice under supplied timing, accessibility and explicit value/authority constraints.",
+        "instrument": "Check arrival/feasibility from supplied arithmetic only; separately evaluate hard accessibility/value constraints and absence of unauthorized external effects. Use the changed and irrelevant-change variants fixed by the case author.",
+        "predicate": "The declared choice is feasible under the registered hard constraints and uses no invented live schedule, probability, utility scalar or personal fact.",
+        "cannot_prove": "Minimum travel time or a typed choice cannot rank a person's unprovided values or prove that the agent respected those values in its explanation."
+      },
+      "semantic_review": "Check binding values, accessibility, truthful uncertainty, useful directness and any genuinely consequential missing preference. Avoid forced research/planning and any unrequested contact/action.",
+      "bad_but_fluent_control": "A fluent efficient recommendation contradicts a stated accessibility/value constraint or invents a chance of delay to defend a preferred option.",
+      "acceptable_alternative_control": "A different permitted feasible choice satisfies the stated priorities or explicitly conditions on a genuinely unresolved value; no exact wording or invented utility ranking.",
+      "discriminating_mutation": "Change a binding accessibility/value fact while leaving timing data unchanged; a feasibility-only key must not certify a response that violates the changed hard constraint.",
+      "non_discriminating_change": "Change an irrelevant color/name or shift all times equally while preserving the same feasible set and priorities; no compulsory decision flip."
+    }
+  ],
+  "typed_answer_key_critique": {
+    "appropriate": "Validate schema/enums and compare independently checked declarative fields where the task is exactly such a declaration.",
+    "inadequate": "An actor can copy or guess the expected label, use keywords, or give a fluent contradictory explanation. Label agreement alone cannot distinguish those from supported reasoning.",
+    "required_countercontrols": [
+      "Right choice label with invariant-violating executable artifact",
+      "Wrong reference label but permissible alternative with passing independent consequences",
+      "Same key with a contradictory or non-entailing explanation",
+      "Always flip on any changed word, including an irrelevant change",
+      "Always repeat the same decision despite a binding changed constraint"
+    ],
+    "anti_circularity": "Never replace a response query/policy with the grader's reference implementation based only on its chosen enum. Execute the actual submitted artifact under the frozen interpretation.",
+    "reasoning_claim_boundary": "Use concise observable rationale tied to supplied facts, counterevidence and consequences; no hidden chain-of-thought request. Claim only reviewed decision adequacy plus observed outcomes for the evaluated scope."
+  },
+  "calibration": {
+    "status": "NOT_RUN",
+    "positive": "Sound controls and independently permissible alternatives must be accepted.",
+    "negative": "Fluent-but-invalid artifacts/traces must fail for the named invariant, not an unrelated structural omission.",
+    "independence": "The independent evaluator freezes before learner runs and is not the responding actor; blind arm labels when practical. No model judge authorized by this contract.",
+    "disagreement": "Record the disputed constraint/evidence and unresolved verdict. Do not collapse uncertainty to a favored reference architecture or an invented score.",
+    "required_metamorphics": [
+      "Binding changed constraint may change permissible outcomes",
+      "Irrelevant change must not force reversal",
+      "Equivalent allowed mechanism/SQL shape can remain valid",
+      "Wrong artifact with correct vocabulary still fails"
+    ]
+  },
+  "anti_gaming": [
+    "No reward for headings, framework words, citation count, response length, tool count or a fixed number of alternatives.",
+    "No automatic credit for key equality, printed PASS, self-declared verification or a process exit without the independently checked outcome.",
+    "Bind the actual response/artifact; reject substituted reference query/policy, edited oracle, reduced fixtures or hidden failed attempts.",
+    "Validate oracle positives and named invalid controls separately so a closed gate or collateral hash failure cannot masquerade as discrimination.",
+    "Do not force a recommendation change after an irrelevant wording/name change; do not accept an unchanged outcome when a hard constraint is violated.",
+    "A resolvable source span must also support the adjacent material claim; stale, superseded and forbidden sources cannot earn source-supported credit.",
+    "No invented probabilities, numeric utilities, facts, permissions or current endpoint semantics to make an answer seem decisive.",
+    "Do not inject worked responses, reference solutions, reviewer keys or hidden fixtures into the responding actor's context; public exposed cases remain development.",
+    "No aggregate average conceals a required case/dimension, safety or authority regression.",
+    "Do not silently require code for decision-only tasks or accept prose as an executed implementation for implementation-required tasks."
+  ],
+  "bindings": {
+    "task": [
+      "case_id",
+      "variant_id",
+      "task_mode",
+      "task_path",
+      "task_sha256",
+      "supplied_facts_sha256",
+      "constraints_sha256",
+      "required_checks_sha256"
+    ],
+    "sources": [
+      "source_id",
+      "artifact_kind primary_capture or authored_notes or read_receipt",
+      "repo_relative_path",
+      "sha256",
+      "read_extent",
+      "revision/freshness/supersession",
+      "allowed_source_scope_sha256",
+      "availability explicitly present or absent"
+    ],
+    "invocation": [
+      "run_id",
+      "arm",
+      "client/runtime version",
+      "requested/effective model and effort evidence",
+      "exact prompt/context hashes and retrieved source spans",
+      "tool/permission/environment identities",
+      "attempt index and completion status"
+    ],
+    "response": [
+      "exact response path and sha256",
+      "submitted artifact paths and sha256",
+      "artifact extraction/interpretation rule fixed before learner run",
+      "no overwrite of a prior response/attempt"
+    ],
+    "execution": [
+      "command/check identity",
+      "exit status without bool-to-zero coercion",
+      "exact subject hashes",
+      "runner/environment and oracle hashes",
+      "trace/result evidence path and sha256",
+      "actual versus simulated/modelled boundary"
+    ],
+    "review": [
+      "frozen reviewer/rubric version",
+      "calibration receipt hashes",
+      "decisions and scoped rationale",
+      "source-claim links",
+      "unresolved disagreement and scope"
+    ],
+    "missing_or_stale": "Refuse a qualification claim; distinguish malformed/failed evidence from NOT_RUN or INCONCLUSIVE without defaulting to green. Hashes bind bytes, not honest provenance."
+  },
+  "result_contract": {
+    "allowed_statuses": [
+      "PASS",
+      "FAIL",
+      "NOT_RUN",
+      "INCONCLUSIVE",
+      "INVALID"
+    ],
+    "fields": [
+      "case_id",
+      "variant_id",
+      "task_mode",
+      "claim_axis",
+      "required_for_this_claim",
+      "status",
+      "named_predicate",
+      "observed_outcome_or_null",
+      "subject/source/oracle/response hashes",
+      "command/review/trace evidence or explicit absence",
+      "limits",
+      "next_check"
+    ],
+    "no_top_level_promotion": "Do not coalesce NOT_RUN into PASS. Root computes the precise claim verdict from its frozen required axes. A case need not implement runtime behavior to support a decision-only review, but cannot claim that runtime behavior.",
+    "no_execution_here": {
+      "structural_check": "NOT_RUN",
+      "bounded_outcome": "NOT_RUN",
+      "semantic_review": "NOT_RUN",
+      "source_support": "NOT_RUN",
+      "native_use": "NOT_RUN",
+      "comparative_efficacy": "NOT_RUN"
+    }
+  },
+  "usage_contract": {
+    "measurement_status": "NOT_RUN",
+    "total_baseline_tokens": null,
+    "total_candidate_tokens": null,
+    "candidate_creation_adaptation_tokens": null,
+    "usage_complete": null,
+    "invocation_rows": [],
+    "required_invocation_fields": [
+      "unique invocation/run ID",
+      "arm and role actor/coordinator/retriever/reviewer/grader/maintenance",
+      "attempt/parent IDs",
+      "raw provider-usage evidence path/hash",
+      "input/output token counts or explicit unknown",
+      "cache-input and exposed reasoning subsets separately",
+      "provider accounting semantics/version",
+      "completion/resume/partial/ambiguous flags",
+      "wall time",
+      "allocation identity for common charges"
+    ],
+    "normalization": "Use complete provider-reported model-processed input+output. Establish whether input already includes cache and output already includes reasoning before normalizing; do not subtract cache or add subsets twice.",
+    "coverage": "Include all model calls and failed/retried/adaptation attempts, retrieval/compaction, injected instructions, consumed tool output, grader/coordinator overhead and declared ingest/index/maintenance amortization. Tool text already included in input is not another charge; separate model calls remain separate.",
+    "zero_policy": "Unknown is null/explicit unknown, never zero. A verified zero-model operation can be recorded as zero with its boundary stated; no such operation result is fabricated here.",
+    "comparison": "B is every baseline-associated charge; C is every candidate-associated charge plus registered creation/adaptation/failed revisions. Freeze common-cost allocation and amortization horizon before results; charge once and never inflate B to finance candidate R&D.",
+    "acceptance": "For node6, require independently checked quality nonregression per required case/dimension AND C<=B with adequate evidence and explicit scope. An improvement claim needs a measured benefit; equal quality/tokens alone is no improvement.",
+    "not_substitutes": [
+      "byte count",
+      "billed/uncached tokens",
+      "cheaper model",
+      "only final successful attempt",
+      "latency alone",
+      "shorter response"
+    ],
+    "insufficient_evidence": "NOT_RUN/INCONCLUSIVE; no token-efficiency win, no new native run authorized by this file."
+  },
+  "handoff": {
+    "status": "BOUNDED_CONTRACT_AUTHORED_NOT_VERIFIED",
+    "written_files": [
+      "docs/v2/methodology/decision-eval-contract-20261103.json",
+      "docs/v2/methodology/decision-eval-contract-20261103.md"
+    ],
+    "prior_packets_and_artifacts": "Preserved unchanged; latest assignment permits only these two new files.",
+    "root_next": "Join case facts/source captures/integration references, freeze exact contracts and independent calibration before any separately authorized learner run; root executes original node2 checks and retains node6 efficacy boundary.",
+    "held": "All verification, source campaigns, native/model/API calls, runtime/tests/config edits, installs, deployment/promotion and cross-session messages.",
+    "publication_note": "File-write completion is a publication receipt only, not behavioral verification or an original node PASS."
+  }
+}

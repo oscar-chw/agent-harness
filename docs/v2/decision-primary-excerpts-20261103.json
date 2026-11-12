@@ -1,0 +1,50 @@
+{
+  "schema": "harness.primary-excerpts/v1",
+  "as_of": "2026-11-03",
+  "source_kind": "primary_web_excerpts",
+  "read_scope": "Focused matching paragraphs checked by root; not full-page or code execution claims.",
+  "html_bytes_captured": false,
+  "scope": "Evidence for principles only; hypothetical scenario inputs and transfer decisions are authored inference. No native quality or efficacy is established.",
+  "sources": [
+    {
+      "id": "aws-intent",
+      "url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
+      "quote": "Requests from the same caller with the same client request identifier can be considered duplicate requests",
+      "locator": "Reducing client complexity with idempotent API design",
+      "note": "Replay identity belongs to caller intent under an implemented service contract. This excerpt does not establish that any scenario's service implements that contract.",
+      "quote_words": 16
+    },
+    {
+      "id": "google-overload",
+      "url": "https://sre.google/sre-book/handling-overload/",
+      "quote": "If a large subset of backend tasks in the datacenter are overloaded, requests should not be retried",
+      "locator": "Handling Overload Errors",
+      "note": "Overload scope changes the retry decision. The case's capacity and deadline numbers remain authored inputs; they are not Google measurements.",
+      "quote_words": 17
+    },
+    {
+      "id": "sqlite-join",
+      "url": "https://www.sqlite.org/lang_select.html",
+      "quote": "All joins in SQLite are based on the cartesian product of the left and right-hand datasets.",
+      "locator": "2.1 Determination of input data",
+      "note": "Join cardinality can change an aggregate's unit. The required business metric must come from the task rather than this language reference.",
+      "quote_words": 16
+    },
+    {
+      "id": "shopify-isolation",
+      "url": "https://shopify.engineering/a-packwerk-retrospective",
+      "quote": "our code was still broken and unusable in isolation.",
+      "locator": "Packwerk is a Sharp Knife",
+      "note": "The retrospective reports a static finish line that did not settle executable isolation. It does not imply deleting valid dependency checks or choosing services for every team.",
+      "quote_words": 9
+    },
+    {
+      "id": "sre-complexity",
+      "url": "https://sre.google/sre-book/simplicity/",
+      "quote": "Essential complexity is the complexity inherent in a given situation that cannot be removed from a problem definition",
+      "locator": "The Virtue of Boring",
+      "note": "Complexity should be related to the problem and operating constraints. This does not prescribe one optimal architecture or a scalar cost score.",
+      "quote_words": 18
+    }
+  ]
+}

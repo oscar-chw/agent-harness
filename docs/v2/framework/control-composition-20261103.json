@@ -1,0 +1,740 @@
+{
+  "schema": "harness.control-composition-contract/v1",
+  "as_of": "2026-11-03",
+  "source_base_revision": "60735e2b35088c0e458e78e8a3fe3f1574c2d970",
+  "source_tree": "shared_dirty_worktree",
+  "read_depth": "Targeted code sections and retained handoffs; hashes identify observed files, not a claim of whole-file analysis or frozen concurrent sources.",
+  "status": "DOCUMENTATION_DELIVERABLE; ROOT_VERIFICATION_PENDING",
+  "contract": "docs/v2/framework/control-composition-20261103.md",
+  "evidence_labels": [
+    "policy",
+    "advisory",
+    "runtime",
+    "native_evidence"
+  ],
+  "relations": [
+    {
+      "id": "prerequisite",
+      "representation": "needs DAG",
+      "cycles": "rejected"
+    },
+    {
+      "id": "hierarchy",
+      "representation": "human task/child/packet grouping; composition manifest proposed",
+      "cycles": "parent ancestry must be acyclic; no inferred prerequisite edges"
+    },
+    {
+      "id": "feedback",
+      "representation": "pending/running/gate outcome/repair transition",
+      "cycles": "bounded by evidence/retry/authority; not a prerequisite cycle"
+    },
+    {
+      "id": "resource",
+      "representation": "typed dependency/availability/authority admission contract",
+      "cycles": "no repeated unchanged missing-tool or denied-effect attempts"
+    },
+    {
+      "id": "join",
+      "representation": "current required node results + own parent integration gate",
+      "cycles": "reopen affected closure on acceptance/dependency drift"
+    }
+  ],
+  "components": [
+    {
+      "id": "dag",
+      "role": "prerequisite scheduling",
+      "policy": "A node is a verifiable work unit; prerequisites must remain acyclic.",
+      "advisory": "ready/status/context are projections, not independent outcomes.",
+      "runtime": "analyse/claim/cmd_gate and opt-in Versions bind current acceptance.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/workgraph/plan.py",
+          "symbols": [
+            "analyse",
+            "cmd_claim",
+            "cmd_gate"
+          ]
+        },
+        {
+          "path": "src/agent_harness/workgraph/versions.py",
+          "symbols": [
+            "Versions.capture",
+            "Versions.state"
+          ]
+        }
+      ],
+      "missing_or_limits": "No arbitrary communicating nested-statechart engine; no implicit graph freshness for legacy plans."
+    },
+    {
+      "id": "hierarchy",
+      "role": "human task and child grouping",
+      "policy": "One accountable parent, exact required deliverables, own worker packets.",
+      "advisory": "Prior composition manifest maps task/node/session/receipt; proposed, not a runtime API.",
+      "runtime": "Existing goal/node/task strings and file packet readers; no unified child-state transaction.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/handoff.py",
+          "symbols": [
+            "inspect"
+          ]
+        },
+        {
+          "path": "src/agent_harness/operational_state.py",
+          "symbols": [
+            "OperationalState._validate_value"
+          ]
+        }
+      ],
+      "missing_or_limits": "Do not send nested manifests to bounded-string OperationalState values; parent gate remains independent."
+    },
+    {
+      "id": "feedback",
+      "role": "repair without cyclic prerequisites",
+      "policy": "Intent/result/gap/hypotheses/discriminating check/repair; same failure twice changes approach.",
+      "advisory": "method_control selects relevant diagnosis; does not perform it.",
+      "runtime": "Gate FAIL returns pending; runner excludes repeated same-signature failures.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/method_control.py",
+          "symbols": [
+            "decide"
+          ]
+        },
+        {
+          "path": "src/agent_harness/workgraph/plan.py",
+          "symbols": [
+            "repeated_failures",
+            "cmd_run"
+          ]
+        }
+      ],
+      "missing_or_limits": "No model compliance or causal explanation is established by selecting a method."
+    },
+    {
+      "id": "method",
+      "role": "proportional method advice",
+      "policy": "Smallest adequate workflow; simple supplied-evidence answer can finish directly.",
+      "advisory": "DIRECT/PLAN/CLARIFY/VERIFY/REVISE/DIAGNOSE/CHANGE_METHOD/REPORT from supplied/current bindings.",
+      "runtime": "decide validates inputs and returns a decision; executes no selected effect.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/method_control.py",
+          "symbols": [
+            "decide"
+          ]
+        }
+      ],
+      "missing_or_limits": "Dependency count and uncertainty are supplied, not automatically inferred; gate provenance remains caller obligation."
+    },
+    {
+      "id": "progression",
+      "role": "separate model/effort recommendation",
+      "policy": "Typed task minimum, justified higher start, independent failure, limits and ceilings; policy order is not model capability evidence.",
+      "advisory": "next_decision can return HOLD/DISPATCH/STOP when configured; default progression disabled.",
+      "runtime": "Pure decision output using resolver/history/counter checks; no dispatch side effect.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/routing.py",
+          "symbols": [
+            "_task_minimum",
+            "next_decision",
+            "resolve"
+          ]
+        },
+        {
+          "path": "content/routing.toml",
+          "symbols": [
+            "progression.enabled=false",
+            "progression.selector=task"
+          ]
+        }
+      ],
+      "missing_or_limits": "Does not select tools/skills, allocate workers, spend quota, or enforce live token ceilings."
+    },
+    {
+      "id": "runner-route",
+      "role": "runtime runner tier selection",
+      "policy": "Declare supported resource minimum; do not equate worker exit to gate PASS.",
+      "advisory": "route reason and observed usage are metadata.",
+      "runtime": "route_for feeds _dispatch; explicit declared tier has installed pair and Codex capability checks.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/workgraph/plan.py",
+          "symbols": [
+            "route_for",
+            "_dispatch",
+            "codex_cmd"
+          ]
+        }
+      ],
+      "missing_or_limits": "Distinct from disabled strict progression; explicit-tier preflight is not universal legacy/default validation or native identity proof."
+    },
+    {
+      "id": "skills",
+      "role": "procedure discovery and loading",
+      "policy": "Load relevant current skill under task authority; stale advice needs correction/hold.",
+      "advisory": "Learned lexical scored results do not establish suitability or full installed-skill semantic selection.",
+      "runtime": "Skills.list/view/scored; learned view bumps usage; server rejects direct create/update.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/mcp/skills.py",
+          "symbols": [
+            "Skills.list",
+            "Skills.view",
+            "Skills.scored"
+          ]
+        },
+        {
+          "path": "src/agent_harness/mcp/server.py",
+          "symbols": [
+            "Server.skill_manage"
+          ]
+        }
+      ],
+      "missing_or_limits": "A listed skill is not adoption, usefulness or authorization; draft/correct paths do not silently promote."
+    },
+    {
+      "id": "mcp",
+      "role": "actual advertised effects and retrieval",
+      "policy": "Required effect, tool availability, source scope and task authority must all match.",
+      "advisory": "Tool definitions/catalog records are availability leads.",
+      "runtime": "tool_list filters optional disabled tools; Server.call_tool dispatches existing surfaces.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/mcp/server.py",
+          "symbols": [
+            "tool_list",
+            "Server.call_tool"
+          ]
+        },
+        {
+          "path": "src/agent_harness/mcp/checks.py",
+          "symbols": [
+            "OFF_BY_DEFAULT",
+            "disabled"
+          ]
+        }
+      ],
+      "missing_or_limits": "Do not silently enable op_state/run_checks, install/authenticate, or broaden access. Unavailable required effect stays held/NOT_RUN."
+    },
+    {
+      "id": "discovery",
+      "role": "bounded extension metadata and proposal",
+      "policy": "Existing authorized resources first; missing effect does not authorize an install.",
+      "advisory": "Catalog ranks/vets candidates; not task-fitness or measured quality evidence.",
+      "runtime": "search/catalogue may invoke plugin CLIs and write last-search metadata; install is separate approval-bound action.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/discover.py",
+          "symbols": [
+            "catalogue",
+            "search",
+            "install"
+          ]
+        }
+      ],
+      "missing_or_limits": "--no-network is not no-process/no-Claude. This worker did not invoke discovery, network or install actions."
+    },
+    {
+      "id": "inventory",
+      "role": "package and launcher provenance",
+      "policy": "Use dated selected-file/source identity, then qualify actual task operations separately.",
+      "advisory": "MATCHED_SELECTED_FILES is not a whole-package/native-session assertion.",
+      "runtime": "inspect_runtime reads selected files and launcher paths without running them; native_sessions NOT_OBSERVABLE.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/runtime_inventory.py",
+          "symbols": [
+            "inspect_runtime"
+          ]
+        }
+      ],
+      "missing_or_limits": "No current native loading, interface readiness or cross-device parity inferred."
+    },
+    {
+      "id": "admission",
+      "role": "cross-worker ownership and scarce resource limits",
+      "policy": "Ready AND authorized AND disjoint; cap by spare slots, per-resource capacity, allowed workers and remaining deadline/budget.",
+      "advisory": "Proposed admission contract only; root decides before dispatch.",
+      "runtime": "cmd_run slices its ready pool by --workers and uses ThreadPoolExecutor; local claims protect graph state.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/workgraph/plan.py",
+          "symbols": [
+            "cmd_run",
+            "build_context"
+          ]
+        }
+      ],
+      "missing_or_limits": "No inspected global session allocator, automatic canonical write-overlap check, universal token monitor or absolute task deadline enforcement."
+    },
+    {
+      "id": "deadlines",
+      "role": "attempt timeout, task stop and cleanup",
+      "policy": "Deadline is not lease expiry; reserve cleanup and checkpoint time.",
+      "advisory": "Node budget/retry/escalation metadata and doctor suggestions are advisory.",
+      "runtime": "Per-worker timeout, separate gate timeout, round cap, STOP-before-next-round and process-group cleanup exist.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/workgraph/plan.py",
+          "symbols": [
+            "_dispatch_codex",
+            "_kill_worker",
+            "cmd_run",
+            "main"
+          ]
+        },
+        {
+          "path": "src/agent_harness/launch.py",
+          "symbols": [
+            "execute",
+            "_end_group"
+          ]
+        }
+      ],
+      "missing_or_limits": "Plan defaults worker1800s/gate1800s/20rounds/3workers; explicit launch timeout positive<=300s. No cross-entrypoint global budget."
+    },
+    {
+      "id": "leases",
+      "role": "mutation ownership and recovery",
+      "policy": "Inspect actual activity/scope before takeover; do not publish raw tokens.",
+      "advisory": "Lease status is activity claim, not model/process liveness.",
+      "runtime": "Graph defaults4h configurable; OperationalState CAS/token/fence TTL1..3600s/default300.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/workgraph/plan.py",
+          "symbols": [
+            "effective_mark"
+          ]
+        },
+        {
+          "path": "src/agent_harness/operational_state.py",
+          "symbols": [
+            "OperationalState.claim",
+            "OperationalState.renew",
+            "OperationalState.release"
+          ]
+        }
+      ],
+      "missing_or_limits": "Expired leases do not stop filesystem writes or free an actual external resource safely."
+    },
+    {
+      "id": "permission-recovery",
+      "role": "exact guard-held scheduling recovery",
+      "policy": "Preserve denied effect and original acceptance; no alternate-tool/account bypass.",
+      "advisory": "Retained local receipt is scoped reported evidence.",
+      "runtime": "cmd_recover rechecks guard-bound original command/current state, records resolution and clears exact pending scheduler hold.",
+      "native_evidence": {
+        "status": "RETAINED_LOCAL_REPORT_ONLY",
+        "receipt": "handoffs/guard-repair/local-20261103.md"
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/workgraph/plan.py",
+          "symbols": [
+            "cmd_recover"
+          ]
+        },
+        {
+          "path": "handoffs/guard-repair/local-20261103.md",
+          "symbols": [
+            "Installed recovery"
+          ]
+        }
+      ],
+      "missing_or_limits": "No command execution, grant authentication, universal interception, native/worker/unknown denial recovery or Air parity claim."
+    },
+    {
+      "id": "launch-policy",
+      "role": "prepared native context and resume boundary",
+      "policy": "Source-bound task/context, appropriate scoped effects, original independent evaluation.",
+      "advisory": "Prepared packet and operator handles are context, never authority.",
+      "runtime": "prepare/execute bounded request/context/process handling; native completion remains ungraded.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/launch.py",
+          "symbols": [
+            "prepare",
+            "execute"
+          ]
+        },
+        {
+          "path": "src/agent_harness/method_control.py",
+          "symbols": [
+            "decide"
+          ]
+        }
+      ],
+      "missing_or_limits": "Prompt-policy/resume identity correction is root active work; no current fix/qualification claimed here."
+    },
+    {
+      "id": "coordination",
+      "role": "file-first handoff and useful grouping",
+      "policy": "Read at start/resume/dependency boundaries; own atomic compact packet; no routine chatter/heartbeats/polling/activation.",
+      "advisory": "Goal/deliverable/owner UI grouping remains a proposed projection.",
+      "runtime": "Bounded local handoff inspection exists; graph gate remains completion authority.",
+      "native_evidence": {
+        "status": "NOT_RUN_BY_FRAMEWORK_WORKER",
+        "receipt": null
+      },
+      "sources": [
+        {
+          "path": "src/agent_harness/handoff.py",
+          "symbols": [
+            "inspect"
+          ]
+        },
+        {
+          "path": "handoffs/v2-completion/README.md",
+          "symbols": [
+            "Coordination policy"
+          ]
+        }
+      ],
+      "missing_or_limits": "No automatic idle wakeup, bidirectional UI scheduler/state sync or universal policy compliance."
+    }
+  ],
+  "admission_contract": {
+    "status": "PROPOSED_POLICY_NOT_GLOBAL_RUNTIME_ENFORCEMENT",
+    "required_conditions": [
+      "ready required dependencies",
+      "current task/effect authority",
+      "nonoverlapping canonical write targets or authorized isolation",
+      "known sufficient required resource capacity",
+      "free authorized task/session slots",
+      "remaining attempt/task/deadline/cleanup allowance"
+    ],
+    "parallel_limit": "minimum of ready count, task-authorized worker maximum, observed spare slots, required-resource capacity and deadline/budget feasibility; scope conflicts can lower it to1 or0",
+    "unknown_capacity_policy": "sequential bounded work when safe; otherwise hold required resource action",
+    "not_an_api": "Store optional composition in existing project packet/manifest, linked by existing bounded checkpoint/evidence strings. No nested OperationalState value or new engine implied."
+  },
+  "countercases": [
+    {
+      "id": "C01",
+      "component_ids": [
+        "method",
+        "skills",
+        "admission"
+      ],
+      "given": "Adequate supplied facts; direct definition; no consequential ambiguity.",
+      "required_outcome": "Answer with appropriate evidence; no tool/worker/graph ceremony.",
+      "countercase": "A short but consequential unknown still requires current evidence or clarification; length alone cannot select direct.",
+      "root_oracle": "Task outcome/source accuracy plus absence of unnecessary effects; helper DIRECT is only a projection.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C02",
+      "component_ids": [
+        "skills",
+        "mcp",
+        "discovery"
+      ],
+      "given": "Authorized local SQL fixture and relevant current local procedure; no remote data needed.",
+      "required_outcome": "Use local authorized capability and independent result oracle; no remote MCP/auth/install or delegation merely for SQL wording.",
+      "countercase": "Required remote authoritative rows change the choice only with available scoped tool and explicit effect authority; otherwise hold remote effect.",
+      "root_oracle": "Correct SQL rows including fanout/missing-row negatives; distinguish authorized effect and fixture result from tool popularity.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C03",
+      "component_ids": [
+        "method",
+        "mcp"
+      ],
+      "given": "Research question has consequential uncertainty and an identified missing/stale source.",
+      "required_outcome": "Retrieve current scoped local source first; acquire only missing current evidence if authorized, else retain uncertainty.",
+      "countercase": "Existing local complete/current evidence makes repeated web acquisition unnecessary; no-network task cannot be bypassed by another tool.",
+      "root_oracle": "Supported decision with source freshness/scope and explicit gap; no ritual checklist or keyword score.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C04",
+      "component_ids": [
+        "dag",
+        "hierarchy",
+        "admission"
+      ],
+      "given": "Two ready independent deliverables with disjoint canonical writes and authorized free slots.",
+      "required_outcome": "Consider bounded parallel execution, separate packets, current child evidence and main integration.",
+      "countercase": "Shared generated lockfile or ancestor-directory ownership overlap requires serialization/isolation despite two ready nodes.",
+      "root_oracle": "Main compares actual write scope/authorization and integration result; DAG readiness alone must not pass admission.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C05",
+      "component_ids": [
+        "admission",
+        "deadlines"
+      ],
+      "given": "Eight ready/disjoint nodes; task permits at most2 spare worker slots; requested --workers8.",
+      "required_outcome": "Admit at most2 under proposed policy; retain others ready. Current runner alone does not enforce external slot policy.",
+      "countercase": "If only one actual scarce resource unit is available, at most1; unknown required capacity is not8 or infinity.",
+      "root_oracle": "A root admission check must reject excess starts; existing runner batch slicing cannot certify this case. Native execution NOT_RUN.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C06",
+      "component_ids": [
+        "admission",
+        "leases"
+      ],
+      "given": "One worker is quiet/lease expired while its process/resource ownership is unverified; another wants same files/resource.",
+      "required_outcome": "Reconcile actual process/cleanup and scope before takeover; ledger CAS/fence alone is insufficient.",
+      "countercase": "Confirmed stopped process plus authorized current claim can resume; genuine stale token must still fail owned ledger mutation.",
+      "root_oracle": "Separate observed process/resource state from lease state and actual dispatch; no time-based liveness inference.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C07",
+      "component_ids": [
+        "deadlines",
+        "feedback"
+      ],
+      "given": "Task has remaining wall time shorter than worker attempt+gate+cleanup allowance.",
+      "required_outcome": "Do independent useful bounded work or checkpoint/hold; do not launch a task known to overrun merely because lease4h remains.",
+      "countercase": "Enough authorized time/resources may permit bounded attempt; timeout is not a blanket reason to increase tier.",
+      "root_oracle": "Root deadline/admission control plus cleanup check. Existing per-attempt timeout only supports a narrower projection.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C08",
+      "component_ids": [
+        "feedback",
+        "runner-route",
+        "progression"
+      ],
+      "given": "Artifact failed original independent gate; diagnosis distinguishes requirement/check/implementation/environment.",
+      "required_outcome": "Choose causal discriminating check and bounded repair, rerun original check; preserve valid independent branches.",
+      "countercase": "Guard NOT_RUN, missing tool or timeout cannot be silently treated as demonstrated artifact-quality failure.",
+      "root_oracle": "Original gate evidence and cause-discriminating result; compare source helper routing only as advisory/runtime projection.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C09",
+      "component_ids": [
+        "skills",
+        "mcp"
+      ],
+      "given": "Recipe is stale for current interface version; live tool differs from retained recipe.",
+      "required_outcome": "Hold recipe-dependent action; inspect authorized current interface/version and revise only with evidence.",
+      "countercase": "A matching keyword or many recorded skill uses does not establish suitability; a current recipe can be reused without broad rediscovery.",
+      "root_oracle": "Current interface correctness and changed-version negative; no model-expertise claim from skill list/score.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C10",
+      "component_ids": [
+        "mcp",
+        "coordination"
+      ],
+      "given": "Required tool is not advertised or has no authorized scope; op_state is disabled.",
+      "required_outcome": "Use equivalent authorized file/CLI path if adequate; otherwise mark effect NOT_RUN/unavailable and retain checkpoint.",
+      "countercase": "Optional unused tool absence must not block completed independent work; no silent flag/config/auth/account change to satisfy dependency.",
+      "root_oracle": "Actual availability/effect scope and unchanged external boundary; source tool definition is insufficient.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C11",
+      "component_ids": [
+        "admission",
+        "method"
+      ],
+      "given": "Small reversible task has one tightly coupled file and a clear existing check.",
+      "required_outcome": "One executor; no helper creation, consensus loop or duplicated edit.",
+      "countercase": "Several truly independent deliverables with authority/free capacity can justify parallel ownership.",
+      "root_oracle": "Correct artifact + required check + no harmful unnecessary dispatch; lower elapsed time is not presumed.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C12",
+      "component_ids": [
+        "progression",
+        "runner-route"
+      ],
+      "given": "Public progression.enabled=false; separate plan runner tier logic exists.",
+      "required_outcome": "next_decision stays HOLD/route_disabled; no model dispatched by helper. Runner remains a separate entrypoint with its own authority and checks.",
+      "countercase": "With authorized enabled fixture/profile, invalid task/unsupported pair/stale route/exhausted usage must hold; do not claim hidden activation from policy label.",
+      "root_oracle": "Original tests/test_route_progression.py and tests/test_workgraph_routing.py on main; no native model calls by this worker.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C13",
+      "component_ids": [
+        "progression",
+        "deadlines"
+      ],
+      "given": "Explicitly enabled progression fixture has failed gate with missing usage.",
+      "required_outcome": "HOLD/usage_unknown for a further recommendation; no fabricated zero usage.",
+      "countercase": "A current bound PASS can STOP with unknown cost in enabled helper; inactive helper does not overturn independently accepted graph PASS.",
+      "root_oracle": "Main checks artifact binding, usage absence and full failed/orchestration totals before improvement claim.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C14",
+      "component_ids": [
+        "discovery",
+        "inventory",
+        "mcp"
+      ],
+      "given": "A catalog/version lists a promising MCP or library; no current connection/native loading evidence.",
+      "required_outcome": "Treat as proposal/availability lead; installed selected hashes and actual current operation are separate observations.",
+      "countercase": "--no-network can still invoke CLIs; MATCHED_SELECTED_FILES leaves native sessions NOT_OBSERVABLE; do not treat either as zero-effect/loaded guarantee.",
+      "root_oracle": "Read-only source projection and actual required operation qualification if authorized; installs/native/network effects stay NOT_RUN here.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C15",
+      "component_ids": [
+        "dag",
+        "hierarchy",
+        "feedback"
+      ],
+      "given": "Backend current; frontend failed; docs depend only on backend; parent joins frontend+docs.",
+      "required_outcome": "Retain backend/docs, repair frontend, hold parent until current required evidence and own integration PASS.",
+      "countercase": "Acceptance/check/source change invalidates relevant closure; task hierarchy must not be encoded as cyclic prerequisites.",
+      "root_oracle": "Original versioned join/invalidation gates; no parent done from child packet or operational summary.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C16",
+      "component_ids": [
+        "permission-recovery"
+      ],
+      "given": "Pending exact guard_hold and original command digest; underlying guard now accepts; scoped resolution recorded.",
+      "required_outcome": "Use current recover path only for exact guard scheduling hold; no command executed/completion/grant from recovery.",
+      "countercase": "Different command, native/worker/unknown hold, absent/disabled/refusing guard or changed/live/done node remains refused.",
+      "root_oracle": "Original guard-recovery gates owned by main; retained install report is not this worker native verification.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    },
+    {
+      "id": "C17",
+      "component_ids": [
+        "launch-policy"
+      ],
+      "given": "Prompt-policy instructions change while original task/source IDs remain unchanged.",
+      "required_outcome": "Require main to bind actual prepared prompt policy to resume/method evidence; withhold fix claim until original reproduction and gates qualify.",
+      "countercase": "Same request/source alone cannot certify unchanged executable instruction context.",
+      "root_oracle": "Root active reproduction/acceptance only; NOT_RUN here and no root-owned code/gate edits.",
+      "worker_result": "NOT_RUN",
+      "claim": "Specified acceptance/countercase, not a measured behavior or native outcome."
+    }
+  ],
+  "verification": {
+    "owner": "main/orchestrator",
+    "framework_worker_tests": "NOT_RUN",
+    "framework_worker_native_models": "NOT_RUN",
+    "framework_worker_installed_readback": "NOT_RUN",
+    "proposed_document_checks": [
+      "python3 -m json.tool docs/v2/framework/control-composition-20261103.json",
+      "Resolve all component path/symbol references; fail missing refs, unknown/duplicate IDs, unsupported promotion/runtime/native assertions and absent required countercases."
+    ],
+    "original_checks": "Use current original root requirements/routing/workgraph/recovery/launch gates; this document does not edit their commands or close nodes.",
+    "unsupported_cases": "Admission/global ownership/deadline/native effectiveness stay policy/proposal or NOT_RUN until separately implemented and qualified."
+  },
+  "observed_source_sha256": {
+    "content/routing.toml": "fb6ecb669c9be773859d7c691252e139735ffa0ce5ce06a5ace8628501d925c7",
+    "handoffs/guard-repair/local-20261103.md": "63ea39638680554da5ddd35fecfa569c8b1bb4370b248b404dfd4379e947ab0d",
+    "handoffs/v2-completion/README.md": "85eb8e73a2617075413649d5554b5c3be6a3bea10c69310f62f2493293270c07",
+    "handoffs/v2-completion/round2-20261103.md": "bc126284e8a59dda74f51eaaf5d1a8ee956352c9b087609bb894717e6c6ffdfd",
+    "plan/v2-completion.md": "4f668f31f66afa59b76299d00f113c8739b23279bde6203fa6b74ade11a6b31f",
+    "src/agent_harness/discover.py": "cac4f90cb3fe399fc41b7acd556c1e3284c5172a3ba2e329d08df1d35046fed2",
+    "src/agent_harness/handoff.py": "a0752b4ac5fd26e8125ff41e046455db1f1779104172fb509c25adfe5d4a2e97",
+    "src/agent_harness/launch.py": "bfc38c1ff54171e2312c239bc9e8eb1f1f74d134bc07def685f4c864db170810",
+    "src/agent_harness/mcp/checks.py": "cc954863d1edc250322466e9d5f9825ceec52cf3eef57ac40f18edb87b4a8477",
+    "src/agent_harness/mcp/server.py": "e071269fcb737cc09895e2a315965c6e3f1a333bcfbd8af4fb1a067f742b5bc1",
+    "src/agent_harness/mcp/skills.py": "9c3eba95e9088592110407e7e5b8dd09d67757c37026151655532350c8c864b1",
+    "src/agent_harness/method_control.py": "f3cc51acd4ee3f4f1fbcf7ed139c5ea87e0c432078e0ad15c54f0208343fe93b",
+    "src/agent_harness/operational_state.py": "f27e75d8e6d3c3fb2fb3ceb2d26bbe1d5b428d0bfe00c0ad6ab2b3ceb57525fb",
+    "src/agent_harness/routing.py": "bcfaa62456454a10c54e5a77505996b08d0859f07a60fe9cb01a06d8a36c8ff3",
+    "src/agent_harness/runtime_inventory.py": "7bee7bdc60522156f1fc35be7f5a76980e10f3f71908c7dfbbdccd03150a152b",
+    "src/agent_harness/workgraph/plan.py": "027702a021a6a01c6e44391b92fb3d07426506fdbce1a6214b5a3f36c43d649f",
+    "src/agent_harness/workgraph/versions.py": "87d925b9df21a5793bdb3c3e7608aac31dc7e38c4d1d72d261f4cfa3c3c3c96d",
+    "tests/test_plan_routing.py": "9e8a0e28dede1d10b46716ab7c1cf5e310b92a274f81c87e62b87846693a416f",
+    "tests/test_route_progression.py": "e3dbae3e1f560447cc4d013977272d90f8411ee5df8c4eff66bb5283fb2cbe65",
+    "tests/test_workgraph_routing.py": "55425fd8a9738ad00d9028b9fb78479e5e5b2f31e97d65ab10eb4f2e325b1413"
+  },
+  "worker_actions": {
+    "runtime_changes": false,
+    "root_plan_changes": false,
+    "original_gate_changes": false,
+    "native_config_changes": false,
+    "dispatch": false,
+    "tests": false,
+    "network": false,
+    "installs": false,
+    "promotion": false,
+    "publish": false
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "schema": "harness.v3-philosophy-calibration/v1",
+  "model": "gpt-6.1-sol",
+  "effort": "high",
+  "authored_visible_cases": 8,
+  "native_calls": 4,
+  "tokens": {
+    "baseline": 50726,
+    "selected-guidance": 52439
+  },
+  "format_contract": "valid JSON, plain-text math, 90 words per response",
+  "failed_response_contract": [
+    {
+      "case": "PH-05",
+      "arm": "selected-guidance",
+      "words": 92,
+      "limit": 90
+    }
+  ],
+  "first_attempt": {
+    "status": "INVALID_JSON",
+    "known_tokens": 25219,
+    "calls": 1
+  },
+  "controller_repair": "retained first bound baseline response after journal writer failed; no inference replay",
+  "comparison_verdict": "HELD_TOKEN_AND_RESPONSE_CONTRACT_REGRESSION",
+  "adoption": "NOT_GRANTED",
+  "initial_response_meaning_review": "ROOT_REVIEWED; multi-turn followup, independent learner transfer and teaching efficacy NOT_RUN",
+  "whole_project_research_usage": "UNKNOWN",
+  "trials": [
+    {
+      "arm": "baseline",
+      "batch": 0,
+      "receipt_sha256": "f30b9776892b7a9d3e4e953a433f83eb7c9edffb7a2adf222fe4e5bec92ff593",
+      "response_contract_pass": true,
+      "tokens": 25194,
+      "word_counts": {
+        "PH-01": 49,
+        "PH-02": 41,
+        "PH-03": 44,
+        "PH-04": 44
+      }
+    },
+    {
+      "arm": "selected-guidance",
+      "batch": 0,
+      "receipt_sha256": "5aabf1d9ebf5f53a2a06a0adf2b25a840f8ae3696f39141a604f333db973cc47",
+      "response_contract_pass": true,
+      "tokens": 26112,
+      "word_counts": {
+        "PH-01": 38,
+        "PH-02": 21,
+        "PH-03": 37,
+        "PH-04": 45
+      }
+    },
+    {
+      "arm": "selected-guidance",
+      "batch": 1,
+      "receipt_sha256": "6eb320457f8eff07f765060251d06311d2a963d756e6d6cafb444744ea15bcb3",
+      "response_contract_pass": false,
+      "tokens": 26327,
+      "word_counts": {
+        "PH-05": 92,
+        "PH-06": 38,
+        "PH-07": 74,
+        "PH-08": 33
+      }
+    },
+    {
+      "arm": "baseline",
+      "batch": 1,
+      "receipt_sha256": "36f508c7860d01062b5e6171e00baeea120817dbb102c7dfdad44c92ad8d1cff",
+      "response_contract_pass": true,
+      "tokens": 25532,
+      "wall_s": 38.484735875,
+      "word_counts": {
+        "PH-05": 81,
+        "PH-06": 45,
+        "PH-07": 82,
+        "PH-08": 37
+      }
+    }
+  ]
+}

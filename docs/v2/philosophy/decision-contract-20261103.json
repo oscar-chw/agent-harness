@@ -1,0 +1,1717 @@
+{
+  "schema": "harness.decision-case-contract/v1",
+  "date": "2026-11-03",
+  "status": "PROPOSED_VISIBLE_DEVELOPMENT_CONTRACT_ROOT_TO_FREEZE",
+  "classification": "AUTHORED_INFERENCE_NOT_EMPIRICAL_RESULT",
+  "owner": {
+    "author_worker": "01a19c20-2a09-7073-aeb5-cb5cfdecd3e5",
+    "integration_and_verification": "root 01a135a7-05d6-7910-9cb7-0a1084e8ebbd",
+    "graph_node": "v2-completion/2"
+  },
+  "assignment": "handoffs/v2-completion/decision-cases-assignment-20261103.md",
+  "boundaries": {
+    "sources": "Retained source reading/synthesis reused; primary-source copied bytes/read extent are separately reconciled by vault. This file does not certify upstream acquisition.",
+    "facts": "All family/variant values are synthetic supplied inputs, not live APIs, provider capacity, project policies, timetables or performance measurements.",
+    "inference": "Goal, tradeoff, permissible alternatives and discriminating tests are authored applications, never source quotations.",
+    "exposure": "Every family, variant and oracle is public development material. No held-out or unseen-transfer claim.",
+    "execution": "No scenario, SQL query, worker/native/model call or semantic verification was run by this author.",
+    "scope": "Only the two named new files were written; existing handoff/history/cases remain intact.",
+    "authority": "Cases grant no production, external write, cross-project access, additional-agent or new guard authority."
+  },
+  "variant_semantics": {
+    "base": "supplied_facts are the control facts.",
+    "overrides": "fact_overrides replaces top-level fields only; a nested object/array override replaces that whole object/array.",
+    "resolved": "effective_facts is materialized per variant to avoid ambiguous inheritance.",
+    "goals": "Family goal/invariant apply throughout; an explicit requested_metric or feasibility change changes which expression/action satisfies the same goal.",
+    "nonmaterial": "Every family includes one named nonmaterial_change. It must not trigger gratuitous recommendation/effort changes; actual wording may differ.",
+    "alternatives": "Listed decisions are permissible plans, not canned actor responses or an exhaustive string classifier. Another plan is acceptable only if independently shown to satisfy supplied constraints and outcomes."
+  },
+  "evaluation_limits": {
+    "typed_key": "Matching decision IDs, output numbers or checklist words is not a reasoning/transfer oracle. A fixture can settle bounded outcome consequences; semantic/native evidence remains separate.",
+    "binding": "Root freezes exact source/case/variant/fixture/evaluator identities and binds actual response/artifact/usage before running any evaluation.",
+    "no_tradeoff_score": "No fabricated probabilities, scalar utility, universal ranking or current provider guarantees.",
+    "root_gate": "This proposed contract does not pass check_cases.py or replace independent methodology, source reconciliation or original root gates.",
+    "comparative_efficacy": "Node6 still requires independent task quality plus complete paired aggregate usage including preparation, retrieval, retries, failures and coordination."
+  },
+  "actor_view": {
+    "include": [
+      "family id",
+      "variant id",
+      "effective_facts",
+      "goal",
+      "invariant",
+      "only root-authorised source context actually needed"
+    ],
+    "exclude": [
+      "permissible_decisions",
+      "unacceptable_consequences",
+      "expected_observable_distinctions",
+      "review notes",
+      "oracle/fixture expected results from other variants"
+    ],
+    "note": "Serving only one variant avoids answer leakage from a paired correction/missing-evidence case. That preparation does not convert visible development material to held-out."
+  },
+  "qualification": {
+    "source_retrieval": "NOT_RUN_BY_THIS_WORKER",
+    "deterministic_outcomes": "NOT_RUN_MAIN_OWNED",
+    "semantic_quality": "NOT_RUN_MAIN_OWNED",
+    "native_useful_decisions": "NOT_RUN",
+    "paired_quality_total_usage": "NOT_RUN",
+    "original_node2_gate": "NOT_RUN_BY_THIS_WORKER"
+  },
+  "source_pointers": [
+    {
+      "id": "SRC-SHOPIFY-BOUNDARIES",
+      "primary_url": "https://shopify.engineering/shopify-monolith",
+      "local_path": "docs/v2/engineering-cases-20261102.md",
+      "local_read_scope": "Evidence table and case 1: goals, two intermediate decomposition strategies, ownership, dependency density and service-extraction limits.",
+      "local_kind": "authored synthesis with retained primary-read receipt; not the original upstream article bytes",
+      "primary_read_extent": "Prior researcher reports full article opened with focused sections; no new upstream fetch/read by this assignment.",
+      "local_sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+      "local_bytes": 16999,
+      "local_original_primary_capture": "NOT_ESTABLISHED_BY_THIS_WORKER; the hashed file is explicitly the local note/contract, not necessarily upstream source bytes"
+    },
+    {
+      "id": "SRC-SHOPIFY-PACKWERK",
+      "primary_url": "https://shopify.engineering/a-packwerk-retrospective",
+      "local_path": "docs/v2/engineering-cases-20261102.md",
+      "local_read_scope": "Evidence table and case 2: static graph/privacy checks versus runnable component isolation and limits.",
+      "local_kind": "authored synthesis with retained primary-read receipt; not raw source",
+      "primary_read_extent": "Prior focused primary read retained in sidecar; no new upstream read.",
+      "local_sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+      "local_bytes": 16999,
+      "local_original_primary_capture": "NOT_ESTABLISHED_BY_THIS_WORKER; the hashed file is explicitly the local note/contract, not necessarily upstream source bytes"
+    },
+    {
+      "id": "SRC-AWS-IDEMPOTENCY",
+      "primary_url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
+      "local_path": "docs/v2/engineering-cases-20261102.md",
+      "local_read_scope": "Case 3: caller intent identity, atomic key/effect binding, changed parameters, late requests and bounded retention.",
+      "local_kind": "authored synthesis with retained primary-read receipt; not raw source",
+      "primary_read_extent": "Prior focused primary read retained; scenario facts here are not a current AWS endpoint contract.",
+      "local_sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+      "local_bytes": 16999,
+      "local_original_primary_capture": "NOT_ESTABLISHED_BY_THIS_WORKER; the hashed file is explicitly the local note/contract, not necessarily upstream source bytes"
+    },
+    {
+      "id": "SRC-STRIPE-IDEMPOTENCY",
+      "primary_url": "https://stripe.com/blog/idempotency",
+      "local_path": "docs/v2/engineering-cases-20261102.md",
+      "local_read_scope": "Case 5: ambiguous connection outcomes, key/retry role, backoff/jitter and historical API-spec limitations.",
+      "local_kind": "authored synthesis with retained primary-read receipt; not raw source",
+      "primary_read_extent": "Prior focused 2017 design-article read retained; not current Stripe endpoint verification.",
+      "local_sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+      "local_bytes": 16999,
+      "local_original_primary_capture": "NOT_ESTABLISHED_BY_THIS_WORKER; the hashed file is explicitly the local note/contract, not necessarily upstream source bytes"
+    },
+    {
+      "id": "SRC-GOOGLE-OVERLOAD",
+      "primary_url": "https://sre.google/sre-book/handling-overload/",
+      "local_path": "docs/v2/engineering-cases-20261102.md",
+      "local_read_scope": "Case 4: local versus broad overload, retry owner/budget/deadline, amplification and signal requirements.",
+      "local_kind": "authored synthesis with retained primary-read receipt; not raw source",
+      "primary_read_extent": "Prior focused primary read retained; scenario one-extra-attempt budget is authored, not Google's setting.",
+      "local_sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+      "local_bytes": 16999,
+      "local_original_primary_capture": "NOT_ESTABLISHED_BY_THIS_WORKER; the hashed file is explicitly the local note/contract, not necessarily upstream source bytes"
+    },
+    {
+      "id": "SRC-FOUNDATION-SIMPLICITY",
+      "primary_url": "https://sre.google/sre-book/simplicity/",
+      "local_path": "docs/v2/philosophy/decision-references.md",
+      "local_read_scope": "F2 and continuing-cost decision reference.",
+      "local_kind": "authored reference with prior primary-read receipt",
+      "primary_read_extent": "This worker previously read chapter prose on 2 November; this assignment reuses the receipt, no new fetch.",
+      "local_sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+      "local_bytes": 7491,
+      "local_original_primary_capture": "NOT_ESTABLISHED_BY_THIS_WORKER; the hashed file is explicitly the local note/contract, not necessarily upstream source bytes"
+    },
+    {
+      "id": "SRC-FOUNDATION-ENDPOINTS",
+      "primary_url": "https://web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf",
+      "local_path": "docs/v2/philosophy/decision-references.md",
+      "local_read_scope": "F1 and guarantee-placement reference: intermediate success versus application outcome.",
+      "local_kind": "authored reference with prior primary-read receipt",
+      "primary_read_extent": "This worker previously read selected PDF pages 1-7 on 2 November; no new upstream read.",
+      "local_sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+      "local_bytes": 7491,
+      "local_original_primary_capture": "NOT_ESTABLISHED_BY_THIS_WORKER; the hashed file is explicitly the local note/contract, not necessarily upstream source bytes"
+    },
+    {
+      "id": "SRC-WORKED-CASES",
+      "local_path": "docs/v2/philosophy/worked-cases.md",
+      "local_read_scope": "C1-C4 and C6: module, reservation, overload, scoped retrieval and supplied daily times, all labeled hypothetical.",
+      "local_kind": "authored hypothetical cases, not production implementation or upstream source",
+      "primary_read_extent": "Not applicable: authored inference, not primary empirical evidence.",
+      "local_sha256": "f22369fadf5b98acf476dc8eae24ae1053228404ce29436f3561a10c3c08f8cf",
+      "local_bytes": 10318,
+      "local_original_primary_capture": "NOT_ESTABLISHED_BY_THIS_WORKER; the hashed file is explicitly the local note/contract, not necessarily upstream source bytes"
+    },
+    {
+      "id": "SRC-RESOURCE-J6",
+      "local_path": "docs/v2/philosophy/resource-judgment-20261103.md",
+      "local_read_scope": "J6: accepted report grain, fanout/source-duplicate/oracle hypotheses, discriminating check and preservation of intent.",
+      "local_kind": "authored hypothetical diagnostic example; not executed SQL",
+      "primary_read_extent": "Not applicable: new equal-valued invoice fixture is an authored inference.",
+      "local_sha256": "6f723d066ef459eea16038865892a74984fa8313d1f092ed9dae0963653256d5",
+      "local_bytes": 14090,
+      "local_original_primary_capture": "NOT_ESTABLISHED_BY_THIS_WORKER; the hashed file is explicitly the local note/contract, not necessarily upstream source bytes"
+    },
+    {
+      "id": "SRC-SECOND-BRAIN-MEMORY",
+      "local_path": "docs/v2/second-brain-contract.md",
+      "local_read_scope": "Architecture original-versus-derived authority and Memory choice scope/freshness/correction boundaries.",
+      "local_kind": "retained project requirements/design contract; not empirical efficacy",
+      "primary_read_extent": "No fresh primary reading; the family uses the project contract's authority boundaries.",
+      "local_sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+      "local_bytes": 15681,
+      "local_original_primary_capture": "NOT_ESTABLISHED_BY_THIS_WORKER; the hashed file is explicitly the local note/contract, not necessarily upstream source bytes"
+    },
+    {
+      "id": "SRC-SECOND-BRAIN-EFFORT",
+      "local_path": "docs/v2/second-brain-contract.md",
+      "local_read_scope": "What the owner expects: proportional effort, simple daily response and no missing-fact invention.",
+      "local_kind": "retained project requirement; not live schedule evidence",
+      "primary_read_extent": "Not applicable to supplied daily arithmetic.",
+      "local_sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+      "local_bytes": 15681,
+      "local_original_primary_capture": "NOT_ESTABLISHED_BY_THIS_WORKER; the hashed file is explicitly the local note/contract, not necessarily upstream source bytes"
+    }
+  ],
+  "families": [
+    {
+      "id": "DC-01",
+      "family": "module_isolation",
+      "authorship": "AUTHORED_INFERENCE; hypothetical development scenario",
+      "supplied_facts": {
+        "team_size": 2,
+        "existing_deployment": "one application and transactional store",
+        "approval_invariant": "Only an authorised reviewer can approve the exact record version reviewed.",
+        "renderer_input": "immutable timetable snapshot; no shared-row updates",
+        "renderer_memory_failure_contained_in_process": false,
+        "new_deployable_budget": 0,
+        "required_renderer_failure_isolation": false,
+        "renderer_workload": "small bounded render",
+        "existing_import_check": "passes but does not start the component in isolation"
+      },
+      "goal": "Add maintainable approvals and export rendering within the stated deployment budget; preserve approval semantics and required availability.",
+      "invariant": [
+        "No approval of a stale record version.",
+        "No inference of runnable isolation from an import check alone.",
+        "When isolation is required, a rendering failure must not stop timetable edits."
+      ],
+      "variants": [
+        {
+          "variant_id": "DC-01.control",
+          "role": "control",
+          "fact_overrides": {},
+          "permissible_decisions": [
+            {
+              "decision": "in_process_module",
+              "conditions": "One deployment, no renderer availability-isolation requirement.",
+              "required_consequences": [
+                "One clear owner/interface for approvals.",
+                "Version/authorisation checks at the authoritative write boundary."
+              ]
+            },
+            {
+              "decision": "retain_cohesive_existing_functions",
+              "conditions": "Existing boundary is already understandable and supports the same approval checks.",
+              "required_consequences": [
+                "Demonstrate a representative consumer and stale/unauthorised negatives.",
+                "Do not claim independent deployment."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Adding a mandatory new deployable despite the zero-deployable budget.",
+            "Approving a record changed after review.",
+            "Calling a passing import rule evidence of independent runtime isolation."
+          ],
+          "expected_observable_distinctions": {
+            "approval_stale_version": "rejected",
+            "unauthorised_reviewer": "rejected",
+            "new_deployables_max": 0
+          },
+          "recommendation_change": "No new process/service is needed under supplied constraints.",
+          "effective_facts": {
+            "team_size": 2,
+            "existing_deployment": "one application and transactional store",
+            "approval_invariant": "Only an authorised reviewer can approve the exact record version reviewed.",
+            "renderer_input": "immutable timetable snapshot; no shared-row updates",
+            "renderer_memory_failure_contained_in_process": false,
+            "new_deployable_budget": 0,
+            "required_renderer_failure_isolation": false,
+            "renderer_workload": "small bounded render",
+            "existing_import_check": "passes but does not start the component in isolation"
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-01.isolation",
+          "role": "changed_constraints",
+          "fact_overrides": {
+            "required_renderer_failure_isolation": true,
+            "renderer_workload": "renderer has a reproduced memory-exhaustion failure capable of terminating its host process",
+            "new_deployable_budget": 1
+          },
+          "permissible_decisions": [
+            {
+              "decision": "separately_constrained_worker",
+              "conditions": "Immutable input/output seam; enforce its memory/failure boundary.",
+              "required_consequences": [
+                "Timetable edits remain available after renderer failure.",
+                "Approval transactions retain their existing authority."
+              ]
+            },
+            {
+              "decision": "independent_renderer_service",
+              "conditions": "Fits one permitted new deployable and has explicit operational ownership.",
+              "required_consequences": [
+                "Same failure containment and immutable data seam.",
+                "Account for deployment, observability and recovery costs."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Keep the demonstrated fatal render in the same unprotected edit process while claiming isolation.",
+            "Move approval authority into the renderer or silently introduce shared cross-service transactions.",
+            "Treat a renamed folder as memory/failure isolation."
+          ],
+          "expected_observable_distinctions": {
+            "renderer_fault": "must not stop edits",
+            "new_deployables_max": 1,
+            "approval_invariant": "unchanged"
+          },
+          "recommendation_change": "The required containment changes the allowed boundary; a worker or service can satisfy it.",
+          "effective_facts": {
+            "team_size": 2,
+            "existing_deployment": "one application and transactional store",
+            "approval_invariant": "Only an authorised reviewer can approve the exact record version reviewed.",
+            "renderer_input": "immutable timetable snapshot; no shared-row updates",
+            "renderer_memory_failure_contained_in_process": false,
+            "new_deployable_budget": 1,
+            "required_renderer_failure_isolation": true,
+            "renderer_workload": "renderer has a reproduced memory-exhaustion failure capable of terminating its host process",
+            "existing_import_check": "passes but does not start the component in isolation"
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-01.renamed",
+          "role": "nonmaterial_change",
+          "fact_overrides": {
+            "application_name": "School Atlas instead of Timetable Tool"
+          },
+          "permissible_decisions": [
+            {
+              "decision": "in_process_module",
+              "conditions": "One deployment, no renderer availability-isolation requirement.",
+              "required_consequences": [
+                "One clear owner/interface for approvals.",
+                "Version/authorisation checks at the authoritative write boundary."
+              ]
+            },
+            {
+              "decision": "retain_cohesive_existing_functions",
+              "conditions": "Existing boundary is already understandable and supports the same approval checks.",
+              "required_consequences": [
+                "Demonstrate a representative consumer and stale/unauthorised negatives.",
+                "Do not claim independent deployment."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Require service extraction solely because the product name changed."
+          ],
+          "expected_observable_distinctions": {
+            "new_deployables_max": 0,
+            "approval_invariant": "unchanged"
+          },
+          "recommendation_change": "Should not change the control recommendation.",
+          "effective_facts": {
+            "team_size": 2,
+            "existing_deployment": "one application and transactional store",
+            "approval_invariant": "Only an authorised reviewer can approve the exact record version reviewed.",
+            "renderer_input": "immutable timetable snapshot; no shared-row updates",
+            "renderer_memory_failure_contained_in_process": false,
+            "new_deployable_budget": 0,
+            "required_renderer_failure_isolation": false,
+            "renderer_workload": "small bounded render",
+            "existing_import_check": "passes but does not start the component in isolation",
+            "application_name": "School Atlas instead of Timetable Tool"
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        }
+      ],
+      "discriminating_test": {
+        "status": "PROPOSED_NOT_RUN",
+        "kind": [
+          "bounded_state_trace",
+          "process_boundary_review"
+        ],
+        "steps": [
+          "Supply current record version 2 and an approval for version 1; require rejection without state mutation.",
+          "Attempt unauthorised approval and one authorised current-version approval.",
+          "In isolation variant, use a disposable renderer-fault fixture and observe an edit operation in its separate authority/process path."
+        ],
+        "settles": "Approval state consequences; actual failure isolation only if the runtime boundary is exercised.",
+        "does_not_settle": "Best architecture, team productivity or useful native judgment from enum selection."
+      },
+      "source_refs": [
+        "SRC-SHOPIFY-BOUNDARIES",
+        "SRC-SHOPIFY-PACKWERK",
+        "SRC-WORKED-CASES",
+        "SRC-FOUNDATION-SIMPLICITY"
+      ],
+      "source_read_scope": "Existing engineering cases 1-2 and worked case C1; no fresh upstream read."
+    },
+    {
+      "id": "DC-02",
+      "family": "api_replay_unknown_outcome",
+      "authorship": "AUTHORED_INFERENCE; hypothetical contract, not any current provider API",
+      "supplied_facts": {
+        "operation": "create one independent rendering job",
+        "tenant": "T",
+        "request_id": "K1",
+        "payload": {
+          "snapshot": "S1"
+        },
+        "attempt_sequence": [
+          "send",
+          "server may commit",
+          "response lost"
+        ],
+        "seconds_since_first_send": 5,
+        "retention_seconds": 600,
+        "server_contract": {
+          "caller_request_id": true,
+          "atomic_effect_and_id_record": true,
+          "same_id_same_payload": "same semantic job result",
+          "same_id_changed_payload": "validation error",
+          "authoritative_status_available": true
+        },
+        "second_distinct_intent_id": "K2",
+        "max_client_extra_attempts": 1
+      },
+      "goal": "Recover the first requested job without accidental duplicate creation or false confirmation; preserve a genuinely second user intent.",
+      "invariant": [
+        "One request intent is not identified solely by equal payload.",
+        "Never display confirmed success from a timeout alone.",
+        "Client retry safety requires the supplied service contract, not merely a client-generated key."
+      ],
+      "variants": [
+        {
+          "variant_id": "DC-02.control",
+          "role": "control",
+          "fact_overrides": {},
+          "permissible_decisions": [
+            {
+              "decision": "retry_same_intent_id",
+              "conditions": "Within the supplied retention window and unchanged payload/tenant.",
+              "required_consequences": [
+                "Reuse K1; recover the semantically same job.",
+                "Reject same-ID changed-payload use."
+              ]
+            },
+            {
+              "decision": "query_authoritative_status",
+              "conditions": "Supplied status contract returns the committed intent's state.",
+              "required_consequences": [
+                "Confirm only from authoritative success; preserve pending/unknown otherwise."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Generate a new ID for an automatic retry of K1.",
+            "Collapse deliberate K2 into K1 because the payload matches.",
+            "Report failure or success as established merely because the response was lost."
+          ],
+          "expected_observable_distinctions": {
+            "same_intent_successful_replays_effects": 1,
+            "distinct_K2_can_create_second_job": true,
+            "changed_payload_same_id": "rejected"
+          },
+          "recommendation_change": "The explicit contract allows bounded recovery of the same intent.",
+          "effective_facts": {
+            "operation": "create one independent rendering job",
+            "tenant": "T",
+            "request_id": "K1",
+            "payload": {
+              "snapshot": "S1"
+            },
+            "attempt_sequence": [
+              "send",
+              "server may commit",
+              "response lost"
+            ],
+            "seconds_since_first_send": 5,
+            "retention_seconds": 600,
+            "server_contract": {
+              "caller_request_id": true,
+              "atomic_effect_and_id_record": true,
+              "same_id_same_payload": "same semantic job result",
+              "same_id_changed_payload": "validation error",
+              "authoritative_status_available": true
+            },
+            "second_distinct_intent_id": "K2",
+            "max_client_extra_attempts": 1
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-02.no_contract",
+          "role": "changed_constraints",
+          "fact_overrides": {
+            "server_contract": {
+              "caller_request_id": false,
+              "atomic_effect_and_id_record": false,
+              "same_id_same_payload": "UNSPECIFIED",
+              "same_id_changed_payload": "UNSPECIFIED",
+              "authoritative_status_available": false
+            }
+          },
+          "permissible_decisions": [
+            {
+              "decision": "retain_unknown_without_automatic_replay",
+              "conditions": "No authoritative completion or replay-safety evidence.",
+              "required_consequences": [
+                "Keep the operation unresolved rather than confirmed/failed.",
+                "Retain intent and seek an authorised reconciliation path before another create."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Assume that adding a client key enforces server deduplication.",
+            "Automatically resend a potentially completed side effect.",
+            "Label the first job absent because no response/status is available."
+          ],
+          "expected_observable_distinctions": {
+            "automatic_creates_after_timeout": 0,
+            "visible_state": "unknown",
+            "duplicate_effect_guarantee": "not established"
+          },
+          "recommendation_change": "Recovery must become conservative when the authoritative replay/status contract disappears.",
+          "effective_facts": {
+            "operation": "create one independent rendering job",
+            "tenant": "T",
+            "request_id": "K1",
+            "payload": {
+              "snapshot": "S1"
+            },
+            "attempt_sequence": [
+              "send",
+              "server may commit",
+              "response lost"
+            ],
+            "seconds_since_first_send": 5,
+            "retention_seconds": 600,
+            "server_contract": {
+              "caller_request_id": false,
+              "atomic_effect_and_id_record": false,
+              "same_id_same_payload": "UNSPECIFIED",
+              "same_id_changed_payload": "UNSPECIFIED",
+              "authoritative_status_available": false
+            },
+            "second_distinct_intent_id": "K2",
+            "max_client_extra_attempts": 1
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-02.key_spelling",
+          "role": "nonmaterial_change",
+          "fact_overrides": {
+            "request_id": "K77"
+          },
+          "permissible_decisions": [
+            {
+              "decision": "retry_same_intent_id",
+              "conditions": "Within the supplied retention window and unchanged payload/tenant.",
+              "required_consequences": [
+                "Reuse K77; recover the semantically same job.",
+                "Reject same-ID changed-payload use."
+              ]
+            },
+            {
+              "decision": "query_authoritative_status",
+              "conditions": "Supplied status contract returns the committed intent's state.",
+              "required_consequences": [
+                "Confirm only from authoritative success; preserve pending/unknown otherwise."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Change recovery merely because the opaque request-ID spelling changed."
+          ],
+          "expected_observable_distinctions": {
+            "same_intent_successful_replays_effects": 1,
+            "visible_confirmation_requires": "authoritative result"
+          },
+          "recommendation_change": "Should not change the control recommendation; consistently rename the same intent, do not introduce a new one.",
+          "effective_facts": {
+            "operation": "create one independent rendering job",
+            "tenant": "T",
+            "request_id": "K77",
+            "payload": {
+              "snapshot": "S1"
+            },
+            "attempt_sequence": [
+              "send",
+              "server may commit",
+              "response lost"
+            ],
+            "seconds_since_first_send": 5,
+            "retention_seconds": 600,
+            "server_contract": {
+              "caller_request_id": true,
+              "atomic_effect_and_id_record": true,
+              "same_id_same_payload": "same semantic job result",
+              "same_id_changed_payload": "validation error",
+              "authoritative_status_available": true
+            },
+            "second_distinct_intent_id": "K2",
+            "max_client_extra_attempts": 1
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        }
+      ],
+      "discriminating_test": {
+        "status": "PROPOSED_NOT_RUN",
+        "kind": [
+          "bounded_state_trace"
+        ],
+        "steps": [
+          "For the supplied atomic service contract, commit effect+K1, drop response, then replay K1 unchanged.",
+          "Replay K1 with changed payload; submit a genuine second intent K2 with the original payload.",
+          "Remove the contract/status path and inspect whether the client automatically creates again or falsely labels completion."
+        ],
+        "settles": "Declared replay/unknown-state consequences in the model fixture.",
+        "does_not_settle": "Actual provider endpoint semantics, distributed exactly-once guarantees or native semantic judgment."
+      },
+      "source_refs": [
+        "SRC-AWS-IDEMPOTENCY",
+        "SRC-STRIPE-IDEMPOTENCY",
+        "SRC-WORKED-CASES",
+        "SRC-FOUNDATION-ENDPOINTS"
+      ],
+      "source_read_scope": "Existing engineering cases 3/5, including retention/2017 article limitations; worked C2."
+    },
+    {
+      "id": "DC-03",
+      "family": "overload_retry_budget",
+      "authorship": "AUTHORED_INFERENCE; supplied budgets are scenario facts, not copied production defaults",
+      "supplied_facts": {
+        "operation": "read-only report RPC",
+        "replay_safe": true,
+        "overload_extent": "one rejected instance",
+        "verified_alternate_capacity": true,
+        "healthy_alternate_response_ms": 100,
+        "deadline_ms": 500,
+        "elapsed_ms": 100,
+        "max_extra_attempts": 1,
+        "retry_owner": "client immediately above rejecting backend",
+        "other_layers_retry": false,
+        "valid_cached_report": {
+          "available": true,
+          "age_seconds": 5,
+          "max_age_seconds": 60
+        },
+        "required_freshness": "report age <=60 seconds",
+        "instance_label": "backend-A",
+        "cached_lookup_ms": 10
+      },
+      "goal": "Return an acceptably fresh report within the given deadline without multiplying overload work.",
+      "invariant": [
+        "Across layers, extra attempts remain within the supplied budget.",
+        "Replay safety and spare capacity are separate conditions.",
+        "A cache/degraded response must meet the stated freshness/meaning."
+      ],
+      "variants": [
+        {
+          "variant_id": "DC-03.control",
+          "role": "control",
+          "fact_overrides": {},
+          "permissible_decisions": [
+            {
+              "decision": "single_owner_bounded_retry",
+              "conditions": "Verified alternate capacity; replay safe; remaining deadline fits the supplied response time.",
+              "required_consequences": [
+                "At most one extra attempt; no retry multiplication in other layers."
+              ]
+            },
+            {
+              "decision": "serve_valid_cache",
+              "conditions": "The supplied cached report meets the stated 60-second requirement.",
+              "required_consequences": [
+                "Identify cache age/status truthfully; do not label it newly computed."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Retry independently at every layer.",
+            "Retry indefinitely or past the total deadline.",
+            "Claim that jitter or idempotency creates spare capacity."
+          ],
+          "expected_observable_distinctions": {
+            "max_total_rpc_attempts": 2,
+            "valid_cache_age_seconds": 5,
+            "deadline_ms": 500
+          },
+          "recommendation_change": "A bounded alternate retry is permitted; satisfying freshness via cache is also acceptable.",
+          "effective_facts": {
+            "operation": "read-only report RPC",
+            "replay_safe": true,
+            "overload_extent": "one rejected instance",
+            "verified_alternate_capacity": true,
+            "healthy_alternate_response_ms": 100,
+            "deadline_ms": 500,
+            "elapsed_ms": 100,
+            "max_extra_attempts": 1,
+            "retry_owner": "client immediately above rejecting backend",
+            "other_layers_retry": false,
+            "valid_cached_report": {
+              "available": true,
+              "age_seconds": 5,
+              "max_age_seconds": 60
+            },
+            "required_freshness": "report age <=60 seconds",
+            "instance_label": "backend-A",
+            "cached_lookup_ms": 10
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-03.systemwide",
+          "role": "changed_constraints",
+          "fact_overrides": {
+            "overload_extent": "all instances rejecting",
+            "verified_alternate_capacity": false,
+            "all_instances_unavailable_through_deadline": true
+          },
+          "permissible_decisions": [
+            {
+              "decision": "serve_valid_cache",
+              "conditions": "Cache still meets the supplied freshness requirement.",
+              "required_consequences": [
+                "No extra RPC attempt while capacity is unavailable."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Spend another attempt on a fully rejecting pool known unavailable through the deadline despite an adequate cache.",
+            "Call an old or unavailable report freshly computed.",
+            "Claim falling queue depth after dropped requests establishes useful recovery."
+          ],
+          "expected_observable_distinctions": {
+            "max_total_rpc_attempts": 1,
+            "extra_attempts": 0
+          },
+          "recommendation_change": "The lack of a viable backend through the deadline removes a useful retry; the budget is a maximum, not a reason to spend it. A valid cache remains acceptable.",
+          "effective_facts": {
+            "operation": "read-only report RPC",
+            "replay_safe": true,
+            "overload_extent": "all instances rejecting",
+            "verified_alternate_capacity": false,
+            "healthy_alternate_response_ms": 100,
+            "deadline_ms": 500,
+            "elapsed_ms": 100,
+            "max_extra_attempts": 1,
+            "retry_owner": "client immediately above rejecting backend",
+            "other_layers_retry": false,
+            "valid_cached_report": {
+              "available": true,
+              "age_seconds": 5,
+              "max_age_seconds": 60
+            },
+            "required_freshness": "report age <=60 seconds",
+            "instance_label": "backend-A",
+            "cached_lookup_ms": 10,
+            "all_instances_unavailable_through_deadline": true
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-03.instance_rename",
+          "role": "nonmaterial_change",
+          "fact_overrides": {
+            "instance_label": "backend-Z"
+          },
+          "permissible_decisions": [
+            {
+              "decision": "single_owner_bounded_retry",
+              "conditions": "Verified alternate capacity; replay safe; remaining deadline fits the supplied response time.",
+              "required_consequences": [
+                "At most one extra attempt; no retry multiplication in other layers."
+              ]
+            },
+            {
+              "decision": "serve_valid_cache",
+              "conditions": "The supplied cached report meets the stated 60-second requirement.",
+              "required_consequences": [
+                "Identify cache age/status truthfully; do not label it newly computed."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Change attempt count solely because the instance identifier changed."
+          ],
+          "expected_observable_distinctions": {
+            "max_total_rpc_attempts": 2,
+            "deadline_ms": 500
+          },
+          "recommendation_change": "Should not change the permissible control decisions.",
+          "effective_facts": {
+            "operation": "read-only report RPC",
+            "replay_safe": true,
+            "overload_extent": "one rejected instance",
+            "verified_alternate_capacity": true,
+            "healthy_alternate_response_ms": 100,
+            "deadline_ms": 500,
+            "elapsed_ms": 100,
+            "max_extra_attempts": 1,
+            "retry_owner": "client immediately above rejecting backend",
+            "other_layers_retry": false,
+            "valid_cached_report": {
+              "available": true,
+              "age_seconds": 5,
+              "max_age_seconds": 60
+            },
+            "required_freshness": "report age <=60 seconds",
+            "instance_label": "backend-Z",
+            "cached_lookup_ms": 10
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        }
+      ],
+      "discriminating_test": {
+        "status": "PROPOSED_NOT_RUN",
+        "kind": [
+          "bounded_event_trace",
+          "arithmetic"
+        ],
+        "steps": [
+          "Count attempts per logical RPC across every layer, including rejected attempts.",
+          "Compare total attempts/deadline/freshness in local-overload and system-wide variants.",
+          "Test both legitimate cache service and one delayed-retry alternative; include a three-layer multiplication countertrace."
+        ],
+        "settles": "Budget/deadline/freshness consequences under supplied facts.",
+        "does_not_settle": "Real fleet capacity, live latency or the best global throughput policy."
+      },
+      "source_refs": [
+        "SRC-GOOGLE-OVERLOAD",
+        "SRC-WORKED-CASES"
+      ],
+      "source_read_scope": "Existing engineering case 4 and worked C3; Google's documented retry setting is not adopted as this scenario's budget."
+    },
+    {
+      "id": "DC-04",
+      "family": "sql_metric_semantics",
+      "authorship": "AUTHORED_INFERENCE; synthetic arithmetic/relational fixture, no executed query",
+      "supplied_facts": {
+        "requested_metric": "invoice_revenue",
+        "required_grain": "one row per customer, including zero-activity customers",
+        "amount_units": "synthetic integer currency units",
+        "customers": [
+          {
+            "customer_id": 1,
+            "name": "Ada"
+          },
+          {
+            "customer_id": 2,
+            "name": "Bo"
+          }
+        ],
+        "invoices": [
+          {
+            "invoice_id": 10,
+            "customer_id": 1,
+            "amount": 100
+          },
+          {
+            "invoice_id": 11,
+            "customer_id": 1,
+            "amount": 100
+          }
+        ],
+        "invoice_lines": [
+          {
+            "line_id": 101,
+            "invoice_id": 10
+          },
+          {
+            "line_id": 102,
+            "invoice_id": 10
+          },
+          {
+            "line_id": 103,
+            "invoice_id": 11
+          }
+        ],
+        "payments": [
+          {
+            "payment_id": 201,
+            "invoice_id": 10,
+            "amount": 60
+          },
+          {
+            "payment_id": 202,
+            "invoice_id": 10,
+            "amount": 40
+          },
+          {
+            "payment_id": 203,
+            "invoice_id": 11,
+            "amount": 30
+          }
+        ],
+        "bad_query_shape": "customers INNER JOIN invoices JOIN invoice_lines JOIN payments, grouped by customer; aggregate invoice amount",
+        "source_invoice_ids_unique": true
+      },
+      "goal": "Report the explicitly requested metric once at its correct grain for every customer; do not silently substitute a different business metric.",
+      "invariant": [
+        "Each source invoice contributes once to invoice revenue.",
+        "Each payment contributes once to received-payments metric.",
+        "Equal amounts do not identify duplicate invoices.",
+        "Customers without activity remain with zero."
+      ],
+      "variants": [
+        {
+          "variant_id": "DC-04.control",
+          "role": "control",
+          "fact_overrides": {},
+          "permissible_decisions": [
+            {
+              "decision": "aggregate_at_invoice_or_customer_grain_before_combining",
+              "conditions": "Requested metric is invoice revenue.",
+              "required_consequences": [
+                "Preserve customer domain; unrelated line/payment multiplicity cannot inflate invoices."
+              ]
+            },
+            {
+              "decision": "correlated_or_separate_customer_aggregate",
+              "conditions": "Same required metric/grain and customer coverage.",
+              "required_consequences": [
+                "Same result without joining independent one-to-many tables at raw grain."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Raw join fanout yields 500 for customer 1.",
+            "SUM(DISTINCT invoice amount) yields 100 and loses a real equal-valued invoice.",
+            "Return only customer 1 or replace invoice revenue with payments of 130."
+          ],
+          "expected_observable_distinctions": {
+            "rows": [
+              {
+                "customer_id": 1,
+                "value": 200
+              },
+              {
+                "customer_id": 2,
+                "value": 0
+              }
+            ],
+            "raw_join_bad_total": 500,
+            "sum_distinct_bad_total": 100
+          },
+          "recommendation_change": "The repair must preserve invoice identity/grain, not just suppress duplicate values.",
+          "effective_facts": {
+            "requested_metric": "invoice_revenue",
+            "required_grain": "one row per customer, including zero-activity customers",
+            "amount_units": "synthetic integer currency units",
+            "customers": [
+              {
+                "customer_id": 1,
+                "name": "Ada"
+              },
+              {
+                "customer_id": 2,
+                "name": "Bo"
+              }
+            ],
+            "invoices": [
+              {
+                "invoice_id": 10,
+                "customer_id": 1,
+                "amount": 100
+              },
+              {
+                "invoice_id": 11,
+                "customer_id": 1,
+                "amount": 100
+              }
+            ],
+            "invoice_lines": [
+              {
+                "line_id": 101,
+                "invoice_id": 10
+              },
+              {
+                "line_id": 102,
+                "invoice_id": 10
+              },
+              {
+                "line_id": 103,
+                "invoice_id": 11
+              }
+            ],
+            "payments": [
+              {
+                "payment_id": 201,
+                "invoice_id": 10,
+                "amount": 60
+              },
+              {
+                "payment_id": 202,
+                "invoice_id": 10,
+                "amount": 40
+              },
+              {
+                "payment_id": 203,
+                "invoice_id": 11,
+                "amount": 30
+              }
+            ],
+            "bad_query_shape": "customers INNER JOIN invoices JOIN invoice_lines JOIN payments, grouped by customer; aggregate invoice amount",
+            "source_invoice_ids_unique": true
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-04.received_payments",
+          "role": "changed_constraints",
+          "fact_overrides": {
+            "requested_metric": "received_payments"
+          },
+          "permissible_decisions": [
+            {
+              "decision": "aggregate_payment_identity_at_customer_grain",
+              "conditions": "The accepted metric is explicitly changed to received payments.",
+              "required_consequences": [
+                "Count each payment once; retain zero-activity customers."
+              ]
+            },
+            {
+              "decision": "correlated_payment_aggregate",
+              "conditions": "Equivalent metric and customer domain.",
+              "required_consequences": [
+                "Same correct payment total without line fanout."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Keep reporting invoice revenue 200 after the metric explicitly changes.",
+            "Keep raw child-table fanout or omit the zero-activity customer.",
+            "Reinterpret the original control metric silently to excuse an incorrect query."
+          ],
+          "expected_observable_distinctions": {
+            "rows": [
+              {
+                "customer_id": 1,
+                "value": 130
+              },
+              {
+                "customer_id": 2,
+                "value": 0
+              }
+            ],
+            "metric": "received_payments"
+          },
+          "recommendation_change": "The metric expression must change even though source rows are identical; it changes only because acceptance explicitly changed.",
+          "effective_facts": {
+            "requested_metric": "received_payments",
+            "required_grain": "one row per customer, including zero-activity customers",
+            "amount_units": "synthetic integer currency units",
+            "customers": [
+              {
+                "customer_id": 1,
+                "name": "Ada"
+              },
+              {
+                "customer_id": 2,
+                "name": "Bo"
+              }
+            ],
+            "invoices": [
+              {
+                "invoice_id": 10,
+                "customer_id": 1,
+                "amount": 100
+              },
+              {
+                "invoice_id": 11,
+                "customer_id": 1,
+                "amount": 100
+              }
+            ],
+            "invoice_lines": [
+              {
+                "line_id": 101,
+                "invoice_id": 10
+              },
+              {
+                "line_id": 102,
+                "invoice_id": 10
+              },
+              {
+                "line_id": 103,
+                "invoice_id": 11
+              }
+            ],
+            "payments": [
+              {
+                "payment_id": 201,
+                "invoice_id": 10,
+                "amount": 60
+              },
+              {
+                "payment_id": 202,
+                "invoice_id": 10,
+                "amount": 40
+              },
+              {
+                "payment_id": 203,
+                "invoice_id": 11,
+                "amount": 30
+              }
+            ],
+            "bad_query_shape": "customers INNER JOIN invoices JOIN invoice_lines JOIN payments, grouped by customer; aggregate invoice amount",
+            "source_invoice_ids_unique": true
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-04.label_change",
+          "role": "nonmaterial_change",
+          "fact_overrides": {
+            "customers": [
+              {
+                "customer_id": 1,
+                "name": "A. Example"
+              },
+              {
+                "customer_id": 2,
+                "name": "B. Example"
+              }
+            ]
+          },
+          "permissible_decisions": [
+            {
+              "decision": "aggregate_at_invoice_or_customer_grain_before_combining",
+              "conditions": "Requested metric is invoice revenue.",
+              "required_consequences": [
+                "Preserve customer domain; unrelated line/payment multiplicity cannot inflate invoices."
+              ]
+            },
+            {
+              "decision": "correlated_or_separate_customer_aggregate",
+              "conditions": "Same required metric/grain and customer coverage.",
+              "required_consequences": [
+                "Same result without joining independent one-to-many tables at raw grain."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Deduplicate invoices or change totals because customer display labels changed."
+          ],
+          "expected_observable_distinctions": {
+            "rows": [
+              {
+                "customer_id": 1,
+                "value": 200
+              },
+              {
+                "customer_id": 2,
+                "value": 0
+              }
+            ]
+          },
+          "recommendation_change": "Should not change the control recommendation or numeric result.",
+          "effective_facts": {
+            "requested_metric": "invoice_revenue",
+            "required_grain": "one row per customer, including zero-activity customers",
+            "amount_units": "synthetic integer currency units",
+            "customers": [
+              {
+                "customer_id": 1,
+                "name": "A. Example"
+              },
+              {
+                "customer_id": 2,
+                "name": "B. Example"
+              }
+            ],
+            "invoices": [
+              {
+                "invoice_id": 10,
+                "customer_id": 1,
+                "amount": 100
+              },
+              {
+                "invoice_id": 11,
+                "customer_id": 1,
+                "amount": 100
+              }
+            ],
+            "invoice_lines": [
+              {
+                "line_id": 101,
+                "invoice_id": 10
+              },
+              {
+                "line_id": 102,
+                "invoice_id": 10
+              },
+              {
+                "line_id": 103,
+                "invoice_id": 11
+              }
+            ],
+            "payments": [
+              {
+                "payment_id": 201,
+                "invoice_id": 10,
+                "amount": 60
+              },
+              {
+                "payment_id": 202,
+                "invoice_id": 10,
+                "amount": 40
+              },
+              {
+                "payment_id": 203,
+                "invoice_id": 11,
+                "amount": 30
+              }
+            ],
+            "bad_query_shape": "customers INNER JOIN invoices JOIN invoice_lines JOIN payments, grouped by customer; aggregate invoice amount",
+            "source_invoice_ids_unique": true
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        }
+      ],
+      "discriminating_test": {
+        "status": "PROPOSED_NOT_RUN",
+        "kind": [
+          "bounded_SQL_fixture",
+          "arithmetic_oracle"
+        ],
+        "steps": [
+          "Main loads the supplied synthetic rows into a disposable local fixture and checks complete customer row sets.",
+          "Independently calculate invoice totals and payment totals by entity identity.",
+          "Contrast correct preaggregation/correlated alternatives with raw fanout, SUM(DISTINCT amount), and an inner-join omission.",
+          "Run changed metric and label-only cases; a syntax pass cannot settle them."
+        ],
+        "settles": "Synthetic report totals, row grain and customer coverage for an actual query run.",
+        "does_not_settle": "Production SQL concurrency, arbitrary domain semantics or model reasoning from a typed result alone."
+      },
+      "source_refs": [
+        "SRC-RESOURCE-J6",
+        "SRC-WORKED-CASES"
+      ],
+      "source_read_scope": "Resource-judgment J6 intent/result/gap/causal check; synthetic fixture here adds equal-valued invoices to expose value-dedup errors."
+    },
+    {
+      "id": "DC-05",
+      "family": "scoped_evidence_correction",
+      "authorship": "AUTHORED_INFERENCE; synthetic records/values, not any real retention policy",
+      "supplied_facts": {
+        "question": "What is the current retention period for project P?",
+        "authorised_projects": [
+          "P"
+        ],
+        "records": [
+          {
+            "record_id": "retention-policy",
+            "revision": "r1",
+            "project": "P",
+            "status": "current",
+            "value_days": 30,
+            "source_span": "policy section 2",
+            "bytes_available": true
+          }
+        ],
+        "derived_summary": {
+          "revision": "r1",
+          "value_days": 30
+        },
+        "outside_scope_index_hit": null
+      },
+      "goal": "Answer from current authorised source evidence with revision/span provenance, or report the exact evidence gap without inventing a policy.",
+      "invariant": [
+        "A superseded summary cannot override the current authoritative revision.",
+        "Relevance or index visibility does not grant source access.",
+        "Correction preserves history while invalidating dependent advice.",
+        "A failed lookup is not proof that no policy exists."
+      ],
+      "variants": [
+        {
+          "variant_id": "DC-05.control",
+          "role": "control",
+          "fact_overrides": {},
+          "permissible_decisions": [
+            {
+              "decision": "answer_current_scoped_record",
+              "conditions": "r1 is current and its source bytes/span are supplied.",
+              "required_consequences": [
+                "Use value 30 with r1/source-span provenance."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Invent a different period.",
+            "Treat the derived summary as stronger authority than its source.",
+            "Research unrelated generic policies instead of answering the supplied project record."
+          ],
+          "expected_observable_distinctions": {
+            "answer_days": 30,
+            "source_revision": "r1",
+            "project": "P"
+          },
+          "recommendation_change": "Scoped current retrieval is sufficient.",
+          "effective_facts": {
+            "question": "What is the current retention period for project P?",
+            "authorised_projects": [
+              "P"
+            ],
+            "records": [
+              {
+                "record_id": "retention-policy",
+                "revision": "r1",
+                "project": "P",
+                "status": "current",
+                "value_days": 30,
+                "source_span": "policy section 2",
+                "bytes_available": true
+              }
+            ],
+            "derived_summary": {
+              "revision": "r1",
+              "value_days": 30
+            },
+            "outside_scope_index_hit": null
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-05.correction",
+          "role": "changed_constraints",
+          "fact_overrides": {
+            "records": [
+              {
+                "record_id": "retention-policy",
+                "revision": "r1",
+                "project": "P",
+                "status": "superseded",
+                "value_days": 30,
+                "source_span": "policy section 2",
+                "bytes_available": true
+              },
+              {
+                "record_id": "retention-policy",
+                "revision": "r2",
+                "project": "P",
+                "status": "current",
+                "supersedes": "r1",
+                "value_days": 7,
+                "source_span": "policy section 2 revision r2",
+                "bytes_available": true
+              }
+            ]
+          },
+          "permissible_decisions": [
+            {
+              "decision": "use_current_correction_and_mark_derivative_stale",
+              "conditions": "r2 explicitly supersedes r1 in the same authorised scope.",
+              "required_consequences": [
+                "Use value 7 with r2 provenance.",
+                "Retain r1 as history; refresh or mark stale the r1-derived summary."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Repeat the stale 30-day summary as current.",
+            "Erase the original source/history to conceal the change.",
+            "Infer cross-project permission from the correction."
+          ],
+          "expected_observable_distinctions": {
+            "answer_days": 7,
+            "source_revision": "r2",
+            "derived_summary_state": "stale_or_refreshed",
+            "r1_history": "retained"
+          },
+          "recommendation_change": "The answer and dependent-summary state must change with the authoritative correction.",
+          "effective_facts": {
+            "question": "What is the current retention period for project P?",
+            "authorised_projects": [
+              "P"
+            ],
+            "records": [
+              {
+                "record_id": "retention-policy",
+                "revision": "r1",
+                "project": "P",
+                "status": "superseded",
+                "value_days": 30,
+                "source_span": "policy section 2",
+                "bytes_available": true
+              },
+              {
+                "record_id": "retention-policy",
+                "revision": "r2",
+                "project": "P",
+                "status": "current",
+                "supersedes": "r1",
+                "value_days": 7,
+                "source_span": "policy section 2 revision r2",
+                "bytes_available": true
+              }
+            ],
+            "derived_summary": {
+              "revision": "r1",
+              "value_days": 30
+            },
+            "outside_scope_index_hit": null
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-05.distractor",
+          "role": "nonmaterial_change",
+          "fact_overrides": {
+            "outside_scope_index_hit": {
+              "project": "Q",
+              "revision": "q9",
+              "value_days": 1,
+              "status": "current_in_Q",
+              "access_authorised": false,
+              "claimed_relevance": "high"
+            }
+          },
+          "permissible_decisions": [
+            {
+              "decision": "answer_current_scoped_record",
+              "conditions": "r1 is current and its source bytes/span are supplied.",
+              "required_consequences": [
+                "Use value 30 with r1/source-span provenance."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Change P's answer to the more relevant-looking Q result.",
+            "Broaden access to avoid an honest scoped answer."
+          ],
+          "expected_observable_distinctions": {
+            "answer_days": 30,
+            "source_revision": "r1",
+            "project": "P"
+          },
+          "recommendation_change": "Should not change the control recommendation; relevance is not authority.",
+          "effective_facts": {
+            "question": "What is the current retention period for project P?",
+            "authorised_projects": [
+              "P"
+            ],
+            "records": [
+              {
+                "record_id": "retention-policy",
+                "revision": "r1",
+                "project": "P",
+                "status": "current",
+                "value_days": 30,
+                "source_span": "policy section 2",
+                "bytes_available": true
+              }
+            ],
+            "derived_summary": {
+              "revision": "r1",
+              "value_days": 30
+            },
+            "outside_scope_index_hit": {
+              "project": "Q",
+              "revision": "q9",
+              "value_days": 1,
+              "status": "current_in_Q",
+              "access_authorised": false,
+              "claimed_relevance": "high"
+            }
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-05.missing_current_bytes",
+          "role": "missing_evidence_control",
+          "fact_overrides": {
+            "records": [
+              {
+                "record_id": "retention-policy",
+                "revision": "r1",
+                "project": "P",
+                "status": "superseded",
+                "value_days": 30,
+                "source_span": "policy section 2",
+                "bytes_available": true
+              },
+              {
+                "record_id": "retention-policy",
+                "revision": "r2",
+                "project": "P",
+                "status": "current",
+                "supersedes": "r1",
+                "bytes_available": false
+              }
+            ]
+          },
+          "permissible_decisions": [
+            {
+              "decision": "report_unknown_current_value_and_source_gap",
+              "conditions": "Current source bytes are unavailable; r1 is superseded.",
+              "required_consequences": [
+                "Explain current-value unknown; acquire only authorised missing evidence if permitted.",
+                "Do not treat old 30 as current or invent r2's value."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Answer 7 from another exposed variant's answer key.",
+            "Default to stale 30 as current.",
+            "State that no policy exists."
+          ],
+          "expected_observable_distinctions": {
+            "current_value": "UNKNOWN",
+            "gap": "current r2 source bytes unavailable",
+            "old_value_status": "historical_only"
+          },
+          "recommendation_change": "Missing current evidence requires bounded abstention, not leaked answers or scope expansion.",
+          "effective_facts": {
+            "question": "What is the current retention period for project P?",
+            "authorised_projects": [
+              "P"
+            ],
+            "records": [
+              {
+                "record_id": "retention-policy",
+                "revision": "r1",
+                "project": "P",
+                "status": "superseded",
+                "value_days": 30,
+                "source_span": "policy section 2",
+                "bytes_available": true
+              },
+              {
+                "record_id": "retention-policy",
+                "revision": "r2",
+                "project": "P",
+                "status": "current",
+                "supersedes": "r1",
+                "bytes_available": false
+              }
+            ],
+            "derived_summary": {
+              "revision": "r1",
+              "value_days": 30
+            },
+            "outside_scope_index_hit": null
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        }
+      ],
+      "discriminating_test": {
+        "status": "PROPOSED_NOT_RUN",
+        "kind": [
+          "bounded_record_state_trace",
+          "source_support_review"
+        ],
+        "steps": [
+          "Select among the supplied scoped record revisions and trace the derived summary's dependency.",
+          "Add the out-of-scope distractor without changing P's record; then remove current source bytes.",
+          "Require revision/span support or explicit unknown; inspect that old source/history remains."
+        ],
+        "settles": "Revision/scope selection and correction-state consequences in the fixture.",
+        "does_not_settle": "Actual retrieved citation support without source bytes, arbitrary semantic source reconciliation, or native retrieval performance."
+      },
+      "source_refs": [
+        "SRC-SECOND-BRAIN-MEMORY",
+        "SRC-WORKED-CASES"
+      ],
+      "source_read_scope": "Second-brain Memory choice/Architecture authority boundaries; worked C4 and existing causal-gap/correction guidance."
+    },
+    {
+      "id": "DC-06",
+      "family": "everyday_proportional_choice",
+      "authorship": "AUTHORED_INFERENCE; all timing/accessibility facts supplied, not a live schedule",
+      "supplied_facts": {
+        "now": "08:40",
+        "meeting": "casual catch-up",
+        "meeting_deadline": "09:00",
+        "walk_minutes": 12,
+        "walking_feasible": true,
+        "shuttle_departure": "08:50",
+        "shuttle_minutes": 5,
+        "weather_constraint": false,
+        "live_research_needed": false
+      },
+      "goal": "Arrive before 09:00 using a feasible supplied option; prefer greater margin when both are otherwise acceptable. Give a direct answer of at most two sentences.",
+      "invariant": [
+        "Do not ignore an explicit accessibility constraint.",
+        "Use supplied times; do not invent weather, probabilities or live schedule claims.",
+        "A simple adequate choice does not require a plan, diagram, research campaign or workers."
+      ],
+      "variants": [
+        {
+          "variant_id": "DC-06.control",
+          "role": "control",
+          "fact_overrides": {},
+          "permissible_decisions": [
+            {
+              "decision": "walk_now",
+              "conditions": "Walking is feasible and otherwise unconstrained.",
+              "required_consequences": [
+                "Arrive 08:52, before the 08:55 shuttle arrival; give one useful reason."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Wait for a smaller margin without explaining a supplied constraint.",
+            "Claim researched traffic/weather or numerical probability.",
+            "Add compulsory planning/delegation."
+          ],
+          "expected_observable_distinctions": {
+            "walk_arrival": "08:52",
+            "shuttle_arrival": "08:55",
+            "preferred_option": "walk_now"
+          },
+          "recommendation_change": "Use the greater-margin feasible option directly.",
+          "effective_facts": {
+            "now": "08:40",
+            "meeting": "casual catch-up",
+            "meeting_deadline": "09:00",
+            "walk_minutes": 12,
+            "walking_feasible": true,
+            "shuttle_departure": "08:50",
+            "shuttle_minutes": 5,
+            "weather_constraint": false,
+            "live_research_needed": false
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-06.accessibility",
+          "role": "changed_constraints",
+          "fact_overrides": {
+            "walking_feasible": false,
+            "accessibility_constraint": "Walking is painful and must be avoided."
+          },
+          "permissible_decisions": [
+            {
+              "decision": "take_shuttle",
+              "conditions": "Shuttle remains feasible and on time under supplied facts.",
+              "required_consequences": [
+                "Arrive 08:55 without the forbidden walking burden; stay brief."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Keep recommending walking merely because it saves three minutes.",
+            "Ask the user to restate the already explicit constraint."
+          ],
+          "expected_observable_distinctions": {
+            "preferred_option": "take_shuttle",
+            "arrival": "08:55"
+          },
+          "recommendation_change": "Accessibility changes the feasible option; no scalar utility score is needed.",
+          "effective_facts": {
+            "now": "08:40",
+            "meeting": "casual catch-up",
+            "meeting_deadline": "09:00",
+            "walk_minutes": 12,
+            "walking_feasible": false,
+            "shuttle_departure": "08:50",
+            "shuttle_minutes": 5,
+            "weather_constraint": false,
+            "live_research_needed": false,
+            "accessibility_constraint": "Walking is painful and must be avoided."
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        },
+        {
+          "variant_id": "DC-06.title_only",
+          "role": "nonmaterial_change",
+          "fact_overrides": {
+            "meeting": "routine project chat"
+          },
+          "permissible_decisions": [
+            {
+              "decision": "walk_now",
+              "conditions": "Walking is feasible and otherwise unconstrained.",
+              "required_consequences": [
+                "Arrive 08:52, before the 08:55 shuttle arrival; give one useful reason."
+              ]
+            }
+          ],
+          "unacceptable_consequences": [
+            "Escalate to a new plan/workforce because of the meeting title."
+          ],
+          "expected_observable_distinctions": {
+            "preferred_option": "walk_now",
+            "arrival": "08:52"
+          },
+          "recommendation_change": "Should not change the control recommendation or effort.",
+          "effective_facts": {
+            "now": "08:40",
+            "meeting": "routine project chat",
+            "meeting_deadline": "09:00",
+            "walk_minutes": 12,
+            "walking_feasible": true,
+            "shuttle_departure": "08:50",
+            "shuttle_minutes": 5,
+            "weather_constraint": false,
+            "live_research_needed": false
+          },
+          "authorship": "AUTHORED_INFERENCE; supplied hypothetical facts and proposed consequences",
+          "execution_status": "NOT_RUN"
+        }
+      ],
+      "discriminating_test": {
+        "status": "PROPOSED_NOT_RUN",
+        "kind": [
+          "time_arithmetic",
+          "semantic_proportionality_review"
+        ],
+        "steps": [
+          "Calculate arrivals from supplied times.",
+          "Check chosen option is feasible and before the supplied deadline.",
+          "Review that the explanation is useful and brief, without invented evidence or unnecessary machinery."
+        ],
+        "settles": "Timing/feasibility on supplied inputs; usefulness/proportionality requires semantic review.",
+        "does_not_settle": "Actual weather, transport reliability, general daily-task quality or a token-efficiency gain."
+      },
+      "source_refs": [
+        "SRC-WORKED-CASES",
+        "SRC-SECOND-BRAIN-EFFORT"
+      ],
+      "source_read_scope": "Worked C6 and second-brain What the owner expects; all new scenario values and decisions are authored inferences."
+    }
+  ],
+  "assignment_sha256": "f7911fe188ca124ced71372635e833e23758abb14d621e4270ba4e3c6604caac",
+  "source_revision": "60735e2b35088c0e458e78e8a3fe3f1574c2d970 plus concurrent shared uncommitted work; not a clean or installed candidate"
+}

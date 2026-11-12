@@ -18,8 +18,10 @@ Python 3.9 or newer, standard library only, under 20 MB. `harness` below is `pyt
 | `harness run <plan>` | drain a plan autonomously: each node to a worker on its tier, every gate run by the engine; `plan/<plan>.STOP` halts it |
 | `harness discover "<need>"` | search the Claude/Codex plugin lists, the MCP Registry and Open VSX; vet each item (pinned? hidden text? runs code?) |
 | `harness discover --install ID --approve SHA256` | install exactly the command shown, approved by its hash; a Claude Code plugin is checked afterwards against the approved commit and removed if it differs; recorded in `~/.agent-harness/installed-extensions.jsonl` |
-| `harness improve --propose` / `--apply ID --eval FILE` | lessons captured at each turn's end (a check that failed then passed, your corrections) that recur become proposals; one is applied only when a paired eval shows a gain within +15% tokens |
-| `harness improve --trend eval/results/history.jsonl [--release V]` | refuse a release (default: this version) that scores more than one question below the best earlier release, per tool and on the same questions, or costs more than +15% tokens, or has no measured result |
+| `harness improve --propose` | list recurring captured lessons as legacy proposals; these are evidence and cannot be applied directly |
+| `harness improve --draft-procedure FILE --project PATH` / `--apply ID --eval FILE --project PATH` / `--rollback ID --project PATH` | store a dormant project procedure in `procedures.sqlite`; `--apply` currently refuses caller-written comparison files because independent grader provenance and actor answer isolation are unverified. The Python binder can record a frozen task, artifacts, exact-byte grade and provider-reported usage as `HOLD_UNVERIFIED_BOUNDARY`; it does not activate. Rollback withdraws previously active methods. No learned `SKILL.md` is generated |
+| `harness improve --correct-procedure OLD_ID --draft-procedure FILE --project PATH` | in one local transaction, withdraw the named active or proposed method, keep its evidence, link it to a corrected replacement and leave that replacement **proposed**. Identical retries return the same proposal; a different retry conflicts. A failed candidate validation leaves the old method unchanged, so use `--rollback OLD_ID` if it must be withdrawn immediately. No method is promoted by this command |
+| `harness improve --trend eval/results/history.jsonl [--release V]` | refuse a release (default: this version) with any lower score than the best accepted earlier release on the same questions, greater aggregate tokens, or no measured result; +15% was a historical allowance |
 | `harness doctor` | also prunes every store to its cap and names the largest parts when the harness is over its footprint cap |
 
 A real install (without `--dry-run`) **replaces `~/.claude/CLAUDE.md`** and the other tools' instruction files
@@ -47,7 +49,8 @@ $ harness --home $DEMO_HOME install --yes --tools claude-code && harness --home 
 [ok] claude-code: $DEMO_HOME/.claude/CLAUDE.md
   ...
 [ok] MCP server answers tools/list within 5 s (14 tools)
-[ok] disk footprint 0.5 MB (cap 20 MB)
+[ok] base disk footprint 0.5 MB (cap 20 MB)
+[ok] warmed disk footprint 0.5 MB (cap 1024 MB)
 
 $ python3 content/hooks/guard.py --check "rm -rf ~"
 agent-harness guard blocked this: rm -r on ~ (the home directory). If it is really intended, ask the human to run it themselves.
@@ -76,3 +79,20 @@ spends your Claude Code and Codex usage): [eval/README.md](../eval/README.md).
   available.
 - **The work graph is on by default (v0.3.3)**, except in Claude desktop and Jupyter AI (no shell of their own). `HARNESS_DISABLE=plan` turns the `plan` MCP tool off; `plan run`
   dispatches Claude Code workers only, and in the other tools the graph is driven one node at a time.
+
+## Read-only cache inventory (v1 candidate)
+
+`harness cache-status` returns JSON counts for the current discovered KB scope, retained
+cache outside that discovery, session-search rows, allocated SQLite pages and free pages.
+It opens the database read-only and does not refresh, prune, compact or print source text.
+SQLite may maintain its normal WAL reader metadata. `PRESENT` means the database was
+readable, not that storage or retrieval is healthy; `ABSENT` does not create a store,
+and `UNREADABLE` exits 2. Outside-current-discovery rows may still serve other clients.
+This report does not authorize eviction or change `harness doctor`'s budget.
+
+`harness source-inventory` reports declared transcript metadata and index offsets.
+Use `--archive-root PATH` for an additional metadata-only archive, `--details` for
+hashed file identifiers, and `--limit`/`--seconds` to bound discovery. Exit 2 means
+an incomplete scan or unreadable index; exit 0 never means complete migration.
+See the [development checkpoint](v1/development-checkpoint.md) for verified scope,
+latency measurements and outstanding v1 acceptance.

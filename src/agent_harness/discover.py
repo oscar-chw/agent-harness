@@ -4,7 +4,8 @@
     harness discover --install ID --approve SHA256 [--override] [--catalog FILE]
 
 Sources, all read-only: the plugin lists Claude Code and Codex already keep (`claude plugin list --json
---available`, `codex plugin list --available --json`), the official MCP Registry, and Open VSX. A registry is
+--available`, `codex plugin list --available --json`), Kimi's marketplace, the official MCP Registry, and Open
+VSX. Kimi installation stays in its interactive plugin manager because prompt mode is not a management API. A registry is
 an index, not a trust signal (it says so itself), and every source has shipped malware at least once
 (postmark-mcp 2025-09, GlassWorm 2025-10, ClawHavoc 2026-01), so each item is vetted here:
 
@@ -23,9 +24,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
+import sys
 import time
 import urllib.parse
 import urllib.request
@@ -154,6 +157,44 @@ def codex_plugins() -> List[dict]:
     return out
 
 
+def kimi_plugins(home: Optional[Path] = None) -> List[dict]:
+    """Read Kimi's marketplace; its interactive-only installer is deliberately not imitated here."""
+    from . import installer as I
+    home = home or Path.home()
+    root = Path(os.environ.get("KIMI_CODE_HOME", str(home / ".kimi-code"))).expanduser()
+    try:
+        config = I.load_toml((root / "config.toml").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        config = {}
+    providers = config.get("providers") or {}
+    managed = providers.get("managed:kimi-code") or {}
+    base = str(os.environ.get("KIMI_CODE_BASE_URL") or managed.get("base_url")
+               or "https://api.kimi.com/coding/v1").rstrip("/")
+    source = os.environ.get("KIMI_CODE_PLUGIN_MARKETPLACE_URL") or base + "/plugins/marketplace"
+    data = _get(source)
+    current = {"darwin": "macos", "win32": "windows"}.get(sys.platform, "linux")
+    out = []
+    for plugin in (data.get("plugins") if isinstance(data, dict) else None) or []:
+        if not isinstance(plugin, dict):
+            continue
+        if "cli" not in (plugin.get("clients") or ["cli"]):
+            continue
+        if current not in (plugin.get("platforms") or [current]):
+            continue
+        distribution = plugin.get("distribution") or {}
+        description = plugin.get("cliDescription") or plugin.get("description")
+        if not isinstance(distribution, dict) or (description is not None and not isinstance(description, str)):
+            continue
+        out.append({"kind": "plugin", "tool": "kimi", "id": plugin.get("id"),
+                    "name": plugin.get("displayName") or plugin.get("id"),
+                    "description": description,
+                    "publisher": "Kimi" if distribution.get("category") == "official" else "marketplace",
+                    "tier": "official" if distribution.get("category") == "official" else "community",
+                    "repo": plugin.get("source"), "ref": plugin.get("sha256sum") or "",
+                    "components": [], "install": []})
+    return out
+
+
 def mcp_registry(need: str) -> List[dict]:
     d = _get("https://registry.modelcontextprotocol.io/v0.1/servers?version=latest&search="
              + urllib.parse.quote(need))
@@ -195,7 +236,7 @@ def catalogue(need: str, catalog: Optional[str], network: bool) -> List[dict]:
         return json.loads(Path(catalog).read_text(encoding="utf-8"))
     recs = claude_plugins() + codex_plugins()
     if network:
-        recs += mcp_registry(need) + open_vsx(need)
+        recs += kimi_plugins() + mcp_registry(need) + open_vsx(need)
     return recs
 
 
@@ -228,6 +269,9 @@ def install(rec_id: str, approve: Optional[str], override: bool, hh: Path, catal
     rec = recs.get(rec_id)
     if rec is None:
         return 2, "discover: no item %r in the catalogue" % rec_id
+    if not rec.get("install"):
+        return 2, ("discover: %s has no deterministic install command; use the tool's own interactive "
+                   "plugin manager" % rec_id)
     verdict, reasons = vet(rec)
     cmd, digest = install_text(rec), approval(rec)
     shown = "would run: %s\nverdict: %s%s\napprove it with: --approve %s" % (
@@ -309,7 +353,8 @@ def render(recs: List[dict]) -> str:
         lines.append("%-5s %-38s %-9s %s" % (r["verdict"].upper(), r["id"], r.get("tier", ""),
                                             (r.get("description") or "")[:70]))
         lines += ["        - " + x for x in r["reasons"]]
-    lines.append("install one: harness discover --install ID --approve <sha256 it prints>")
+    if any(r.get("install") for r in recs):
+        lines.append("install one: harness discover --install ID --approve <sha256 it prints>")
     return "\n".join(lines)
 
 

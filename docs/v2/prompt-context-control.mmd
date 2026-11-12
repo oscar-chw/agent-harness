@@ -1,0 +1,89 @@
+%%{init: {"flowchart": {"nodeSpacing": 48, "rankSpacing": 64, "curve": "rounded", "padding": 20}}}%%
+flowchart TB
+    USER["YOU<br/>Outcome, constraints and initial clarification"]
+
+    subgraph PREP["REQUEST PREPARATION - before material task effects"]
+        direction TB
+        BRIEF["REFINE A TASK BRIEF<br/>Goal / scope / constraints / success check<br/>Sourced context / assumptions / gaps / next action"]
+        GAP{"Consequential gap<br/>that local context cannot resolve?"}
+        ASK["Ask one focused question<br/>Options, consequences and recommendation"]
+        BRIEF --> GAP
+        GAP -->|Yes| ASK
+        ASK -->|Answer or effective approval| BRIEF
+    end
+
+    USER --> BRIEF
+
+    subgraph CONTROL["1 - FRAMEWORK / CENTRAL CONTROL - responsibilities, not a permanent daemon"]
+        direction TB
+        AUTHORITY["AUTHORITY BOUNDARY<br/>Owner intent + effective native policy<br/>Retrieved text never grants permissions"]
+        ORCH["ACCOUNTABLE ORCHESTRATOR<br/>Own the canonical brief and outcome<br/>Choose next action, integrate and verify"]
+        SELECT["CONTEXT AND METHOD SELECTION<br/>Relevant sources and tools<br/>Method / model-effort tier / useful delegation"]
+        STATE["EXECUTION CONTROL<br/>Task state / ownership / dependencies<br/>Permissions / leases / stopping bounds"]
+        AUTHORITY --> ORCH
+        ORCH --> SELECT
+        ORCH --> STATE
+    end
+
+    GAP -->|Ready| ORCH
+
+    subgraph GUIDES["THINKING GUIDANCE - used when relevant"]
+        direction LR
+        METHOD["2 - METHODOLOGY<br/>Research / design / code / test / review"]
+        PHIL["3 - PHILOSOPHY<br/>First principles / causal and critical thinking<br/>Assumptions / alternatives / tradeoffs"]
+    end
+
+    METHOD -.-> SELECT
+    PHIL -.-> SELECT
+
+    subgraph WORK["WORK AND FEEDBACK - no compulsory full pipeline for simple tasks"]
+        direction TB
+        ACTION["NEXT USEFUL ACTION<br/>Direct work OR bounded task-graph work<br/>Research and analysis when evidence is missing"]
+        LOOP["OPTIONAL AUTONOMOUS DRIVER<br/>Ralph-style: ready work / workers / gates<br/>Round and time limits / STOP / repeated-failure holds"]
+        EXEC["EXECUTE<br/>Root or optional workers with separate scopes<br/>Shared-file inspection; parent integration check"]
+        CHECK{"VERIFY ACTUAL OUTCOME<br/>Task-appropriate evidence<br/>Formal node: gate exits zero"}
+        DIAG["DIAGNOSE AND REVISE<br/>Original intent vs actual result<br/>Cause hypotheses / discriminating check"]
+        HOLD["HOLD AFFECTED WORK<br/>Permission / repeated failure / stop / limits<br/>Keep other authorised branches moving"]
+        DONE["DELIVER<br/>Useful result + evidence + honest limits"]
+        ACTION --> EXEC --> CHECK
+        CHECK -->|PASS| DONE
+        CHECK -->|FAIL or insufficient| DIAG
+        DIAG -->|Bounded repair| ACTION
+        EXEC -->|Authority or runtime boundary| HOLD
+        DIAG -->|Same failure twice| HOLD
+    end
+
+    SELECT --> ACTION
+    ACTION -->|Started task-graph drain| LOOP
+    LOOP --> EXEC
+    STATE --> EXEC
+    DIAG -.->|Changed evidence or requirements| BRIEF
+    HOLD -.->|Boundary resolved; recheck| STATE
+
+    subgraph MEMORY["4 - LOCAL VAULT AND SHARED MEMORY - context engineering throughout the task"]
+        direction TB
+        LOCAL["ORIGINALS AND SHARED RECORDS<br/>Sources / history / scoped facts / corrections<br/>Plans / checkpoints / handoffs / result receipts"]
+        RETRIEVE["SELECT AND BUDGET CONTEXT<br/>Lexical / FTS5 retrieval + provenance<br/>Scope / freshness / small actor-specific packets"]
+        LOCAL --> RETRIEVE
+    end
+
+    RETRIEVE -->|Recover before asking| BRIEF
+    RETRIEVE -->|Refresh when needed| SELECT
+    STATE -->|Persist progress| LOCAL
+    DONE -->|Preserve evidence| LOCAL
+
+    subgraph LEARN["LEARNING - no automatic model training or unvalidated rule promotion"]
+        direction TB
+        OBS["ACTIVE: LOCAL GATE OBSERVATIONS<br/>Actual failure followed by accepted PASS<br/>Scoped, bounded and deduplicated"]
+        CAND["CANDIDATE KNOWLEDGE / METHODS<br/>Provenance and correction history<br/>Outcome sequence is not proof of cause"]
+        PROMOTE["HELD: INDEPENDENT EVAL AND PROMOTION<br/>Quality at least baseline<br/>Aggregate tokens no greater than baseline<br/>Then selective reuse / withdrawal / rollback"]
+        OBS --> CAND
+        CAND -.-> PROMOTE
+    end
+
+    CHECK -->|Eligible executed evidence| OBS
+    CAND -->|Labelled candidate recall| LOCAL
+    PROMOTE -.->|After qualification| LOCAL
+
+    classDef held stroke-dasharray: 6 5;
+    class HOLD,PROMOTE held;

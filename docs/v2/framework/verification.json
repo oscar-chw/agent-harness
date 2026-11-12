@@ -1,0 +1,83 @@
+{
+  "schema": "harness.framework-worker-verification/v1",
+  "recorded_at_utc": "2026-11-02T12:07:12.452128+00:00",
+  "source_base_revision": "60735e2b35088c0e458e78e8a3fe3f1574c2d970",
+  "source_tree": "shared_dirty_worktree",
+  "tested_tree_binding": "Tests ran in the shared tree; hashes below are post-test observations, not proof that concurrent root edits were frozen. Root must verify its integrated candidate.",
+  "checks": [
+    {
+      "command": "PYTHONPATH=src python3 -m pytest -q -p no:cacheprovider tests/test_plan_versions.py tests/test_operational_state.py tests/test_operational_idle_recovery.py tests/test_method_control.py tests/test_handoff_readback.py tests/test_task_control_bridge.py",
+      "exit_code": 0,
+      "result": "75 passed in 23.58s",
+      "execution_session": 17469,
+      "scope": "Existing source regressions in disposable fixtures, including stub workers; no native model invocation. Not a release or root graph gate."
+    },
+    {
+      "command": "python3 - (inline structural validator recorded in worker tool call chunk 1f198f)",
+      "exit_code": 0,
+      "result": "21 capability rows, 21 acceptance cases, all local references and Python test symbols valid; full capability coverage; invalid_status, unknown_capability, missing_evidence and duplicate_case mutants rejected.",
+      "scope": "Supplemental documentation consistency only, not a behavioral integration oracle."
+    },
+    {
+      "command": "python3 - (final artifact SHA-256 and whitespace check)",
+      "exit_code": 0,
+      "result": "All four recorded framework artifact hashes matched; all five document files have final newline and no trailing whitespace."
+    },
+    {
+      "command": "python3 -m json.tool docs/v2/framework/capability-matrix.json > /dev/null; python3 -m json.tool docs/v2/framework/acceptance-cases.json > /dev/null; python3 -m json.tool docs/v2/framework/verification.json > /dev/null",
+      "exit_code": 0,
+      "result": "Each final JSON document parsed independently (commands below in the same execution).",
+      "scope": "JSON syntax only."
+    }
+  ],
+  "not_run": [
+    {
+      "command": "python3.11 .harness-work/v2-completion/check_requirements.py",
+      "reason": "Original root-owned node1 gate; worker does not close it."
+    },
+    {
+      "command": "PYTHONPATH=src python3 -m pytest -q tests/test_permission_recovery.py tests/test_permission_profiles.py",
+      "reason": "Supporting test sources inspected; not executed by this worker. Permission profiles include disposable installs; no install was needed for design scope."
+    },
+    {
+      "command": "native/installed/device/paired performance qualification",
+      "reason": "Root-owned and outside this bounded documentation assignment; no new model calls, installs or native edits authorized here."
+    }
+  ],
+  "observed_source_sha256": {
+    "content/skills/work-loop/SKILL.md": "9a429f05f1773af87dbf4a71620bce14708c6660eb21932104fe0e794c9e309f",
+    "content/skills/work-loop/recovery.md": "4d3a123a98898c4e82dc0bcb8fb15ae3d3cfaf4bf2e92b07895375de16db3160",
+    "docs/v1/local-operational-state.md": "195d159c97be1d6eb2ff7893889a16a4113f7c028fb9cd64dc7cf61568d292d2",
+    "docs/v2/framework/runtime-contract.md": "b1e102637513cf5e9fccc91a1c8ed6e709d0b80ece577dc0c7b3ed3eff1f3e94",
+    "docs/v2/second-brain-contract.md": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+    "handoffs/v2-completion/README.md": "85eb8e73a2617075413649d5554b5c3be6a3bea10c69310f62f2493293270c07",
+    "handoffs/v2-increments/local-20261102.md": "cf424104e11f54004bc110cab87194707ff4d1220ceef6c55211afc919844068",
+    "plan/v2-completion.md": "e2a70de05270e2089c1bf20509d500a8dc3300a24f82d51a6151245758f7cf15",
+    "src/agent_harness/handoff.py": "a0752b4ac5fd26e8125ff41e046455db1f1779104172fb509c25adfe5d4a2e97",
+    "src/agent_harness/method_control.py": "ca4d6dfa476069a6acb26f773c3f2c23d240077bae2b2df329e88510ab309a3f",
+    "src/agent_harness/operational_state.py": "f27e75d8e6d3c3fb2fb3ceb2d26bbe1d5b428d0bfe00c0ad6ab2b3ceb57525fb",
+    "src/agent_harness/permission_profiles.py": "f1046e338be5fb08e46fd1f651837df85e7f1245949ebc580c7e8b581dd9e0b8",
+    "src/agent_harness/workgraph/plan.py": "e3a81cac815cc3c2823cfdf23052101254f3660208ea5d2aef93c73ff248e1fc",
+    "src/agent_harness/workgraph/versions.py": "87d925b9df21a5793bdb3c3e7608aac31dc7e38c4d1d72d261f4cfa3c3c3c96d",
+    "tests/test_handoff_readback.py": "ceef514690dcec4f63f14d6a19074a62fdf616ff7e03bdb6f8e25571607adf1c",
+    "tests/test_method_control.py": "a1553f6c4e4cea83b281d8334af0d8fe65dd16e0e4bf199f6460ab18c8a0e845",
+    "tests/test_operational_idle_recovery.py": "5bc4bdf97cac9fd5ac68a75871e5e93aa5dab3ec8f8655da0bc59435f86d1620",
+    "tests/test_operational_state.py": "e592417c4462c994b54e42dcb3de297cd68c32fa9b27432996a16506a1a76192",
+    "tests/test_permission_profiles.py": "ed7b6bc320fcca8e152083930e06ddbf54b5db6b079eaf9ee57730ec9027ec4c",
+    "tests/test_permission_recovery.py": "0c0d5e412af78b6bb3a1442d0f79da3ca65fcafd7815457cdfc7cb530f9054c6",
+    "tests/test_plan_versions.py": "1364f3a5d3dcf9d7e656fec867fe0085a45272609769d12d57aab8aa4667984d",
+    "tests/test_task_control_bridge.py": "3fd1098a8a819f136006ecd336e61fea0997ea553c33243482348365daa4130e",
+    "tests/workgraph/plan.test.sh": "49e824e502fcd9a867edd0feb70507283f3e05ce911f8d3cb4d6f8fca4097904"
+  },
+  "artifacts": {
+    "README.md": "88a9887c8892a7dec1808155e103315aa30c77318a0889f6057346ad525dcb90",
+    "acceptance-cases.json": "a7d9c5bdadd14699a0f52c01b5b7e1abfbad01bc9a5617442827386de55458e4",
+    "capability-matrix.json": "8a25478a71f4059851dd3847f862c2019a9aad1f4cb3dae3ca1234cdeaf7633c",
+    "runtime-contract.md": "b1e102637513cf5e9fccc91a1c8ed6e709d0b80ece577dc0c7b3ed3eff1f3e94"
+  },
+  "limits": [
+    "Source tests do not prove proposed manifest validation, overlap enforcement, UI grouping, arbitrary statecharts, native profile compliance or broad efficacy.",
+    "Dev2 install/pilot claims are retained-report evidence; no fresh installed readback in this worker.",
+    "The low-level operational put memory-link-clearing edge and renew checkpoint-presence edge are documented gaps, not repaired runtime."
+  ]
+}

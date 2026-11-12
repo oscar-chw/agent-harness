@@ -1,0 +1,56 @@
+{
+  "schema": "harness.jev-decision/v1",
+  "record_id": "jev-h6a-l2-candidacy-20261111",
+  "created": "2026-11-11",
+  "subject": {
+    "name": "H6a — L2 production candidacy",
+    "question": "Does the L2 lexical-evidence honesty rule ship in kb.py, and in what posture?"
+  },
+  "kind": "choice",
+  "domain": "adoption",
+  "options": ["ship-opt-in-default-off", "ship-default-on", "do-not-ship"],
+  "score_range": null,
+  "verdict": "ship-opt-in-default-off",
+  "confidence": {
+    "level": "high",
+    "basis": "all six pre-registered legs green on the fresh 15-query set plus 18/18 stability on the original frozen set, determinism byte-identical, stage p95 0.040 ms vs the 100 ms budget, 3/3 mutation controls both directions — re-derived by check_h6a.py, not asserted here"
+  },
+  "policy": {
+    "execute_at_or_above": "medium",
+    "below": "escalate"
+  },
+  "scope": "the documented envelope: L2 is validated as 'no false negative when some candidate is unigram-complete on the query content tokens' — NOT 'no false negatives'; the x1 thin-worded-answerable-query hole is pre-registered and observed firing; one frozen 133-page corpus; first live enable is a canary",
+  "reversibility": "reversible",
+  "authority": "plan v3-h6a-l2-candidacy nodes 1-10, all gated (check_h6a.py evidence-integrity gate + mutation_controls.py), under the contract posture 'no parameter change is licensed by this result'; retrofit recorded by plan v3-jev-needle node 5",
+  "inputs": [
+    {
+      "ref": "docs/v3/h6a-l2-candidacy-verdict-20261110.md",
+      "kind": "local-file",
+      "role": "the verdict doc this record retrofits",
+      "digest": "da41bdc095ebcf77ac423b181293956d2f5bbc0cc754b130299941fc18ae2533"
+    },
+    {
+      "ref": "docs/v3/h6a-l2-candidacy-contract-20261110.md",
+      "kind": "local-file",
+      "role": "the pre-registered contract + amendment the validation ran against",
+      "digest": "0c0a7c6c017e128057bba1deed5525576e7df1c86eaf8e49131d0d4880bf62cd"
+    },
+    {
+      "ref": ".harness-work/v3-h6a-l2-candidacy/eval-h6a-20261110.json",
+      "kind": "local-file",
+      "role": "hash-bound eval artifact (fresh 15 + stability 18)",
+      "digest": "0b8d1555460dd041384cb5454dca1b9aa529a44c55345637465b4874f41f9086"
+    }
+  ],
+  "receipts": [
+    ".harness-work/v3-h6a-l2-candidacy/eval-h6a-20261110.json",
+    ".harness-work/v3-h6a-l2-candidacy/mutation-controls-h6a-20261110.json"
+  ],
+  "unknowns": [
+    "live-corpus behavior on a larger dynamic index — the first live enable is a canary by the verdict's own honesty limits",
+    "the x1-class false-negative rate on real traffic is unmeasured; de-confidencing instead of hard suppression would be a NEW hypothesis",
+    "whether the envelope transfers to a corpus other than the frozen 133-page one is unproven (n=15 fresh + 18 frozen, one corpus)"
+  ],
+  "links": {},
+  "promotion": "NOT_GRANTED"
+}

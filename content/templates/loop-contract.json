@@ -1,0 +1,9 @@
+{
+  "schema": "harness.loop-contract/v1",
+  "objective": "Illustrative local comparison: reduce reader tokens while preserving source binding",
+  "cases": ["example-source-binding"],
+  "required_checks": ["source_binding"],
+  "required_scope": "local",
+  "max_attempts": 3,
+  "metric": null
+}

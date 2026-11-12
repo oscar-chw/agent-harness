@@ -245,24 +245,57 @@ class Sessions:
             if total <= self.cap:
                 break
 
+    def _scope(self, session, project):
+        if not isinstance(session, str) or not isinstance(project, str):
+            raise ValueError("session and project scope must be strings")
+        where, params = "", []
+        if session:
+            # Session IDs are literal prefixes; SQL wildcards must not broaden a scope.
+            where += " AND substr(f.session,1,?)=?"
+            params += [len(session), session]
+        if project:
+            where += " AND f.project=?"
+            params.append(project)
+        return where, params
+
+    def _coverage(self, session, project, pending):
+        where, params = self._scope(session, project)
+        rows = self.con.execute(
+            "SELECT f.path,f.session,f.project,f.dropped FROM sess_files f WHERE 1=1" + where,
+            params).fetchall()
+        dropped = [r for r in rows if r["dropped"]]
+        status = ("partial_retention" if dropped else
+                  "indexing_pending" if pending and not (session or project) else
+                  "indexed_snapshot" if rows else "not_indexed")
+        # Paths are useful only for a deliberately scoped query. Global searches
+        # expose counts, never a catalogue of unrelated projects' evicted files.
+        sources = ([{"path": r["path"], "session": r["session"], "project": r["project"],
+                     "reason": "evicted_from_index"} for r in dropped[:K_MAX]]
+                   if session or project else [])
+        return {"status": status, "known_files": len(rows),
+                "indexed_files": len(rows)-len(dropped), "evicted_files": len(dropped),
+                "pending_global": pending, "sources": sources,
+                "omitted_source_pointers": len(dropped)-len(sources),
+                "scope": {"session": session, "project": project},
+                "limit": "indexed user/assistant text; message heads capped; not all source history"}
+
     # ------------------------------------------------------------ search
     def search(self, query: str, k: int = 5, session: str = "", before: Optional[float] = None,
-               budget_s: float = BUDGET_S) -> dict:
+               budget_s: float = BUDGET_S, project: str = "") -> dict:
         """Best-matching messages: {"results": [{date, tool, session, project, role, text}], "pending": n}.
 
         before: ignore sessions that started after this time (the server passes its own start time, so the
         conversation asking is not its own top hit). A message must contain at least half of the query's
         content words (all of them for one or two), so one shared common word is not a match."""
+        self._scope(session, project)
         pending = self.sync(budget_s)
+        coverage = self._coverage(session, project, pending)
         k = max(1, min(int(k), K_MAX))
         qt = _kb.query_terms(query or "")
         if not qt:
-            return {"results": [], "pending": pending}
+            return {"results": [], "pending": pending, "coverage": coverage}
         need = len(qt) if len(qt) <= 2 else (len(qt) + 1) // 2
-        where, params = "", []
-        if session:
-            where += " AND (f.session=? OR f.session LIKE ?)"
-            params += [session, session + "%"]
+        where, params = self._scope(session, project)
         if before is not None:
             where += " AND m.ts < ?"      # message time: a resumed old transcript's new messages are the asker's too
             params.append(before)
@@ -288,7 +321,7 @@ class Sessions:
             out.append({"date": _dt.datetime.fromtimestamp(r["ts"] or 0).strftime("%Y-%m-%d %H:%M"),
                         "tool": r["tool"], "session": (r["session"] or "")[:8], "project": r["project"] or "",
                         "role": r["role"], "text": _kb.snippet(r["text"], query, EXCERPT_CHARS)})
-        return {"results": out, "pending": pending}
+        return {"results": out, "pending": pending, "coverage": coverage}
 
     def close(self) -> None:
         self.con.close()
@@ -301,8 +334,18 @@ def render(res: dict, home: Optional[Path] = None) -> str:
     for r in res["results"]:
         proj = r["project"].replace(home_s, "~", 1) if r["project"].startswith(home_s) else r["project"]
         lines.append("%s %s %s %s %s: %s" % (r["date"], r["tool"], r["session"], proj or "-", r["role"], r["text"]))
+    coverage = res.get("coverage", {})
     if not lines:
-        lines.append("no past conversation matches")
+        lines.append("no indexed conversation matches in this scope")
+    if coverage.get("evicted_files"):
+        lines.append("(%d source files evicted from the index; absence is not a full-history result)" %
+                     coverage["evicted_files"])
+        for source in coverage.get("sources", []):
+            path = source["path"]
+            path = "~" + path[len(home_s):] if path.startswith(home_s + "/") else path
+            lines.append("source pointer: %s (explicit scoped read required)" % path)
+    elif coverage.get("status") == "not_indexed":
+        lines.append("(no indexed source is known for this scope)")
     if res.get("pending"):
-        lines.append("(%d older transcripts not indexed yet; searching again reads more)" % res["pending"])
+        lines.append("(%d source files across all projects not indexed yet; searching again reads more)" % res["pending"])
     return "\n".join(lines)

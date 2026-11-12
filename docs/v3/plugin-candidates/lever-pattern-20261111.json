@@ -1,0 +1,14 @@
+{
+  "schema": "harness.plugin-candidate/v1",
+  "name": "lever-experiment-contract-pattern",
+  "kind": "pattern",
+  "rea": {
+    "ref": "docs/v3/rea/lever-20261105.json",
+    "sha256": "5c9e0c7da76579d0d1a2e5f81eb59bc2c1e76a03710177c2f5c529f17a37850b"
+  },
+  "jev": {
+    "ref": "docs/v3/jev/lever-pattern-adoption-20261111.json",
+    "sha256": "f60667ef2a2770cb472e7df0b8ea595af9e644e04534ca6f17a91ec5fced8978"
+  },
+  "admit_verdict": "adopt-pattern-only"
+}

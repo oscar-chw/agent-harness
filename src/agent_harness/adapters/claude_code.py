@@ -51,6 +51,10 @@ def state_command(ctx: Ctx) -> str:
     return _lib_cmd(ctx, "agent_harness.mcp.state print") + " 2>/dev/null; true"
 
 
+def op_command(ctx: Ctx) -> str:
+    return _lib_cmd(ctx, "agent_harness.cli _hook-op")
+
+
 def prompt_command(ctx: Ctx) -> str:
     """Per-prompt recall of relevant memories and lessons (stdout -> context only when non-empty)."""
     return _lib_cmd(ctx, "agent_harness.cli _hook-prompt")
@@ -102,6 +106,9 @@ class ClaudeCodeAdapter(Adapter):
         root = base_dir(ctx)
         claude = root / ".claude"
         project = ctx.scope == "project"
+        if project and ctx.permission_profile == "autonomous":
+            from ..installer import InstallError
+            raise InstallError("Claude auto mode requires user scope; no project-only autonomy install")
         settings = {"hooks": {
             "PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": guard_command(ctx)}]},
                            {"matcher": "Edit|Write|MultiEdit",
@@ -111,6 +118,8 @@ class ClaudeCodeAdapter(Adapter):
                 {"matcher": "startup|resume|compact", "hooks": [{"type": "command", "command": digest_command(ctx)}]},
                 # prints only when this project has a saved state file; nothing (no tokens) otherwise
                 {"matcher": "startup|resume|compact", "hooks": [{"type": "command", "command": state_command(ctx)}]},
+                {"matcher": "startup|resume|compact", "hooks": [{"type": "command", "command": op_command(ctx),
+                                                                     "timeout": 5}]},
             ],
             "UserPromptSubmit": [{"hooks": [{"type": "command", "command": prompt_command(ctx), "timeout": 5}]}],
             "PreCompact": [{"hooks": [{"type": "command", "command": "echo " + shlex.quote(PRECOMPACT_LINE)}]}],
@@ -125,6 +134,20 @@ class ClaudeCodeAdapter(Adapter):
         # Pre-approve our own server only (permissions docs: `mcp__<server>` matches all its tools).
         # Warm-up plugins (fetch, playwright) are NOT pre-approved.
         settings["permissions"] = {"allow": ["mcp__harness"]}
+        if ctx.permission_profile == "preserve":
+            from ..installer import _read_json
+            current = _read_json(claude / "settings.json").get("permissions", {})
+            if isinstance(current, dict) and "defaultMode" in current:
+                settings["permissions"]["defaultMode"] = current["defaultMode"]
+        elif ctx.permission_profile == "explicit":
+            settings["permissions"]["defaultMode"] = "default"
+        elif ctx.permission_profile == "autonomous":
+            settings["permissions"]["defaultMode"] = "auto"
+            # Native review owns execution policy; do not stack our blocking
+            # command/edit/Stop hooks on top. Keep passive capture and recall.
+            settings["hooks"].pop("PreToolUse")
+            settings["hooks"]["Stop"] = [{"hooks": [{"type": "command", "command":
+                _lib_cmd(ctx, "agent_harness.cli _hook-capture"), "timeout": 30}]}]
         # user-level only; one memory dir the harness keeps with its own. A profile can keep Claude Code's own
         # memory folder instead (claude_memory = "keep"): an owner's existing memories stay where they are and
         # are searched through kb_paths, and no absolute path is written into a settings.json shared by accounts.
@@ -140,7 +163,8 @@ class ClaudeCodeAdapter(Adapter):
             FileChange(root / "CLAUDE.md" if project else claude / "CLAUDE.md", "replace", claude_rules(ctx),
                        "agent rules (replaces the file)"),
             FileChange(claude / "settings.json", "merge-json", settings,
-                       "adds a dangerous-command guard and a run-the-checks reminder; your hooks stay"),
+                       ("native auto review and passive capture; your hooks stay" if ctx.permission_profile == "autonomous"
+                        else "adds a dangerous-command guard and a run-the-checks reminder; your hooks stay")),
             FileChange(root / ".mcp.json" if project else ctx.home / ".claude.json", "merge-json",
                        {"mcpServers": servers}, "registers the harness MCP server (" + ", ".join(servers) + ")"),
         ]

@@ -1,0 +1,570 @@
+{
+  "schema": "harness.framework-capabilities/v1",
+  "as_of": "2026-11-02",
+  "source_base_revision": "60735e2b35088c0e458e78e8a3fe3f1574c2d970",
+  "source_tree": "shared_dirty_worktree",
+  "claim_scope": "inspected_source_and_retained_reports; not release/native/device qualification",
+  "contract": "docs/v2/framework/runtime-contract.md",
+  "axis_definitions": {
+    "implemented": [
+      "implemented",
+      "partial",
+      "proposed",
+      "missing"
+    ],
+    "locally_installed": [
+      "not_checked",
+      "reported_dev2_install"
+    ],
+    "native_qualified": [
+      "not_qualified",
+      "bounded_development_pilot_reported"
+    ]
+  },
+  "rules": [
+    "Axes are independent; implemented never implies installed or native-qualified.",
+    "Retained-report evidence is not fresh worker readback.",
+    "Test source paths do not imply tests were executed; see verification.json for exact executed commands.",
+    "No status or proposal grants authority, installs a runtime, or closes a root graph gate."
+  ],
+  "capabilities": [
+    {
+      "id": "dependency-dag",
+      "capability": "Acyclic prerequisites and ready/blocked branches",
+      "implemented": {
+        "status": "implemented",
+        "evidence": [
+          "src/agent_harness/workgraph/plan.py"
+        ],
+        "test_sources": [
+          "tests/workgraph/plan.test.sh",
+          "tests/test_plan_versions.py"
+        ],
+        "boundary": "needs edges are DAG prerequisites; task hierarchy and feedback are different relations."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Do not represent retry with a prerequisite cycle."
+    },
+    {
+      "id": "control-repair",
+      "capability": "Failure-to-pending repair cycle and method feedback",
+      "implemented": {
+        "status": "implemented",
+        "evidence": [
+          "src/agent_harness/workgraph/plan.py",
+          "src/agent_harness/method_control.py",
+          "content/skills/work-loop/SKILL.md"
+        ],
+        "test_sources": [
+          "tests/test_method_control.py"
+        ],
+        "boundary": "A gate decides completion; feedback is advisory and does not enforce model compliance."
+      },
+      "locally_installed": {
+        "status": "reported_dev2_install",
+        "evidence": [
+          "handoffs/v2-increments/local-20261102.md"
+        ],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "bounded_development_pilot_reported",
+        "evidence": [
+          "handoffs/v2-increments/local-20261102.md"
+        ],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Task-specific failure classification and bounded retry acceptance remain necessary."
+    },
+    {
+      "id": "versioned-evidence",
+      "capability": "Declared input/check/output and definition binding",
+      "implemented": {
+        "status": "implemented",
+        "evidence": [
+          "src/agent_harness/workgraph/versions.py",
+          "src/agent_harness/workgraph/plan.py"
+        ],
+        "test_sources": [
+          "tests/test_plan_versions.py"
+        ],
+        "boundary": "Opt-in ## versions: v1; no automatic binding for undeclared files or runtime environment."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Root v2-completion graph is currently unversioned; bind acceptance-relevant environment via an explicit artifact."
+    },
+    {
+      "id": "same-graph-join",
+      "capability": "Join on all current required prerequisite results",
+      "implemented": {
+        "status": "implemented",
+        "evidence": [
+          "src/agent_harness/workgraph/versions.py",
+          "src/agent_harness/workgraph/plan.py"
+        ],
+        "test_sources": [
+          "tests/test_plan_versions.py"
+        ],
+        "boundary": "Parent receipts are bound by needs; integration must run its own gate."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Require explicit terminal dependencies and integration acceptance; a child report is insufficient."
+    },
+    {
+      "id": "join-invalidation",
+      "capability": "Invalidate changed dependency closure, retain unrelated work",
+      "implemented": {
+        "status": "implemented",
+        "evidence": [
+          "src/agent_harness/workgraph/versions.py",
+          "src/agent_harness/workgraph/plan.py"
+        ],
+        "test_sources": [
+          "tests/test_plan_versions.py"
+        ],
+        "boundary": "Current version inspection observes staleness; refresh persists reopening without stealing live leases."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Cross-graph invalidation and automatically discovered dependencies are absent."
+    },
+    {
+      "id": "operational-cas",
+      "capability": "Local project CAS, atomic event/projection/request replay",
+      "implemented": {
+        "status": "implemented",
+        "evidence": [
+          "src/agent_harness/operational_state.py"
+        ],
+        "test_sources": [
+          "tests/test_operational_state.py"
+        ],
+        "boundary": "One resolved project path and harness home; exact request replay is historical, not a new freshness check."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "No transaction spanning graph/source/memory files and SQLite."
+    },
+    {
+      "id": "fenced-leases",
+      "capability": "Operational expiry and fencing distinct from graph lease",
+      "implemented": {
+        "status": "implemented",
+        "evidence": [
+          "src/agent_harness/operational_state.py",
+          "src/agent_harness/workgraph/plan.py"
+        ],
+        "test_sources": [
+          "tests/test_operational_state.py",
+          "tests/test_operational_idle_recovery.py"
+        ],
+        "boundary": "Operational 1..3600s/default300; graph four-hour lease; no file-write fencing or liveness guarantee."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Check actual process/ownership before takeover; no global cross-device lock."
+    },
+    {
+      "id": "source-freshness",
+      "capability": "Revalidate linked memory and evidence before claim/renew",
+      "implemented": {
+        "status": "partial",
+        "evidence": [
+          "src/agent_harness/operational_state.py"
+        ],
+        "test_sources": [
+          "tests/test_operational_state.py",
+          "tests/test_task_control_bridge.py"
+        ],
+        "boundary": "Freshness checked separately from SQLite; checkpoint/stop/resume retain memory; put without a receipt clears it; renew does not recheck checkpoint presence."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Consumer must not clear stale dependencies through put; revalidate on sensitive use and unchanged cursors."
+    },
+    {
+      "id": "cold-recovery",
+      "capability": "Durable goal/checkpoint/next and explicit blocks",
+      "implemented": {
+        "status": "implemented",
+        "evidence": [
+          "src/agent_harness/operational_state.py",
+          "src/agent_harness/handoff.py"
+        ],
+        "test_sources": [
+          "tests/test_operational_idle_recovery.py",
+          "tests/test_task_control_bridge.py"
+        ],
+        "boundary": "Checkpoint/evidence presence/hash is reference only; unavailable state is not fresh empty state."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Rebuild operational projection from current graph gates after a partial cross-store crash."
+    },
+    {
+      "id": "file-handoff",
+      "capability": "Bounded project-local packet inspection without registry",
+      "implemented": {
+        "status": "implemented",
+        "evidence": [
+          "src/agent_harness/handoff.py"
+        ],
+        "test_sources": [
+          "tests/test_handoff_readback.py"
+        ],
+        "boundary": "<=16KiB per Markdown packet, <=64KiB aggregate, <=100 entries; hashes are data only."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "No semantic packet validator, freshness oracle, message delivery or auto-dispatch."
+    },
+    {
+      "id": "permission-hold",
+      "capability": "Branch-scoped NOT_RUN holds and independent continuation",
+      "implemented": {
+        "status": "implemented",
+        "evidence": [
+          "src/agent_harness/workgraph/plan.py",
+          "content/skills/work-loop/recovery.md"
+        ],
+        "test_sources": [
+          "tests/test_permission_recovery.py"
+        ],
+        "boundary": "Guard refusal is not gate FAIL; runner flags/resume do not clear permission hold; native authority is external."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Codex structured worker-denial parity is absent; record scoped resolution before authorized hold removal."
+    },
+    {
+      "id": "permission-posture",
+      "capability": "Explicit preference while retaining native authority",
+      "implemented": {
+        "status": "implemented",
+        "evidence": [
+          "src/agent_harness/permission_profiles.py"
+        ],
+        "test_sources": [
+          "tests/test_permission_profiles.py"
+        ],
+        "boundary": "preserve/explicit/autonomous are preferences, not universal permissions or authenticated consent."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "No permission/config changes authorized for this worker; native profile behavior needs exact client evidence."
+    },
+    {
+      "id": "child-correlation",
+      "capability": "Task-to-child/session/graph/receipt composition manifest",
+      "implemented": {
+        "status": "proposed",
+        "evidence": [
+          "docs/v2/framework/runtime-contract.md"
+        ],
+        "test_sources": [],
+        "boundary": "Design uses existing checkpoint/evidence handles; nested OperationalState values are not supported."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Implement only minimal manifest validation/projection if root needs cross-task navigation; one root graph already handles joins."
+    },
+    {
+      "id": "cross-graph-join",
+      "capability": "Automatic receipt traversal and invalidation across task graphs",
+      "implemented": {
+        "status": "missing",
+        "evidence": [
+          "src/agent_harness/workgraph/versions.py",
+          "src/agent_harness/operational_state.py"
+        ],
+        "test_sources": [],
+        "boundary": "No unified hierarchical composition transaction found in the inspected components."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Use explicit root graph joins for present cases; demonstrate unmet cases before adding a runtime."
+    },
+    {
+      "id": "ownership-metadata",
+      "capability": "Declared node write scope and worker packet responsibility",
+      "implemented": {
+        "status": "partial",
+        "evidence": [
+          "src/agent_harness/workgraph/plan.py",
+          "handoffs/v2-completion/README.md"
+        ],
+        "test_sources": [],
+        "boundary": "write_scope/ctx are advisory; workers share this checkout; self-gating test-file checks do not sandbox all writes."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Pre-dispatch overlap checks and integration review; no enforced OS per-worker write isolation."
+    },
+    {
+      "id": "worktree-coordination",
+      "capability": "Explicit common graph directory across isolated worktrees",
+      "implemented": {
+        "status": "partial",
+        "evidence": [
+          "src/agent_harness/workgraph/plan.py",
+          "docs/v1/local-operational-state.md"
+        ],
+        "test_sources": [],
+        "boundary": "PLAN_DIR can point workers to one common plan; otherwise each worktree may have its own plan; operational ledgers remain path-scoped."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Root must explicitly configure authorized shared graph and verify semantic integration, not infer coordination from git worktrees."
+    },
+    {
+      "id": "ui-grouping",
+      "capability": "Human-goal grouping with separate gate/activity/freshness views",
+      "implemented": {
+        "status": "proposed",
+        "evidence": [
+          "src/agent_harness/workgraph/plan.py",
+          "src/agent_harness/handoff.py",
+          "docs/v2/framework/runtime-contract.md"
+        ],
+        "test_sources": [],
+        "boundary": "CLI status/context/versions and files exist; native UI hierarchy and bidirectional synchronization do not follow."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Build only an advisory projection if needed; keep evidence links and UNKNOWN activity; never write acceptance through a sidebar."
+    },
+    {
+      "id": "file-first-coordination",
+      "capability": "Read at boundaries; own atomic packet; no routine chatter",
+      "implemented": {
+        "status": "partial",
+        "evidence": [
+          "handoffs/v2-completion/README.md",
+          "docs/v2/framework/runtime-contract.md",
+          "src/agent_harness/handoff.py"
+        ],
+        "test_sources": [
+          "tests/test_handoff_readback.py"
+        ],
+        "boundary": "Policy and bounded reads exist; atomic replacement is writer responsibility; not universal agent-compliance enforcement."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Preserve no-heartbeat/no-peer-activation/no-scheduled-polling task contract; a completed packet does not wake a model."
+    },
+    {
+      "id": "general-statecharts",
+      "capability": "Arbitrary communicating hierarchical concurrent statecharts",
+      "implemented": {
+        "status": "missing",
+        "evidence": [
+          "src/agent_harness/workgraph/plan.py",
+          "src/agent_harness/operational_state.py",
+          "docs/v2/second-brain-contract.md"
+        ],
+        "test_sources": [],
+        "boundary": "DAG plus feedback and leases does not implement arbitrary concurrent regions/statechart semantics."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "No demonstrated requirement beyond the reusable DAG/repair cases; no extra engine proposed."
+    },
+    {
+      "id": "native-parity",
+      "capability": "Current installed clients and authorized-device parity",
+      "implemented": {
+        "status": "partial",
+        "evidence": [
+          "handoffs/v2-increments/local-20261102.md",
+          "docs/v2/second-brain-contract.md"
+        ],
+        "test_sources": [],
+        "boundary": "Dev2 local activation/readback is reported; open clients may retain old code/skills; Air dev2 parity is NOT_VERIFIED."
+      },
+      "locally_installed": {
+        "status": "reported_dev2_install",
+        "evidence": [
+          "handoffs/v2-increments/local-20261102.md"
+        ],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Root must inspect exact installed/native/device evidence for target candidate; do not generalize old receipts."
+    },
+    {
+      "id": "measured-efficacy",
+      "capability": "Complete-task quality and total-token improvement",
+      "implemented": {
+        "status": "missing",
+        "evidence": [
+          "handoffs/v2-increments/local-20261102.md",
+          "plan/v2-completion.md"
+        ],
+        "test_sources": [],
+        "boundary": "Retained four-case development pilot is bounded; cumulative candidate R&D tokens exceed controls; no broad improvement claim."
+      },
+      "locally_installed": {
+        "status": "not_checked",
+        "evidence": [],
+        "fresh_readback_in_this_worker": false
+      },
+      "native_qualified": {
+        "status": "not_qualified",
+        "evidence": [],
+        "claim": "No broad or current-client qualification inferred from source tests."
+      },
+      "missing_or_next": "Frozen held-out/control tasks, full failed/orchestration usage and quality>=baseline AND total tokens<=baseline are required."
+    }
+  ]
+}

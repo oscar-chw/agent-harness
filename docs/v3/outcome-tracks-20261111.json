@@ -1,0 +1,205 @@
+{
+  "schema": "harness.outcome-tracks/v1",
+  "created": "2026-11-11",
+  "note": "Frozen track registry for the NEEDLE outcome table (plan v3-jev-needle). Bindings pin the verdict docs' and receipts' BYTES as of 2026-11-11; a later legitimate amendment takes a dated additive registry amendment, never a silent re-bind (the H1/H4/H6c amendment precedent). Living ledgers (plan/*.md node records) are deliberately NOT byte-bound — they append; each track's stable docs/receipts carry the evidence. Every key number below is copied from the bound verdict doc, which re-derives it from hash-bound artifacts.",
+  "tracks": [
+    {
+      "id": "h1",
+      "title": "H1 — model-free memory consolidation",
+      "plan": "plan/v3-h1-consolidation.md",
+      "hypothesis": "A model-free consolidation pass (dup merge, supersedes edges, conflict flags, reference-weighted decay) improves retrieval on the frozen 133-page corpus with zero fact loss.",
+      "criteria": "Amended 2026-11-10 pre-eval (baseline falsified the original premises): no lost fact; A/B/C/D non-regression; E holds; F not worse than baseline; hygiene invariants (MEMORY.md byte-identical; archive-never-delete; receipts complete).",
+      "key_numbers": [
+        ["master check", "26/26 pass (check_h1.py)"],
+        ["mutation controls", "5/5 both directions"],
+        ["recall@5 / precision@5 / MRR", "0.9333 / 0.2133 / 0.8185 — identical pre/post"],
+        ["exact duplicates in corpus", "0 (v0 archives nothing by construction)"]
+      ],
+      "verdict": "CONFIRMED (as amended) — value is graph hygiene + a reranker substrate, not lexical rank movement",
+      "bindings": [
+        {"path": "docs/v3/h1-eval-query-design-20261110.md", "sha256": "ca7dd41756d1fbe182c3fcc323eb96de15555ea66a09bc927d5b43ccc29a9076"},
+        {"path": ".harness-work/v3-h1-consolidation/eval-h1-20261110.json", "sha256": "63f076262d04bfef59f09523d659463cae1b045ce9228248d9439ba0709717d8"},
+        {"path": ".harness-work/v3-h1-consolidation/baseline-20261110.json", "sha256": "286a988c061474ec27541b232b0eb1120625d7ae3707b0d8a4d4ad74e273901a"},
+        {"path": ".harness-work/v3-h1-consolidation/mutation-controls-20261110.json", "sha256": "1faabf4173b55d3e0df0b4a9e1335710a9c091af60239e2b050a2cc0c5bb955a"}
+      ]
+    },
+    {
+      "id": "h2",
+      "title": "H2 — bounded offline semantic rerank over FTS5 candidates",
+      "plan": "plan/v3-h2-reranking.md",
+      "hypothesis": "A deterministic GloVe mean-pool cosine rerank of the BM25 k=10 pool improves paraphrase recall (b1) and reduces negative-control false positives (f1, f3) without regressing A/C/D/E.",
+      "criteria": "Pre-registered contract (+ amendment 1): b1 recovered to top-5; f1/f3 measurably reduced; A/C/D/E non-regression; deterministic; rerank p95 ≤ 100 ms.",
+      "key_numbers": [
+        ["recall@5 baseline → arm1 → arm2", "0.9333 → 0.6000 → 0.6667"],
+        ["b1 rank", "9 → 5 (arm1, cos 0.8875); 9 → 6 (arm2)"],
+        ["A/D classes", "3/3 → 1/3 (A), 3/3 → 0/3 (D), both arms"],
+        ["rerank p95", "0.13 ms (arm1) / 0.62 ms (arm2) vs 100 ms budget"],
+        ["controls", "3/3 both directions (shuffled weights / wrong hash / tampered artifact)"]
+      ],
+      "verdict": "DISCONFIRMED — both arms; topical similarity cannot express absence; lexical ordering carries real fact-level signal",
+      "bindings": [
+        {"path": "docs/v3/h2-reranking-verdict-20261110.md", "sha256": "82d7f7866d557c78819545100316a668cdd2a551092b11e398a8d9ba431ac66d"},
+        {"path": ".harness-work/v3-h2-reranking/eval-h2-arm1-20261110.json", "sha256": "0a46fd1c02abf4489ec226ac12932e8b26164bf05dc21edaea94b7f0952e436a"},
+        {"path": ".harness-work/v3-h2-reranking/eval-h2-arm2-20261110.json", "sha256": "0efb7792f9dd343ac028de6bf0726b64c338dcb3b4ed942518dac64f70350164"},
+        {"path": ".harness-work/v3-h2-reranking/mutation-controls-h2-20261110.json", "sha256": "5f07ef8c72cf130c8ce740eaa140053c617bf699c4ae196e1a4658d2ebb81401"}
+      ]
+    },
+    {
+      "id": "h3a",
+      "title": "H3a — bounded semantic boost under lexical primacy",
+      "plan": "plan/v3-h3-hybrid.md",
+      "hypothesis": "A bounded (BAND δ=0.10) or additive (ADD w=0.15) semantic boost over lexical scores recovers b1 while holding A/C/D/E.",
+      "criteria": "Pre-registered contract + amendment 1: b1 recovered; A/C/D/E non-regression; F not worse; determinism; latency budget.",
+      "key_numbers": [
+        ["BAND(0.10)", "b1 rank 5 but A 2/3, D 0/3"],
+        ["ADD(0.15)", "A/C/D/E held, F no worse, but b1 rank 10 (baseline 9)"],
+        ["dominance trilemma", "no δ lifts b1 without breaking A/D; ADD needs w > 6.3 (semantic-dominant; D 2/3 at w = 6.5)"],
+        ["pre-registered predictions", "matched observed outcomes exactly (b1 5, a1 6, d1 10)"]
+      ],
+      "verdict": "DISCONFIRMED — the pure-rerank line closes: semantics can reorder the frozen lexical candidate set only by overriding the lexical evidence that makes the baseline good",
+      "bindings": [
+        {"path": "docs/v3/h3-hybrid-verdict-20261110.md", "sha256": "0748dd067dbe346bf6a3513051457fa5c35634499fadbd9a64067fdcb874982a"},
+        {"path": ".harness-work/v3-h3-hybrid/eval-h3-20261110.json", "sha256": "18d4fe0959e543f44925c26ec906484b17f655d67b72e65f426428614f5ba2c8"},
+        {"path": ".harness-work/v3-h3-hybrid/mutation-controls-h3-20261110.json", "sha256": "319787aa8ab49f978c894765d4c3ce8cd2e5bc1f362cb3034ce470d927075f96"}
+      ]
+    },
+    {
+      "id": "h3b",
+      "title": "H3b — lexical-evidence honesty rule",
+      "plan": "plan/v3-h3-hybrid.md",
+      "hypothesis": "A lexical-evidence rule (no query content-bigram in any candidate → honest miss) suppresses negative-control false positives without false negatives.",
+      "criteria": "Pre-registered: suppress f1/f2/f3; zero A–E false negatives. Amendment 1 (pre-registered after L's failure, before any L2 run): L2 = L ∧ (best candidate content-token coverage < 1.0).",
+      "key_numbers": [
+        ["rule L as specified", "DISCONFIRMED — false negatives b1, b3, e1"],
+        ["rule L2", "f1+f3 suppressed, f2 clean, zero false negatives, zero A–E suppression"],
+        ["separator", "structural: best-candidate coverage 1.00 (paraphrases) vs ≤ 0.60 (traps)"],
+        ["controls", "3/3 both directions (receipt 319787aa…)"]
+      ],
+      "verdict": "SPLIT — L DISCONFIRMED as specified; L2 CONFIRMED (single authorized refinement, validated once on the frozen 18)",
+      "bindings": [
+        {"path": "docs/v3/h3-hybrid-verdict-20261110.md", "sha256": "0748dd067dbe346bf6a3513051457fa5c35634499fadbd9a64067fdcb874982a"},
+        {"path": ".harness-work/v3-h3-hybrid/eval-h3-20261110.json", "sha256": "18d4fe0959e543f44925c26ec906484b17f655d67b72e65f426428614f5ba2c8"},
+        {"path": ".harness-work/v3-h3-hybrid/eval-h3-ruleL-20261110.json", "sha256": "3b11a55ed9041317499a085e313e7729b57f8d2fb1daad93536709fe1ae48245"},
+        {"path": ".harness-work/v3-h3-hybrid/mutation-controls-h3-20261110.json", "sha256": "319787aa8ab49f978c894765d4c3ce8cd2e5bc1f362cb3034ce470d927075f96"}
+      ]
+    },
+    {
+      "id": "h4",
+      "title": "H4 — deterministic dreaming control loop (v0)",
+      "plan": "plan/v3-h4-dreaming.md",
+      "hypothesis": "A model-free trigger → Light → REM → gated Deep loop promotes H1's consolidation candidates at high precision without touching retrieval.",
+      "criteria": "Pre-registered DC1–DC5: orphan-link precision ≥ 0.80 and ≥ apply-all + 0.20; ≥ 15 orphans integrated; edge precision/recall ≥ 0.75; no invariant violation; retrieval non-regression.",
+      "key_numbers": [
+        ["DC1 orphan-link precision", "0.6071 (apply-all 0.4940, +0.113) — FIRES"],
+        ["DC3 edge precision / recall", "0.3636 / 1.0 (apply-all 0.3077) — FIRES"],
+        ["DC2 / DC4 / DC5", "26 orphans integrated; invariants held; 18/18 non-regressed — all YES"],
+        ["integrity", "15/15 checks; controls 5/5 both directions"]
+      ],
+      "verdict": "DISCONFIRMED (v0 as specified) — the loop is safe but not selective; agreement-blindness is the measured boundary; infrastructure stays in the tree behind its gates",
+      "bindings": [
+        {"path": "docs/v3/h4-dreaming-verdict-20261110.md", "sha256": "91600906ecc376fd0e8013bcab6241077ab0b0a49e6591b8aa2811824378727d"},
+        {"path": ".harness-work/v3-h4-dreaming/eval-h4-20261110.json", "sha256": "8ad71f1ffd2e03c055d1d7bf9de39b68ae716a951d547f10aeaff41adde8c07c"},
+        {"path": ".harness-work/v3-h4-dreaming/mutation-controls-h4-20261110.json", "sha256": "795919d4c8b658436b679f9fd05b660f10971b2a818feda156da19fc707f1ffd"}
+      ]
+    },
+    {
+      "id": "h5",
+      "title": "H5 — certified unlearning with tombstone ledger",
+      "plan": "plan/v3-h5-unlearning.md",
+      "hypothesis": "A designated page becomes provably unretrievable (bytes, FTS5 raw tables, retrieval surface, consolidation arms) under an auditable hash-chained tombstone ledger, with a defined relearn path and no other fact lost.",
+      "criteria": "Pre-registered D1–D6: no admissible probe retrievable post-unlearn; no unrelated query regresses; ledger leaks no content; consolidation untouched; controls fail when they must; target separable.",
+      "key_numbers": [
+        ["D1–D6", "none triggered"],
+        ["probes", "8/8 zero live occurrences; kb_search('fatqat') zero hits"],
+        ["non-target preservation", "17/17 queries exactly unchanged (ranks AND hit counts)"],
+        ["erasure levels", "L1 + L2 achieved; L3 not claimed"],
+        ["checks / controls", "42/42; 4/4 both directions"]
+      ],
+      "verdict": "CONFIRMED — within the pre-registered boundary (frozen corpus, easy-by-design target, one AUBench channel)",
+      "bindings": [
+        {"path": "docs/v3/h5-unlearning-verdict-20261110.md", "sha256": "8bab09925c7d2810c81891f34b5a7e00cadd82ab5fcb084bf29b9a8d257bbf79"},
+        {"path": ".harness-work/v3-h5-unlearning/eval-h5-20261110.json", "sha256": "bd627530a6437cd92770709a2886e960a17fbd95c570f72329a8e6ddc34745de"},
+        {"path": ".harness-work/v3-h5-unlearning/certification-h5-20261110.json", "sha256": "d16abf6cf45aba78c45114cfdb0e1a778ea2525955b4a21bc61d93d2a26038be"},
+        {"path": ".harness-work/v3-h5-unlearning/mutation-controls-h5-20261110.json", "sha256": "45b8f9310442510bbb47b32f9c3589e67f48ee83f39e16a94ced789c8ed1eb11"}
+      ]
+    },
+    {
+      "id": "h6a",
+      "title": "H6a — L2 production candidacy (fresh queries + integration)",
+      "plan": "plan/v3-h6a-l2-candidacy.md",
+      "hypothesis": "The frozen L2 rule validates on fresh queries within a pre-registered envelope and can ship as an opt-in honesty layer.",
+      "criteria": "Six pre-registered legs: N all suppressed; P/V zero false negatives; X matches expectations; stability on the original 18; determinism; latency budget; plus flag-off byte-identity for the integration.",
+      "key_numbers": [
+        ["legs", "6/6 green — fresh 15 all pass; stability 18/18 exact"],
+        ["stage p95", "0.040 ms vs 100 ms budget"],
+        ["controls", "3/3 both directions (flag_default / embedded_rule_tampering / tampered_artifacts)"],
+        ["integration", "HARNESS_KB_HONESTY in kb.py, default OFF, flag-off byte-identical; 97 tests green"],
+        ["envelope", "x1 thin-worded false-negative hole fires exactly as pre-registered"]
+      ],
+      "verdict": "CONFIRMED — within the documented envelope; ships opt-in, default OFF",
+      "bindings": [
+        {"path": "docs/v3/h6a-l2-candidacy-verdict-20261110.md", "sha256": "da41bdc095ebcf77ac423b181293956d2f5bbc0cc754b130299941fc18ae2533"},
+        {"path": ".harness-work/v3-h6a-l2-candidacy/eval-h6a-20261110.json", "sha256": "0b8d1555460dd041384cb5454dca1b9aa529a44c55345637465b4874f41f9086"},
+        {"path": ".harness-work/v3-h6a-l2-candidacy/mutation-controls-h6a-20261110.json", "sha256": "e1d236bbf5c76b6151b447ab0fc52e03851aec5a4aa85b96f72dbe8d145c48a5"}
+      ]
+    },
+    {
+      "id": "h6b",
+      "title": "H6b — backflow guard at write/admission time",
+      "plan": "plan/v3-h6b-backflow-guard.md",
+      "hypothesis": "A write-time admission guard derived from H5's tombstone ledger prevents silent re-admission of a certified-forgotten fact at every repo-owned write seam while unrelated content flows.",
+      "criteria": "Pre-registered D1–D7 disconfirmation criteria plus E1–E7 probes: verbatim / near-verbatim / unique-literal paraphrase refused; zero blocking false positives over the corpus; relearn re-admits; corrupt ledger fails closed.",
+      "key_numbers": [
+        ["probes", "E1–E3, E6, E7 refused; E5 post-relearn ADMITTED; P6 untouched"],
+        ["false positives", "0 blocking over 133 candidates (L4 demoted to advisory, pre-registered rule)"],
+        ["guard cost", "7.7 ms per admission check (133-doc reference)"],
+        ["tests / controls", "24 new + 186 existing green; 3/3 controls both directions"]
+      ],
+      "verdict": "CONFIRMED — within the pre-registered boundary (repo-owned seams, lexical not semantic)",
+      "bindings": [
+        {"path": "docs/v3/h6b-backflow-guard-verdict-20261110.md", "sha256": "82a508535d6f0fddb76cc5bd5b7f1c92809a6e3c7f16a8b46f6f3fc1ecae0c7f"},
+        {"path": ".harness-work/v3-h6b-backflow-guard/eval-h6b-20261110.json", "sha256": "8d72e6f87f1a89c410fe7759ff682da0eeb1ef976ed26e4438bbe148d5cfde48"},
+        {"path": ".harness-work/v3-h6b-backflow-guard/mutation-controls-h6b-20261110.json", "sha256": "1e47304b2e6bf794149277829191178dff78a31a4098c8433865fc175b5f387d"},
+        {"path": ".harness-work/v3-h6b-backflow-guard/admission-survey-h6b-20261110.json", "sha256": "4c7a1da2d3e10de7744192db32b0f3ccde55801871137de067d9df3d880405e7"}
+      ]
+    },
+    {
+      "id": "h6c",
+      "title": "H6c — dreaming v1 (literal-local windows + stance gates + idf recalibration)",
+      "plan": "plan/v3-h6c-dreaming-v1.md",
+      "hypothesis": "v1 scoring (±8-token idf-weighted windows, two-sided stance gates, BM25 idf + log authority) lifts the v0 dreaming arms past the pre-registered bars.",
+      "criteria": "Pre-registered DC1–DC6: orphan P ≥ 0.80 and ≥ v0 + 0.10; orphan recall ≥ 0.50; edge P/R ≥ 0.75; invariants; retrieval non-regression; dormancy clause for the edge ceiling band.",
+      "key_numbers": [
+        ["DC1 orphan P", "0.6034 (v0 0.6071) — FIRES"],
+        ["edge arm", "P 0.80 / R 1.0 (v0 0.3636 / 1.0) — ceiling REFUTED for edges"],
+        ["orphan ceiling", "P ≥ 0.80 only at recall ≤ 0.4878 (v0 envelope); v1 envelope worse (max 0.3171)"],
+        ["integrity / controls", "15/15; 5/5 both directions"]
+      ],
+      "verdict": "DISCONFIRMED overall — split outcome: edge-arm fixes work; the model-free orphan ceiling (≈ 0.60 at high recall) holds; the line goes dormant until a model-based stance check is authorized",
+      "bindings": [
+        {"path": "docs/v3/h6c-dreaming-v1-verdict-20261110.md", "sha256": "047d10cdceae77c9336a63dfbfeee99ab0591ca3db1d2f69f36fca26ac8b2f2c"},
+        {"path": ".harness-work/v3-h6c-dreaming-v1/eval-h6c-20261110.json", "sha256": "b6efb83a03867184ee7f212305b9d9ea43097a43d7b579b9465fff92718d93b2"},
+        {"path": ".harness-work/v3-h6c-dreaming-v1/mutation-controls-h6c-20261110.json", "sha256": "db426e3fb49e6d10232e96979e001bccf19e30c4b4f99b22257b649d0a8809c4"},
+        {"path": ".harness-work/v3-h6c-dreaming-v1/dominance-analysis-20261110.json", "sha256": "a561f305ed539a3c8ad7af914a7e7818b7a461d0b7c18099d8f667e0413707ee"}
+      ]
+    },
+    {
+      "id": "v2-node4",
+      "title": "v2 node-4 campaign — source-to-claim retrieval / correction / handoff qualification",
+      "plan": "plan/v2-completion.md",
+      "hypothesis": "Source-to-claim retrieval, correction and cross-session handoff can be qualified on real local content against the original 16-case acceptance input.",
+      "criteria": "Original 16-case gate plus strict matched whole-usage comparison: per-case quality/scope/correction non-regression and complete aggregate token accounting.",
+      "key_numbers": [
+        ["node state", "OPEN — the 16-case gate remains exit 1 (4 partial cases; whole matched usage UNKNOWN)"],
+        ["measured comparison", "naive overlap-window arm rejected: 38,970 vs 32,162 native tokens (+21.17%)"],
+        ["handoff trial", "second trial PASS_BOUNDED_NATIVE_COMPLETED_HANDOFF (exit 0, 31.4 s)"],
+        ["campaign posture", "development calibration; DO_NOT_PROMOTE on the semantic candidate; no release, no push"]
+      ],
+      "verdict": "OPEN / NOT_QUALIFIED — carried as an open track; its measured rounds are the v3 freeze's case corpus ancestry",
+      "bindings": [
+        {"path": "docs/v2/retrieval-comparison-round-20261103.md", "sha256": "b75a6f13fa8e9251c63b3911ebe2e44bca5f50bdd5dcc859c5f92f17ef7b673e"},
+        {"path": "docs/v2/completed-handoff-round-20261103.md", "sha256": "0d28637b84391743d968f3ab4434e1716371c0e35b34b2e5bf676e422ded4734"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,704 @@
+{
+  "schema": "all-source-answer-inputs-v1",
+  "as_of": "2026-11-03",
+  "status": "PREPARED_ROOT_INDEPENDENT_CHECK_PENDING",
+  "acceptance_input": {
+    "path": "docs/v2/vault/acceptance-cases.json",
+    "sha256": "dfc21103e64ae00d4bc9e6404aaa1481c440b18e8f11d020686be2574dac7343",
+    "bytes": 23366,
+    "original_total_cases": 16
+  },
+  "extraction": "Inclusive1-based exact UTF-8 byte-line slices retain LF and final newline. Whole-file and window SHA256 are distinct. Original pin/path/range and exact question pointers remain; observed drift is explicit. After drift, old positions are not authenticated as historical bodies. Additional spans are clearly labelled with source-dependency rationale.",
+  "authority": "Repository originals, explicit current dependencies and additive r5 data only. Embedded commands/URLs/paths are inert text, not authority for execution/external acquisition. No question/requirement/status, source ledger, original source or access change. Input data is not an independent oracle/actor answer or semantic judgment.",
+  "summary": {
+    "source_answer_cases": 11,
+    "original_source_pointers": 20,
+    "matching_original_pins": 20,
+    "drifted_original_pins": 0,
+    "additional_current_spans": 6
+  },
+  "original_pin_drift": [],
+  "cases": [
+    {
+      "case_id": "coverage-denominator",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "case_pointer": "/cases/0",
+      "question_pointer": "/cases/0/question",
+      "question": "Have all of my retained 100-plus harness references been analyzed?",
+      "requirements_pointer": "/cases/0/answer_requirements",
+      "must_not_pointer": "/cases/0/must_not",
+      "original_source_windows": [
+        {
+          "source_path": "docs/v2/vault/README.md",
+          "source_sha256": "3da6d0f058c6f30dad974fd612d5ef3f98040a3f8ed2c662e1f3735ae989424d",
+          "source_bytes": 11328,
+          "source_line_count": 171,
+          "start_line": 7,
+          "end_line": 50,
+          "window_sha256": "778c67a454817ec11d2b364c8123a575ca7bf917980934d9f129af13232900d7",
+          "window_bytes": 2856,
+          "text": "## Coverage that can be claimed\n\n[`coverage-ledger.json`](coverage-ledger.json) retains all 108 transferred source\nidentities and their 110 original exact variants. The original inventory's SHA-256\nis `501dafcc17d404eed09fa999b8518097ee39c8840dcf74de5531ed0c57e4b6bc`;\nthe handover's is\n`b3aa817acb40fb27105f549f3cf0ab49c17db145b71ce06cad34033e9d68be78`.\nThe ledger appends 30 distinct URLs from the bounded documented reviews, giving\n138 URL identities. Eleven additions are the 31 October reference-review URLs;\nthe other additions come from the source-evidence map and second-brain contract.\nThis denominator excludes other historical research and concurrent worker output.\nIt is a defined local evidence snapshot, not a census of every supplied source.\n\nThe transferred rows' reconciled **reported** depths are: 98 uninspected, seven\nsnippet only, one title snippet, one metadata only, and one complete post text.\nThe last is the Alex Lavaee post; attached video remains untranscribed. The\nmetadata-only YouTube record retains a reported fetch failure and root-reported\ntitle/chapters, not a transcript read. A prior pointer alone does not count as\nreading. All 108 original `incoming_read_status=UNREAD_UNVERIFIED` fields remain\nunchanged as historical transfer fields. See the input-pinned observations for\neach reconciliation. This worker acquired/read **zero primary web sources**.\n\nAcross the 138 identities, reported depths are 98 uninspected, eight snippets,\none title snippet, one metadata-only, one caption/frame, four abstracts, 20\nselected-section reads, three complete post texts, one complete article text and\none complete idea file. “Complete” refers to that text artifact, not its media,\ncomments, linked projects, reproducibility or truth. Current access and freshness\nremain `NOT_ATTEMPTED` / `NOT_REVALIDATED` even when an earlier report read it.\n\nThe 28 October checkpoint reports 15 failed fetches, 13 prior matches, three\noverlapping, and 83 with neither. It lacks a per-item attempt map. Keep this\naggregate intact; do not label 15 arbitrarily chosen rows inaccessible or the\nother 83 read. Named leads RSIHub, MemPalace and the Gulli book lack resolved\nidentity/read-depth evidence in these selected inputs and stay outside URL totals.\nCross-project items 19, 20 and 104 remain retained leads with no harness adoption.\n\nThree claim checks on the Linux Foundation announcement are retained as\n**historical reported** supports/contradicts/does-not-support relations from\n[`source-check-workflow.md`](../../v1/source-check-workflow.md). They are not new\nprimary-source verification. The map's implementation counterparts are existing\ncapabilities, not proof that a source caused their adoption. No complete\nsource → claim → adoption → implementation → evaluation join is established.\n\n## Ledger semantics and correction\n",
+          "original_pointer": "/cases/0/supporting_sources/0",
+          "original_pin": {
+            "path": "docs/v2/vault/README.md",
+            "sha256": "3da6d0f058c6f30dad974fd612d5ef3f98040a3f8ed2c662e1f3735ae989424d",
+            "start_line": 7,
+            "end_line": 50
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        },
+        {
+          "source_path": "docs/v2/source-coverage-20261102.md",
+          "source_sha256": "297af857b7e23856af8f030de269534f34ce39891c82fe8f3caff081d79be9c8",
+          "source_bytes": 7438,
+          "source_line_count": 53,
+          "start_line": 7,
+          "end_line": 15,
+          "window_sha256": "27ee1da606b23154e6c98bc0d0e0c4d5b3e86a524852ad56ebcd1cba1dcf4e2e",
+          "window_bytes": 1664,
+          "text": "## Denominator and method\n\nInspected the retained `agentic-os/plan/harness-v05/dot-link-intake-20261028/{inventory.json,HANDOVER.md}`, `docs/v2/knowledge-foundation-audit-20261031.md`, `docs/v2/reference-review-20261031.md`, and `docs/v11/STATUS.md`. Reconciled the saved JSON inventory structurally and compared public URLs in the supplied reference review against its canonical URLs locally. No URLs were fetched and no private transcript stores were read.\n\nThe intake is schema 1: 108 `items`, 110 `exact_variants`, with classification counts U=95, E=5, R=5, M=2, Q=1. All 108 rows have `incoming_read_status=UNREAD_UNVERIFIED`; triage is `NEEDS_SOURCE_READ`=92, `PRIOR_RECORD_FOUND_RECONCILE_READ_DEPTH`=13, and `CROSS_PROJECT_RETAINED`=3. The 13 prior pointers are distributed as follows: items 15 and 16 point to two prior research files; items 64, 65, 66, 70–77 (11 items) point to `docs/v1/source-evidence-graph.md`. Those are pointers/mentions, not source reads.\n\nThe intake handover says its 108 rows and 110 variants reconcile, and that its source search exhausted returned cursors. This is the handover’s bounded denominator, not every source across conversations. The v1.1 status checkpoint separately reports 15 individual link attempts in three batches, all with failed access; 13 prior-reference matches, three overlapping; and 83 candidates with neither an attempt nor a prior-reference match. Those are checkpoint aggregates, not item-level current states. The inspected status does not map the 15 attempts to item IDs. Failed access is not a read; untouched sources are not known inaccessible.\n\n## Additional public URLs in supplied context\n",
+          "original_pointer": "/cases/0/supporting_sources/1",
+          "original_pin": {
+            "path": "docs/v2/source-coverage-20261102.md",
+            "sha256": "297af857b7e23856af8f030de269534f34ce39891c82fe8f3caff081d79be9c8",
+            "start_line": 7,
+            "end_line": 15
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        }
+      ],
+      "additional_current_spans": []
+    },
+    {
+      "case_id": "access-aggregate",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "case_pointer": "/cases/1",
+      "question_pointer": "/cases/1/question",
+      "question": "Which exact fifteen inventory items were inaccessible?",
+      "requirements_pointer": "/cases/1/answer_requirements",
+      "must_not_pointer": "/cases/1/must_not",
+      "original_source_windows": [
+        {
+          "source_path": "docs/v11/STATUS.md",
+          "source_sha256": "ad5edf08265a309c5c9b2f377062e287ab84c1755c2d33cb8cfae8759bed3764",
+          "source_bytes": 7948,
+          "source_line_count": 90,
+          "start_line": 74,
+          "end_line": 75,
+          "window_sha256": "6bb2dc04d59d806c4245bc56e807960be6f52c7695bab82738829cdab830f26d",
+          "window_bytes": 705,
+          "text": "| All-link content research | All 108 candidates/110 variants retained. Fifteen individual links attempted in three bounded Luna-low batches; access failed, so no new full content was read. Thirteen items have prior-reference matches, three overlapping attempts; 83 have neither an attempt nor a prior-reference match. Untouched items are NOT_RUN, not known inaccessible. A Terra/medium synthesis used existing evidence only. Further broad intake is suspended for this closure slice. |\n| Other devices / Windows scheduler | Registry/core code is portable; native scheduler implementation/readback is macOS only. No all-device rollout, Windows scheduling or logged-out/asleep daily execution is claimed. |\n",
+          "original_pointer": "/cases/1/supporting_sources/0",
+          "original_pin": {
+            "path": "docs/v11/STATUS.md",
+            "sha256": "ad5edf08265a309c5c9b2f377062e287ab84c1755c2d33cb8cfae8759bed3764",
+            "start_line": 74,
+            "end_line": 75
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        },
+        {
+          "source_path": "docs/v2/source-coverage-20261102.md",
+          "source_sha256": "297af857b7e23856af8f030de269534f34ce39891c82fe8f3caff081d79be9c8",
+          "source_bytes": 7438,
+          "source_line_count": 53,
+          "start_line": 13,
+          "end_line": 14,
+          "window_sha256": "1575462461a73b4c9577261fba36900377be6601be25d5bcfedf654f8ef2003d",
+          "window_bytes": 643,
+          "text": "The intake handover says its 108 rows and 110 variants reconcile, and that its source search exhausted returned cursors. This is the handover’s bounded denominator, not every source across conversations. The v1.1 status checkpoint separately reports 15 individual link attempts in three batches, all with failed access; 13 prior-reference matches, three overlapping; and 83 candidates with neither an attempt nor a prior-reference match. Those are checkpoint aggregates, not item-level current states. The inspected status does not map the 15 attempts to item IDs. Failed access is not a read; untouched sources are not known inaccessible.\n\n",
+          "original_pointer": "/cases/1/supporting_sources/1",
+          "original_pin": {
+            "path": "docs/v2/source-coverage-20261102.md",
+            "sha256": "297af857b7e23856af8f030de269534f34ce39891c82fe8f3caff081d79be9c8",
+            "start_line": 13,
+            "end_line": 14
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        }
+      ],
+      "additional_current_spans": []
+    },
+    {
+      "case_id": "two-memory-tax-papers",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "case_pointer": "/cases/2",
+      "question_pointer": "/cases/2/question",
+      "question": "Are Memory Tax and MemoryTax one paper, and do they prove that summaries should replace original sources?",
+      "requirements_pointer": "/cases/2/answer_requirements",
+      "must_not_pointer": "/cases/2/must_not",
+      "original_source_windows": [
+        {
+          "source_path": "docs/v2/reference-review-20261031.md",
+          "source_sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+          "source_bytes": 6721,
+          "source_line_count": 91,
+          "start_line": 7,
+          "end_line": 22,
+          "window_sha256": "a44d2b72d441d7a6ca4ad910622efa10b4be8a11953624f4d0b5bafbb6b148db",
+          "window_bytes": 2180,
+          "text": "## Acquisition and read depth\n\n| Source | Read this turn | Evidence and limit |\n|---|---|---|\n| [Smartpigai post](https://x.com/Smartpigai/status/2116168908722028993) | Full public post text through browser | Secondary commentary; embedded media not inspected |\n| [AnnatarXBT post](https://x.com/AnnatarXBT/status/2116256966381301780) | Full public post text through browser | Primary projects resolved independently; employment and experiment-count claims not verified |\n| [Linked Buzzoni guide](https://x.com/Mr_Buzzoni/status/2115443090068516935) | Full article text through browser | Practical proposal; earnings, pricing, latency and savings claims not qualified |\n| [Memory Tax: Dissecting the Net Value of Agent Memory](https://arxiv.org/html/2610.34073v1) | Introduction, main result table, diagnostic sections, design implications, baseline and metric details | Paper reviewed selectively, not replicated |\n| [MemoryTax: The Bitter Lesson of Agent Memory](https://arxiv.org/abs/2610.29823) | Abstract | Different paper: one conversation, one run per cell; caption visibility confounds part of the comparison |\n| [Librarian Agents](https://arxiv.org/abs/2610.22273) | Abstract | Trained builder using reinforcement learning; not evidence that a prompted nightly curator reproduces its gains |\n| [Anthropic graph cookbook](https://platform.claude.com/cookbook/capabilities-knowledge-graph-guide) | Setup, extraction overview, query example, evaluation and scaling sections | API example, not an installed subscription-compatible integration |\n| [Karpathy autoresearch](https://github.com/karpathy/autoresearch) and [program.md](https://raw.githubusercontent.com/karpathy/autoresearch/master/program.md) | README mechanism and experiment instructions | Pattern reference; no GPU experiment run |\n| [Karpathy llm-wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) | Complete idea file, excluding comment-thread claims | Method proposal, not measured harness efficacy |\n| [TypeSafe System One](https://docs.typesafe.ai/api/system-one) | API request/response and authorization schema | Identifies Jev; no account, install or API invocation |\n\n## Findings\n",
+          "original_pointer": "/cases/2/supporting_sources/0",
+          "original_pin": {
+            "path": "docs/v2/reference-review-20261031.md",
+            "sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+            "start_line": 7,
+            "end_line": 22
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        },
+        {
+          "source_path": "docs/v2/reference-review-20261031.md",
+          "source_sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+          "source_bytes": 6721,
+          "source_line_count": 91,
+          "start_line": 22,
+          "end_line": 55,
+          "window_sha256": "b31aedef28d4c7d1d1a9628a23225da3c6d3288b91f08f7c8df50075a1f7b93a",
+          "window_bytes": 1886,
+          "text": "## Findings\n\nThe broader Memory Tax paper compares eleven memory systems with a substantial\nraw-history retrieval baseline: BM25 plus dense search and reranking, optionally\ntwo rounds. Its diagnosis distinguishes information loss, retrieval difficulty\nand reader/writer model changes. Source recovery alongside derived memory is a\nuseful design lead. This does not establish our local system's performance or\nprove structured memory universally inferior. See its main table and sections\n4, 6 and A.2 at the linked paper.\n\nThe smaller MemoryTax paper is a separate study, not a replication of that\neleven-system comparison. Its abstract explicitly discloses narrow sampling and\nunequal photo-caption availability. Keep those limits attached to its headline.\n\nThe cookbook demonstrates extraction, entity resolution and graph-backed\nanswers. Its relation scorer ignores predicate wording; use that as a warning\nagainst treating entity connectivity as relationship correctness. It requires an\nAnthropic API key. Reuse methodology without assuming the example runs through\nClaude Max authentication.\n\nAutoresearch separates an editable training file from fixed evaluation, uses a\nfixed experiment duration and keeps a results ledger. Transfer the experimental\ndiscipline, not its unbounded loop or permission-disabling recommendation.\n\nThe llm-wiki idea preserves original sources and maintains a linked derived wiki\nwith an index and chronological log. It offers a useful human-readable view;\nthe source itself calls the tooling optional and domain-dependent.\n\nJev is now concretely identified: TypeSafe documents a remote decision endpoint\nwith named questions, typed answers, effective model and usage fields. A typed\nresponse is not evidence of calibrated routing quality, local inference, privacy\nequivalence or net token savings.\n\n## Architecture decisions — proposed, not deployed\n",
+          "original_pointer": "/cases/2/supporting_sources/1",
+          "original_pin": {
+            "path": "docs/v2/reference-review-20261031.md",
+            "sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+            "start_line": 22,
+            "end_line": 55
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        }
+      ],
+      "additional_current_spans": []
+    },
+    {
+      "case_id": "raw-rag-transfer",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "case_pointer": "/cases/3",
+      "question_pointer": "/cases/3/question",
+      "question": "Can the RAW-RAG results certify that our local engineering assistant is better?",
+      "requirements_pointer": "/cases/3/answer_requirements",
+      "must_not_pointer": "/cases/3/must_not",
+      "original_source_windows": [
+        {
+          "source_path": "docs/v1/source-evidence-graph.md",
+          "source_sha256": "92124d3ceedf2a9f0e3ad3c0cbff06e4390aa6d2e2f51bd7203d576559101ea3",
+          "source_bytes": 10907,
+          "source_line_count": 27,
+          "start_line": 11,
+          "end_line": 12,
+          "window_sha256": "9197b6408fd6a50b387316b5618c3a4d182d4a3e795b4da3a18d4c7808d91773",
+          "window_bytes": 2924,
+          "text": "| [Bao et al., *Is Complex Agentic Memory Always Needed?*, v1](https://arxiv.org/html/2610.30755v1) and [authors' implementation README](https://github.com/Litmeb/RAW-RAG); selected primary method/limitations read. The [X lead](https://x.com/omarsar0/status/2113635562578178147) was only a partial indexed snippet; its full post and attachments were not read. | Summaries and extracted memories can omit a relation, temporal qualifier, or dependency path needed for a later answer. | Raw-RAG keeps time-ordered conversation evidence, retrieves overlapping raw windows, reranks, then gives selected source text to a reader. The paper reports strong results on its offline conversation-QA settings, while explicitly limiting claims about interactive, multimodal, operational, privacy, and deletion behavior. | `vault_sources.py` supplies retained source receipts; `mcp/kb.py` and `vault_retrieval.py` provide current lexical/section retrieval. A raw-evidence baseline would be a **derived comparison arm**, not a new task or authority store. `project_memory.py` and `operational_state.py` retain revision, withdrawal, and lease rules. | On an authorized, frozen export only, compare current retrieval against raw-window retrieval with identical questions, reader, evidence budget, and source visibility. Fail on unsupported answers, missed temporal corrections, inaccessible originals, or withdrawal leaks; report support recall, answer quality, latency, storage, and all index/retrieval/reader tokens. No prohibited raw-session reads or default dense dependency. |\n| [TextFold README](https://github.com/chenxiachan/textfold/blob/main/README.md) and [format document](https://github.com/chenxiachan/textfold/blob/main/docs/format.md); selected upstream pages read, **un-pinned main**, no install/runtime audit. The [X lead](https://x.com/GitHub_Daily/status/2113993969269190674) was an indexed snippet; full post and attachments were not read. | A compact view of a long document or agent reply can hide a condition needed for a decision. | Reversible levels let a reader expand from a map/gist to the original. The document format distinguishes source metadata and generated levels; its agent-reply fold is a display operation over existing text. These are presentation ideas, not proof of zero total cost in this harness. | `context_packet.py` already bounds emitted context; `vault_sources.py` preserves original spans. A fold would be an **optional view** over those receipts, never the canonical source, task ledger, or grader. No TextFold plugin is installed. | Freeze documents with a required condition late in the text and a changed-source negative control. Compare direct source view against optional fold under the same budget: exact condition recall, citation to original spans, reversible expansion, stale-view refusal, total tokens, latency, and maintenance. Do not enable by default without a measured gain. |\n",
+          "original_pointer": "/cases/3/supporting_sources/0",
+          "original_pin": {
+            "path": "docs/v1/source-evidence-graph.md",
+            "sha256": "92124d3ceedf2a9f0e3ad3c0cbff06e4390aa6d2e2f51bd7203d576559101ea3",
+            "start_line": 11,
+            "end_line": 12
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        },
+        {
+          "source_path": "docs/v2/second-brain-contract.md",
+          "source_sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+          "source_bytes": 15681,
+          "source_line_count": 235,
+          "start_line": 176,
+          "end_line": 191,
+          "window_sha256": "afb3a8cba192046c932c4179b07b3d89ac222a921731ecb6dfd9935fbeb5d4aa",
+          "window_bytes": 1135,
+          "text": "Fresh primary-source review, 2 November 2026:\n[RAW-RAG](https://arxiv.org/html/2610.30755v1), method section3 and limitations6.1,\npreserves source windows and uses dense retrieval plus cross-encoder reranking.\nIt reports first place in six of seven compared benchmark/model settings, and\nexplicitly limits its evidence to offline conversational tasks. It does not\nestablish our SWE/dev-ops performance or an operational state/permission system.\n[Memory Tax](https://arxiv.org/html/2610.34073v1), section6, tests retrieving\noriginal history alongside transformed memory and jointly reranking; this\nsupports a source-recovery path, not a universal requirement for our own graph.\n[Memory portability](https://arxiv.org/abs/2609.05339), abstract only reviewed,\nreports writer/model and mixed-embedding migration problems on48synthetic\nhistories with two small open models. Generalization remains unproven.\n\nCompare current retrieval, improved raw-source RAG, and that RAG plus our derived\nviews on the same frozen cases and reader. Include exact/paraphrased recall,\nmulti-source decisions, corrections, contradictory sources, no evidence,\n",
+          "original_pointer": "/cases/3/supporting_sources/1",
+          "original_pin": {
+            "path": "docs/v2/second-brain-contract.md",
+            "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+            "start_line": 176,
+            "end_line": 191
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        }
+      ],
+      "additional_current_spans": []
+    },
+    {
+      "case_id": "current-search-capability",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "case_pointer": "/cases/4",
+      "question_pointer": "/cases/4/question",
+      "question": "Does the vault already use embeddings and graph traversal to search every retained link?",
+      "requirements_pointer": "/cases/4/answer_requirements",
+      "must_not_pointer": "/cases/4/must_not",
+      "original_source_windows": [
+        {
+          "source_path": "src/agent_harness/vault_retrieval.py",
+          "source_sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+          "source_bytes": 7170,
+          "source_line_count": 123,
+          "start_line": 26,
+          "end_line": 43,
+          "window_sha256": "e291a48be37f3f63c39beefd4182d080f08242ecc07babef8802a472e5d1d503",
+          "window_bytes": 1362,
+          "text": "def search_shared_documents(root, *, vault_id, manifest, manifest_sha256, allowed_ids, query,\n                            backend=\"lexical\", max_results=5, max_bytes=8192, context_lines=0):\n    \"\"\"Filter approved IDs before reading/scoring; resolve every returned excerpt by its pin.\n\n    Caller-supplied allowed_ids is an explicit scope, not an authentication service. BM25 scores\n    express lexical overlap, not answer confidence. A zero-overlap query abstains; missing/stale\n    approved evidence is an error. This pilot caps each scope at 100 notes and total text at 4 MiB.\n    Opt-in neighbouring lines retain local qualifications; they do not guarantee a complete\n    answer. The byte cap admits a whole requested window or records its omission.\n    \"\"\"\n    if not isinstance(vault_id, str) or not vault_id.strip():\n        raise ValueError(\"shared vault identity is required\")\n    if (not isinstance(allowed_ids, list) or len(allowed_ids) > 100\n            or any(not isinstance(identity, str) or not identity or len(identity) > 256 for identity in allowed_ids)\n            or len(set(allowed_ids)) != len(allowed_ids)):\n        raise ValueError(\"scope must contain at most 100 unique document IDs\")\n    if not isinstance(query, str) or not query.strip() or len(query) > 512:\n        raise ValueError(\"query must be nonempty and at most 512 characters\")\n",
+          "original_pointer": "/cases/4/supporting_sources/0",
+          "original_pin": {
+            "path": "src/agent_harness/vault_retrieval.py",
+            "sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+            "start_line": 26,
+            "end_line": 43
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "IMPLEMENTATION_NOT_RUNTIME"
+        },
+        {
+          "source_path": "docs/v2/knowledge-foundation-audit-20261031.md",
+          "source_sha256": "15d114229487b4bc6e4a44b40254c4e3576cd3ae5fdee1176c7cefca8d95d57e",
+          "source_bytes": 10003,
+          "source_line_count": 150,
+          "start_line": 48,
+          "end_line": 67,
+          "window_sha256": "649e4217163cadab77a54e374c61b78ade8410301b0330d8ef73e98270d71cd1",
+          "window_bytes": 2010,
+          "text": "## Architecture: implemented boundaries versus claims\n\n| Layer | Inspected evidence | Verdict |\n|---|---|---|\n| Task dependency graph | `workgraph/plan.py`, leases and command gates | Execution state; not a graph of research knowledge |\n| Source/capability map | [source-evidence-graph.md](../v1/source-evidence-graph.md) explicitly says research evidence, not installed functionality | Useful curated table; not proof of an operational whole-corpus graph |\n| Document/KB search | `mcp/kb.py`: scoped document sections, BM25 and FTS5 | Implemented lexical retrieval; not semantic or graph traversal |\n| Shared document retrieval | `vault_retrieval.py`: explicit allowed IDs, pinned manifest, lexical/FTS5, bounded excerpts | Opt-in pilot, at most 100 documents/4 MiB per scope; no persistent graph in this module |\n| Source and record integrity | `vault_sources.py`, `project_memory.py`; immutable receipts, revisions, pending assertions, withdrawal/history | Valuable correctness foundation; not automatic truth checking of arbitrary prose |\n| Conversation inventory | `source_inventory.py` inspects transcript metadata/index progress | Different denominator from shared web links; byte coverage is not semantic extraction |\n| Handoffs and cold recovery | Existing source/process tests and bounded native receipts | Partial evidence; not lossless memory or universal client compliance |\n| Learning/discovery | `procedures.py`, `improve.py`, `discovery_cycle.py` | Candidate generation and held promotion; daily discovery covers two approved model-document URLs, not the entire ecosystem |\n\nThe architecture's separation of authoritative originals, derived indexes,\nproject/task state and optional learned procedures is a sensible baseline for\nthe stated requirements. It still needs operational integration and evidence.\nChanging Python to Rust, adding a graph database, or increasing agent count does\nnot by itself close a missing-content or missing-evaluation gap.\n\n## What a usable evidence graph must add\n",
+          "original_pointer": "/cases/4/supporting_sources/1",
+          "original_pin": {
+            "path": "docs/v2/knowledge-foundation-audit-20261031.md",
+            "sha256": "15d114229487b4bc6e4a44b40254c4e3576cd3ae5fdee1176c7cefca8d95d57e",
+            "start_line": 48,
+            "end_line": 67
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        }
+      ],
+      "additional_current_spans": [
+        {
+          "source_path": "src/agent_harness/vault_retrieval.py",
+          "source_sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+          "source_bytes": 7170,
+          "source_line_count": 123,
+          "start_line": 44,
+          "end_line": 45,
+          "window_sha256": "d8b189ef77bcec2d7ff761c677120edbd94389dbcf3ecaa79e12d3326fb020d9",
+          "window_bytes": 98,
+          "text": "    if backend not in (\"lexical\", \"fts5\"):\n        raise ValueError(\"unsupported search backend\")\n",
+          "label": "ADDITIONAL_CURRENT_SPAN_NOT_ORIGINAL_EXCERPT",
+          "dependency_rationale": "Original26-43 names a default but omits the explicit accepted-backend validation condition.",
+          "evidence_kind": "IMPLEMENTATION_NOT_RUNTIME"
+        },
+        {
+          "source_path": "src/agent_harness/vault_retrieval.py",
+          "source_sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+          "source_bytes": 7170,
+          "source_line_count": 123,
+          "start_line": 67,
+          "end_line": 87,
+          "window_sha256": "4f7f9849056bc091fbb34865622bfdf7490d00254dde84473354f0ae8b204697",
+          "window_bytes": 1352,
+          "text": "    documents, total = {}, 0\n    for identity in sorted(allowed_ids):\n        document = read_shared_document(root, vault_id=vault_id, manifest=manifest,\n                                        manifest_sha256=manifest_sha256, document_id=identity,\n                                        max_bytes=2 * SOURCE_LIMIT)\n        total += len(document[\"content\"].encode(\"utf-8\"))\n        if total > 4 * SOURCE_LIMIT:\n            raise ValueError(\"authorized source text exceeds the 4 MiB search budget\")\n        documents[identity] = document\n    exact = query if query in identities else query.strip() if query.strip() in identities else None\n    q = set(query_terms(query))\n    if exact is not None:\n        # Exact identities are opaque: stopword and minimum-word-length filters cannot erase them.\n        # The source was validated above only if this identity belongs to the approved scope.\n        ranked = [(exact, 1.0)] if exact in documents else []\n    else:\n        corpus = [(identity, tokens(doc[\"title\"] + \"\\n\" + doc[\"content\"])) for identity, doc in documents.items()]\n        candidates = _candidates(corpus, sorted(q), backend) if q else set()\n        ranked = [(identity, score) for identity, score in BM25(corpus).search(q, len(corpus))\n                  if identity in candidates]\n        ranked.sort(key=lambda pair: (-pair[1], pair[0]))\n",
+          "label": "ADDITIONAL_CURRENT_SPAN_NOT_ORIGINAL_EXCERPT",
+          "dependency_rationale": "Original26-43 omits the executable approved-document loop, accumulated byte cap and BM25 candidate/ranking data flow used by this entry point.",
+          "evidence_kind": "IMPLEMENTATION_NOT_RUNTIME"
+        }
+      ]
+    },
+    {
+      "case_id": "citation-does-not-entail",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "case_pointer": "/cases/5",
+      "question_pointer": "/cases/5/question",
+      "question": "If a source receipt contains port 8081, can a paraphrase or a claim that the port is 9999 be verified just because it cites that receipt?",
+      "requirements_pointer": "/cases/5/answer_requirements",
+      "must_not_pointer": "/cases/5/must_not",
+      "original_source_windows": [
+        {
+          "source_path": "src/agent_harness/project_memory.py",
+          "source_sha256": "0ffe43618c880e1788173d10a88963c68ec7039a732b972aa72bd15b8c61e8c0",
+          "source_bytes": 28753,
+          "source_line_count": 480,
+          "start_line": 145,
+          "end_line": 163,
+          "window_sha256": "a79a2759dfd4fc1fe5c2a5ff68d6459e6a5432c3e8070f2a865c622fb330d980",
+          "window_bytes": 1140,
+          "text": "    def append(self, item, *, expected):\n        _validate(item, self.project_id)\n        if expected is not None:\n            _validate_receipt(expected, self.project_id)\n        # Work on a private immutable representation; a caller cannot mutate provenance mid-save.\n        item = json.loads(_bytes(item))\n        spans = self._resolve_sources(item, historical=False)\n        if item[\"confidence\"] == \"verified\":\n            # A source receipt proves the cited bytes exist, not that a paraphrase follows\n            # from them. Only an entire cited assertion can retain this label without an\n            # independent semantic check. Keep uncertain claims, but mark them pending.\n            claim = item[\"text\"].rstrip(\"\\r\\n\")\n            if not all(span.rstrip(\"\\r\\n\") == claim for span in spans):\n                item[\"confidence\"] = \"pending\"\n        for _ in range(8):\n            events, latest, total = self._load()\n            old = latest.get(item[\"id\"])\n            if expected != (old[\"receipt\"] if old else None):\n                raise ValueError(\"memory revision conflict: refresh the current receipt before changing it\")\n",
+          "original_pointer": "/cases/5/supporting_sources/0",
+          "original_pin": {
+            "path": "src/agent_harness/project_memory.py",
+            "sha256": "0ffe43618c880e1788173d10a88963c68ec7039a732b972aa72bd15b8c61e8c0",
+            "start_line": 145,
+            "end_line": 163
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "IMPLEMENTATION_NOT_RUNTIME"
+        },
+        {
+          "source_path": "tests/test_project_memory_claim_support.py",
+          "source_sha256": "11826f7e791738a3b24ca98183eae0055236a00a362022ae274cce3f9504ce88",
+          "source_bytes": 5602,
+          "source_line_count": 116,
+          "start_line": 61,
+          "end_line": 91,
+          "window_sha256": "9735c41a93dd524e6b5a760b678b8d6b1986fa7c26c161dafb84e9cae0e01d38",
+          "window_bytes": 1850,
+          "text": "def test_pending_claim_is_not_a_normal_search_or_recovery_hit(tmp_path):\n    project_id = initialize(tmp_path)\n    (tmp_path / \"source.txt\").write_text(\"Port: 8081\\n\")\n    source = SourceVault(tmp_path, project_id).capture(\"source.txt\")\n    store = ProjectMemory(tmp_path, project_id)\n    item = {\"id\": \"service-port\", \"project_id\": project_id, \"layer\": \"project_facts\", \"kind\": \"fact\",\n            \"scope\": \"project\", \"text\": \"Port: 9999\", \"provenance\": [\n                {\"source\": source, \"start_line\": 1, \"end_line\": 1}], \"confidence\": \"verified\",\n            \"sensitivity\": \"internal\", \"access_boundary\": \"local_user\", \"owner\": \"fixture\",\n            \"freshness\": \"current\"}\n    receipt = store.append(item, expected=None)\n    policy = {\"allowed_sensitivities\": [\"internal\"], \"allowed_scopes\": [\"project\"],\n              \"layers\": [\"project_facts\"]}\n    results = store.search(\"service-port\", **policy)\n    assert not results[\"hits\"]\n    assert {entry[\"reason\"] for entry in results[\"omitted\"]} == {\"pending\"}\n    recovered = store.recover(receipt, phase=\"resume\", depends_on_memory=True,\n                              verified_receipt=receipt, **policy)\n    assert recovered[\"decision\"] == \"HOLD\" and recovered[\"reason\"] == \"pending\"\n    assert \"record\" not in recovered\n    exact = store.read_scoped(receipt, **policy)\n    assert exact[\"kind\"] == \"pending-memory-data\"\n    assert exact[\"usable_for_current_decisions\"] is False\n    page = store.search_page(\"service-port\", **policy)\n    assert page[\"hits\"] == []\n    assert {entry[\"reason\"] for entry in page[\"omitted\"]} == {\"pending\"}\n    with pytest.raises(ValueError, match=\"pending memory\"):\n        store.read(receipt, allowed_sensitivities=[\"internal\"])\n    with pytest.raises(ValueError, match=\"pending memory\"):\n        store.latest(\"service-port\", allowed_sensitivities=[\"internal\"])\n\n",
+          "original_pointer": "/cases/5/supporting_sources/1",
+          "original_pin": {
+            "path": "tests/test_project_memory_claim_support.py",
+            "sha256": "11826f7e791738a3b24ca98183eae0055236a00a362022ae274cce3f9504ce88",
+            "start_line": 61,
+            "end_line": 91
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "TEST_DEFINITION_NOT_EXECUTION"
+        }
+      ],
+      "additional_current_spans": []
+    },
+    {
+      "case_id": "real-source-claim-control",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "case_pointer": "/cases/6",
+      "question_pointer": "/cases/6/question",
+      "question": "Did the Linux Foundation announcement say Alibaba contributed OpenEnv, or prove a 30 percent coding gain?",
+      "requirements_pointer": "/cases/6/answer_requirements",
+      "must_not_pointer": "/cases/6/must_not",
+      "original_source_windows": [
+        {
+          "source_path": "docs/v1/source-check-workflow.md",
+          "source_sha256": "5c2ecd957f34cf259acbfa8f2fbf5f2530b14d1a384cd6e300d477fbe86b3ba0",
+          "source_bytes": 2958,
+          "source_line_count": 39,
+          "start_line": 23,
+          "end_line": 39,
+          "window_sha256": "a64853322943e17f858b2eff3aec519b86cb1b1678f7067e1049649fad718a40",
+          "window_bytes": 1464,
+          "text": "## Live smoke check, 26 October 2026\n\nPrimary source opened successfully:\n[Linux Foundation AAIF announcement, 22 October 2026](https://www.linuxfoundation.org/press/agentic-ai-foundation-announces-four-new-projects-agent-skills-open-responses-openenv-and-opensandbox).\n\n| Probe | Access | Claim result | Action |\n|---|---|---|---|\n| The announcement identifies Alibaba as the OpenSandbox contributor. | Readable publisher page; summary and New Projects section | SUPPORTED | Retain with citation. |\n| Alibaba contributed OpenEnv. | Same genuine page | CONTRADICTED: it attributes OpenEnv to Hugging Face. | Correct the attribution. |\n| The announcement proves coding performance improved 30%. | Same genuine page | NOT_SUPPORTED: no such measured result is reported. | Remove the number or find independent evidence. |\n| A study at the synthetic path below proves all context loss is eliminated. | Browser tool could not open it; direct public HTTP request returned 404 | UNVERIFIABLE citation; claim not established | Do not cite or retain as fact. |\n\nThe last probe deliberately uses an invented test URL, not a real citation:\n`https://www.linuxfoundation.org/press/harness-memory-eliminates-all-context-loss-2026-study`.\nThe browser's access error alone was not called a 404; a separate HTTP read supplied\nthat status. These bounded checks demonstrate evidence handling, not universal\nsource coverage, automated semantic accuracy, or absence of hallucination.\n",
+          "original_pointer": "/cases/6/supporting_sources/0",
+          "original_pin": {
+            "path": "docs/v1/source-check-workflow.md",
+            "sha256": "5c2ecd957f34cf259acbfa8f2fbf5f2530b14d1a384cd6e300d477fbe86b3ba0",
+            "start_line": 23,
+            "end_line": 39
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        }
+      ],
+      "additional_current_spans": []
+    },
+    {
+      "case_id": "withdrawal-is-terminal",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "case_pointer": "/cases/8",
+      "question_pointer": "/cases/8/question",
+      "question": "An earlier record was withdrawn. Does asking for historical evidence grant permission to use it as current advice again?",
+      "requirements_pointer": "/cases/8/answer_requirements",
+      "must_not_pointer": "/cases/8/must_not",
+      "original_source_windows": [
+        {
+          "source_path": "src/agent_harness/project_memory.py",
+          "source_sha256": "0ffe43618c880e1788173d10a88963c68ec7039a732b972aa72bd15b8c61e8c0",
+          "source_bytes": 28753,
+          "source_line_count": 480,
+          "start_line": 170,
+          "end_line": 172,
+          "window_sha256": "e434c4d02493994e4cfb24b800b35d13630110680c77a1f4cdc052641d2866e4",
+          "window_bytes": 285,
+          "text": "                    raise ValueError(\"withdrawal is terminal for this record; a new grant needs new evidence and identity\")\n            now = datetime.now(timezone.utc).isoformat()\n            if old and datetime.fromisoformat(now) < datetime.fromisoformat(old[\"item\"][\"updated_at\"]):\n",
+          "original_pointer": "/cases/8/supporting_sources/0",
+          "original_pin": {
+            "path": "src/agent_harness/project_memory.py",
+            "sha256": "0ffe43618c880e1788173d10a88963c68ec7039a732b972aa72bd15b8c61e8c0",
+            "start_line": 170,
+            "end_line": 172
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "IMPLEMENTATION_NOT_RUNTIME"
+        },
+        {
+          "source_path": "src/agent_harness/project_memory.py",
+          "source_sha256": "0ffe43618c880e1788173d10a88963c68ec7039a732b972aa72bd15b8c61e8c0",
+          "source_bytes": 28753,
+          "source_line_count": 480,
+          "start_line": 197,
+          "end_line": 210,
+          "window_sha256": "72f9e8ee9935bc2cc0b8eb2f1fc15536841e51f5908c18b4f2adab9ee6fe652c",
+          "window_bytes": 928,
+          "text": "    def _visible(self, result, allowed_sensitivities, historical):\n        if (not isinstance(allowed_sensitivities, list)\n                or any(value not in (\"public\", \"internal\", \"private\") for value in allowed_sensitivities)):\n            raise ValueError(\"explicit sensitivity scope is required\")\n        if result[\"item\"][\"sensitivity\"] not in allowed_sensitivities:\n            raise PermissionError(\"memory item is outside the caller's declared scope\")\n        if result[\"item\"][\"freshness\"] in (\"expired\", \"withdrawn\") and not historical:\n            raise ValueError(result[\"item\"][\"freshness\"] + \" memory requires an explicit historical read\")\n        self._resolve_sources(result[\"item\"], historical=historical)\n        return result\n\n    def _selected_receipt(self, receipt, historical):\n        receipt = receipt.copy() if isinstance(receipt, dict) else receipt\n        _validate_receipt(receipt, self.project_id)\n",
+          "original_pointer": "/cases/8/supporting_sources/1",
+          "original_pin": {
+            "path": "src/agent_harness/project_memory.py",
+            "sha256": "0ffe43618c880e1788173d10a88963c68ec7039a732b972aa72bd15b8c61e8c0",
+            "start_line": 197,
+            "end_line": 210
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "IMPLEMENTATION_NOT_RUNTIME"
+        }
+      ],
+      "additional_current_spans": [
+        {
+          "source_path": "src/agent_harness/project_memory.py",
+          "source_sha256": "0ffe43618c880e1788173d10a88963c68ec7039a732b972aa72bd15b8c61e8c0",
+          "source_bytes": 28753,
+          "source_line_count": 480,
+          "start_line": 164,
+          "end_line": 170,
+          "window_sha256": "a80c511bbfdebfdef078aa49e62a20bb0e6985d91b5953b4bbcf07ff533d26db",
+          "window_bytes": 486,
+          "text": "            if old:\n                if any(item[key] != old[\"item\"][key] for key in CONTRACT):\n                    raise ValueError(\"correction cannot change the ownership/access contract\")\n                if item == {key: old[\"item\"][key] for key in FIELDS}:\n                    return old[\"receipt\"]\n                if old[\"item\"][\"freshness\"] == \"withdrawn\":\n                    raise ValueError(\"withdrawal is terminal for this record; a new grant needs new evidence and identity\")\n",
+          "label": "ADDITIONAL_CURRENT_SPAN_NOT_ORIGINAL_EXCERPT",
+          "dependency_rationale": "Original170-172 starts at a raise without its prior-record/withdrawn condition and ownership/access-contract check.",
+          "evidence_kind": "IMPLEMENTATION_NOT_RUNTIME"
+        },
+        {
+          "source_path": "src/agent_harness/project_memory.py",
+          "source_sha256": "0ffe43618c880e1788173d10a88963c68ec7039a732b972aa72bd15b8c61e8c0",
+          "source_bytes": 28753,
+          "source_line_count": 480,
+          "start_line": 211,
+          "end_line": 227,
+          "window_sha256": "d6b3436bd1fd60917df44efbdd58d51ed90c5cd743afa37ccc520530dbe6f504",
+          "window_bytes": 1090,
+          "text": "        if type(historical) is not bool:\n            raise ValueError(\"historical must be boolean\")\n        events, latest, _ = self._load()\n        if receipt[\"sequence\"] > len(events) or events[receipt[\"sequence\"] - 1][\"receipt\"] != receipt:\n            raise ValueError(\"memory receipt does not match retained evidence\")\n        result = events[receipt[\"sequence\"] - 1]\n        if not historical and latest[receipt[\"id\"]][\"receipt\"] != receipt:\n            raise ValueError(\"superseded memory requires an explicit historical read\")\n        if historical:\n            current = latest[receipt[\"id\"]]\n            if current[\"receipt\"] != receipt or current[\"item\"][\"freshness\"] != \"current\":\n                # Keep superseded words for diagnosis, but a historical receipt\n                # must never look like a presently usable fact or old grant.\n                status = current[\"item\"][\"freshness\"]\n                return {**result, \"current_status\": status if status != \"current\" else \"superseded\",\n                        \"usable_for_current_decisions\": False}\n        return result\n",
+          "label": "ADDITIONAL_CURRENT_SPAN_NOT_ORIGINAL_EXCERPT",
+          "dependency_rationale": "Original197-210 stops before historical receipt selection and usable_for_current_decisions=False; read invokes this selection path.",
+          "evidence_kind": "IMPLEMENTATION_NOT_RUNTIME"
+        }
+      ]
+    },
+    {
+      "case_id": "unread-lead",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "case_pointer": "/cases/11",
+      "question_pointer": "/cases/11/question",
+      "question": "What method does the unread beamnxw source recommend, and is it adopted?",
+      "requirements_pointer": "/cases/11/answer_requirements",
+      "must_not_pointer": "/cases/11/must_not",
+      "original_source_windows": [
+        {
+          "source_path": "docs/v1/source-evidence-graph.md",
+          "source_sha256": "92124d3ceedf2a9f0e3ad3c0cbff06e4390aa6d2e2f51bd7203d576559101ea3",
+          "source_bytes": 10907,
+          "source_line_count": 27,
+          "start_line": 20,
+          "end_line": 21,
+          "window_sha256": "d749b3d3cd687ee3b5c1affe8e3334586fa203ba9ed1a90537c451256a0c7487",
+          "window_bytes": 565,
+          "text": "| [Unverified “end of harness engineering” title snippet](https://x.com/virgilxbt/status/2113750670545482170), and unread [post A](https://x.com/beamnxw/status/2114058366347554833), [post B](https://x.com/goan999999/status/2113927960650776889), [post C](https://x.com/rlaope/status/2113900819951321240); no verified primary content. | **Unknown.** Titles or account names are not method evidence. | None. | No architecture edge or installation. | Obtain lawful full text plus an identified primary source before mapping a claim. Do not infer from a snippet. |\n\n",
+          "original_pointer": "/cases/11/supporting_sources/0",
+          "original_pin": {
+            "path": "docs/v1/source-evidence-graph.md",
+            "sha256": "92124d3ceedf2a9f0e3ad3c0cbff06e4390aa6d2e2f51bd7203d576559101ea3",
+            "start_line": 20,
+            "end_line": 21
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        }
+      ],
+      "additional_current_spans": []
+    },
+    {
+      "case_id": "learning-boundary",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "case_pointer": "/cases/12",
+      "question_pointer": "/cases/12/question",
+      "question": "Does repeated weekly intake or a green binder receipt automatically teach the harness an active skill?",
+      "requirements_pointer": "/cases/12/answer_requirements",
+      "must_not_pointer": "/cases/12/must_not",
+      "original_source_windows": [
+        {
+          "source_path": "docs/v1/weekly-learning-intake.md",
+          "source_sha256": "df65811dc4bc5ef2cefc86e1f087066dfd1d265d130dfd418e718fe1d786e2bf",
+          "source_bytes": 3729,
+          "source_line_count": 60,
+          "start_line": 44,
+          "end_line": 59,
+          "window_sha256": "dc6d25cb8e9646f4a7f9602ec3133271adfb7901588b082585b0e03571b77e8c",
+          "window_bytes": 1105,
+          "text": "An item with `count >= 2` is still only a **candidate signal**. To draft a\nrepeatable method, use the existing source-bound\n`skill_manage draft` / `harness improve --draft-procedure` path with distinct\ntask-input episodes. `harness improve --apply` currently rejects caller-attested\nscores; local freeze/bind receipts stay `HOLD_UNVERIFIED_BOUNDARY` and do not\nactivate advice. Future promotion requires verified native actor isolation,\neffective model and usage-to-artifact provenance, independent frozen grading,\nand a matched held-out comparison with no per-case quality regression, a\nmeasurable gain and aggregate tokens including overhead no greater than the\nbaseline. Legacy active rows without native verification are withheld from\nrecall; rollback and source-staleness checks remain. Weekly intake performs no\npromotion, and no gain has been measured for the intake itself.\n\nA recurring schedule would need a separately authorized scheduler and a\nbounded run policy. This candidate command does not install one, wake chats,\nbuy usage, or start Claude/Codex. Review whether the captured source and\n",
+          "original_pointer": "/cases/12/supporting_sources/0",
+          "original_pin": {
+            "path": "docs/v1/weekly-learning-intake.md",
+            "sha256": "df65811dc4bc5ef2cefc86e1f087066dfd1d265d130dfd418e718fe1d786e2bf",
+            "start_line": 44,
+            "end_line": 59
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        },
+        {
+          "source_path": "src/agent_harness/procedures.py",
+          "source_sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+          "source_bytes": 28792,
+          "source_line_count": 568,
+          "start_line": 413,
+          "end_line": 440,
+          "window_sha256": "4e1bac947dd9f227bc2e055f42c67f7aca621b2c06a73679011771cf7b415e12",
+          "window_bytes": 1562,
+          "text": "def change(home, project, identity, result=None, *, rollback=False):\n    project = _scope(project)\n    with _db(home) as con:\n        row = con.execute(\"SELECT * FROM procedures WHERE id=? AND project=?\", (identity, project)).fetchone()\n        if not row:\n            raise ValueError(\"no procedure in this project\")\n        if rollback:\n            if row[\"status\"] != \"active\":\n                raise ValueError(\"only an active procedure can be rolled back\")\n            status, receipt, evidence = \"rolled_back\", None, row[\"evidence\"]\n        else:\n            if row[\"status\"] != \"proposed\":\n                raise ValueError(\"procedure is already \" + row[\"status\"])\n            # A matching score and grader hash in caller JSON are assertions,\n            # not independent evidence. Local binder receipts remain held until\n            # native answer isolation and evaluator provenance are established.\n            raise ValueError(\"independent grader receipt and actor isolation are required; \"\n                             \"local binder receipts remain on hold\")\n        con.execute(\"UPDATE procedures SET status=?,evidence=? WHERE id=?\", (status, evidence, identity))\n        con.execute(\"INSERT INTO procedure_events(id,action,evidence_sha256,at) VALUES (?,?,?,?)\",\n                    (identity, status, receipt[\"receipt_sha256\"] if receipt else None, time.time()))\n    return {\"id\": identity, \"status\": status, \"evidence\": receipt}\n\n\ndef _active(home, project):\n    path = Path(home) / \"procedures.sqlite\"\n    if not path.is_file():\n        return []\n",
+          "original_pointer": "/cases/12/supporting_sources/1",
+          "original_pin": {
+            "path": "src/agent_harness/procedures.py",
+            "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+            "start_line": 413,
+            "end_line": 440
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "IMPLEMENTATION_NOT_RUNTIME"
+        },
+        {
+          "source_path": "src/agent_harness/procedures.py",
+          "source_sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+          "source_bytes": 28792,
+          "source_line_count": 568,
+          "start_line": 369,
+          "end_line": 409,
+          "window_sha256": "e5635568be369c41d8dbc35d7c6a38f8c34ddb9e0d1838aa440092df4fc1e558",
+          "window_bytes": 2716,
+          "text": "def bind_hold(home, project, identity, task_id, task, answer,\n              base_artifact, candidate_artifact, base_usage, candidate_usage):\n    \"\"\"Compute a content-bound local receipt; never activate from this receipt.\n\n    Exact-byte correctness is a narrow mechanical grader, not general quality.\n    The provided native receipts are checked for completeness and hashed, but\n    same-user mutation and actor answer isolation are not established here.\n    \"\"\"\n    project = _scope(project)\n    task_sha, answer_sha = _bytes(task, \"task\"), _bytes(answer, \"answer\")\n    base_sha = _bytes(base_artifact, \"baseline artifact\")\n    cand_sha = _bytes(candidate_artifact, \"candidate artifact\")\n    base_tokens, cand_tokens = _native_tokens(base_usage), _native_tokens(candidate_usage)\n    with _db(home) as con:\n        payload = _proposal(con, project, identity)\n        frozen = con.execute(\"SELECT task_sha256,answer_sha256 FROM procedure_frozen_cases \"\n                             \"WHERE id=? AND task_id=?\", (identity, task_id)).fetchone()\n        if not frozen or (task_sha, answer_sha) != tuple(frozen):\n            raise ValueError(\"frozen task or answer receipt is missing or changed\")\n        grader = {\"version\": \"exact-bytes-v1\",\n                  \"sha256\": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}\n        result = {\"schema\": 1, \"project\": project, \"procedure_id\": identity,\n                  \"candidate_sha256\": payload[\"sha256\"], \"task_id\": task_id,\n                  \"task_sha256\": task_sha, \"answer_sha256\": answer_sha,\n                  \"artifacts\": {\"base_sha256\": base_sha, \"candidate_sha256\": cand_sha},\n                  \"grader\": grader,\n                  \"quality\": {\"base\": int(base_artifact == answer),\n                              \"candidate\": int(candidate_artifact == answer)},\n                  \"usage_receipts\": {\"base_sha256\": digest(base_usage),\n                                     \"candidate_sha256\": digest(candidate_usage)},\n                  \"tokens\": {\"base\": base_tokens, \"candidate\": cand_tokens},\n                  \"decision\": \"HOLD_UNVERIFIED_BOUNDARY\",\n                  \"hold_reason\": \"actor answer isolation, effective model and receipt provenance unverified\"}\n        prior = con.execute(\"SELECT receipt FROM procedure_binder_receipts WHERE id=? AND task_id=?\",\n                            (identity, task_id)).fetchone()\n        if prior:\n            if json.loads(prior[0]) == result:\n                return result\n            raise ValueError(\"binder receipt conflicts with changed artifact, usage or grader\")\n        con.execute(\"INSERT INTO procedure_binder_receipts VALUES (?,?,?)\",\n                    (identity, task_id, encoded(result).decode()))\n",
+          "original_pointer": "/cases/12/supporting_sources/2",
+          "original_pin": {
+            "path": "src/agent_harness/procedures.py",
+            "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+            "start_line": 369,
+            "end_line": 409
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "IMPLEMENTATION_NOT_RUNTIME"
+        }
+      ],
+      "additional_current_spans": [
+        {
+          "source_path": "src/agent_harness/procedures.py",
+          "source_sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+          "source_bytes": 28792,
+          "source_line_count": 568,
+          "start_line": 441,
+          "end_line": 449,
+          "window_sha256": "d617cd22e9b0771d15c5459213d040541872a1b79c1af5fbbbb99f2daacd6999",
+          "window_bytes": 421,
+          "text": "    con = sqlite3.connect(path.as_uri() + \"?mode=ro\", uri=True)\n    try:\n        records = [json.loads(r[0]) for r in con.execute(\n            \"SELECT p.payload FROM procedures p WHERE p.project=? AND p.status='active' \"\n            \"AND EXISTS (SELECT 1 FROM procedure_events e WHERE e.id=p.id \"\n            \"AND e.action='native_verified_active')\", (str(project),))]\n    finally:\n        con.close()\n    return records\n",
+          "label": "ADDITIONAL_CURRENT_SPAN_NOT_ORIGINAL_EXCERPT",
+          "dependency_rationale": "Original413-440 ends before the active-procedure query requires native_verified_active event evidence.",
+          "evidence_kind": "IMPLEMENTATION_NOT_RUNTIME"
+        }
+      ]
+    },
+    {
+      "case_id": "cold-version-device-state",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "case_pointer": "/cases/13",
+      "question_pointer": "/cases/13/question",
+      "question": "A cold session sees local dev2 files. Does this establish that every open client and the MacBook Air now runs dev2?",
+      "requirements_pointer": "/cases/13/answer_requirements",
+      "must_not_pointer": "/cases/13/must_not",
+      "original_source_windows": [
+        {
+          "source_path": "handoffs/v2-increments/local-20261102.md",
+          "source_sha256": "cf424104e11f54004bc110cab87194707ff4d1220ceef6c55211afc919844068",
+          "source_bytes": 5387,
+          "source_line_count": 89,
+          "start_line": 60,
+          "end_line": 84,
+          "window_sha256": "c7f922661b92be7536da41b169a9fb26c2804a70a7bfaca046419bcb374cbca0",
+          "window_bytes": 1452,
+          "text": "## Installed state and boundaries\n\nVersion:2.0.0.dev2,local development canary. Atomic patches to installed\n__init__.py,method_control.py and work-loop/{SKILL.md,reasoning.md} in both\n~/.agent-harness/content/skills and ~/.agents/skills. Prior launch/cli/KB\noverlays retained. No native hooks/settings/model/effort/permissions changed.\nRollback:~/.agent-harness/rollback/dev2-20261102T112628474022Z,original six\nfile states,installed.json and receipt. Preserve originals; created reasoning\nfiles have no previous copy and must be treated as creations during rollback.\n\nExisting processes were not forcibly reloaded. A fresh/reconnected MCP loads\ndev2; this does not prove every already-open client has imported new code or\nre-read its previously loaded skill. Historical r3 receipts remain historical;\ntheir old guide hash is superseded by this activation, not silently rewritten.\n\nMacBook Air KB/dev2 catch-up is NOT_VERIFIED:existing authorised task transport\nfailed three times, including a schema-conforming no-hostId call. No alternate\nexecutor/network/approval bypass. Preserve pending node13 of v2-development.\nAir's earlier r3 knowledge/workflow is verified; it does not prove dev2 parity.\n\nSemantic embedding/reranking comparison, broad domain efficacy, fully automatic\nlearning/promotion, arbitrary statechart orchestration,stable v2 and continuous\ncross-device sync remain unqualified. Do not invent a V3 breakthrough.\n\n## Evidence location\n",
+          "original_pointer": "/cases/13/supporting_sources/0",
+          "original_pin": {
+            "path": "handoffs/v2-increments/local-20261102.md",
+            "sha256": "cf424104e11f54004bc110cab87194707ff4d1220ceef6c55211afc919844068",
+            "start_line": 60,
+            "end_line": 84
+          },
+          "pin_status": "MATCH",
+          "evidence_kind": "LOCAL_HISTORICAL_REPORT_NOT_PRIMARY_OR_LIVE_STATE"
+        }
+      ],
+      "additional_current_spans": [
+        {
+          "source_path": "docs/v2/readiness-20261103.md",
+          "source_sha256": "5f785b36a651f4ecaca86cc352682a18a0aff3b8622d950670d11f584a6656dc",
+          "source_bytes": 4595,
+          "source_line_count": 71,
+          "start_line": 1,
+          "end_line": 4,
+          "window_sha256": "2e72eb22b3e6a2883d9a982048b9b552f1573802cf46cf67d3b0deb678d1a649",
+          "window_bytes": 201,
+          "text": "# What works, and what is still being qualified\n\n3 November 2026. Local package: **2.0.0.dev3**, with reversible local repairs.\nThis is a development build. No stable-v2 or all-device readiness claim.\n",
+          "label": "ADDITIONAL_CURRENT_SPAN_NOT_ORIGINAL_EXCERPT",
+          "dependency_rationale": "Original60-84 is a dated dev2 snapshot; this separately labelled later local report provides development-version context, not fresh installed/client/device proof.",
+          "evidence_kind": "CURRENT_LOCAL_REPORT_NOT_LIVE_READBACK"
+        }
+      ]
+    }
+  ],
+  "current_r5_correction": {
+    "label": "SEPARATE_ADDITIVE_CURRENT_PROJECTION_NOT_ORIGINAL_CASE_REPLACEMENT",
+    "applies_to": [
+      "coverage-denominator"
+    ],
+    "windows": [
+      {
+        "source_path": "docs/v2/vault/r5-reconciliation-20261103.json",
+        "source_sha256": "531450fc1cc7578dd16ef5983fcb7798a69ed686ad24d7410e412c8619061592",
+        "source_bytes": 283444,
+        "source_line_count": 7843,
+        "start_line": 1337,
+        "end_line": 1366,
+        "window_sha256": "ca27551bacc0c97f7b3a05d705ed8c39bd4c9549b9d36af46a2997fdc5974eab",
+        "window_bytes": 1308,
+        "text": "  \"corrections\": [\n    {\n      \"correction_id\": \"r5-correction-read-extent-item15\",\n      \"source_id\": \"url-sha256:676bd1c080f28c36532848577db0cd604ee14c4822a3b2bf410d00f204ffb63d\",\n      \"axis\": \"reading\",\n      \"old_status\": \"COMPLETE_POST_TEXT\",\n      \"replacement_status\": \"POST_TEXT_EXTENT_UNSPECIFIED\",\n      \"reason\": \"The cited report says X text was readable and records the PDD finding. It does not certify complete post-text inspection; attached video was not transcribed. The old worker inferred completeness beyond that evidence.\",\n      \"status\": \"APPLIED_TO_CURRENT_PROJECTION_ONLY\",\n      \"original_preserved\": {\n        \"input\": \"docs/v2/vault/coverage-ledger.json\",\n        \"json_pointer\": \"/sources/14/reading\"\n      },\n      \"supporting_evidence\": [\n        {\n          \"input\": \"/Users/me/Desktop/Claude Code/agentic-os/plan/harness-v05/source-architecture-20261022/ANALYSIS.md\",\n          \"start_line\": 14,\n          \"end_line\": 20\n        },\n        {\n          \"input\": \"/Users/me/Desktop/Claude Code/agentic-os/plan/harness-v05/source-architecture-20261022/ANALYSIS.md\",\n          \"start_line\": 29,\n          \"end_line\": 29\n        }\n      ],\n      \"acceptance_change\": false,\n      \"access_or_activation_change\": false,\n      \"verified_primary_read\": false\n    }\n  ],\n",
+        "json_pointer": "/corrections/0"
+      },
+      {
+        "source_path": "docs/v2/vault/r5-reconciliation-20261103.json",
+        "source_sha256": "531450fc1cc7578dd16ef5983fcb7798a69ed686ad24d7410e412c8619061592",
+        "source_bytes": 283444,
+        "source_line_count": 7843,
+        "start_line": 7791,
+        "end_line": 7842,
+        "window_sha256": "e764675c234501846d1586cea64b70c08adf8baf2495f53ee050acca5a49a2ce",
+        "window_bytes": 2322,
+        "text": "  \"summary\": {\n    \"retained_identities\": 138,\n    \"r5_manifest_identities\": 94,\n    \"overlap_retained_manifest\": 0,\n    \"new_resolved_or_manifest_identities\": 94,\n    \"additional_requested_locator_identities\": 3,\n    \"pending_outside_manifest_identities\": 2,\n    \"new_identities\": 99,\n    \"url_identities\": 237,\n    \"manifest_urls_with_detailed_report\": 22,\n    \"manifest_urls_without_depth_in_selected_r5_receipts\": 72,\n    \"new_reported_redirect_relations\": 3,\n    \"reported_primary_full_reads_this_worker\": 0,\n    \"current_primary_fetches_this_worker\": 0,\n    \"base_read_extent_corrections\": 1,\n    \"current_projection_read_depths\": {\n      \"ABSTRACT_ONLY\": 4,\n      \"CAPTION_FRAME\": 1,\n      \"COMPLETE_ARTICLE_TEXT\": 1,\n      \"COMPLETE_IDEA_FILE\": 1,\n      \"COMPLETE_POST_TEXT\": 2,\n      \"COMPLETE_SHORT_PAGE_TEXT_REPORTED\": 1,\n      \"CONTENT_REPORTED_AT_SEPARATE_RESOLVED_LOCATOR\": 3,\n      \"METADATA_ONLY\": 1,\n      \"NOT_ANALYSED_REPORTED\": 1,\n      \"NOT_ESTABLISHED_IN_SELECTED_R5_RECEIPTS\": 72,\n      \"NOT_READ_REPORTED\": 1,\n      \"POST_TEXT_EXTENT_UNSPECIFIED\": 1,\n      \"SELECTED_SCOPE_REPORTED\": 21,\n      \"SELECTED_SECTIONS\": 20,\n      \"SNIPPET_ONLY\": 8,\n      \"TITLE_SNIPPET\": 1,\n      \"UNINSPECTED\": 98\n    },\n    \"current_transfer_read_depths\": {\n      \"METADATA_ONLY\": 1,\n      \"POST_TEXT_EXTENT_UNSPECIFIED\": 1,\n      \"SNIPPET_ONLY\": 7,\n      \"TITLE_SNIPPET\": 1,\n      \"UNINSPECTED\": 98\n    },\n    \"measured_efficacy_receipts_added\": 0\n  },\n  \"limits\": [\n    \"URL identities are not read works; reported redirect identities are deliberately retained.\",\n    \"Old ledger stays a historical snapshot; its COMPLETE_POST_TEXT classification for item15 is superseded only in this current projection.\",\n    \"Current primary access/freshness and source statement truth were not independently revalidated.\",\n    \"72 manifest-only depths are not established in selected r5 receipts; other earlier per-source records may exist.\",\n    \"Manifest file-byte/hash identity is content integrity, not mastery, semantic source verification or task efficacy.\",\n    \"No semantic/reranking qualification, automatic promotion, source deletion, live corpus edit or Air-r5 claim.\",\n    \"No root acceptance/runtime/native/model verification run by this worker; provided checker and negative controls are for root to execute.\"\n  ]\n",
+        "json_pointers": [
+          "/summary",
+          "/limits"
+        ]
+      },
+      {
+        "source_path": "docs/v2/vault/r5-reconciliation-20261103.md",
+        "source_sha256": "b4d0503d8d49832258ca683bc90300920e6c22a5748934d2d18d9c167beae277",
+        "source_bytes": 7064,
+        "source_line_count": 117,
+        "start_line": 44,
+        "end_line": 67,
+        "window_sha256": "42629a39d7eb38618788f1fe43e79d9ee61dec6f0cd05761c75f1773d56b32be",
+        "window_bytes": 1530,
+        "text": "## Corrected current read claim, originals preserved\n\nThe old ledger labels transfer item 15, Alex Lavaee/PDD Kit,\n`COMPLETE_POST_TEXT`. Its cited `source-architecture-20261022/ANALYSIS.md`\nlines 14–20 say X text was readable in a browser and attached videos were not\ntranscribed; line 29 gives a PDD finding. Those statements do not certify a\ncomplete post-text inspection. The earlier worker inferred more than the\nrecorded evidence supports.\n\nCorrection `r5-correction-read-extent-item15` changes the **current projection**\nto `POST_TEXT_EXTENT_UNSPECIFIED`. The old row, incoming status, source identity,\nreceipt and four earlier artifacts remain unchanged. Access, support, adoption,\nevaluation and activation authority are unchanged. The old row remains visible\nas the corrected historical assertion. The new checker must reject a projection\nthat omits the correction or restores `COMPLETE_POST_TEXT`.\n\nCurrent transferred-source depths are consequently 98 uninspected, seven\nsnippets, one title snippet, one metadata-only, and one post-text report with\nunspecified completeness. **Zero transferred sources now carry a justified\ncomplete-post label in this selected evidence.** Two complete-post reports from\nthe later 31 October review remain distinct; this correction does not downgrade\ntheir explicitly recorded read scopes. The old coverage acceptance case and\nREADME counts describe the previous snapshot and must not be used unchanged as\nthe oracle for the current projection. Nothing here closes root's graph gate.\n"
+      }
+    ],
+    "boundary": "Preserve108/110transferred denominator and138historical ledger; additive237URLidentities are not237reads. Item15 read-extent correction changes only current projection, not original requirements, source identity, access/adoption/evaluation authority or primary-read status. Exact15failed-fetch IDs remain unknown. Linked upstream paths grant no permission."
+  },
+  "qualification_boundary": "Code/test/report quotes do not prove actual control replay, autonomous retrieval, native answers, primary truth, all16case qualification or complete paired usage. Root independently checks bytes/current relevance before freezing native inputs/questions and grader. Earlier failures and UNKNOWN usage debt remain.",
+  "preparation": "First packet draft4153bytes exceeded4096cap and was rejected before artifact/archive/packet writes; reduced packet links detail without deleting prior history.",
+  "worker_actions": "Only this input and compact own packet/archive written; no tests/gates/runtime/native/model calls. Root owns all verification."
+}

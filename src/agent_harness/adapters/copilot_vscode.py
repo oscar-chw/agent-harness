@@ -14,9 +14,9 @@ What the docs say, and what this adapter does with it:
   ``~/.copilot/mcp-config.json`` uses ``mcpServers``; Agent Host and Copilot CLI read it directly.
   Both are written.
 - VS Code has several harnesses (Local agent; Agent Host: Copilot, Claude, Codex) and what loads
-  depends on the one picked. Agent Host reads user instructions from ``~/.copilot/instructions``;
-  the Local agent reads the same folder through ``chat.instructionsFilesLocations`` (deprecated,
-  Local-agent only, tilde paths accepted, default includes ``~/.copilot/instructions``). So there is
+  depends on the one picked. Copilot reads user instructions from ``~/.copilot/instructions``;
+  VS Code also forwards ``chat.instructionsFilesLocations`` to Agent Host harnesses. This setting
+  remains supported; native locations work across clients. So there is
   ONE rules file, ``~/.copilot/instructions/harness.instructions.md`` (``applyTo: "**"``), and the
   setting restates that folder because a user value replaces the default object.
 - Prompt files (``*.prompt.md``) load only in the Local agent (deprecated for Agent Host). They are
@@ -31,12 +31,13 @@ What the docs say, and what this adapter does with it:
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
-from .base import Adapter, Ctx, FileChange, list_md, mcp_servers, which
+from .base import Adapter, Ctx, FileChange, list_md, mcp_servers, shared_skills, which
 
 APPLY_ALL = '---\nname: harness\ndescription: agent-harness rules, always on\napplyTo: "**"\n---\n\n'
 
@@ -248,7 +249,10 @@ class CopilotVSCodeAdapter(Adapter):
             add(json_change(mdir / "mcp.json", self._mcp(ctx),
                             "VS Code Remote-SSH remote user MCP: servers.harness", refused))
 
-        add(json_change(ctx.home / ".copilot" / "mcp-config.json", self._portable_mcp(ctx),
+        # Copilot discovery checks only its selected home, not both directories.
+        override = os.environ.get("COPILOT_HOME")
+        portable_home = Path(override).expanduser().absolute() if override else ctx.home / ".copilot"
+        add(json_change(portable_home / "mcp-config.json", self._portable_mcp(ctx),
                         "Copilot portable user MCP (Agent Host, Copilot CLI, remote): mcpServers.harness",
                         refused))
 
@@ -258,12 +262,12 @@ class CopilotVSCodeAdapter(Adapter):
         return changes, refused
 
     def plan(self, ctx: Ctx) -> List[FileChange]:
-        return self._changes(ctx)[0]
+        return self._changes(ctx)[0] + shared_skills(ctx)
 
     def notes(self, ctx: Ctx) -> List[str]:
         """Plan lines that are not file changes: refusals, and what covers notebooks."""
         return self._changes(ctx)[1] + [
             "VS Code notebooks (.ipynb) with Copilot use the same user settings, so they are covered.",
-            "Prompt files load only in the Local agent; the Copilot, Claude and Codex harnesses use "
-            "skills instead (~/.claude/skills is read by all of them).",
+            "Prompt files load only in the Local agent; shared skills are installed in "
+            ".agents/skills. Native loading depends on the selected harness.",
         ]

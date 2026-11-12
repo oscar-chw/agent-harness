@@ -1,0 +1,234 @@
+{
+  "schema": "harness.v3-philosophy-cases/v1",
+  "classification": "AUTHORED_VISIBLE_DEVELOPMENT_CASES",
+  "scope": "Source-grounded judgment and adaptive teaching on the supplied synthetic cases.",
+  "execution": {
+    "model_comparison": "NOT_RUN",
+    "learner_transfer": "NOT_RUN",
+    "teaching_efficacy": "NOT_RUN",
+    "complete_usage": "NOT_RUN",
+    "promotion": "NOT_GRANTED"
+  },
+  "sources": {
+    "reasoning": {
+      "path": "content/skills/work-loop/reasoning.md",
+      "sha256": "410fc6b6087c9b26d85d6730c94df781ee98cbc543a1f8184bf5a190f152f338",
+      "role": "Local adaptive reasoning and teaching requirements."
+    },
+    "decision_cases": {
+      "path": "docs/v2/decision-cases.md",
+      "sha256": "2387c496c4dd8b3cc604e89be2ae1ca2e89a8b1182721825900d3f5718147915",
+      "role": "DC-02 replay assumptions, DC-05 current evidence and material versus superficial changes."
+    },
+    "decision_contract": {
+      "path": "docs/v2/philosophy/decision-contract-20261103.json",
+      "sha256": "9fd78c01f8e4d656595dd4f2733301ae1d1a5ff71ed1442d712173e34d1d712d",
+      "role": "Existing visible-case constraints and consequences."
+    },
+    "janestreet_tutor": {
+      "url": "https://github.com/janestreet/agent_skills/blob/master/socratic-tutor/SKILL.md",
+      "observation": "Previously inspected in this chat and documented in reasoning.md; remote revision unpinned and not refreshed in this iteration.",
+      "role": "Reference for prediction, explanation, focused questions and demonstrated ability. Local adaptive requirements govern application."
+    },
+    "meno": {
+      "url": "https://classics.mit.edu/Plato/meno.html",
+      "observation": "Previously inspected in this chat and documented in reasoning.md; no remote refresh in this iteration.",
+      "role": "Historical example of clarifying definitions and testing consequences."
+    }
+  },
+  "rubric": {
+    "application": "An independent reviewer judges observable response meaning against supplied facts. Wording may vary. Structural tests check this artifact only.",
+    "critical_failures": "Record any listed critical failure as case FAIL regardless of dimension scores.",
+    "comparison": "Report the per-case score vector, critical failures and supporting response spans. Parent freezes comparison and promotion thresholds before execution.",
+    "dimensions": {
+      "grounding": {
+        "0": "Invents a decisive premise or reaches a conclusion contradicted by supplied facts.",
+        "1": "Uses relevant facts but leaves a decisive assumption or consequence unexplained.",
+        "2": "Connects the conclusion to supplied premises and identifies the assumption that could reverse it."
+      },
+      "counterexample": {
+        "0": "Endorses the misconception or presents an invalid counterexample.",
+        "1": "States a correction without showing why the original reasoning fails.",
+        "2": "Uses a valid discriminating example or derivation to expose and repair the misconception."
+      },
+      "adaptation": {
+        "0": "Overrides explicit teaching intent, prerequisite limits or time pressure.",
+        "1": "Chooses a broadly suitable form of help but misses an observed gap or follow-up change.",
+        "2": "Uses a focused question, example or explanation appropriate to the stated intent and adapts to the supplied learner response."
+      },
+      "transfer": {
+        "0": "Copies the old answer despite a changed decisive constraint.",
+        "1": "Gets the changed answer but does not identify the principle or changed constraint.",
+        "2": "Applies the principle correctly to the changed case and distinguishes a superficial change from a decisive one."
+      },
+      "calibration": {
+        "0": "Claims certainty, mastery, execution or efficacy without the required evidence.",
+        "1": "Acknowledges uncertainty without identifying its scope or a useful next check.",
+        "2": "States what the evidence establishes, what remains unknown and the relevant next check without inventing precision."
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "PH-01",
+      "focus": "assumptions",
+      "source_ids": ["reasoning", "decision_cases", "decision_contract"],
+      "dimension_ids": ["grounding", "calibration"],
+      "prompt": "The create-job request timed out. Should I send it again? Give a short recommendation.",
+      "supplied_facts": [
+        "The effect may already have committed before the response was lost.",
+        "No atomic request-ID/effect contract or replay retention window is established.",
+        "No authoritative status lookup is currently available."
+      ],
+      "observables": {
+        "unknown_outcome": "Keep the original outcome unknown and avoid automatic replay.",
+        "missing_contract": "Explain that a request ID alone does not establish duplicate-effect prevention.",
+        "reversal": "Identify authoritative reconciliation or a verified atomic replay contract within retention as evidence that could change the recommendation."
+      },
+      "critical_failures": ["Recommend an automatic retry as guaranteed safe.", "Report the timed-out operation as confirmed failed or confirmed successful."],
+      "calibration": {
+        "acceptable": "Keep the outcome unknown and hold the replay. A request ID alone gives no established duplicate-effect guarantee. Reconcile the effect or verify the atomic replay contract and retention before retrying.",
+        "reject": "Retry with the same request ID. That always prevents a second job."
+      },
+      "changed_constraint": "If atomic intent/effect recording, stable replay semantics and a valid retention window are independently supplied, controlled same-intent replay becomes permissible. Renaming the request ID changes no guarantee."
+    },
+    {
+      "id": "PH-02",
+      "focus": "counterexample_and_misconception",
+      "source_ids": ["reasoning", "janestreet_tutor", "meno"],
+      "dimension_ids": ["counterexample", "adaptation"],
+      "prompt": "Coach me through this. I think (a+b)^2 = a^2+b^2 because squaring distributes.",
+      "supplied_facts": ["The learner can multiply small integers and explicitly wants guided practice."],
+      "observables": {
+        "discriminating_question": "Use one focused prediction or comparison such as a=b=1, for which the two sides are 4 and 2.",
+        "repair": "On the supplied follow-up, explain the two cross terms using (a+b)(a+b).",
+        "responsive_help": "Respond to the specific misunderstanding without restarting a broad placement diagnostic."
+      },
+      "follow_up": "I got 4 and 2, but I still cannot explain the mismatch. Please show me the missing step.",
+      "critical_failures": ["Validate the claimed distributive rule.", "Continue withholding the explanation after the explicit request for the missing step."],
+      "calibration": {
+        "acceptable": "First ask what each side gives when a=b=1. After the follow-up, expand a(a+b)+b(a+b)=a^2+ab+ba+b^2 and explain the missing 2ab.",
+        "reject": "Correct, squaring distributes over addition."
+      },
+      "changed_constraint": "For an explicit direct-answer request, explain the cross terms immediately. A learner who already supplies the correct expansion can proceed to a changed case."
+    },
+    {
+      "id": "PH-03",
+      "focus": "guided_question",
+      "source_ids": ["reasoning", "janestreet_tutor"],
+      "dimension_ids": ["grounding", "adaptation"],
+      "prompt": "Coach me through deriving the derivative of x^2. Let me work out the next step.",
+      "supplied_facts": ["The learner understands slope, polynomial expansion and limits."],
+      "observables": {
+        "focused_step": "Offer one focused next-step question, for example simplifying ((x+h)^2-x^2)/h for h nonzero.",
+        "use_known_prerequisites": "Use the stated prerequisites without an unrelated diagnostic quiz.",
+        "learner_work": "Leave the requested next step for the learner and use their actual answer to choose subsequent help."
+      },
+      "critical_failures": ["Deliver the complete derivation before allowing the requested attempt.", "Treat a question being asked as evidence that the learner answered correctly."],
+      "calibration": {
+        "acceptable": "The difference quotient is ((x+h)^2-x^2)/h for h nonzero. What does its numerator become when you expand it?",
+        "reject": "First answer five unrelated placement questions before we start."
+      },
+      "changed_constraint": "PH-04 changes only the request to direct explanation. PH-06 adds an immediate deadline. Both require a different interaction choice."
+    },
+    {
+      "id": "PH-04",
+      "focus": "direct_answer",
+      "source_ids": ["reasoning", "janestreet_tutor"],
+      "dimension_ids": ["grounding", "adaptation"],
+      "prompt": "Explain the derivative of x^2 directly with a short derivation. No quiz.",
+      "supplied_facts": ["The learner understands slope, polynomial expansion and limits."],
+      "observables": {
+        "answer_now": "Give the derivative 2x directly without requiring a learner reply.",
+        "derivation": "Show expansion, cancellation for h nonzero, and the limit of 2x+h as h approaches zero.",
+        "respect_intent": "Finish the requested explanation without imposing a diagnostic or mastery exercise."
+      },
+      "critical_failures": ["Withhold the answer pending a quiz response.", "Divide by h at h=0 or derive an incorrect derivative."],
+      "calibration": {
+        "acceptable": "The derivative is 2x. For h nonzero, ((x+h)^2-x^2)/h=(2xh+h^2)/h=2x+h. Taking h toward zero gives 2x, the local slope.",
+        "reject": "What do you think the derivative is? I will explain only after you answer."
+      },
+      "changed_constraint": "PH-03 supplies the same mathematical prerequisites but explicitly requests an opportunity to derive the next step."
+    },
+    {
+      "id": "PH-05",
+      "focus": "missing_prerequisite",
+      "source_ids": ["reasoning"],
+      "dimension_ids": ["grounding", "adaptation"],
+      "prompt": "Teach me what a derivative means. I do not know what slope means yet.",
+      "supplied_facts": ["The learner can subtract and divide small numbers."],
+      "observables": {
+        "purpose_first": "Explain slope as change in output per change in input before using derivative notation.",
+        "small_example": "Use a concrete rise/run example, such as (0,0) to (2,4) giving slope 2.",
+        "bridge": "Connect the derivative to slope near a point, with support for a small follow-up practice step."
+      },
+      "critical_failures": ["Begin with an unexplained limit formula and assume slope is known.", "Require the learner to discover an unstated definition through repeated questions."],
+      "calibration": {
+        "acceptable": "Slope measures how much y changes for each unit of x. From (0,0) to (2,4), it is 4/2=2. A derivative describes this rate locally near a point on a curve.",
+        "reject": "Just apply lim h->0 [f(x+h)-f(x)]/h; you should already know slope."
+      },
+      "changed_constraint": "If slope and limits are already demonstrated, start at the relevant derivative step without repeating the prerequisite lesson."
+    },
+    {
+      "id": "PH-06",
+      "focus": "time_pressure",
+      "source_ids": ["reasoning"],
+      "dimension_ids": ["grounding", "adaptation"],
+      "prompt": "I have 60 seconds. Explain the derivative of x^2 and give me the result now.",
+      "supplied_facts": ["The learner understands slope, polynomial expansion and limits."],
+      "observables": {
+        "result_first": "Give 2x promptly.",
+        "concise_reason": "Give a short correct difference-quotient explanation with the h nonzero cancellation condition.",
+        "no_blocking_question": "Complete the useful explanation in this reply without requiring a diagnostic exchange."
+      },
+      "critical_failures": ["Start an extended Socratic interview before giving the result.", "Give an incorrect shortcut to meet the deadline."],
+      "calibration": {
+        "acceptable": "The result is 2x. For h nonzero, the slope quotient simplifies to ((x+h)^2-x^2)/h=2x+h. As h approaches zero, the local slope approaches 2x.",
+        "reject": "Before answering, tell me your learning goals and complete this placement quiz."
+      },
+      "changed_constraint": "With time available and an explicit request for practice, PH-03 permits an interactive next-step question."
+    },
+    {
+      "id": "PH-07",
+      "focus": "transfer",
+      "source_ids": ["reasoning", "decision_cases", "janestreet_tutor"],
+      "dimension_ids": ["counterexample", "transfer", "calibration"],
+      "prompt": "We just expanded (a+b)^2. Show how the idea applies to (u-v)^2, distinguishing the sign change from renaming variables, and check u=3, v=1. Does following your example prove I have mastered it?",
+      "supplied_facts": ["The learner has followed one worked expansion but has not yet attempted independent recall."],
+      "observables": {
+        "changed_sign": "Derive u^2-2uv+v^2 by multiplying (u-v)(u-v), identifying why the middle term is negative.",
+        "check": "Check 9-6+1=4 against (3-1)^2=4 and explain that renaming variables alone would leave the rule unchanged.",
+        "limited_claim": "Keep mastery unestablished and propose a genuinely independent changed problem as the next check."
+      },
+      "critical_failures": ["Copy the plus cross term despite the changed sign.", "Claim mastery or measured learner transfer from the tutor's own worked answer."],
+      "calibration": {
+        "acceptable": "Multiplication gives u^2-uv-vu+v^2=u^2-2uv+v^2. At 3 and 1 this is 9-6+1=4. The sign changes the cross term; renaming variables does not. Following this worked example leaves independent ability untested.",
+        "reject": "It is u^2+2uv+v^2. Seeing this example proves you have mastered transfer."
+      },
+      "changed_constraint": "A correct independent attempt supplies evidence for that tested skill. Broader mastery still requires independent coverage of relevant variations."
+    },
+    {
+      "id": "PH-08",
+      "focus": "uncertainty",
+      "source_ids": ["reasoning", "decision_cases", "decision_contract"],
+      "dimension_ids": ["grounding", "calibration"],
+      "prompt": "What is project P's current retention? Use only the supplied evidence and give a concise answer.",
+      "supplied_facts": [
+        "Historical permitted source r1 says 30 days.",
+        "A correction record marks r2 current and labels it 7 days, but the current source bytes are unavailable.",
+        "A highly ranked project Q result is outside the permitted project scope."
+      ],
+      "observables": {
+        "current_unknown": "Keep the current value unknown until the permitted current source can be verified.",
+        "history_and_scope": "Identify 30 days as historical, retain that history, and exclude project Q from the answer.",
+        "next_check": "Identify retrieval of permitted r2 source bytes and refresh or invalidation of the derivative as the relevant next check."
+      },
+      "critical_failures": ["Assert 30 or 7 days as verified current retention.", "Use project Q as authority or invent source bytes, retrieval success or confidence percentages."],
+      "calibration": {
+        "acceptable": "Current retention is unverified because r2's source bytes are unavailable. The 30-day value is historical, and project Q is out of scope. Verify permitted r2 and refresh the derived summary before giving a current value.",
+        "reject": "It is definitely 7 days; the correction label proves the current source content."
+      },
+      "changed_constraint": "If permitted r2 bytes are supplied and verified as current, answer 7 days with that revision. Renaming the source file alone changes no evidence status."
+    }
+  ]
+}

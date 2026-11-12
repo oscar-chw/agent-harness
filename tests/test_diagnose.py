@@ -70,7 +70,8 @@ class TestExplain(unittest.TestCase):
         self.assertEqual(r["instructions"]["loaded_in_session"], D.NOT_OBSERVABLE)   # Claude does not log it
         self.assertEqual(r["skills"]["invoked"], ["production-code"])
         self.assertEqual([c["tool"] for c in r["memory"]], ["mem_search"])
-        self.assertEqual(r["checks"][0]["exit"], 0)
+        # "3 passed" is program output, not an observed process exit code.
+        self.assertEqual(r["checks"][0]["exit"], D.NOT_OBSERVABLE)
         self.assertEqual(r["workers"], ["Agent:harness-review"])
         self.assertEqual(r["compactions"], 1)
         self.assertEqual(r["tokens"]["input"], 100)
@@ -114,7 +115,7 @@ class TestExplain(unittest.TestCase):
                                                                  "content": "ok"}]}})
         out = D.render(D.explain("claude-code", jsonl(self.tmp / "s.jsonl", ev), self.home))
         self.assertLess(max(len(x) for x in out.splitlines()), 200)
-        self.assertIn("301 passed", out)
+        self.assertIn("0 passed, 0 failed, 301 unobserved", out)
 
     def test_negative_control_codex_session_without_the_harness_rules(self):
         r = D.explain("codex", jsonl(self.tmp / "r.jsonl", codex_events(rules="# Some other rules")), self.home)

@@ -12,10 +12,13 @@ keys stay; uninstall takes out only these):
 """
 from __future__ import annotations
 
+import os
+import re
 from typing import Dict, List
 
 from .. import routing
 from .base import Adapter, Ctx, FileChange, base_dir, mcp_servers, shared_skills, which
+from .claude_code import hpath
 
 
 class CodexAdapter(Adapter):
@@ -39,6 +42,21 @@ class CodexAdapter(Adapter):
                 tables[name[1:]].update(body)
             else:
                 tables[name] = body
+        if ctx.permission_profile != "preserve":
+            tables.setdefault("+", {}).update({
+                "sandbox_mode": "workspace-write" if ctx.permission_profile == "autonomous" else "read-only",
+                "approval_policy": "on-request",
+                "approvals_reviewer": "auto_review" if ctx.permission_profile == "autonomous" else "user",
+            })
+        else:
+            # Carry current values through removal of a formerly owned patch.
+            # Omitting them would restore the pre-install backup, not preserve.
+            from ..installer import load_toml
+            config = codex / "config.toml"
+            current = load_toml(config.read_text(encoding="utf-8")) if config.is_file() else {}
+            for key in ("sandbox_mode", "approval_policy", "approvals_reviewer"):
+                if key in current:
+                    tables.setdefault("+", {})[key] = current[key]
         note = "agent rules (replaces the file)"
         if not project and (codex / "AGENTS.override.md").is_file():
             note += "; NOTE: your AGENTS.override.md takes precedence and hides it"
@@ -47,6 +65,48 @@ class CodexAdapter(Adapter):
             FileChange(codex / "config.toml", "merge-toml", tables,
                        "registers the harness MCP server; other settings untouched"),
         ]
+        if os.name != "nt":
+            # Additive JSON merge preserves user hooks and leaves inline TOML
+            # hooks untouched. Native Codex must still trust each definition.
+            prefix = "PYTHONPATH=" + hpath(ctx, "lib") + " python3 -m agent_harness.cli "
+            hooks = {
+                "UserPromptSubmit": [{"hooks": [{"type": "command", "command": prefix + "_hook-prompt",
+                                                  "timeout": 5, "additionalContextLimit": 1200}]}],
+                "SessionStart": [{"matcher": "startup|resume|compact",
+                                  "hooks": [{"type": "command", "command": prefix + "_hook-context",
+                                             "timeout": 5, "additionalContextLimit": 6000}]}],
+            }
+            from .. import installer
+            config = codex / "config.toml"
+            before = config.read_text(encoding="utf-8") if config.is_file() else ""
+            inline = installer.load_toml(installer.toml_merge(before, tables)).get("hooks", {})
+            for event in list(hooks):
+                groups = inline.get(event, []) if isinstance(inline, dict) else []
+                command = hooks[event][0]['hooks'][0]['command']
+                equivalent = [g for g in groups if isinstance(g, dict) and
+                              any(isinstance(h, dict) and h.get('command') == command
+                                  and h.get('enabled', True) is not False for h in g.get('hooks', []))]
+                if event == 'SessionStart':
+                    missing = []
+                    for source in ('startup', 'resume', 'compact'):
+                        covered = False
+                        for group in equivalent:
+                            try:
+                                covered |= not group.get('matcher') or bool(re.search(group['matcher'], source))
+                            except (re.error, TypeError):
+                                pass  # Invalid existing matcher does not supply coverage.
+                        if not covered:
+                            missing.append(source)
+                    if missing:
+                        hooks[event][0]['matcher'] = '|'.join(missing)
+                    else:
+                        del hooks[event]
+                elif any(not group.get('matcher') for group in equivalent):
+                    del hooks[event]
+            if hooks:
+                changes.append(FileChange(codex / "hooks.json", "merge-json", {"hooks": hooks},
+                                      "scoped recall/context; review exact definitions in Codex /hooks; "
+                                      "existing inline hooks stay and may produce a multiple-source warning"))
         if routing.available(ctx.content):          # one subagent per tier: model + effort from routing.toml
             for name, tier in routing.resolve(ctx.content, ctx.home, ctx.profile).items():
                 changes.append(FileChange(codex / "agents" / f"{routing.PREFIX}{name}.toml", "replace",

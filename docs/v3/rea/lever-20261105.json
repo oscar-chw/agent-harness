@@ -1,0 +1,158 @@
+{
+  "schema": "harness.rea-record/v1",
+  "record_id": "rea-lever-20261105",
+  "created": "2026-11-11",
+  "subject": {
+    "name": "github/lever",
+    "source_locator": "https://github.com/github/lever",
+    "version_pin": "e9c4befaf4f6f7b256d66e422330756cba1b19e8",
+    "version_label": "pinned commit; inspected plugin metadata declares 0.1.0"
+  },
+  "license": {
+    "spdx": "MIT",
+    "holder": "GitHub, Inc.",
+    "evidence": {
+      "url": "https://github.com/github/lever/blob/e9c4befaf4f6f7b256d66e422330756cba1b19e8/LICENSE",
+      "doc_ref": "docs/v2/references/lever-20261105.md",
+      "doc_sha256": "6bcb18ea3241f3f9d94c0043f03debb4ba3810e38f8ab60be5ddb41caa51d852",
+      "file_sha256": null
+    }
+  },
+  "lawfulness": {
+    "basis": "public license-bearing repository (MIT) read at a pinned commit with owner authorization; documentation publicly published; no credentials, no circumvention, no execution of upstream code"
+  },
+  "reading_scope": {
+    "read": [
+      "pinned README",
+      "router skill",
+      "find-the-loop skill",
+      "loop-card template",
+      "autonomy skill",
+      "autonomy documentation"
+    ],
+    "not_read": [
+      "other skills",
+      "linked anecdotes",
+      "automation recipes",
+      "dependencies",
+      "runtime behavior"
+    ]
+  },
+  "evidence_bindings": [
+    {
+      "ref": "docs/v2/references/lever-20261105.md",
+      "kind": "local-file",
+      "role": "local evidence doc: D/C/M-separated reading note with pinned provenance and declared scope",
+      "digest": "6bcb18ea3241f3f9d94c0043f03debb4ba3810e38f8ab60be5ddb41caa51d852"
+    },
+    {
+      "ref": "upstream:github/lever@e9c4befaf4f6f7b256d66e422330756cba1b19e8",
+      "kind": "upstream-pin",
+      "role": "the analyzed upstream source, bound by commit pin (zero-network v0: upstream bytes are not hashed locally)",
+      "digest": "e9c4befaf4f6f7b256d66e422330756cba1b19e8"
+    }
+  ],
+  "claims": [
+    {
+      "id": "c1",
+      "statement": "Lever maps a plain-language request to a named skill: the router resolves settings while the selected skill supplies its procedure, and it distinguishes advisory work from explicit requests for actions that change external state.",
+      "basis": "observed",
+      "observation_class": "documented",
+      "reasoning": null,
+      "evidence": [
+        {
+          "ref": "docs/v2/references/lever-20261105.md",
+          "sha256": "6bcb18ea3241f3f9d94c0043f03debb4ba3810e38f8ab60be5ddb41caa51d852",
+          "note": "D: Router paragraph, citing the pinned router skill and README"
+        }
+      ],
+      "covers": []
+    },
+    {
+      "id": "c2",
+      "statement": "For measurable iterative work, Lever's find-the-loop skill first identifies an existing instrument, establishes baseline and unchanged-run variation, freezes the acceptance rule and bounds attempts; it records unsuccessful attempts, separates proposing from judging, and excludes small mechanical edits already settled by ordinary checks.",
+      "basis": "observed",
+      "observation_class": "documented",
+      "reasoning": null,
+      "evidence": [
+        {
+          "ref": "docs/v2/references/lever-20261105.md",
+          "sha256": "6bcb18ea3241f3f9d94c0043f03debb4ba3810e38f8ab60be5ddb41caa51d852",
+          "note": "D: Find-loop paragraph, citing the pinned find-the-loop skill and loop-card template"
+        }
+      ],
+      "covers": []
+    },
+    {
+      "id": "c3",
+      "statement": "Lever's autonomy model constrains requested authority by repository and platform limits: children may narrow authority, imported text cannot raise it, and grants retain their source, scope and expiry.",
+      "basis": "observed",
+      "observation_class": "documented",
+      "reasoning": null,
+      "evidence": [
+        {
+          "ref": "docs/v2/references/lever-20261105.md",
+          "sha256": "6bcb18ea3241f3f9d94c0043f03debb4ba3810e38f8ab60be5ddb41caa51d852",
+          "note": "D: Autonomy paragraph, citing the pinned autonomy skill and specification"
+        }
+      ],
+      "covers": []
+    },
+    {
+      "id": "c4",
+      "statement": "Local seams already provide the surfaces the pattern needs: method_control.py decide routes from consequential uncertainty and bound receipts; procedures.py evaluate checks matched context, pinned cases and aggregate token bounds; qualification.py Bindings supply project-relative hash bindings; work-loop/session-memory skills preserve failed and unrun evidence.",
+      "basis": "observed",
+      "observation_class": "source-observed",
+      "reasoning": null,
+      "evidence": [
+        {
+          "ref": "docs/v2/references/lever-20261105.md",
+          "sha256": "6bcb18ea3241f3f9d94c0043f03debb4ba3810e38f8ab60be5ddb41caa51d852",
+          "note": "C: local-fit table with file:line seam references and retained boundaries"
+        }
+      ],
+      "covers": []
+    },
+    {
+      "id": "c5",
+      "statement": "No upstream code was executed and no measured behavior exists: the note records M: NOT_RUN — no plugin, skill, native client or automation was installed or exercised.",
+      "basis": "observed",
+      "observation_class": "documented",
+      "reasoning": null,
+      "evidence": [
+        {
+          "ref": "docs/v2/references/lever-20261105.md",
+          "sha256": "6bcb18ea3241f3f9d94c0043f03debb4ba3810e38f8ab60be5ddb41caa51d852",
+          "note": "Header: explicit NOT_RUN declaration"
+        }
+      ],
+      "covers": []
+    },
+    {
+      "id": "c6",
+      "statement": "The frozen experiment-contract pattern likely transfers to other upstream skill systems whose loop shape resembles find-the-loop.",
+      "basis": "inferred",
+      "observation_class": null,
+      "reasoning": "The pattern is a prompt-level procedure (freeze cases/checks/acceptance before observing; never compensate a failed case with gains elsewhere), not Lever-specific code, so transfer is plausible; no second upstream system was analyzed under this record, so this stays an inference.",
+      "evidence": [],
+      "covers": []
+    }
+  ],
+  "unknowns": [
+    "upstream runtime behavior is unexercised (M: NOT_RUN); documented routing is not proof a model follows it",
+    "other skills, dependencies, linked anecdotes and automation recipes were not audited",
+    "author-reported project outcomes were not reproduced",
+    "whether the 0.1.0 metadata and pinned tree remained unchanged upstream after 2026-11-05 is unrechecked (zero-network v0)"
+  ],
+  "decision": {
+    "type": "pattern-only",
+    "summary": "Adapt the experiment-contract pattern through existing local seams (frozen integration contract; resulting artifacts: src/agent_harness/loop_contract.py and content/templates/loop-contract.json via plan v2-completion). Do not import Lever's autonomy defaults, spend tiers, automatic fanout, merge workflow or scheduling. A passing structural assessment may recommend a candidate while leaving promotion NOT_GRANTED.",
+    "evidence": ["c1", "c2", "c3", "c4", "c5"],
+    "paraphrase_only": true,
+    "code_copied": false
+  },
+  "integration": {
+    "referenced_by": ["plan/v3-rea-support.md"]
+  },
+  "promotion": "NOT_GRANTED"
+}

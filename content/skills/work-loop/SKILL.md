@@ -3,56 +3,52 @@ name: work-loop
 description: Default loop for research, coding and dev-ops - analyse, research, plan, execute, test, loop back where the evidence points. Use for any task beyond a one-line change.
 ---
 
-# The work loop
+# Adaptive problem solving
 
-Five stages. Move forward when a stage's exit condition holds; jump back when evidence says an
-earlier stage was wrong. Record the stage with `state_save` so the loop survives compaction and
-new sessions.
+Choose the next useful action from the current goal, evidence and constraints.
+These are available actions, not a mandatory sequence. Simple answers stay direct.
+Use relevant principles, counterevidence and alternatives; [reasoning.md](reasoning.md)
+provides optional depth when a concrete uncertainty cannot be resolved directly.
 
-## 1. Analyse / hypothesise
-- Coding or ops: restate the problem in one sentence, without the asker's framing. What is
-  observed, what is expected, what would prove it fixed?
-- Science or data research: write the hypothesis so it can be **falsified**: "X changes Y by at
-  least Z on data D" - and the result that would refute it.
-- Exit: a "done" (or "refuted") condition that a command can check.
+## Prepare before task actions
+- Material includes requested plans and research. Before the substantive answer,
+  writes or delegation, emit **Task brief:** in a few sentences, then continue:
+  outcome, scope/non-goals, constraints/authority, success check, sourced context,
+  labelled assumptions/consequential gaps and next action. Preserve original intent.
+- Recover available context before questions; use [task-brief.md](task-brief.md).
+  Do not invent facts, expand authority or change acceptance to make work easier.
+- Trivial requests stay direct, without a visible brief or compulsory research/plan.
+  Do not chase prompt perfection; revisit only when evidence or requirements change.
 
-## 2. Research
-- What already exists? Search the knowledge index (`kb_get` the matching sections), memory and
-  lessons, the codebase, then outside sources. Read only what bears on the question.
-- Look for the disconfirming evidence too, not only support.
-- Exit: the unknowns are answered or written down as assumptions.
+## Understand and inspect
+- Establish the intended outcome, constraints, facts, assumptions and success check.
+- Inspect local knowledge, memory, task state and the project before asking for
+  information already available. Research only the consequential evidence gap.
+- Ask the user only for unrecoverable intent, authority or a real value tradeoff;
+  give a recommended default and its consequences. Own technical diagnosis.
 
-## 3. Summarise and plan
-- Three to ten lines: what you found, the approach, the steps, the check for each step.
-- For experiments: the data split (in-sample / out-of-sample, dates), the metric, the baseline,
-  and how many runs. Decide these **before** looking at results.
-- Exit: the plan names its checks. Ask the human only if a real decision is needed.
+## Act and verify
+- Choose a small reviewable action; coordinate independent work only when useful.
+- Code: name a failing reproduction and affected checks. Research: define the
+  hypothesis, evidence, baseline and disconfirmation before judging the result.
+- Data: tiny input, representative sample, full run. Record commands, inputs,
+  seeds and outputs where they matter. Reuse the current task's artifact home.
+- Run the actual check; compare with the intended outcome and baseline. Preserve
+  failures, unrun steps and uncertainty. Never weaken a valid test to get green.
+- Optional optimization assessment: [feedback-loop.md](feedback-loop.md).
+- Full-stack/interview work: load [full-stack.md](full-stack.md). Explain useful
+  tradeoffs and use an appropriate visual when it reduces understanding effort.
 
-## 4. Execute / experiment
-- Smallest change first. Data jobs: a tiny input, then a heavy one, then the full run.
-- Keep every run reproducible: the command, the inputs, the seed, the output location.
-- Exit: the planned steps ran, or one failed.
-
-## 5. Test and evaluate
-- Run the checks from step 3. Compare against the baseline, not against hope.
-- Report the numbers, including the ones that disagree. A null result is a result.
-- Never change a test or the metric to make it pass.
-
-## Loop
-| Evidence | Jump to |
-|---|---|
-| a check failed, cause understood | 4 execute |
-| the cause is not understood | 1 analyse (debug-systematically skill) |
-| a fact was missing or wrong | 2 research |
-| the plan was wrong or too big | 3 plan |
-| everything passed | done: `session_note` if files changed, `lesson_add` if a check failed then passed |
-
-Stop and report honestly when the same stage fails twice the same way: change the approach, do
-not repeat it.
-
-## Making it hold: the work graph
-`state_save` is free text nothing checks. For work spanning sessions, parallel, or not to be
-declared done by assertion, use the `plan` tool: `new <slug> "<goal>"`
-gates stages 1-3 on substance; each node's **gate** is a command, and exit 0 is the only way it
-is done. `ready`, `context <slug> <id>` (rebuilt from disk) and `gate <slug> <id>`. A failed gate
-returns the node to pending with its output: the jump-back, with evidence.
+## Respond to evidence
+- A weak or failed result: reconcile intent with what was actually achieved;
+  identify the gap, competing causes and a discriminating check before patching.
+- Return to analysis, research, design, implementation or verification as needed.
+  Repeat neither the same failed approach nor a full routine without a reason.
+- Dependency branches can proceed independently and join at an integration check.
+  Parent completion requires current child evidence and its own outcome check.
+- Persist task state/checkpoints for dependencies, recovery or cross-session work.
+  `plan context` rebuilds the briefing; `plan gate` records completion evidence.
+  A failed gate returns its node to pending. Never hand-edit completion marks.
+- Blocked effect: follow [recovery.md](recovery.md); continue independent work.
+- Report the outcome, evidence and material limits concisely. Verified corrections
+  and fail-to-pass lessons are candidates, not automatically promoted standards.

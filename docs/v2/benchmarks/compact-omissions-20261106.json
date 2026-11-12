@@ -1,0 +1,51 @@
+{
+  "schema": "harness.public-diagnostic-result/v1",
+  "status": "POST_RESULT_DIAGNOSTIC_SOURCE_ONLY",
+  "base_version": "2.0.0.dev7",
+  "installed": false,
+  "candidate_source_sha256": "97658292d5dfc2561677e29437f20ce46479feec8b71fbf7dcf29ce9ff03a15a",
+  "dataset_sha256": "d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442",
+  "candidate": {
+    "status": "PASS_DIAGNOSTIC_REPLAY_ONLY",
+    "attempted": 500,
+    "graded": 470,
+    "abstention_excluded": 30,
+    "errors": [],
+    "graded_recall_losses": [],
+    "all_session_successes": 396,
+    "coverage_adjusted_recall_all": 0.8425531914893617,
+    "mean_evidence_turn_recall": 0.4453900709219858,
+    "max_packet_bytes": 8190,
+    "seconds": 70.867773458,
+    "model_calls": 0,
+    "results_sha256": "2d06c67a34a2b924318f2308d9ab8a3ffa92c7ce97a02d168f3eba042d5648e4",
+    "contract_sha256": "5fd464e6d3a0b2f262743ab8f704fe4d01b62aae57ac5a28d091c74dc739c679",
+    "input_pins_unchanged": true,
+    "inference": "seen-case diagnostic only; no official QA, heldout efficacy or token savings",
+    "full_v2": "NOT_QUALIFIED",
+    "promotion": "NOT_GRANTED"
+  },
+  "previous_installed_dev7": {
+    "non_abstention_cases": 470,
+    "all_session_successes": 331,
+    "metadata_budget_errors": 7
+  },
+  "limits": {
+    "max_bytes": 8192,
+    "max_results": 5,
+    "context_lines": 0
+  },
+  "limitations": [
+    "All500 records had already been inspected before this repair; no new heldout claim.",
+    "One intermediate compact candidate lost two previously recovered cases and was refused.",
+    "Diagnostic replay02 failed input stability; its data and logs remain, not accepted as a pass.",
+    "Incomplete evidence windows remain: session recall is not QA accuracy.",
+    "Preparation, orchestration and review model usage is not included in this zero-model retrieval component.",
+    "Concurrent regression tests prevent a fair latency comparison.",
+    "No official leaderboard, whole-task token savings or QMD comparison."
+  ],
+  "result_report_sha256": "cc673068280db4583298aa452a3a1494b704ee8d7224444615fcef547075274d",
+  "promotion": "NOT_GRANTED",
+  "full_v2": "NOT_QUALIFIED",
+  "public_submission": "NOT_PERFORMED"
+}

@@ -1,0 +1,124 @@
+{
+  "schema": "harness.methodology-worker-verification/v1",
+  "recorded_at": "2026-11-02T20:09:15.916822+08:00",
+  "head": "60735e2b35088c0e458e78e8a3fe3f1574c2d970",
+  "source_snapshot_note": "Dirty shared checkout; hashes recorded after scoped checks. Not an atomic frozen native campaign or a clean commit. Integration owner must rerun required graph gates on exact integrated candidate.",
+  "source_sha256": {
+    "content/skills/work-loop/SKILL.md": "9a429f05f1773af87dbf4a71620bce14708c6660eb21932104fe0e794c9e309f",
+    "content/skills/work-loop/recovery.md": "4d3a123a98898c4e82dc0bcb8fb15ae3d3cfaf4bf2e92b07895375de16db3160",
+    "content/skills/work-loop/reasoning.md": "5f6f51389268c213f69510835630b2d9bb8f979a0cab8bb0269c5d098516081b",
+    "src/agent_harness/method_control.py": "ca4d6dfa476069a6acb26f773c3f2c23d240077bae2b2df329e88510ab309a3f",
+    "src/agent_harness/procedures.py": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+    "src/agent_harness/launch.py": "2201c6ee17be7c6da9f3081b876e8d13b2f50c215911abdfea502e222bd97134",
+    "src/agent_harness/improve.py": "d7ad190684bbed0623a25e698967eb9d93b410dd2dae491e78352ea500ca9ed9",
+    "content/templates/learning-review.md": "d51d3b412130839c907d3a52d1361be5b25df58986911c15455aa7d215c7bd96",
+    "eval/quality_report.py": "69a385a72d4a05af05cf566eb607a9afc22fc538a546e5bfb56b1b7b903fc3f8",
+    "tests/test_method_control.py": "a1553f6c4e4cea83b281d8334af0d8fe65dd16e0e4bf199f6460ab18c8a0e845",
+    "tests/test_procedure_preparation.py": "a9a50297573c0f421a397c90afc2ab59cd7bc35ce9c6465293008ee2a7cf870d",
+    "tests/test_procedure_independence.py": "28d648f901fde0ace1e58733b62770ab6ad8733edb9cada71a594010ac355732",
+    "tests/test_v1_learning_loop.py": "b3a10be4a767a864117a7fc785679f978742fd3535d22f0d9989447eb348584b",
+    "tests/test_v1_legacy_promotion.py": "31d81e909e723de23273c97667f675c91574d1c151c79f51f590bb1a7f658ab4",
+    "tests/test_learning_arms.py": "f2e8df6915b180aba190582af32d85706c49922d74f8a4a5b4c7500349209add",
+    "tests/test_quality_eval.py": "ad7592cdd00994488d9667c12820bf4feb6a21b4cf56b8675948b8aa8809b763",
+    "tests/test_gate_learning.py": "bd7e6101b90509f5c990448a84c93e6e031726633ea050c9e8cd214cf64a257e",
+    "docs/v1/ACCEPTANCE-MATRIX.md": "fb3a22fe45e0840e5dc2c13938fa1054a439784cb9ea41379421e14e3c9ef05b",
+    "docs/v2/second-brain-contract.md": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+    "handoffs/v2-increments/local-20261102.md": "cf424104e11f54004bc110cab87194707ff4d1220ceef6c55211afc919844068"
+  },
+  "owned_artifact_sha256": {
+    "docs/v2/methodology/README.md": "88fd373a3fad46fe83cb1abbff64681a5a1cee62a44c3f61c2462f18afc8d3dc",
+    "docs/v2/methodology/cases.json": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+    "docs/v2/methodology/evaluation.md": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+    "docs/v2/methodology/native-promotion.md": "96bf938a3407d2fbb21025c4fc35e54929736c8a41dcdd97c13b10b8d667587e",
+    "docs/v2/methodology/replay_cases.py": "bf2fd2f36bc56c7495bfbd7eb9c6e37c1fe91b34cfea86e1e7734081cb5768cd"
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 docs/v2/methodology/replay_cases.py",
+      "exit_code": 0,
+      "result": {
+        "cases": 17,
+        "claim_class": "structural_and_helper_behavior_only",
+        "contract_only_not_behaviorally_graded": 5,
+        "helper_probes": 12,
+        "not_proven": [
+          "native_method_selection",
+          "domain_quality",
+          "transfer",
+          "token_gain",
+          "promotion"
+        ],
+        "pack_sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+        "status": "PASS"
+      }
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q -p no:cacheprovider tests/test_method_control.py tests/test_procedure_preparation.py tests/test_procedure_independence.py tests/test_v1_learning_loop.py tests/test_v1_legacy_promotion.py tests/test_learning_arms.py tests/test_quality_eval.py",
+      "exit_code": 0,
+      "result": "102 passed in 211.74s (0:03:31)",
+      "exec_session_id": 19604
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m ruff check docs/v2/methodology/replay_cases.py",
+      "exit_code": 0,
+      "result": "All checks passed!"
+    },
+    {
+      "command": "inline Python: per-owned-file final-newline/trailing-whitespace assertions; local Markdown destination and named source existence assertions",
+      "exit_code": 0,
+      "result": "PASS: owned file whitespace, final newlines, Markdown destinations and named source existence"
+    },
+    {
+      "command": "inline Python: deep-copy pack, change one field per mutant, subprocess replay_cases.py with temporary JSON; require nonzero exit and named diagnostic; rerun unchanged control",
+      "exit_code": 0,
+      "mutants": [
+        {
+          "change": "cases[0].expected.runtime_action = PLAN",
+          "exit_code": 1,
+          "diagnostic": "got DIRECT, expected PLAN"
+        },
+        {
+          "change": "cases = []",
+          "exit_code": 1,
+          "diagnostic": "empty case pack"
+        },
+        {
+          "change": "remove cases with domain research",
+          "exit_code": 1,
+          "diagnostic": "missing or unknown domain"
+        },
+        {
+          "change": "split = heldout",
+          "exit_code": 1,
+          "diagnostic": "visible cases cannot be held-out"
+        },
+        {
+          "change": "cases[0].existing_checks = [tests/test_method_control.py::test_absent_method]",
+          "exit_code": 1,
+          "diagnostic": "missing existing check"
+        }
+      ],
+      "unchanged_control_exit_code": 0
+    }
+  ],
+  "root_gate_files_observed_at_finish": {
+    "check_cases.py": false,
+    "check_learning.py": false,
+    "check_native.py": false,
+    "check_release.py": false
+  },
+  "root_status": "Deliver and qualify Oscar's complete general 1/9; ready 1,9; blocked 2,4,5,6,7,8; 1 gate run, 0 failed, p50 1s",
+  "not_run": [
+    "native model campaign",
+    "native actor/oracle isolation qualification",
+    "installed-client promotion or rollback",
+    "broad efficacy or token comparison",
+    "root integration/release/device gates"
+  ],
+  "limits": [
+    "structural/helper replay is not domain-quality grading",
+    "five contract-only cases not behaviorally graded",
+    "existing source tests do not establish native promotion",
+    "worker receipt does not close graph nodes"
+  ]
+}

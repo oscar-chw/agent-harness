@@ -1,0 +1,1005 @@
+{
+  "schema": "harness.decision-source-bindings/v1",
+  "as_of": "2026-11-03",
+  "status": "LOCAL_SOURCE_AVAILABILITY_REPORT_NOT_ACCEPTANCE",
+  "worker": "01a19c20-2ecf-7b43-8b94-8be7903dd115",
+  "write_scope": [
+    "docs/v2/vault/decision-source-bindings-20261103.json",
+    "docs/v2/vault/decision-source-bindings-20261103.md"
+  ],
+  "inputs": [
+    {
+      "path": "docs/v2/engineering-cases-20261102.md",
+      "bytes": 16999,
+      "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+      "kind": "AUTHORED_CASE_NOTES_NOT_PRIMARY_COPY",
+      "inspected_extent": "Full case note including acquisition table, five cases and visible transfer prompts"
+    },
+    {
+      "path": "docs/v2/philosophy/decision-references.md",
+      "bytes": 7491,
+      "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+      "kind": "AUTHORED_PRINCIPLE_NOTES_NOT_PRIMARY_COPY",
+      "inspected_extent": "Full F1-F3 read-report and authored decision-reference note"
+    },
+    {
+      "path": "docs/v2/philosophy/source-bindings-20261103.json",
+      "bytes": 6545,
+      "sha256": "73aa512378824d03f715991768ac832558d306fcdd3dcfd6fc3198b70b1e209f",
+      "kind": "DERIVED_READ_PROVENANCE_LEDGER",
+      "inspected_extent": "Existing retained read reports and local-input hashes; not external source copies"
+    },
+    {
+      "path": "docs/v2/philosophy/worked-cases.md",
+      "bytes": 10318,
+      "sha256": "f22369fadf5b98acf476dc8eae24ae1053228404ce29436f3561a10c3c08f8cf",
+      "kind": "AUTHORED_DEVELOPMENT_CASES",
+      "inspected_extent": "Source routes plus C4-C7 evidence/recovery/everyday assumption boundaries; no executed outcomes"
+    },
+    {
+      "path": "docs/v2/philosophy/transfer-prompts.md",
+      "bytes": 4105,
+      "sha256": "40f646424959312f51e9badb41d4bcfe1ba5ffb84c69204e1efc480aab29d88c",
+      "kind": "VISIBLE_DEVELOPMENT_PROMPTS",
+      "inspected_extent": "Eight prompt headings; not held-out or verified model responses"
+    },
+    {
+      "path": "docs/v2/philosophy/resource-judgment-20261103.md",
+      "bytes": 14090,
+      "sha256": "6f723d066ef459eea16038865892a74984fa8313d1f092ed9dae0963653256d5",
+      "kind": "AUTHORED_DECISION_AID",
+      "inspected_extent": "J2 acquisition-versus-ranking and J6 metric/SQL distinctions; source/read boundary"
+    },
+    {
+      "path": "docs/v2/vault/r5-reconciliation-20261103.json",
+      "bytes": 283444,
+      "sha256": "531450fc1cc7578dd16ef5983fcb7798a69ed686ad24d7410e412c8619061592",
+      "kind": "DERIVED_SOURCE_IDENTITY_READ_LEDGER",
+      "inspected_extent": "237 source index and read-axis summary; not237primary-source copies"
+    },
+    {
+      "path": "docs/v2/vault/coverage-ledger.json",
+      "bytes": 272710,
+      "sha256": "e4713a40fbfd759e51052a46e29666605e307cd26828c6e165e04e87d36362ff",
+      "kind": "DERIVED_SOURCE_IDENTITY_READ_LEDGER",
+      "inspected_extent": "Foundation-source read observations and identity membership only"
+    },
+    {
+      "path": ".harness-work/guard-repair/cases/sources.json",
+      "bytes": 11026,
+      "sha256": "22fee4084a174b80010714e5a208f7bfd76287184e12dbc687dab8fa1b10a9c8",
+      "kind": "READ_REPORT_NOT_PRIMARY_COPY",
+      "inspected_extent": "Existing19primary-read report rows; no upstream page text"
+    },
+    {
+      "path": ".harness-work/guard-repair/stage/REFERENCE-SOURCES.json",
+      "bytes": 12635,
+      "sha256": "643d54a98b526c2efcb106549898772885caa315e4e67c824b5ea235663f39ec",
+      "kind": "READ_REPORT_NOT_PRIMARY_COPY",
+      "inspected_extent": "Existing r5 source/read/pending metadata; not page captures"
+    },
+    {
+      "path": "handoffs/v2-completion/decision-cases-assignment-20261103.md",
+      "bytes": 3923,
+      "sha256": "f7911fe188ca124ced71372635e833e23758abb14d621e4270ba4e3c6604caac",
+      "kind": "ASSIGNMENT",
+      "inspected_extent": "Vault two-file scope, no new campaign and root verification"
+    },
+    {
+      "path": ".harness-work/qualification/source-reconciliation.json",
+      "bytes": 575,
+      "sha256": "c0e3b8cca2fca4fb226144910a66fed026cb27c69497d136aa98b435f1f7efe2",
+      "kind": "PLAIN_TEXT_METADATA_QA_STDOUT_DESPITE_JSON_SUFFIX",
+      "inspected_extent": "Whole575-byte text output; not a JSON source ledger or primary capture"
+    }
+  ],
+  "search_scope": {
+    "method": "Read named case/reference/read-ledger files; inventory relevant filenames, without opening raw private transcripts/browser caches or upstream network content.",
+    "local_scopes": [
+      "docs/v2/",
+      ".harness-work/guard-repair/cases/",
+      ".harness-work/data-science/research/",
+      "relevant .harness-work filenames excluding generated candidate mirrors, installed runtime packages and caches",
+      "named public/swe directory inventory via prior known local-vault route"
+    ],
+    "project_source_vault": {
+      "path": ".harness",
+      "exists_at_inspection": false
+    },
+    "found_pdf_limit": "Only an authored harness-system-diagrams PDF filename was returned by the narrow docs/cases/research PDF/HTML listing; no claim about its full contents or use as a primary article capture.",
+    "limits": [
+      "No global disk search or inspection of other users/projects/private raw stores.",
+      "Not finding a local primary capture is not an access-failure report or proof a source never existed.",
+      "Generated candidate duplicates and authored summaries are not independent primary-source copies."
+    ]
+  },
+  "sources": [
+    {
+      "id": "ENG-SHOPIFY-MONOLITH",
+      "canonical_url": "https://shopify.engineering/shopify-monolith",
+      "exact_url": "https://shopify.engineering/shopify-monolith",
+      "title_reported": "Shopify: Under Deconstruction: The State of Shopify’s Monolith",
+      "role": "SUBSTANTIVE_PRIMARY",
+      "family_hints": [
+        "module/isolation"
+      ],
+      "notes_relevance_only": [
+        "ownership and useful intermediate decomposition states",
+        "cost/limit of service extraction"
+      ],
+      "historical_acquisition": {
+        "status": "REPORTED_OPENED_NOT_REVALIDATED",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 11,
+          "end_line": 11
+        }
+      },
+      "historical_read": {
+        "kind": "LOCAL_AUTHOR_REPORT_NOT_NEW_PRIMARY_READ",
+        "extent": "Full article opened; focused reading of initial goals, dependency-density discussion, alternative decomposition strategies and reported current state.",
+        "date_metadata": "16 Sep2020 (date reported by local note)",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 11,
+          "end_line": 11
+        },
+        "other_retained_observations": []
+      },
+      "local_primary_capture": {
+        "status": "NOT_LOCATED_IN_BOUNDED_SEARCH",
+        "path": null,
+        "bytes": null,
+        "sha256": null,
+        "source_revision": null,
+        "read_extent_this_worker": "NONE",
+        "absence_limit": "No corresponding primary body identified in the declared local scopes/receipts; this does not prove global nonexistence or current network inaccessibility."
+      },
+      "available_local_representation": {
+        "kind": "AUTHORED_NOTES_NOT_PRIMARY_COPY",
+        "file": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "bytes": 16999,
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "kind": "AUTHORED_CASE_NOTES_NOT_PRIMARY_COPY",
+          "inspected_extent": "Full case note including acquisition table, five cases and visible transfer prompts"
+        },
+        "relevant_span": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 11,
+          "end_line": 11
+        }
+      },
+      "prior237_membership": {
+        "present": false,
+        "source_id": null,
+        "meaning": "Bounded identity membership only; not acquisition/read/adoption/benefit."
+      },
+      "claim_support": {
+        "status": "REPORTED_ATTRIBUTION_NOT_INDEPENDENTLY_REVALIDATED",
+        "current_primary_span_support": "NOT_RUN"
+      },
+      "adoption": {
+        "status": "USED_IN_LOCAL_EXPLANATORY_NOTES",
+        "runtime_adoption": "NOT_ESTABLISHED"
+      },
+      "benefit": {
+        "status": "NOT_RUN",
+        "measured_receipts": []
+      },
+      "minimal_missing_acquisition": {
+        "needed_for": "Independent local resolution of an attributed primary-source claim, not mere retrieval of the authored note.",
+        "scope": "Capture only the decision/limitation passages named in the reported read scope; keep URL/title/date/access conditions and stable paragraph/page locators with a content digest. Retain original bytes where permitted and label any extracted text/transformation separately.",
+        "conditional": false,
+        "condition": "Required only for primary-span-backed assertions retained in the selected frozen case.",
+        "authority": "Proposed acquisition for root; NOT_RUN here; no new web campaign, credential/cookie use or permission widening."
+      }
+    },
+    {
+      "id": "ENG-SHOPIFY-PACKWERK",
+      "canonical_url": "https://shopify.engineering/a-packwerk-retrospective",
+      "exact_url": "https://shopify.engineering/a-packwerk-retrospective",
+      "title_reported": "Shopify: A Packwerk Retrospective",
+      "role": "SUBSTANTIVE_PRIMARY",
+      "family_hints": [
+        "module/isolation"
+      ],
+      "notes_relevance_only": [
+        "static check versus executable isolation",
+        "boundary-check costs and revised scope"
+      ],
+      "historical_acquisition": {
+        "status": "REPORTED_OPENED_NOT_REVALIDATED",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 12,
+          "end_line": 12
+        }
+      },
+      "historical_read": {
+        "kind": "LOCAL_AUTHOR_REPORT_NOT_NEW_PRIMARY_READ",
+        "extent": "Full article opened; focused reading of package/dependency model, privacy checks, failed isolation result, costs and revised direction.",
+        "date_metadata": "7 Feb2024 (date reported by local note)",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 12,
+          "end_line": 12
+        },
+        "other_retained_observations": []
+      },
+      "local_primary_capture": {
+        "status": "NOT_LOCATED_IN_BOUNDED_SEARCH",
+        "path": null,
+        "bytes": null,
+        "sha256": null,
+        "source_revision": null,
+        "read_extent_this_worker": "NONE",
+        "absence_limit": "No corresponding primary body identified in the declared local scopes/receipts; this does not prove global nonexistence or current network inaccessibility."
+      },
+      "available_local_representation": {
+        "kind": "AUTHORED_NOTES_NOT_PRIMARY_COPY",
+        "file": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "bytes": 16999,
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "kind": "AUTHORED_CASE_NOTES_NOT_PRIMARY_COPY",
+          "inspected_extent": "Full case note including acquisition table, five cases and visible transfer prompts"
+        },
+        "relevant_span": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 12,
+          "end_line": 12
+        }
+      },
+      "prior237_membership": {
+        "present": false,
+        "source_id": null,
+        "meaning": "Bounded identity membership only; not acquisition/read/adoption/benefit."
+      },
+      "claim_support": {
+        "status": "REPORTED_ATTRIBUTION_NOT_INDEPENDENTLY_REVALIDATED",
+        "current_primary_span_support": "NOT_RUN"
+      },
+      "adoption": {
+        "status": "USED_IN_LOCAL_EXPLANATORY_NOTES",
+        "runtime_adoption": "NOT_ESTABLISHED"
+      },
+      "benefit": {
+        "status": "NOT_RUN",
+        "measured_receipts": []
+      },
+      "minimal_missing_acquisition": {
+        "needed_for": "Independent local resolution of an attributed primary-source claim, not mere retrieval of the authored note.",
+        "scope": "Capture only the decision/limitation passages named in the reported read scope; keep URL/title/date/access conditions and stable paragraph/page locators with a content digest. Retain original bytes where permitted and label any extracted text/transformation separately.",
+        "conditional": false,
+        "condition": "Required only for primary-span-backed assertions retained in the selected frozen case.",
+        "authority": "Proposed acquisition for root; NOT_RUN here; no new web campaign, credential/cookie use or permission widening."
+      }
+    },
+    {
+      "id": "ENG-AWS-IDEMPOTENT",
+      "canonical_url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs",
+      "exact_url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
+      "title_reported": "Amazon Builders Library: Making retries safe with idempotent APIs",
+      "role": "SUBSTANTIVE_PRIMARY",
+      "family_hints": [
+        "API replay/unknown outcome"
+      ],
+      "notes_relevance_only": [
+        "request identity and parameter binding",
+        "atomic persistence, response semantics, late requests and retention limits"
+      ],
+      "historical_acquisition": {
+        "status": "REPORTED_OPENED_NOT_REVALIDATED",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 13,
+          "end_line": 13
+        }
+      },
+      "historical_read": {
+        "kind": "LOCAL_AUTHOR_REPORT_NOT_NEW_PRIMARY_READ",
+        "extent": "Read workflow, duplicate-intent, atomicity, semantic-response, late-request and parameter-mismatch sections.",
+        "date_metadata": "No publication date displayed in reported fetched article; ancillary announcement mentioned Jan2021",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 13,
+          "end_line": 13
+        },
+        "other_retained_observations": []
+      },
+      "local_primary_capture": {
+        "status": "NOT_LOCATED_IN_BOUNDED_SEARCH",
+        "path": null,
+        "bytes": null,
+        "sha256": null,
+        "source_revision": null,
+        "read_extent_this_worker": "NONE",
+        "absence_limit": "No corresponding primary body identified in the declared local scopes/receipts; this does not prove global nonexistence or current network inaccessibility."
+      },
+      "available_local_representation": {
+        "kind": "AUTHORED_NOTES_NOT_PRIMARY_COPY",
+        "file": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "bytes": 16999,
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "kind": "AUTHORED_CASE_NOTES_NOT_PRIMARY_COPY",
+          "inspected_extent": "Full case note including acquisition table, five cases and visible transfer prompts"
+        },
+        "relevant_span": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 13,
+          "end_line": 13
+        }
+      },
+      "prior237_membership": {
+        "present": false,
+        "source_id": null,
+        "meaning": "Bounded identity membership only; not acquisition/read/adoption/benefit."
+      },
+      "claim_support": {
+        "status": "REPORTED_ATTRIBUTION_NOT_INDEPENDENTLY_REVALIDATED",
+        "current_primary_span_support": "NOT_RUN"
+      },
+      "adoption": {
+        "status": "USED_IN_LOCAL_EXPLANATORY_NOTES",
+        "runtime_adoption": "NOT_ESTABLISHED"
+      },
+      "benefit": {
+        "status": "NOT_RUN",
+        "measured_receipts": []
+      },
+      "minimal_missing_acquisition": {
+        "needed_for": "Independent local resolution of an attributed primary-source claim, not mere retrieval of the authored note.",
+        "scope": "Capture only the decision/limitation passages named in the reported read scope; keep URL/title/date/access conditions and stable paragraph/page locators with a content digest. Retain original bytes where permitted and label any extracted text/transformation separately.",
+        "conditional": false,
+        "condition": "Required only for primary-span-backed assertions retained in the selected frozen case.",
+        "authority": "Proposed acquisition for root; NOT_RUN here; no new web campaign, credential/cookie use or permission widening."
+      }
+    },
+    {
+      "id": "META-AWS-ANNOUNCEMENT",
+      "canonical_url": "https://aws.amazon.com/about-aws/whats-new/2021/01/new-abl-article-making-retries-safe-with-idempotent-APIs",
+      "exact_url": "https://aws.amazon.com/about-aws/whats-new/2021/01/new-abl-article-making-retries-safe-with-idempotent-APIs/",
+      "title_reported": "AWS announcement linked as publication-date context",
+      "role": "ANCILLARY_METADATA_LINK",
+      "family_hints": [],
+      "notes_relevance_only": [
+        "publication-date context only; not API behavior evidence"
+      ],
+      "historical_acquisition": {
+        "status": "MENTION_ONLY_READ_NOT_ESTABLISHED",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 13,
+          "end_line": 13
+        }
+      },
+      "historical_read": {
+        "kind": "LOCAL_AUTHOR_REPORT_NOT_NEW_PRIMARY_READ",
+        "extent": "Link is cited for Jan2021 announcement context; a separate actual read extent is NOT_ESTABLISHED.",
+        "date_metadata": "Jan2021 (local note attribution; not revalidated)",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 13,
+          "end_line": 13
+        },
+        "other_retained_observations": []
+      },
+      "local_primary_capture": {
+        "status": "NOT_LOCATED_IN_BOUNDED_SEARCH",
+        "path": null,
+        "bytes": null,
+        "sha256": null,
+        "source_revision": null,
+        "read_extent_this_worker": "NONE",
+        "absence_limit": "No corresponding primary body identified in the declared local scopes/receipts; this does not prove global nonexistence or current network inaccessibility."
+      },
+      "available_local_representation": {
+        "kind": "AUTHORED_NOTES_NOT_PRIMARY_COPY",
+        "file": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "bytes": 16999,
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "kind": "AUTHORED_CASE_NOTES_NOT_PRIMARY_COPY",
+          "inspected_extent": "Full case note including acquisition table, five cases and visible transfer prompts"
+        },
+        "relevant_span": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 13,
+          "end_line": 13
+        }
+      },
+      "prior237_membership": {
+        "present": false,
+        "source_id": null,
+        "meaning": "Bounded identity membership only; not acquisition/read/adoption/benefit."
+      },
+      "claim_support": {
+        "status": "NOT_ESTABLISHED_FOR_BEHAVIOR",
+        "current_primary_span_support": "NOT_RUN"
+      },
+      "adoption": {
+        "status": "USED_IN_LOCAL_EXPLANATORY_NOTES",
+        "runtime_adoption": "NOT_ESTABLISHED"
+      },
+      "benefit": {
+        "status": "NOT_RUN",
+        "measured_receipts": []
+      },
+      "minimal_missing_acquisition": {
+        "needed_for": "Independent local resolution of an attributed primary-source claim, not mere retrieval of the authored note.",
+        "scope": "Capture only the decision/limitation passages named in the reported read scope; keep URL/title/date/access conditions and stable paragraph/page locators with a content digest. Retain original bytes where permitted and label any extracted text/transformation separately.",
+        "conditional": true,
+        "condition": "Date corroboration only if an exact publication-date claim is actually required.",
+        "authority": "Proposed acquisition for root; NOT_RUN here; no new web campaign, credential/cookie use or permission widening."
+      }
+    },
+    {
+      "id": "ENG-GOOGLE-OVERLOAD",
+      "canonical_url": "https://sre.google/sre-book/handling-overload",
+      "exact_url": "https://sre.google/sre-book/handling-overload/",
+      "title_reported": "Google SRE Book: Handling Overload",
+      "role": "SUBSTANTIVE_PRIMARY",
+      "family_hints": [
+        "overload"
+      ],
+      "notes_relevance_only": [
+        "localized versus broad overload",
+        "bounded retry budgets, retry owner and fleet-specific limits"
+      ],
+      "historical_acquisition": {
+        "status": "REPORTED_OPENED_NOT_REVALIDATED",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 14,
+          "end_line": 14
+        }
+      },
+      "historical_read": {
+        "kind": "LOCAL_AUTHOR_REPORT_NOT_NEW_PRIMARY_READ",
+        "extent": "Read overload signals, local-versus-global overload, retry budgets, retry-layer rule and limitations sections.",
+        "date_metadata": "Copyright2017 (local note report)",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 14,
+          "end_line": 14
+        },
+        "other_retained_observations": []
+      },
+      "local_primary_capture": {
+        "status": "NOT_LOCATED_IN_BOUNDED_SEARCH",
+        "path": null,
+        "bytes": null,
+        "sha256": null,
+        "source_revision": null,
+        "read_extent_this_worker": "NONE",
+        "absence_limit": "No corresponding primary body identified in the declared local scopes/receipts; this does not prove global nonexistence or current network inaccessibility."
+      },
+      "available_local_representation": {
+        "kind": "AUTHORED_NOTES_NOT_PRIMARY_COPY",
+        "file": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "bytes": 16999,
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "kind": "AUTHORED_CASE_NOTES_NOT_PRIMARY_COPY",
+          "inspected_extent": "Full case note including acquisition table, five cases and visible transfer prompts"
+        },
+        "relevant_span": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 14,
+          "end_line": 14
+        }
+      },
+      "prior237_membership": {
+        "present": false,
+        "source_id": null,
+        "meaning": "Bounded identity membership only; not acquisition/read/adoption/benefit."
+      },
+      "claim_support": {
+        "status": "REPORTED_ATTRIBUTION_NOT_INDEPENDENTLY_REVALIDATED",
+        "current_primary_span_support": "NOT_RUN"
+      },
+      "adoption": {
+        "status": "USED_IN_LOCAL_EXPLANATORY_NOTES",
+        "runtime_adoption": "NOT_ESTABLISHED"
+      },
+      "benefit": {
+        "status": "NOT_RUN",
+        "measured_receipts": []
+      },
+      "minimal_missing_acquisition": {
+        "needed_for": "Independent local resolution of an attributed primary-source claim, not mere retrieval of the authored note.",
+        "scope": "Capture only the decision/limitation passages named in the reported read scope; keep URL/title/date/access conditions and stable paragraph/page locators with a content digest. Retain original bytes where permitted and label any extracted text/transformation separately.",
+        "conditional": false,
+        "condition": "Required only for primary-span-backed assertions retained in the selected frozen case.",
+        "authority": "Proposed acquisition for root; NOT_RUN here; no new web campaign, credential/cookie use or permission widening."
+      }
+    },
+    {
+      "id": "ENG-STRIPE-IDEMPOTENCY",
+      "canonical_url": "https://stripe.com/blog/idempotency",
+      "exact_url": "https://stripe.com/blog/idempotency",
+      "title_reported": "Stripe: Designing robust and predictable APIs with idempotency",
+      "role": "SUBSTANTIVE_PRIMARY",
+      "family_hints": [
+        "API replay/unknown outcome"
+      ],
+      "notes_relevance_only": [
+        "ambiguous network outcome and replay principle",
+        "backoff/jitter distinct from duplicate-effect correctness; not current endpoint contract"
+      ],
+      "historical_acquisition": {
+        "status": "REPORTED_OPENED_NOT_REVALIDATED",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 15,
+          "end_line": 15
+        }
+      },
+      "historical_read": {
+        "kind": "LOCAL_AUTHOR_REPORT_NOT_NEW_PRIMARY_READ",
+        "extent": "Full article opened; focused reading of ambiguous network outcomes, idempotency-key behavior, exponential backoff and jitter.",
+        "date_metadata": "22 Feb2017 (local note report)",
+        "evidence": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 15,
+          "end_line": 15
+        },
+        "other_retained_observations": []
+      },
+      "local_primary_capture": {
+        "status": "NOT_LOCATED_IN_BOUNDED_SEARCH",
+        "path": null,
+        "bytes": null,
+        "sha256": null,
+        "source_revision": null,
+        "read_extent_this_worker": "NONE",
+        "absence_limit": "No corresponding primary body identified in the declared local scopes/receipts; this does not prove global nonexistence or current network inaccessibility."
+      },
+      "available_local_representation": {
+        "kind": "AUTHORED_NOTES_NOT_PRIMARY_COPY",
+        "file": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "bytes": 16999,
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "kind": "AUTHORED_CASE_NOTES_NOT_PRIMARY_COPY",
+          "inspected_extent": "Full case note including acquisition table, five cases and visible transfer prompts"
+        },
+        "relevant_span": {
+          "path": "docs/v2/engineering-cases-20261102.md",
+          "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+          "start_line": 15,
+          "end_line": 15
+        }
+      },
+      "prior237_membership": {
+        "present": false,
+        "source_id": null,
+        "meaning": "Bounded identity membership only; not acquisition/read/adoption/benefit."
+      },
+      "claim_support": {
+        "status": "REPORTED_ATTRIBUTION_NOT_INDEPENDENTLY_REVALIDATED",
+        "current_primary_span_support": "NOT_RUN"
+      },
+      "adoption": {
+        "status": "USED_IN_LOCAL_EXPLANATORY_NOTES",
+        "runtime_adoption": "NOT_ESTABLISHED"
+      },
+      "benefit": {
+        "status": "NOT_RUN",
+        "measured_receipts": []
+      },
+      "minimal_missing_acquisition": {
+        "needed_for": "Independent local resolution of an attributed primary-source claim, not mere retrieval of the authored note.",
+        "scope": "Capture only the decision/limitation passages named in the reported read scope; keep URL/title/date/access conditions and stable paragraph/page locators with a content digest. Retain original bytes where permitted and label any extracted text/transformation separately.",
+        "conditional": false,
+        "condition": "Required only for primary-span-backed assertions retained in the selected frozen case.",
+        "authority": "Proposed acquisition for root; NOT_RUN here; no new web campaign, credential/cookie use or permission widening."
+      }
+    },
+    {
+      "id": "F1-END-TO-END",
+      "canonical_url": "https://web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf",
+      "exact_url": "https://web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf",
+      "title_reported": "Saltzer/Reed/Clark: End-to-End Arguments in System Design",
+      "role": "SUBSTANTIVE_PRIMARY",
+      "family_hints": [
+        "module/isolation",
+        "API replay/unknown outcome",
+        "evidence/correction"
+      ],
+      "notes_relevance_only": [
+        "which boundary can establish an outcome guarantee",
+        "conditional endpoint/recovery tradeoff, not removal of lower-layer safeguards"
+      ],
+      "historical_acquisition": {
+        "status": "REPORTED_OPENED_NOT_REVALIDATED",
+        "evidence": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "start_line": 15,
+          "end_line": 29
+        }
+      },
+      "historical_read": {
+        "kind": "LOCAL_AUTHOR_REPORT_NOT_NEW_PRIMARY_READ",
+        "extent": "Introduction, file-transfer/performance, delivery guarantees, duplicate suppression and Identifying the ends; PDF pages1-7. Later history and bibliography not used.",
+        "date_metadata": "Date not established by selected local read report",
+        "evidence": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "start_line": 15,
+          "end_line": 29
+        },
+        "other_retained_observations": [
+          {
+            "kind": "HISTORICAL_LEDGER_OBSERVATION",
+            "read_depth": "SELECTED_SECTIONS",
+            "extent_and_limit": "End-to-end argument primary foundation inspected; complete paper reading not explicitly certified",
+            "ledger_path": "docs/v2/vault/coverage-ledger.json",
+            "ledger_sha256": "e4713a40fbfd759e51052a46e29666605e307cd26828c6e165e04e87d36362ff"
+          }
+        ]
+      },
+      "local_primary_capture": {
+        "status": "NOT_LOCATED_IN_BOUNDED_SEARCH",
+        "path": null,
+        "bytes": null,
+        "sha256": null,
+        "source_revision": null,
+        "read_extent_this_worker": "NONE",
+        "absence_limit": "No corresponding primary body identified in the declared local scopes/receipts; this does not prove global nonexistence or current network inaccessibility."
+      },
+      "available_local_representation": {
+        "kind": "AUTHORED_NOTES_NOT_PRIMARY_COPY",
+        "file": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "bytes": 7491,
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "kind": "AUTHORED_PRINCIPLE_NOTES_NOT_PRIMARY_COPY",
+          "inspected_extent": "Full F1-F3 read-report and authored decision-reference note"
+        },
+        "relevant_span": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "start_line": 15,
+          "end_line": 29
+        }
+      },
+      "prior237_membership": {
+        "present": true,
+        "source_id": "url-sha256:80cd7a3df17a0fa9945a16be5ec8757d7ea68257bf9a7ba061d02046a4911786",
+        "meaning": "Bounded identity membership only; not acquisition/read/adoption/benefit."
+      },
+      "claim_support": {
+        "status": "REPORTED_ATTRIBUTION_NOT_INDEPENDENTLY_REVALIDATED",
+        "current_primary_span_support": "NOT_RUN"
+      },
+      "adoption": {
+        "status": "USED_IN_LOCAL_EXPLANATORY_NOTES",
+        "runtime_adoption": "NOT_ESTABLISHED"
+      },
+      "benefit": {
+        "status": "NOT_RUN",
+        "measured_receipts": []
+      },
+      "minimal_missing_acquisition": {
+        "needed_for": "Independent local resolution of an attributed primary-source claim, not mere retrieval of the authored note.",
+        "scope": "Capture only the decision/limitation passages named in the reported read scope; keep URL/title/date/access conditions and stable paragraph/page locators with a content digest. Retain original bytes where permitted and label any extracted text/transformation separately.",
+        "conditional": false,
+        "condition": "Required only for primary-span-backed assertions retained in the selected frozen case.",
+        "authority": "Proposed acquisition for root; NOT_RUN here; no new web campaign, credential/cookie use or permission widening."
+      }
+    },
+    {
+      "id": "F2-SRE-SIMPLICITY",
+      "canonical_url": "https://sre.google/sre-book/simplicity",
+      "exact_url": "https://sre.google/sre-book/simplicity/",
+      "title_reported": "Google SRE Book: Simplicity",
+      "role": "SUBSTANTIVE_PRIMARY",
+      "family_hints": [
+        "module/isolation"
+      ],
+      "notes_relevance_only": [
+        "essential/accidental complexity and whole-change cost",
+        "modularity and small release tradeoffs, not universal service count"
+      ],
+      "historical_acquisition": {
+        "status": "REPORTED_OPENED_NOT_REVALIDATED",
+        "evidence": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "start_line": 30,
+          "end_line": 42
+        }
+      },
+      "historical_read": {
+        "kind": "LOCAL_AUTHOR_REPORT_NOT_NEW_PRIMARY_READ",
+        "extent": "All chapter prose including stability/agility, minimal APIs, modularity and release simplicity; linked works not followed.",
+        "date_metadata": "Date not established by selected local read report",
+        "evidence": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "start_line": 30,
+          "end_line": 42
+        },
+        "other_retained_observations": [
+          {
+            "kind": "HISTORICAL_LEDGER_OBSERVATION",
+            "read_depth": "SELECTED_SECTIONS",
+            "extent_and_limit": "Simplicity chapter primary foundation inspected",
+            "ledger_path": "docs/v2/vault/coverage-ledger.json",
+            "ledger_sha256": "e4713a40fbfd759e51052a46e29666605e307cd26828c6e165e04e87d36362ff"
+          }
+        ]
+      },
+      "local_primary_capture": {
+        "status": "NOT_LOCATED_IN_BOUNDED_SEARCH",
+        "path": null,
+        "bytes": null,
+        "sha256": null,
+        "source_revision": null,
+        "read_extent_this_worker": "NONE",
+        "absence_limit": "No corresponding primary body identified in the declared local scopes/receipts; this does not prove global nonexistence or current network inaccessibility."
+      },
+      "available_local_representation": {
+        "kind": "AUTHORED_NOTES_NOT_PRIMARY_COPY",
+        "file": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "bytes": 7491,
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "kind": "AUTHORED_PRINCIPLE_NOTES_NOT_PRIMARY_COPY",
+          "inspected_extent": "Full F1-F3 read-report and authored decision-reference note"
+        },
+        "relevant_span": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "start_line": 30,
+          "end_line": 42
+        }
+      },
+      "prior237_membership": {
+        "present": true,
+        "source_id": "url-sha256:7d664dff69e7e5da0fc61e30244666437c360c147f8b37058059d4c884f312e4",
+        "meaning": "Bounded identity membership only; not acquisition/read/adoption/benefit."
+      },
+      "claim_support": {
+        "status": "REPORTED_ATTRIBUTION_NOT_INDEPENDENTLY_REVALIDATED",
+        "current_primary_span_support": "NOT_RUN"
+      },
+      "adoption": {
+        "status": "USED_IN_LOCAL_EXPLANATORY_NOTES",
+        "runtime_adoption": "NOT_ESTABLISHED"
+      },
+      "benefit": {
+        "status": "NOT_RUN",
+        "measured_receipts": []
+      },
+      "minimal_missing_acquisition": {
+        "needed_for": "Independent local resolution of an attributed primary-source claim, not mere retrieval of the authored note.",
+        "scope": "Capture only the decision/limitation passages named in the reported read scope; keep URL/title/date/access conditions and stable paragraph/page locators with a content digest. Retain original bytes where permitted and label any extracted text/transformation separately.",
+        "conditional": false,
+        "condition": "Required only for primary-span-backed assertions retained in the selected frozen case.",
+        "authority": "Proposed acquisition for root; NOT_RUN here; no new web campaign, credential/cookie use or permission widening."
+      }
+    },
+    {
+      "id": "F3-NIELSEN",
+      "canonical_url": "https://www.nngroup.com/articles/ten-usability-heuristics",
+      "exact_url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+      "title_reported": "Nielsen:10Usability Heuristics for User Interface Design",
+      "role": "SUBSTANTIVE_PRIMARY",
+      "family_hints": [
+        "API replay/unknown outcome",
+        "everyday choice"
+      ],
+      "notes_relevance_only": [
+        "human-visible state and recovery principles",
+        "broad interaction guidance; not a recommendation for a supplied walking/shuttle scenario"
+      ],
+      "historical_acquisition": {
+        "status": "REPORTED_OPENED_NOT_REVALIDATED",
+        "evidence": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "start_line": 43,
+          "end_line": 54
+        }
+      },
+      "historical_read": {
+        "kind": "LOCAL_AUTHOR_REPORT_NOT_NEW_PRIMARY_READ",
+        "extent": "Definitions and tips for all ten heuristics, focused on1,3,5,8,9,10; linked articles not followed.",
+        "date_metadata": "Date not established by selected local read report",
+        "evidence": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "start_line": 43,
+          "end_line": 54
+        },
+        "other_retained_observations": [
+          {
+            "kind": "HISTORICAL_LEDGER_OBSERVATION",
+            "read_depth": "SELECTED_SECTIONS",
+            "extent_and_limit": "Usability heuristics primary foundation inspected; full-site reading not claimed",
+            "ledger_path": "docs/v2/vault/coverage-ledger.json",
+            "ledger_sha256": "e4713a40fbfd759e51052a46e29666605e307cd26828c6e165e04e87d36362ff"
+          }
+        ]
+      },
+      "local_primary_capture": {
+        "status": "NOT_LOCATED_IN_BOUNDED_SEARCH",
+        "path": null,
+        "bytes": null,
+        "sha256": null,
+        "source_revision": null,
+        "read_extent_this_worker": "NONE",
+        "absence_limit": "No corresponding primary body identified in the declared local scopes/receipts; this does not prove global nonexistence or current network inaccessibility."
+      },
+      "available_local_representation": {
+        "kind": "AUTHORED_NOTES_NOT_PRIMARY_COPY",
+        "file": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "bytes": 7491,
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "kind": "AUTHORED_PRINCIPLE_NOTES_NOT_PRIMARY_COPY",
+          "inspected_extent": "Full F1-F3 read-report and authored decision-reference note"
+        },
+        "relevant_span": {
+          "path": "docs/v2/philosophy/decision-references.md",
+          "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+          "start_line": 43,
+          "end_line": 54
+        }
+      },
+      "prior237_membership": {
+        "present": true,
+        "source_id": "url-sha256:d19198408d2c162177ab527619d5078ec42a490eeab437507d8776fc8be7cb95",
+        "meaning": "Bounded identity membership only; not acquisition/read/adoption/benefit."
+      },
+      "claim_support": {
+        "status": "REPORTED_ATTRIBUTION_NOT_INDEPENDENTLY_REVALIDATED",
+        "current_primary_span_support": "NOT_RUN"
+      },
+      "adoption": {
+        "status": "USED_IN_LOCAL_EXPLANATORY_NOTES",
+        "runtime_adoption": "NOT_ESTABLISHED"
+      },
+      "benefit": {
+        "status": "NOT_RUN",
+        "measured_receipts": []
+      },
+      "minimal_missing_acquisition": {
+        "needed_for": "Independent local resolution of an attributed primary-source claim, not mere retrieval of the authored note.",
+        "scope": "Capture only the decision/limitation passages named in the reported read scope; keep URL/title/date/access conditions and stable paragraph/page locators with a content digest. Retain original bytes where permitted and label any extracted text/transformation separately.",
+        "conditional": false,
+        "condition": "Required only for primary-span-backed assertions retained in the selected frozen case.",
+        "authority": "Proposed acquisition for root; NOT_RUN here; no new web campaign, credential/cookie use or permission widening."
+      }
+    }
+  ],
+  "family_evidence_gaps": [
+    {
+      "family": "module/isolation",
+      "source_ids": [
+        "ENG-SHOPIFY-MONOLITH",
+        "ENG-SHOPIFY-PACKWERK",
+        "F2-SRE-SIMPLICITY"
+      ],
+      "current_available": "Local authored case/principle text with hashes and reported reading; no located raw source body.",
+      "minimum_next": "For static-versus-executable isolation, one Packwerk decision/failed-isolation/limit span suffices if the case makes only that attribution. Add monolith intermediate-state spans only when that separate choice is used; add F2 only for its explicit principle claim.",
+      "not_required": "No full Shopify codebase, library install or all-article scrape."
+    },
+    {
+      "family": "API replay/unknown outcome",
+      "source_ids": [
+        "ENG-AWS-IDEMPOTENT",
+        "ENG-STRIPE-IDEMPOTENCY",
+        "F1-END-TO-END",
+        "F3-NIELSEN"
+      ],
+      "current_available": "Authored notes distinguish replay correctness, outcome ambiguity and visible feedback; primary spans are not locally resolved.",
+      "minimum_next": "Use one bounded Amazon intent/atomicity/mismatch span for the retained retry contract. Capture Saltzer pages addressing the specific endpoint guarantee only if that claim is cited. Capture Stripe/Nielsen only when their distinct claims are retained.",
+      "not_required": "Do not fetch current Stripe API docs unless the task actually depends on current endpoint behavior; the historical article cannot supply those facts."
+    },
+    {
+      "family": "overload",
+      "source_ids": [
+        "ENG-GOOGLE-OVERLOAD"
+      ],
+      "current_available": "Reported relevant chapter reading and authored local/global overload contrast.",
+      "minimum_next": "Capture only local/global overload, retry budget/layer and limitations passages with stable locators; retain fleet-specific scope.",
+      "not_required": "No telemetry collection or fleet rollout; no copying the described three-attempt setting as a general default."
+    },
+    {
+      "family": "SQL metric semantics",
+      "source_ids": [],
+      "current_available": "The selected nine external URLs do not define the synthetic report business metric, row grain or required population. Resource-judgment J6 is an authored diagnostic example.",
+      "minimum_next": "Root must freeze the supplied task/metric definition, schema, input rows and independently derived expected output in a local source-bound fixture. A deterministic SQL execution can qualify that fixture outcome; it does not turn a business definition into an external source fact.",
+      "not_required": "No web acquisition is needed for supplied synthetic facts. If engine-specific semantics become decisive, inspect the actual target and obtain only its applicable official behavior reference under separate scope."
+    },
+    {
+      "family": "evidence/correction",
+      "source_ids": [
+        "F1-END-TO-END"
+      ],
+      "current_available": "Worked C4 and second-brain policy are authored local guidance; no actual source decision/old/new fixture is provided by these articles.",
+      "minimum_next": "Bind an authorized project decision/source revision, its correction/withdrawal and allowed scope. Include missing and forbidden-source cases in the frozen fixture. Capture F1 only if an explicit source-attributed guarantee principle is used.",
+      "not_required": "Do not broaden project/private-history scope or install embeddings to compensate for an unacquired source."
+    },
+    {
+      "family": "everyday choice",
+      "source_ids": [],
+      "current_available": "Worked C6/C7 facts/constraints are supplied hypothetical assumptions, not weather, transit or job-market observations. F3 is an optional interaction principle, not evidence for the scenario timing or preferences.",
+      "minimum_next": "Retain the exact supplied scenario/goal and changed constraints as a frozen local fixture. No external acquisition is necessary unless the prompt is changed to request actual current schedules/facts.",
+      "not_required": "No fabricated probability, utility score or user preference; no research campaign for fully supplied arithmetic/constraint facts."
+    }
+  ],
+  "excluded_or_ancillary": [
+    {
+      "label": "GitLab modular-monolith handbook",
+      "url": null,
+      "status": "HISTORICAL_TIMEOUT_REPORTED_EXCLUDED_FROM_CASE_EVIDENCE",
+      "evidence": {
+        "path": "docs/v2/engineering-cases-20261102.md",
+        "sha256": "9ccc6cfa2865c688633f4a152fa592728747651f860a95474d97aae923234916",
+        "start_line": 7,
+        "end_line": 7
+      },
+      "reason": "The engineering note reports a timeout and does not give an exact URL here; do not invent a locator or count it as a read."
+    },
+    {
+      "path": ".harness-work/qualification/source-reconciliation.json",
+      "bytes": 575,
+      "sha256": "c0e3b8cca2fca4fb226144910a66fed026cb27c69497d136aa98b435f1f7efe2",
+      "status": "PLAIN_TEXT_METADATA_QA_STDOUT_NOT_PRIMARY_SOURCE",
+      "interpretation": "A JSON parse attempt failed because this .json-suffixed file contains text output. It was then inspected as text/metadata, not repaired or promoted to source capture evidence."
+    }
+  ],
+  "summary": {
+    "cited_url_identities": 9,
+    "substantive_primary_read_reports": 8,
+    "ancillary_link_only": 1,
+    "primary_captures_located_in_declared_scopes": 0,
+    "primary_capture_content_hashes_available": 0,
+    "new_primary_fetches_or_reads": 0,
+    "identities_in_prior237": 3,
+    "identities_outside_prior237": 6,
+    "families": 6,
+    "benefit_or_native_evaluation_runs": 0
+  },
+  "binding_contract": [
+    "A note/read-report hash binds local notes/provenance, never the absent primary page/PDF.",
+    "Before a primary-backed case is accepted, resolve the exact primary span/revision and independently check its scope/support; a typed key or URL presence cannot certify reasoning.",
+    "A frozen supplied-facts fixture is valid task evidence but must be labeled authored/synthetic rather than an upstream observed result.",
+    "Read/adoption/measured benefit remain separate; no test/model/native run or method promotion is performed here.",
+    "This is a bounded case-source subset; the old237ledger is not edited or automatically expanded."
+  ],
+  "root_next_action": "Choose the minimal frozen case/citation subset; obtain only its missing permitted primary spans or local supplied-fact fixtures, bind hashes/locators, and run independent source/outcome/native checks.",
+  "verification": {
+    "owner": "root",
+    "source_semantic_correspondence": "NOT_RUN",
+    "capture_acquisition": "NOT_RUN",
+    "case_outcomes": "NOT_RUN",
+    "native_decision_quality": "NOT_RUN",
+    "comparative_quality_total_tokens": "NOT_RUN"
+  },
+  "existing_history_preserved": true
+}

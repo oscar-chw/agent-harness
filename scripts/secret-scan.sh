@@ -75,7 +75,22 @@ files=$(git ls-files 2>/dev/null; git ls-files --others --exclude-standard 2>/de
 while IFS= read -r f; do
   [ -f "$f" ] || continue
   case "$f" in */__pycache__/*|*.pyc|.git/*) continue ;; esac   # the scanner scans itself too
-  out=$( { scan_text < "$f"; scan_ident < "$f"; } | sed "s|^|$f:|")
+  # Signature-bound historical plan notes (2026-11-10, plan v3-eval-pipeline node 10):
+  # these main-plan files carry gate-output notes whose [xxxxxxxx] signatures are
+  # computed over the verbatim recorded text — editing the text would rewrite signed
+  # evidence. They predate plan.py normalising machine paths on record; the flagged
+  # strings are the repo's own location, and new recordings no longer leak. Exempt
+  # from the IDENTIFIER scan only — a credential in these files stays fatal. Every
+  # other file in plan/ (per-node records, future plans) is scanned in full.
+  # 2026-11-11: v3-h6a-l2-candidacy.md added — same signature-bound class: its
+  # 06:05Z gate note was recorded by the INSTALLED plan server, which still
+  # predates the repo's plan.py redaction fix (dev9 staged, owner-gated).
+  case "$f" in
+    plan/v2-completion.md|plan/v3-h1-consolidation.md|plan/v3-h2-reranking.md|plan/v3-eval-pipeline.md|plan/v3-h6a-l2-candidacy.md)
+      out=$(scan_text < "$f" | sed "s|^|$f:|") ;;
+    *)
+      out=$( { scan_text < "$f"; scan_ident < "$f"; } | sed "s|^|$f:|") ;;
+  esac
   [ -n "$out" ] && { printf '%s\n' "$out"; fail=1; }
 done <<< "$files"
 

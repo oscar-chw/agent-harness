@@ -3,11 +3,11 @@
 Only two signals count, because a lesson is only as good as the signal it came from (Reflexion got WORSE on
 MBPP when 16% of its "passing" tests were false positives):
   gate  a check that failed and then passed in the same turn: run_checks, `plan gate`, or a test command
-  user  an explicit correction from the user ("no, ...", "don't ...", "use X instead")
+  user  an explicit correction or teaching cue from the user ("no, ...", "please remember that ...")
 They are kept apart (source), redacted, deduplicated with a count, and written to
-~/.agent-harness/candidates.jsonl, never straight into lessons: `harness improve` promotes a repeated one, and
-only behind an eval (append small deltas and curate; rewriting or hoarding memory made agents worse in ACE and
-Dynamic Cheatsheet). The store is capped by agent_harness.storage.
+~/.agent-harness/candidates.jsonl, never straight into lessons. A repeated observation is evidence for a
+separate, source-bound procedure draft; promotion needs an independent comparison. The store is capped by
+agent_harness.storage.
 """
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from .redact import redact
+from .native_evidence import NativeEvidence as NativeEvidence
 
 STORE = "candidates.jsonl"
 # A check is a command whose PROGRAM is a test runner or linter, in any step of the command line: `grep -rn
@@ -108,13 +109,13 @@ def is_check(cmd: str) -> bool:
     return any(_is_check_step(step) for step in _steps(cmd))
 
 
-# Claude Code's Bash tool reports a failing command as a result that STARTS with "Exit code N"; the same words
-# later in passing output ("the child exited with code 1 as expected") are output, not a status.
-EXIT_LINE = re.compile(r"\A\s*Exit code (-?\d+)")
+# Only a leading tool status counts: the same words later in output are not the command's exit status.
+EXIT_LINE = re.compile(r"\A\s*(?:Exit code|Command failed with exit code):?\s*(-?\d+)")
 
 # Strict on purpose: "Stop the server" is an instruction, not a correction.
 CORRECTION = re.compile(r"^\s*(no[,.!]|nope\b|don'?t\b|do not\b|wrong\b|that'?s (wrong|not)|not like that)"
                         r"|\b(instead of|use \S+ (instead|not))\b", re.I)
+TEACH = re.compile(r"^\s*(?:please\s+)?remember\s+(?:that\b|for this project\b)|^\s*from now on\b", re.I)
 FAIL_LINE = re.compile(r"(FAILED|ERROR|Error|Traceback|assert|FAIL\b|failed)")
 MAX_TEXT = 300
 
@@ -134,6 +135,15 @@ def _last_turn(path: str) -> list:
     return _last_turn_info(path)[0]
 
 
+def _jsonl_tail(path: str) -> list:
+    with open(path, "rb") as fb:
+        size = fb.seek(0, 2)
+        fb.seek(max(0, size - TAIL_BYTES))
+        if size > TAIL_BYTES:
+            fb.readline()                         # a partial first line
+        return fb.read().decode("utf-8", "replace").splitlines()
+
+
 def _last_turn_info(path: str):
     """(events of the last user turn, whether its start is in view). Only the file's tail is read: a long
     session's transcript runs to tens of megabytes, and this runs at the end of every turn. A turn longer than
@@ -141,13 +151,7 @@ def _last_turn_info(path: str):
     a NEW turn whose start is also out of the window is then taken for the old one, so a repeat inside it can
     be missed (an undercount; it can never make one occurrence look like two)."""
     events, started = [], False
-    with open(path, "rb") as fb:
-        size = fb.seek(0, 2)
-        fb.seek(max(0, size - TAIL_BYTES))
-        if size > TAIL_BYTES:
-            fb.readline()                         # a partial first line
-        lines = fb.read().decode("utf-8", "replace").splitlines()
-    for line in lines:
+    for line in _jsonl_tail(path):
         try:
             e = json.loads(line)
         except ValueError:
@@ -159,6 +163,46 @@ def _last_turn_info(path: str):
             events, started = [], True
         events.append(e)
     return events, started
+
+
+def _last_kimi_turn_info(path: str):
+    """Translate the latest main-agent wire turn into the existing capture event contract."""
+    events, started = [], False
+    for line in _jsonl_tail(path):
+        try:
+            wrapper = json.loads(line)
+        except ValueError:
+            continue
+        if wrapper.get("type") == "turn.prompt":
+            turn = str(wrapper.get("turnId") if wrapper.get("turnId") is not None else "")
+            events = [{"type": "user", "uuid": wrapper.get("promptId") or turn,
+                       "message": {"content": [{"type": "text", "text": _text(wrapper.get("input"))}]}}]
+            started = True
+            continue
+        if not started or wrapper.get("type") != "context.append_loop_event":
+            continue
+        event = wrapper.get("event") or {}
+        if event.get("type") == "tool.call":
+            args = event.get("args") or {}
+            if not isinstance(args, dict):
+                continue
+            uid = event.get("toolCallId") or event.get("uuid") or "call-%d" % len(events)
+            converted = {"type": "tool_use", "id": uid, "name": str(event.get("name", "")), "input": args}
+            events.append({"type": "assistant", "message": {"content": [converted]}})
+        elif event.get("type") == "tool.result":
+            uid = event.get("toolCallId")
+            if not uid:
+                continue
+            result = event.get("result") or {}
+            output = result.get("output", "") if isinstance(result, dict) else str(result)
+            converted = {"type": "tool_result", "tool_use_id": uid, "content": output}
+            events.append({"type": "user", "message": {"content": [converted]}})
+    return events, started
+
+
+def capture_kimi_turn(hh: Path, transcript: str, session: str, project=None) -> List[dict]:
+    events, started = _last_kimi_turn_info(str(transcript))
+    return capture_turn(hh, str(transcript), session, project=project, events=events, started=started)
 
 
 def _checks(events) -> List[dict]:
@@ -197,14 +241,29 @@ def _norm(cmd: str) -> str:
     return re.sub(r"\s+", " ", cmd).strip()
 
 
-def candidates(transcript: str, events: Optional[list] = None) -> List[dict]:
+def candidates(transcript: str, events: Optional[list] = None, project=None) -> List[dict]:
     events = _last_turn(transcript) if events is None else events
+    project_sha = None
+    if project is not None:
+        from .mcp.state import project_root
+        root = project_root(project)
+        if not root.is_dir():
+            raise ValueError("candidate project is not a directory")
+        project_sha = hashlib.sha256(str(root).encode("utf-8")).hexdigest()
     found = []
     first = events[0] if events else {}
     prompt = _text((first.get("message") or {}).get("content")) if first.get("type") == "user" else ""
-    if prompt and CORRECTION.search(prompt):
+    if prompt and (CORRECTION.search(prompt) or TEACH.search(prompt)):
         t = redact(prompt.strip())[:MAX_TEXT]       # redact the whole text first, then cut
-        found.append({"source": "user", "summary": t, "evidence": t, "key": _key("user", t)})
+        found.append({"source": "user", "summary": t, "evidence": t,
+                      "key": _key("user", project_sha + ":" + t if project_sha else t),
+                      # A retained transcript event can be matched later; neither hash
+                      # authenticates the speaker or promotes the text to a method.
+                      "source_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+                      "source_event_sha256": hashlib.sha256(json.dumps(first, sort_keys=True,
+                                                                         ensure_ascii=False).encode()).hexdigest()})
+        if project_sha:
+            found[-1]["project_sha256"] = project_sha
     checks = _checks(events)
     for i, c in enumerate(checks):
         if c["exit"] == 0:
@@ -217,17 +276,24 @@ def candidates(transcript: str, events: Optional[list] = None) -> List[dict]:
         ev = ("\n".join(lines) or text)[:MAX_TEXT]
         cmd = redact(c["cmd"])[:MAX_TEXT]
         found.append({"source": "gate", "summary": "`%s` failed, then passed after a change" % cmd,
-                      "evidence": ev, "key": _key("gate", c["cmd"] + "|" + (lines[0] if lines else ""))})
+                      "evidence": ev, "key": _key("gate", (project_sha + ":" if project_sha else "")
+                                                   + c["cmd"] + "|" + (lines[0] if lines else ""))})
+        if project_sha:
+            found[-1]["project_sha256"] = project_sha
         break                                    # one lesson per turn: the first thing that was wrong
     return found
 
 
-def capture_turn(hh: Path, transcript: str, session: str) -> List[dict]:
+def capture_turn(hh: Path, transcript: str, session: str, project=None, *,
+                 events: Optional[list] = None, started: Optional[bool] = None) -> List[dict]:
     """The Stop hook's entry point. A turn can end in more than one Stop (after the harness's own block, the
     model works on and stops again), so the marker names the turn and the lessons already recorded for it, and
     a later Stop of the same turn records only what is new: one fail-then-pass must count once, or a single
     occurrence would pass the "has recurred" rule harness improve depends on."""
-    events, started = _last_turn_info(transcript)
+    if events is None:
+        events, started = _last_turn_info(transcript)
+    elif started is None:
+        started = True
     first = events[0] if events else {}
     turn = "%s:%s" % (transcript, first.get("uuid") or hashlib.sha1(
         json.dumps(first, sort_keys=True).encode()).hexdigest())
@@ -240,7 +306,7 @@ def capture_turn(hh: Path, transcript: str, session: str) -> List[dict]:
         seen = m.get("keys", []) if m.get("turn") == turn else []
     except (OSError, ValueError, AttributeError, KeyError):
         pass
-    new = [f for f in candidates(transcript, events) if f["key"] not in seen]   # the transcript is parsed once
+    new = [f for f in candidates(transcript, events, project=project) if f["key"] not in seen]
     rows = record(hh, new)
     # The marker is written BEFORE anything else can fail: if pruning raised first, the next Stop of this turn
     # would count the same lesson again (one occurrence would then pass the "has recurred" rule).
@@ -270,13 +336,22 @@ def record(hh: Path, found: List[dict], now: Optional[str] = None) -> List[dict]
     by_key = {r.get("key"): r for r in rows if r.get("key")}
     for f in found:
         r = by_key.get(f["key"])
+        event = f.get("source_event_sha256")
+        if r and event and event in r.get("source_events", []):
+            continue  # a replayed transcript event is not a second episode
+        if r and event and len(r.get("source_events", [])) >= 20:
+            continue  # bounded provenance: more repeats need deliberate curation
         if r:
             r["count"] = int(r.get("count", 1)) + 1
             r["last"] = now
+            if event:
+                r.setdefault("source_events", []).append(event)
             rows.remove(r)
             rows.append(r)                       # most recent last, so pruning drops the stalest first
         else:
             r = dict(f, id=f["key"][:12], count=1, first=now, last=now)
+            if event:
+                r["source_events"] = [event]
             rows.append(r)
             by_key[f["key"]] = r
     hh.mkdir(parents=True, exist_ok=True)
