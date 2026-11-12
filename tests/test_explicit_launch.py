@@ -11,6 +11,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from agent_harness.project_memory import ProjectMemory
 from agent_harness.vault_sources import SourceVault, initialize
 
+# Protocol checks must reach their packets under loaded process scheduling.
+# The separate 0.15-second timeout cases retain their deadline assertions.
+STUB_TIMEOUT = 10
+
 
 @pytest.fixture
 def launch_request(tmp_path):
@@ -165,7 +169,7 @@ def test_execute_refuses_withdrawn_memory_before_spawning(launch_request, monkey
     ProjectMemory(root, data["project_id"]).append({**item, "freshness": "withdrawn"},
                                                     expected=data["references"][0])
     with pytest.raises(ValueError, match="not current"):
-        execute(root, "request.json", "receipt.json", timeout=2)
+        execute(root, "request.json", "receipt.json", timeout=STUB_TIMEOUT)
     assert not marker.exists() and not (root / "receipt.json").exists()
 
 
@@ -184,7 +188,7 @@ def test_named_resume_accepts_a_large_launcher_receipt(launch_request, monkeypat
          "print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':'ready'}}))\n"
          "print(json.dumps({'type':'turn.completed','usage':{'input_tokens':3,'cached_input_tokens':0,'output_tokens':2}}))\n")
     monkeypatch.setenv("PATH", str(root))
-    result = execute(root, "request.json", "next.json", timeout=2, resume_receipt="prior.json")
+    result = execute(root, "request.json", "next.json", timeout=STUB_TIMEOUT, resume_receipt="prior.json")
     assert result["native_completion"] == "COMPLETED_UNGRADED"
     assert result["task_evaluation"] == "NOT_RUN"
 
@@ -225,7 +229,7 @@ def test_invoke_pins_prompt_and_native_completion_is_ungraded(launch_request, mo
                   "print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':'NOT_DEPLOYED; limit 3'}}))\n"
                   "print(json.dumps({'type':'turn.completed','usage':{'input_tokens':10,'cached_input_tokens':4,'output_tokens':2}}))\n")
     monkeypatch.setenv("PATH", str(root))
-    result = execute(root, "request.json", "receipt.json", timeout=2)
+    result = execute(root, "request.json", "receipt.json", timeout=STUB_TIMEOUT)
     assert result["native_completion"] == "COMPLETED_UNGRADED"
     assert result["task_evaluation"] == "NOT_RUN"
     assert result["usage"]["input_tokens"] == 10
@@ -234,7 +238,7 @@ def test_invoke_pins_prompt_and_native_completion_is_ungraded(launch_request, mo
     assert result["native_path"] == str(native)
     assert json.loads((root / "receipt.json").read_text()) == result
     with pytest.raises(ValueError, match="exist"):
-        execute(root, "request.json", "receipt.json", timeout=2)
+        execute(root, "request.json", "receipt.json", timeout=STUB_TIMEOUT)
 
 
 @pytest.mark.parametrize("body,status", [
@@ -325,7 +329,7 @@ def test_resume_rechecks_same_context_and_reuses_native_thread(launch_request, m
          "print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':'finished'}}))\n"
          "print(json.dumps({'type':'turn.completed','usage':{'input_tokens':20,'cached_input_tokens':10,'output_tokens':2}}))\n")
     monkeypatch.setenv("PATH", str(root))
-    result = execute(root, "request.json", "continued.json", timeout=2,
+    result = execute(root, "request.json", "continued.json", timeout=STUB_TIMEOUT,
                      workspace_write=True, method_policy="adaptive", resume_receipt="previous.json")
     assert result["native_completion"] == "COMPLETED_UNGRADED"
     assert result["resumed_from"] == previous["thread_id"]
@@ -371,7 +375,7 @@ def test_resumed_usage_scope_is_unknown_without_a_documented_delta_contract(laun
          "print(json.dumps({'type':'turn.completed','usage':{'input_tokens':20,"
          "'cached_input_tokens':10,'output_tokens':3,'reasoning_output_tokens':2}}))\n")
     monkeypatch.setenv("PATH", str(root))
-    result = execute(root, "request.json", "continued.json", timeout=2,
+    result = execute(root, "request.json", "continued.json", timeout=STUB_TIMEOUT,
                      resume_receipt="previous.json")
     assert result["native_completion"] == "COMPLETED_UNGRADED"
     assert result["usage_scope"] == "UNKNOWN_ON_RESUME"
@@ -394,7 +398,7 @@ def test_resume_refuses_stale_memory_before_native_spawn(launch_request, monkeyp
     stub(root, "raise SystemExit('must not run on stale context')")
     monkeypatch.setenv("PATH", str(root))
     with pytest.raises(ValueError, match="context"):
-        execute(root, "request.json", "continued.json", timeout=2,
+        execute(root, "request.json", "continued.json", timeout=STUB_TIMEOUT,
                 resume_receipt="previous.json")
     assert not (root / "continued.json").exists()
 
@@ -413,7 +417,7 @@ def test_native_receipt_reports_timing_and_route_without_command_contents(launch
          "print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':'ok'}}),flush=True)\n"
          "print(json.dumps({'type':'turn.completed','usage':{'input_tokens':3,'cached_input_tokens':0,'output_tokens':1}}),flush=True)\n")
     monkeypatch.setenv("PATH", str(root))
-    result = execute(root, "request.json", "receipt.json", timeout=2)
+    result = execute(root, "request.json", "receipt.json", timeout=STUB_TIMEOUT)
     timing = result["runtime_events"]
     assert timing["items"][0]["route"] == "shell_plan_other"
     assert timing["items"][0]["command_sha256"] == sha256(
@@ -449,7 +453,7 @@ def test_resume_consumes_bound_independent_failure_without_changing_grader(launc
          "print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':'revised'}}))\n"
          "print(json.dumps({'type':'turn.completed','usage':{'input_tokens':2,'cached_input_tokens':0,'output_tokens':1}}))\n")
     monkeypatch.setenv("PATH", str(root))
-    result = execute(root, "request.json", "continued.json", timeout=2, workspace_write=True,
+    result = execute(root, "request.json", "continued.json", timeout=STUB_TIMEOUT, workspace_write=True,
                      method_policy="adaptive", resume_receipt="previous.json",
                      artifact_path="draft.md", gate_receipt_path="gate.json")
     assert result["native_completion"] == "COMPLETED_UNGRADED"
@@ -482,10 +486,10 @@ def test_completed_turn_can_revise_only_after_a_bound_failed_gate(launch_request
          "print(json.dumps({'type':'turn.completed','usage':{'input_tokens':3,'cached_input_tokens':0,'output_tokens':1}}))\n")
     monkeypatch.setenv("PATH", str(root))
     with pytest.raises(ValueError, match="completed|failed"):
-        execute(root, "request.json", "unapproved.json", timeout=2, workspace_write=True,
+        execute(root, "request.json", "unapproved.json", timeout=STUB_TIMEOUT, workspace_write=True,
                 method_policy="adaptive", resume_receipt="previous.json")
     assert not (root / "unapproved.json").exists()
-    result = execute(root, "request.json", "revised.json", timeout=2, workspace_write=True,
+    result = execute(root, "request.json", "revised.json", timeout=STUB_TIMEOUT, workspace_write=True,
                      method_policy="adaptive", resume_receipt="previous.json",
                      artifact_path="draft.md", gate_receipt_path="gate.json")
     assert result["native_completion"] == "COMPLETED_UNGRADED"
@@ -505,7 +509,7 @@ def test_paired_eval_pins_requested_model_and_effort_without_claiming_effective_
          "print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':'ok'}}))\n"
          "print(json.dumps({'type':'turn.completed','usage':{'input_tokens':2,'cached_input_tokens':0,'output_tokens':1}}))\n")
     monkeypatch.setenv("PATH", str(root))
-    result = execute(root, "request.json", "receipt.json", timeout=2,
+    result = execute(root, "request.json", "receipt.json", timeout=STUB_TIMEOUT,
                      native_model="gpt-6.1-sol", native_effort="xhigh")
     assert result["native_completion"] == "COMPLETED_UNGRADED"
     assert result["requested_model"] == "gpt-6.1-sol"
@@ -576,14 +580,18 @@ for line in sys.stdin:
 '''
     stub(root, body)
     monkeypatch.setenv('PATH', str(root))
+    # This checks the probe's verdict, independently of slow process startup.
     if not protected:
         with pytest.raises(ValueError, match='boundary'):
-            execute(root, 'request.json', 'enforced.json', timeout=2,
+            execute(root, 'request.json', 'enforced.json', timeout=10,
                     eval_deny_root=oracle, eval_enforce_boundary=True,
                     native_model='fixture-model', native_effort='high')
         assert not marker.exists() and not (root / 'enforced.json').exists()
+        failure = json.loads((root / 'enforced.json.failure.json').read_text())
+        assert failure['protocol_stage'] == 3
+        assert failure['native_completion'] == 'FAILED_PROTOCOL'
     else:
-        result = execute(root, 'request.json', 'enforced.json', timeout=2,
+        result = execute(root, 'request.json', 'enforced.json', timeout=10,
                          eval_deny_root=oracle, eval_enforce_boundary=True,
                     native_model='fixture-model', native_effort='high')
         assert marker.is_file() and result['native_completion'] == 'COMPLETED_UNGRADED'
@@ -602,7 +610,7 @@ def test_eval_profile_refuses_inside_project_or_missing_root_before_native_spawn
     config_sibling.mkdir()
     for invalid in (root, root / "nested", root.parent / "missing-oracle", config_sibling):
         with pytest.raises(ValueError, match="eval|oracle|sibling"):
-            execute(root, "request.json", "bad-receipt.json", timeout=2,
+            execute(root, "request.json", "bad-receipt.json", timeout=STUB_TIMEOUT,
                     eval_deny_root=invalid)
     assert not (root / "bad-receipt.json").exists()
 
@@ -631,10 +639,10 @@ def test_eval_profile_resume_rejects_an_oracle_boundary_change(launch_request, m
          "print(json.dumps({'type':'turn.completed','usage':{'input_tokens':2,'cached_input_tokens':0,'output_tokens':1}}))\n")
     monkeypatch.setenv("PATH", str(root))
     with pytest.raises(ValueError, match="resume context"):
-        execute(root, "request.json", "wrong-oracle.json", timeout=2,
+        execute(root, "request.json", "wrong-oracle.json", timeout=STUB_TIMEOUT,
                 workspace_write=True, resume_receipt="previous.json", eval_deny_root=second)
     assert not (root / "wrong-oracle.json").exists()
-    result = execute(root, "request.json", "continued.json", timeout=2,
+    result = execute(root, "request.json", "continued.json", timeout=STUB_TIMEOUT,
                      workspace_write=True, resume_receipt="previous.json", eval_deny_root=first)
     assert result["native_completion"] == "COMPLETED_UNGRADED"
     assert result["permission_boundary"] == "requested_eval_profile_unverified"
@@ -648,7 +656,7 @@ def test_paired_eval_rejects_partial_or_unsafe_native_pins_before_spawn(launch_r
     for model, effort in (("gpt-6.1-sol", None), (None, "xhigh"),
                           ("gpt-6.1-sol;other", "xhigh"), ("gpt-6.1-sol", "impossible")):
         with pytest.raises(ValueError, match="model|effort"):
-            execute(root, "request.json", "receipt.json", timeout=2,
+            execute(root, "request.json", "receipt.json", timeout=STUB_TIMEOUT,
                     native_model=model, native_effort=effort)
     assert native.exists() and not (root / "receipt.json").exists()
 
@@ -671,10 +679,10 @@ def test_paired_eval_resume_keeps_the_same_requested_model_and_effort(launch_req
          "print(json.dumps({'type':'turn.completed','usage':{'input_tokens':2,'cached_input_tokens':0,'output_tokens':1}}))\n")
     monkeypatch.setenv("PATH", str(root))
     with pytest.raises(ValueError, match="resume context"):
-        execute(root, "request.json", "wrong.json", timeout=2, resume_receipt="prior.json",
+        execute(root, "request.json", "wrong.json", timeout=STUB_TIMEOUT, resume_receipt="prior.json",
                 native_model="gpt-6.1-sol", native_effort="high")
     assert not (root / "wrong.json").exists()
-    result = execute(root, "request.json", "continued.json", timeout=2,
+    result = execute(root, "request.json", "continued.json", timeout=STUB_TIMEOUT,
                      resume_receipt="prior.json", native_model="gpt-6.1-sol", native_effort="xhigh")
     assert result["native_completion"] == "COMPLETED_UNGRADED"
     assert result["requested_effort"] == "xhigh"
@@ -758,7 +766,7 @@ def test_enforced_rpc_refusal_preserves_a_redacted_failure_record(launch_request
          " print(json.dumps({'id':r['id'],'error':{'code':-32600,'message':'fixture native refusal'}}),flush=True)\n")
     monkeypatch.setenv('PATH', str(root))
     with pytest.raises(ValueError, match='boundary'):
-        execute(root, 'request.json', 'refused.json', timeout=2, eval_deny_root=oracle,
+        execute(root, 'request.json', 'refused.json', timeout=STUB_TIMEOUT, eval_deny_root=oracle,
                 eval_enforce_boundary=True, native_model='fixture-model', native_effort='high')
     failure = json.loads((root / 'refused.json.failure.json').read_text())
     assert failure['native_completion'] == 'FAILED_PROTOCOL'
@@ -790,7 +798,7 @@ def test_enforced_protocol_malformed_data_stops_before_account_read(launch_reque
     with pytest.raises(ValueError, match='invalid evaluation protocol'):
         # This checks malformed packets, not a two-second process-start deadline.
         # A slow fixture must reach the packet before the independent timeout fires.
-        execute(root, 'request.json', 'invalid.json', timeout=5, eval_deny_root=oracle,
+        execute(root, 'request.json', 'invalid.json', timeout=STUB_TIMEOUT, eval_deny_root=oracle,
                 eval_enforce_boundary=True, native_model='fixture-model', native_effort='high')
     assert not marker.exists()
     assert json.loads((root/'invalid.json.failure.json').read_text())['protocol_stage']==1
@@ -822,6 +830,23 @@ def test_recorded_protocol_failure_prevents_an_accidental_second_invocation(laun
         raise AssertionError('must not spawn an already consumed receipt')
     monkeypatch.setattr(launch.subprocess, 'Popen', refuse)
     with pytest.raises(ValueError, match='prior.*failure|failure.*exists'):
-        launch.execute(root, 'request.json', 'once.json', timeout=2, eval_deny_root=oracle,
+        launch.execute(root, 'request.json', 'once.json', timeout=STUB_TIMEOUT, eval_deny_root=oracle,
             eval_enforce_boundary=True, native_model='fixture-model', native_effort='high')
     assert failure.read_bytes() == before and not (root/'once.json').exists()
+
+
+def test_enforced_timeout_never_reports_an_unobserved_boundary(launch_request, monkeypatch):
+    from agent_harness.launch import execute
+    root, _, _ = launch_request
+    oracle = root.with_name(root.name + '-oracle')
+    oracle.mkdir()
+    stub(root, 'import time; time.sleep(30)')
+    monkeypatch.setenv('PATH', str(root))
+    result = execute(root, 'request.json', 'timeout-boundary.json', timeout=0.15,
+                     eval_deny_root=oracle, eval_enforce_boundary=True,
+                     native_model='fixture-model', native_effort='high')
+    assert result['native_completion'] == 'TIMEOUT'
+    assert result['evaluation_boundary'] is None
+    assert result['permission_boundary'] == 'requested_eval_profile_unverified'
+    assert result['effective_model_evidence'] == 'UNKNOWN'
+    assert result['task_evaluation'] == 'NOT_RUN'

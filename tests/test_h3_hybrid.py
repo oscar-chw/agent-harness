@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[1]
-WORK = REPO / '.harness-work' / 'v3-h3-hybrid'
+WORK = REPO / 'tests/support/v3_research'
 sys.path.insert(0, str(WORK))
 
 import hybrid_scorer as hs  # noqa: E402

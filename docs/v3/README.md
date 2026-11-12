@@ -2,6 +2,12 @@
 
 One local workspace for connected coding clients, with shared task state, sourced memory and evaluated improvements.
 
+Current candidate is **3.0.0rc2**. Its native qualification passed. Local install
+and public CI readback are in progress.
+The [current qualification report](qualification-20261113.md) records the latest
+four-direction results, token measurements and withheld treatments. The older
+two-task smoke below remains a historical observation.
+
 ## Four directions
 
 | Direction | Purpose |
@@ -93,13 +99,14 @@ The earlier v3 experiments retain their original verdicts. Semantic reranking re
 
 ## Release state
 
-**3.0.0.dev1 is installed on the Mac Studio.** Cold verification checked 127
+**3.0.0rc1 is installed on the Mac Studio.** Cold verification checked 127
 packaged files and two fresh installed-server processes. Default board pickup
 and stale-write rejection passed. The prior runtime and shared guidance have
 transaction backups.
 
 Loaded clients need a new MCP connection. Other devices are NOT_RECHECKED.
-Public release is NOT_PUBLISHED. This development candidate has 2,974 passing
+Publication candidate is [PR5](https://github.com/oscar-chw/agent-harness/pull/5).
+Stable release remains unqualified. This release candidate has 3,020 passing
 regression tests, 2 skips and 2 expected failures. Broader model/client uptake,
 general coding-learning efficacy and the older v2 retrieval gate retain their
 qualification gaps.

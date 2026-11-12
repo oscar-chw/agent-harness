@@ -655,12 +655,17 @@ def execute(root, request_path, receipt_path, *, timeout=120, workspace_write=Fa
     # Persist the binding in actual execution receipts, not just prepare output;
     # otherwise every newly emitted receipt becomes unusable for recovery.
     result["prompt_sha256"] = hashlib.sha256(prepared["prompt"].encode("utf-8")).hexdigest()
+    permission_boundary = None
+    if profile_name:
+        permission_boundary = "requested_eval_profile_unverified"
+        if protocol is not None and protocol.receipt is not None:
+            permission_boundary = ("observed_parent_file_and_command_control"
+                if protocol.receipt.get("status") == "OBSERVED_PARENT_FILE_AND_COMMAND_CONTROL"
+                else "observed_local_tool_control")
     result.update(native_completion=status, task_evaluation="NOT_RUN", native_path=native,
                   requested_model=native_model, requested_effort=native_effort,
                   effective_model_evidence=("NATIVE_CLIENT_RESOLVED" if protocol and protocol.receipt else "UNKNOWN"),
-                  permission_boundary=(("observed_parent_file_and_command_control" if eval_parent_boundary else
-                                        "observed_local_tool_control" if eval_enforce_boundary else
-                                        "requested_eval_profile_unverified") if profile_name else None),
+                  permission_boundary=permission_boundary,
                   evaluation_boundary=(protocol.receipt if protocol else None),
                   eval_deny_root_sha256=denied_sha,
                   eval_profile_parent=(parent_profile if profile_name else None),

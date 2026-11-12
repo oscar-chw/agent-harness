@@ -1,0 +1,125 @@
+{
+  "adaptation_model_calls": 0,
+  "competitor_comparison": "NOT_RUN",
+  "correct_pairs": 4,
+  "generated_procedure_adoption": "NOT_GRANTED",
+  "human_comparison": "NOT_RUN",
+  "mean_paired_token_saving": 2988.5,
+  "native_calls": 8,
+  "observed_usage_complete": true,
+  "paired_standard_error": 26.07201564896738,
+  "scope": "authored source-correction pickup; zero-model memory updates",
+  "status": "PASS",
+  "tokens": {
+    "current": 99864,
+    "history": 111818
+  },
+  "usage_scope": "these eight controller-owned calls",
+  "schema": "harness.v3-public-evidence/v1",
+  "date": "2026-11-13",
+  "model": "gpt-6.1-sol",
+  "effort": "high",
+  "case_count": 4,
+  "authored_cases": true,
+  "case_ids": [
+    "portal",
+    "reports",
+    "queue",
+    "search"
+  ],
+  "comparison": "retained source-revision history versus current source-bound factual memory",
+  "frozen_manifest_sha256": "f12061376978447bc86aa106a2249318b7f26d3016a39962c14f0d969111a8d2",
+  "runtime_sha256": {
+    "cli.py": "de2e3d88e0837ea5ebeb625250a00e00b92377cb6bd867c6c7deec85557b66f8",
+    "eval_boundary.py": "620ddb550bef864b631a5e3e675997e60c5fd5155636c1d7b4812a7232b6bb88",
+    "eval_parent.py": "9e3fee771fe7a1296966cb1f7c70b6f8c38dcc898ff00e96c7a834d147513d39",
+    "launch.py": "b5749a0e46be86cdd7f1d521cc22906604c68e40495e7bf3ce31dcc91da9a497",
+    "procedure_campaign.py": "deddd3cdfc4809b0102e4183160fddc2d757e04c9e0a886644b1adca4cece56e",
+    "procedure_execution.py": "60ba37aef1b49eb9fae8d76180b71f41d02c6c385269c6f4ae442b09772a6198",
+    "procedure_preparation.py": "cb3cc01ae4970b44b9ea40df75c6ebf61df9faa7f38409923f0ec34c27bf24cf",
+    "procedures.py": "5a4fe56fb298543129720420190ac97274e43469ac1aa9993d3e89441655a317"
+  },
+  "claims": {
+    "all_native_clients": "UNQUALIFIED",
+    "teaching_efficacy": "NOT_RUN",
+    "generated_procedure_efficacy": "HELD_TOKEN_REGRESSION",
+    "other_device_rollout": "NOT_RECHECKED",
+    "whole_project_research_cost": "UNKNOWN"
+  },
+  "prior_separate_procedure_campaign": {
+    "observed_tokens": 221538,
+    "candidate_tokens": 172569,
+    "baseline_tokens": 48969,
+    "verdict": "HELD_TOKEN_REGRESSION",
+    "adoption": "NOT_GRANTED"
+  },
+  "trials": [
+    {
+      "arm": "history",
+      "case": "portal",
+      "correct": true,
+      "receipt_sha256": "62f0b3df39ede1a897ac1d51f109c366ac5046b91d96ee12d93e30dc15d2c246",
+      "tokens": 27897,
+      "wall_s": 17.158520333
+    },
+    {
+      "arm": "current",
+      "case": "portal",
+      "correct": true,
+      "receipt_sha256": "3ccb6598454e57e191015d7fc5f25cb4dbdc09e73a2337c4a1b0cdd100af5ca5",
+      "tokens": 24953,
+      "wall_s": 20.479863834
+    },
+    {
+      "arm": "current",
+      "case": "reports",
+      "correct": true,
+      "receipt_sha256": "18843193105937df6542bc4606c9e95329193e751c04800a3e8c6b5730eeda7d",
+      "tokens": 24983,
+      "wall_s": 17.136007792
+    },
+    {
+      "arm": "history",
+      "case": "reports",
+      "correct": true,
+      "receipt_sha256": "d25cada706366189a4f51af3cf0258ab3ff11b160d8ebc668db617b5fa9bee22",
+      "tokens": 27988,
+      "wall_s": 20.065062834000003
+    },
+    {
+      "arm": "history",
+      "case": "queue",
+      "correct": true,
+      "receipt_sha256": "cec82290ab74b879b4a852b134b323fecc4a51fc9d87b3aa68fa9e221a502b80",
+      "tokens": 27903,
+      "wall_s": 26.221389416999997
+    },
+    {
+      "arm": "current",
+      "case": "queue",
+      "correct": true,
+      "receipt_sha256": "66240cb2fbb1c309d04ccfb9b85c8f7cd8fd5f3b1a77029811f71ad6efc63123",
+      "tokens": 24953,
+      "wall_s": 22.212123458000008
+    },
+    {
+      "arm": "current",
+      "case": "search",
+      "correct": true,
+      "receipt_sha256": "be87b56eca9749ef03082986135dd6200414e1e415571e179a6fe43653e0c1a0",
+      "tokens": 24975,
+      "wall_s": 22.23433175000001
+    },
+    {
+      "arm": "history",
+      "case": "search",
+      "correct": true,
+      "receipt_sha256": "e9e14e356094b7d0dde3437f26e079213f3a4e1a87f394c4e6e51d140e49f470",
+      "tokens": 28030,
+      "wall_s": 24.338977916000005
+    }
+  ],
+  "source_revision": "3.0.0rc1 frozen native observer",
+  "prior_readback_requalification_tokens": 211624,
+  "whole_project_token_gain": "NOT_ESTABLISHED"
+}

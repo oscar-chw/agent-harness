@@ -1,0 +1,40 @@
+{
+  "schema": "harness.public-private-eval-scope/v1",
+  "private_corpus": "NOT_DISTRIBUTED",
+  "public_ci_private_corpus": "NOT_RUN",
+  "files": {
+    "test_h6a_l2_candidacy.py": {
+      "original_test_functions": {
+        "test_copied_functions_byte_identical_to_h3": "d79fcf4e1786ce796869a57e36bf725b01a63edfca05d48816e88fc4fab1af19",
+        "test_copied_constants_equal_h3": "f329bcb8dddf4752e00984f73e6411fc20e8691b16e1edfe2334b91ae990d32e",
+        "test_l2_rule_matches_h3_module_sha_binding": "17a0b80815b3a782bf9825de778f4641bb9bd5c1399accbbad4388677dca1869",
+        "test_content_tokens_stoplist_and_length": "e33937fa467e8bda67bfff59fa598b4be26d66c020a0fb3465bca2ea4e0be71b",
+        "test_content_bigrams_adjacent_both_content": "2091ed484aca9272ef08f64754108dd414d08822e585cceb237600ddc279051d",
+        "test_rule_L2_fires_below_full_coverage": "b7f4fc73b2cdf283e5be1779d8fb89ea8190bf8c0d7be0e255db2ecc124577b3",
+        "test_rule_L2_full_coverage_override": "ac7cc51fd9c335798fe1b56c09f473f4a3b2ed1a471efcbab38366348a035a81",
+        "test_rule_L2_silent_when_L_silent": "f5cb080834ac8d6591434b2d32eff15f444b82a929ea10fd6ad5ba3437749763",
+        "test_max_coverage_distinct_query_tokens": "fa986d6f83201489b16605b201f3b7366842481d243ad5717b8a1a93a5dabee7",
+        "test_fresh_set_structure_and_hashes": "92f76055de59c120814c39fe47c2c53c6d426f3b47754532f083a3313b50ff33",
+        "test_fresh_set_no_overlap_with_frozen_18": "f40bcdea147808ac94224a6c47bee9ab76284c1cd402bc8bcc40ba1777288478",
+        "test_recorded_candidates_drift_is_detectable": "44ee34480cabde4d59bee188c6172a2443445127f3bfd4f0c473c6ba240886df",
+        "test_module_imports_without_numpy": "862bd68a39dfcdbad455e4097f91afbbedcdeedde808431268f0a979a93c20ab"
+      },
+      "private_check": "eval/private_reference/h6a_recorded_corpus.py",
+      "original_sha256": "8998bb7527ad01a2fd5e1e17fe7f32df4ea4cd1f3904b8a205b9baa3c3d19f28"
+    },
+    "test_kb_honesty.py": {
+      "original_test_functions": {
+        "test_flag_off_byte_identical_to_recorded": "a50f8f226fe5e608964c8c84653829cb755acf0132a87ff43486793c2d00ab36",
+        "test_flag_off_unset_and_empty_and_false_all_inactive": "6d8b26d48851b6018bc6e4fb6bf559c743fb159edb5e8a3bdac39bb59f2ed00f",
+        "test_flag_on_suppression_matches_recorded_outcomes": "52ea6885e5387ae0d1eb7f0a3ea789caf18033fe17fed4ff93d6239fa5ac64ac",
+        "test_flag_on_nonfiring_byte_identical_to_flag_off": "49c6e91ed82d84e7d71387b97827e057f0aa77e161f9eeb64d943248e3d031f5",
+        "test_flag_on_boundary_cases": "cc413e903330c6cbfabd23840561e63fa8532c72fa04dc291d009375c0315da3",
+        "test_embedded_rule_constants_equal_frozen_eval_module": "756eb51f090e5072c8ba151572f1197fd39366859510b4fc91f84ff568e7b9c5",
+        "test_embedded_rule_functions_match_eval_module": "6a56545a466254ca13f6cadc5e89d80853736bac54434303a48f9bc7ce4419f3",
+        "test_honesty_window_distinct_pages_of_top10_sections": "f62b18c3556fde16e31c92e7bd2cc6d90304b51a8b56a794d09c14ea0f8332b2"
+      },
+      "private_check": "eval/private_reference/kb_honesty_corpus.py",
+      "original_sha256": "337bd03d179fdfe1cff1cc509fb470a2a90eab3c5c4d679e17f9e36afb3b9f5a"
+    }
+  }
+}

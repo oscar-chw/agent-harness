@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[1]
-WORK = REPO / '.harness-work' / 'v3-h2-reranking'
+WORK = REPO / 'tests/support/v3_research'
 sys.path.insert(0, str(WORK))
 
 import semantic_rerank as sr  # noqa: E402
