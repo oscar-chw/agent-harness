@@ -229,21 +229,6 @@ class PluginLoopTest(unittest.TestCase):
         with self.assertRaises(plugin_loop.PluginLoopError):
             plugin_loop.load_registry(str(bad))
 
-    def test_real_lever_candidate_admits_against_live_tree(self):
-        """The retroactive example: the Lever pattern capability, REA-qualified
-        by docs/v3/rea/lever-20261105.json, decided by
-        docs/v3/jev/lever-pattern-adoption-20261111.json."""
-        candidate = json.loads(LEVER_CANDIDATE.read_text(encoding="utf-8"))
-        entry = plugin_loop.admit(candidate, str(ROOT), "2026-11-11")
-        self.assertEqual(entry["status"], "admitted")
-        self.assertEqual(entry["name"], "lever-experiment-contract-pattern")
-        registry = plugin_loop.load_registry(str(LEVER_REGISTRY))
-        matches = [e for e in registry["entries"]
-                   if e["name"] == "lever-experiment-contract-pattern"]
-        self.assertEqual(len(matches), 1)
-        self.assertEqual(matches[0]["status"], "admitted")
-        self.assertEqual(matches[0]["rea"]["sha256"], entry["rea"]["sha256"])
-        self.assertEqual(matches[0]["jev"]["sha256"], entry["jev"]["sha256"])
 
 
 if __name__ == "__main__":

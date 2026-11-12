@@ -197,19 +197,6 @@ class SettlementTest(unittest.TestCase):
         self.assertEqual(parsed["checked_at"], "2026-11-11")
         self.assertEqual(len(parsed["records"]), 2)
 
-    def test_real_v3_plans_have_zero_failed_actions(self):
-        """Live-tree smoke: the three decision/evidence-layer v3 plans settle."""
-        plans = [str(ROOT / "plan" / slug)
-                 for slug in ("v3-rea-support.md", "v3-jev-needle.md",
-                              "v3-settlement-plugin-loop.md")]
-        doc = settlement.scan(plans, "2026-11-11")
-        failed = [r for r in doc["records"] if r["status"] == "failed"]
-        self.assertEqual([], [(r["plan"]["ref"], r["action"]["node"], r["detail"])
-                              for r in failed])
-        settled = [r for r in doc["records"] if r["status"] == "settled"]
-        self.assertGreaterEqual(len(settled), 14)  # 7 + 7 done nodes at minimum
-        for rec in settled:
-            self.assertIn(rec["settled_by"]["verification"], settlement.VERIFICATIONS)
 
 
 if __name__ == "__main__":

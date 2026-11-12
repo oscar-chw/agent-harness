@@ -14,12 +14,8 @@ Codex; on a held-out set, the v0.2 guard blocked 39 of 45 dangerous commands and
 
 [Quick start](#quick-start) · [Docs](docs/README.md) · [All diagrams](docs/DIAGRAMS.md)
 
-> **v2 development candidate (`2.0.0.dev0`):** shared local state/memory,
-> bounded discovery, task artifact navigation and source-tested guard refinements.
-> This is a development publication, not a stable v2 release or a measured
-> improvement over native clients. Start with the [capabilities, trial steps and
-> remaining limits](docs/v2-development.md). Existing stable installations do not
-> automatically move to this development branch.
+The earlier [v2 development record](docs/v2-development.md) retains its original
+qualification scope. The v3 candidate and current measurements are documented above.
 
 What one install writes into each tool, and what the tools then call; Claude Code and Kimi Code get the guard:
 

@@ -145,6 +145,13 @@ class TestProfile(unittest.TestCase):
 
 
 class TestNoPrivateData(unittest.TestCase):
+    def _assert_no_private_data(self, text, rel):
+        """Keep per-file assertions independent of the runner's subTest handling."""
+        self.assertIsNone(EMAIL.search(text), "email in %s" % rel)
+        self.assertIsNone(IPV4.search(text), "IP address in %s" % rel)
+        for host in URL_HOST.findall(text):
+            self.assertIsNone(PRIVATE_HOST.match(host), "private host %s in %s" % (host, rel))
+
     def test_url_tokens_distinguish_real_hosts_from_a_source_regex(self):
         self.assertIsNone(URL_HOST.search("re.findall(r'https://[^)\\s]+', text)"))
         for url, expected in (("https://github.com/x", "github.com"),
@@ -175,7 +182,7 @@ class TestNoPrivateData(unittest.TestCase):
                 self.test_no_email_ip_or_private_url()
                 page.write_text("http://" + "nas/api")
                 with self.assertRaisesRegex(AssertionError, "private host"):
-                    self.test_no_email_ip_or_private_url()
+                    self._assert_no_private_data(page.read_text(encoding="utf-8"), page.relative_to(ROOT))
 
     def test_no_email_ip_or_private_url(self):
         files = list(shipped_files())
@@ -184,10 +191,7 @@ class TestNoPrivateData(unittest.TestCase):
             text = p.read_text(encoding="utf-8", errors="replace")
             rel = p.relative_to(ROOT)
             with self.subTest(file=str(rel)):
-                self.assertIsNone(EMAIL.search(text), "email in %s" % rel)
-                self.assertIsNone(IPV4.search(text), "IP address in %s" % rel)
-                for host in URL_HOST.findall(text):
-                    self.assertIsNone(PRIVATE_HOST.match(host), "private host %s in %s" % (host, rel))
+                self._assert_no_private_data(text, rel)
 
 
 class TestPackaging(unittest.TestCase):

@@ -232,6 +232,7 @@ def test_kimi_guard_hook_rejects_a_dangerous_bash_payload(tmp_path):
 
 
 def test_kimi_plugin_discovery_uses_marketplace_pins_and_holds_install(monkeypatch, tmp_path):
+    monkeypatch.setattr(discover.sys, "platform", "darwin")
     sha = "b" * 64
     kimi_home(tmp_path)
     monkeypatch.setattr(discover, "_get", lambda url: {"plugins": [
@@ -249,6 +250,10 @@ def test_kimi_plugin_discovery_uses_marketplace_pins_and_holds_install(monkeypat
     assert records[0]["install"] == []
     assert discover.vet(records[0])[0] == "block"
     assert "no install command" in discover.vet(records[0])[1]
+    monkeypatch.setattr(discover.sys, "platform", "linux")
+    assert discover.kimi_plugins(tmp_path) == []
+    monkeypatch.setattr(discover.sys, "platform", "win32")
+    assert [r["id"] for r in discover.kimi_plugins(tmp_path)] == ["kimi-cu-win"]
 
 
 def test_kimi_matrix_marks_only_implemented_capabilities():
@@ -307,6 +312,8 @@ def test_kimi_agent_extends_the_native_base_prompt(tmp_path):
 
 def test_kimi_worker_uses_sandbox_and_explicit_validated_agent_file(tmp_path, monkeypatch):
     install_tier(tmp_path)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("KIMI_CODE_HOME", str(tmp_path / ".kimi-code"))
     monkeypatch.setattr(plan, "_sandbox_prefix", lambda: ["sandbox"])
     captured = {}
 

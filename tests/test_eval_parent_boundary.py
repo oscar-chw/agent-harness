@@ -181,7 +181,8 @@ for line in sys.stdin:
 ''')
     native.chmod(0o755)
     monkeypatch.setenv('PATH', str(root)); monkeypatch.setenv('CODEX_HOME', str(state))
-    result = execute(root, 'request.json', 'parent.json', timeout=3, eval_deny_root=oracle,
+    # Exercise the full handshake independently of the process-start deadline.
+    result = execute(root, 'request.json', 'parent.json', timeout=10, eval_deny_root=oracle,
                      eval_enforce_boundary=True, eval_parent_boundary=True,
                      native_model='fixture-model', native_effort='high')
     assert result['native_completion'] == 'COMPLETED_UNGRADED'

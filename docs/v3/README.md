@@ -2,8 +2,9 @@
 
 One local workspace for connected coding clients, with shared task state, sourced memory and evaluated improvements.
 
-Current candidate is **3.0.0rc2**. Its native qualification passed. Local install
-and public CI readback are in progress.
+Current candidate is **3.0.0rc2**, installed and cold-verified on the Mac Studio.
+Its native memory comparison passed. Public CI and additional-device readback
+remain release checks.
 The [current qualification report](qualification-20261113.md) records the latest
 four-direction results, token measurements and withheld treatments. The older
 two-task smoke below remains a historical observation.

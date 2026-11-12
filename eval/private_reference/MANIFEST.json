@@ -20,7 +20,29 @@
         "test_module_imports_without_numpy": "862bd68a39dfcdbad455e4097f91afbbedcdeedde808431268f0a979a93c20ab"
       },
       "private_check": "eval/private_reference/h6a_recorded_corpus.py",
-      "original_sha256": "8998bb7527ad01a2fd5e1e17fe7f32df4ea4cd1f3904b8a205b9baa3c3d19f28"
+      "original_sha256": "8998bb7527ad01a2fd5e1e17fe7f32df4ea4cd1f3904b8a205b9baa3c3d19f28",
+      "original_functions": {
+        "test_copied_functions_byte_identical_to_h3": "d79fcf4e1786ce796869a57e36bf725b01a63edfca05d48816e88fc4fab1af19",
+        "test_copied_constants_equal_h3": "f329bcb8dddf4752e00984f73e6411fc20e8691b16e1edfe2334b91ae990d32e",
+        "test_l2_rule_matches_h3_module_sha_binding": "17a0b80815b3a782bf9825de778f4641bb9bd5c1399accbbad4388677dca1869",
+        "test_content_tokens_stoplist_and_length": "e33937fa467e8bda67bfff59fa598b4be26d66c020a0fb3465bca2ea4e0be71b",
+        "test_content_bigrams_adjacent_both_content": "2091ed484aca9272ef08f64754108dd414d08822e585cceb237600ddc279051d",
+        "_report": "bd8a381f7bee8aed91d3d0a2d63757f78ad68d192c12ea99effec0f8fc297040",
+        "test_rule_L2_fires_below_full_coverage": "b7f4fc73b2cdf283e5be1779d8fb89ea8190bf8c0d7be0e255db2ecc124577b3",
+        "test_rule_L2_full_coverage_override": "ac7cc51fd9c335798fe1b56c09f473f4a3b2ed1a471efcbab38366348a035a81",
+        "test_rule_L2_silent_when_L_silent": "f5cb080834ac8d6591434b2d32eff15f444b82a929ea10fd6ad5ba3437749763",
+        "test_max_coverage_distinct_query_tokens": "fa986d6f83201489b16605b201f3b7366842481d243ad5717b8a1a93a5dabee7",
+        "test_fresh_set_structure_and_hashes": "92f76055de59c120814c39fe47c2c53c6d426f3b47754532f083a3313b50ff33",
+        "test_fresh_set_no_overlap_with_frozen_18": "f40bcdea147808ac94224a6c47bee9ab76284c1cd402bc8bcc40ba1777288478",
+        "test_recorded_candidates_drift_is_detectable": "44ee34480cabde4d59bee188c6172a2443445127f3bfd4f0c473c6ba240886df",
+        "test_module_imports_without_numpy": "862bd68a39dfcdbad455e4097f91afbbedcdeedde808431268f0a979a93c20ab"
+      },
+      "private_only_tests": [
+        "test_l2_rule_matches_h3_module_sha_binding",
+        "test_fresh_set_structure_and_hashes",
+        "test_fresh_set_no_overlap_with_frozen_18",
+        "test_recorded_candidates_drift_is_detectable"
+      ]
     },
     "test_kb_honesty.py": {
       "original_test_functions": {
@@ -34,7 +56,186 @@
         "test_honesty_window_distinct_pages_of_top10_sections": "f62b18c3556fde16e31c92e7bd2cc6d90304b51a8b56a794d09c14ea0f8332b2"
       },
       "private_check": "eval/private_reference/kb_honesty_corpus.py",
-      "original_sha256": "337bd03d179fdfe1cff1cc509fb470a2a90eab3c5c4d679e17f9e36afb3b9f5a"
+      "original_sha256": "337bd03d179fdfe1cff1cc509fb470a2a90eab3c5c4d679e17f9e36afb3b9f5a",
+      "original_functions": {
+        "_kb": "789bd44fc9ab688fdd3bcd9a7aa8f53d203ebc06250991fd1318c5fc3dc8ae7a",
+        "_pairs": "816f6010a06871ff0aac8d8494af3be4fff350133073c839125914d9eda8123f",
+        "_no_honesty_env": "47c398f88bdcc2b8adf8cef568ffeaf9aee9ee8e964bed89f93963f879fbd12a",
+        "test_flag_off_byte_identical_to_recorded": "a50f8f226fe5e608964c8c84653829cb755acf0132a87ff43486793c2d00ab36",
+        "test_flag_off_unset_and_empty_and_false_all_inactive": "6d8b26d48851b6018bc6e4fb6bf559c743fb159edb5e8a3bdac39bb59f2ed00f",
+        "test_flag_on_suppression_matches_recorded_outcomes": "52ea6885e5387ae0d1eb7f0a3ea789caf18033fe17fed4ff93d6239fa5ac64ac",
+        "test_flag_on_nonfiring_byte_identical_to_flag_off": "49c6e91ed82d84e7d71387b97827e057f0aa77e161f9eeb64d943248e3d031f5",
+        "test_flag_on_boundary_cases": "cc413e903330c6cbfabd23840561e63fa8532c72fa04dc291d009375c0315da3",
+        "test_embedded_rule_constants_equal_frozen_eval_module": "756eb51f090e5072c8ba151572f1197fd39366859510b4fc91f84ff568e7b9c5",
+        "test_embedded_rule_functions_match_eval_module": "6a56545a466254ca13f6cadc5e89d80853736bac54434303a48f9bc7ce4419f3",
+        "test_honesty_window_distinct_pages_of_top10_sections": "f62b18c3556fde16e31c92e7bd2cc6d90304b51a8b56a794d09c14ea0f8332b2",
+        "inspect_source": "1883a69f24c8cb431497cdaeff901043624517634166ff12265e9483df5ab9ca"
+      },
+      "private_only_tests": [
+        "test_flag_off_byte_identical_to_recorded",
+        "test_flag_off_unset_and_empty_and_false_all_inactive",
+        "test_flag_on_suppression_matches_recorded_outcomes",
+        "test_flag_on_nonfiring_byte_identical_to_flag_off",
+        "test_flag_on_boundary_cases"
+      ]
+    },
+    "test_jev_decisions.py": {
+      "original_test_functions": {
+        "TestValidRecord.test_valid_record_validates_and_verifies": "ff8bf48d2966c1411345b86de2269d4d041d9a24f39528cedeb442d8f6aa6fe8",
+        "TestValidRecord.test_real_h6a_record_verifies_on_disk": "fd519474263baa2e9105245b32785dee44552ac25e9ec743ad64062b880c5d9c",
+        "TestValidRecord.test_boolean_and_score_kinds": "3a90ea227655acf245dfcfb058fccf89fffcbc50ca222a5019756e01e0330d98",
+        "TestFailClosedRefusals.test_missing_authority_refused": "8d558a4888dc368be664d10bd88068a9072ebf9a74ce656dd1e8eea814881458",
+        "TestFailClosedRefusals.test_unbound_inputs_refused": "ed22bcc2eb9caee3f698e2a7e4d6574f6ee7b473f56e92a395e45b7cfedc5be7",
+        "TestFailClosedRefusals.test_verdict_outside_enum_refused": "28277043a4c474a0f31f0e724eceb1f49f7136c9edf42de400bcc7c656dd0d14",
+        "TestFailClosedRefusals.test_boolean_verdict_outside_enum_refused": "3c627c49bfee859bd02c3118a1343d6e744373ab42787cd45bd4a98a870327db",
+        "TestFailClosedRefusals.test_score_verdict_outside_range_refused": "5d13635ec4b7d3ab1506cb7b4fe34466fede81e61b2f7b6e17a5069208223dcb",
+        "TestFailClosedRefusals.test_score_verdict_unparseable_refused": "647774a49f033fd16bf17c68720b948378056024f2d2aa6a3fee4740332727ea",
+        "TestFailClosedRefusals.test_choice_carries_no_score_range": "08774365d85a2a45d8a4aeaf0665c34ff1039fa030afa09ef73a669c2ef96668",
+        "TestFailClosedRefusals.test_invalid_confidence_level_refused": "360417277372fbb08ff531b08f20370054285f1995cef1847cddc798f45e28f9",
+        "TestFailClosedRefusals.test_policy_below_must_escalate": "11ed6c9bcb2a62f142a76a0804014133913fd8691895464e30c174a7a70cc738",
+        "TestFailClosedRefusals.test_invalid_reversibility_refused": "d767fd4032ca36c6d219f51c4c35b153edd455b0e46b7b3486f31c800cf5a66a",
+        "TestFailClosedRefusals.test_empty_unknowns_refused": "74de1981188c65fd1bbb18751a7b52b587f334bf8ef9d7ae6d04b176e0a37ea2",
+        "TestFailClosedRefusals.test_empty_receipts_refused": "cf88c3b099e6e703986c8b9b5aece1116a5683f6011e35cce22a17c35fd0a929",
+        "TestFailClosedRefusals.test_promotion_is_never_granted": "e6d9e2a2295712ffc77cc5d2ba6857501a502283fc740079b9d1782915952d15",
+        "TestFailClosedRefusals.test_wrong_schema_refused": "077b64b361e369ee957f7a0d795c286a2371936dea4a8c248dd932329e0c5109",
+        "TestFailClosedRefusals.test_invalid_domain_refused": "67a4f44ffdc19300fa7477f5ba80a2f2cbbfa927f4cd9b8d66f514a30e3aea26",
+        "TestFailClosedRefusals.test_binding_escape_refused": "c6001b8f8461babb294f8f044f484d8122d7cc51a6b9d696f4303d9dd1e2fb7f",
+        "TestBindingVerification.test_input_hash_mismatch_refused": "118536d98260cbc172317e192a6ea6aedd75a34f3efd7576754f09257ed2d657",
+        "TestBindingVerification.test_missing_receipt_refused": "90b9746cf8a407a062c2fb9b68bda2da23da787b0775b0f91a92431eb0d5a7f1",
+        "TestBindingVerification.test_verify_record_roundtrip": "f000acde7451f6573d86cfc4476d973af7c202743fff54401d39dc2fe9c5eea1",
+        "TestReaExpressibility.test_rea_lever_decision_as_jev_dependency_choice": "c81f6ee652c82fa0273f80927403f01ca47120f09cf42d8d439c90c13367e4ad"
+      },
+      "private_check": "eval/private_reference/jev_recorded_corpus.py",
+      "original_sha256": "18e3ce0ce38d8bcc1ad19002b29a293c48eca2da872bef7532ffe70f149b663e",
+      "original_functions": {
+        "fixture": "0e5dc73ce1f41b46deac3b1ece612414be3bbc1c1658d5c477d639ca6b8b7cb5",
+        "TestValidRecord.test_valid_record_validates_and_verifies": "ff8bf48d2966c1411345b86de2269d4d041d9a24f39528cedeb442d8f6aa6fe8",
+        "TestValidRecord.test_real_h6a_record_verifies_on_disk": "fd519474263baa2e9105245b32785dee44552ac25e9ec743ad64062b880c5d9c",
+        "TestValidRecord.test_boolean_and_score_kinds": "3a90ea227655acf245dfcfb058fccf89fffcbc50ca222a5019756e01e0330d98",
+        "TestFailClosedRefusals.setUp": "7a3dd65f08d05630b426575c6a5fa196775fe61319b4545d0b0f996eb11e9c8d",
+        "TestFailClosedRefusals.refuse": "277676080bc813e00fa93c134d37267c64013dee928fa7e1f119535704e362b0",
+        "TestFailClosedRefusals.test_missing_authority_refused": "8d558a4888dc368be664d10bd88068a9072ebf9a74ce656dd1e8eea814881458",
+        "TestFailClosedRefusals.test_unbound_inputs_refused": "ed22bcc2eb9caee3f698e2a7e4d6574f6ee7b473f56e92a395e45b7cfedc5be7",
+        "TestFailClosedRefusals.test_verdict_outside_enum_refused": "28277043a4c474a0f31f0e724eceb1f49f7136c9edf42de400bcc7c656dd0d14",
+        "TestFailClosedRefusals.test_boolean_verdict_outside_enum_refused": "3c627c49bfee859bd02c3118a1343d6e744373ab42787cd45bd4a98a870327db",
+        "TestFailClosedRefusals.test_score_verdict_outside_range_refused": "5d13635ec4b7d3ab1506cb7b4fe34466fede81e61b2f7b6e17a5069208223dcb",
+        "TestFailClosedRefusals.test_score_verdict_unparseable_refused": "647774a49f033fd16bf17c68720b948378056024f2d2aa6a3fee4740332727ea",
+        "TestFailClosedRefusals.test_choice_carries_no_score_range": "08774365d85a2a45d8a4aeaf0665c34ff1039fa030afa09ef73a669c2ef96668",
+        "TestFailClosedRefusals.test_invalid_confidence_level_refused": "360417277372fbb08ff531b08f20370054285f1995cef1847cddc798f45e28f9",
+        "TestFailClosedRefusals.test_policy_below_must_escalate": "11ed6c9bcb2a62f142a76a0804014133913fd8691895464e30c174a7a70cc738",
+        "TestFailClosedRefusals.test_invalid_reversibility_refused": "d767fd4032ca36c6d219f51c4c35b153edd455b0e46b7b3486f31c800cf5a66a",
+        "TestFailClosedRefusals.test_empty_unknowns_refused": "74de1981188c65fd1bbb18751a7b52b587f334bf8ef9d7ae6d04b176e0a37ea2",
+        "TestFailClosedRefusals.test_empty_receipts_refused": "cf88c3b099e6e703986c8b9b5aece1116a5683f6011e35cce22a17c35fd0a929",
+        "TestFailClosedRefusals.test_promotion_is_never_granted": "e6d9e2a2295712ffc77cc5d2ba6857501a502283fc740079b9d1782915952d15",
+        "TestFailClosedRefusals.test_wrong_schema_refused": "077b64b361e369ee957f7a0d795c286a2371936dea4a8c248dd932329e0c5109",
+        "TestFailClosedRefusals.test_invalid_domain_refused": "67a4f44ffdc19300fa7477f5ba80a2f2cbbfa927f4cd9b8d66f514a30e3aea26",
+        "TestFailClosedRefusals.test_binding_escape_refused": "c6001b8f8461babb294f8f044f484d8122d7cc51a6b9d696f4303d9dd1e2fb7f",
+        "TestBindingVerification.test_input_hash_mismatch_refused": "118536d98260cbc172317e192a6ea6aedd75a34f3efd7576754f09257ed2d657",
+        "TestBindingVerification.test_missing_receipt_refused": "90b9746cf8a407a062c2fb9b68bda2da23da787b0775b0f91a92431eb0d5a7f1",
+        "TestBindingVerification.test_verify_record_roundtrip": "f000acde7451f6573d86cfc4476d973af7c202743fff54401d39dc2fe9c5eea1",
+        "TestReaExpressibility.test_rea_lever_decision_as_jev_dependency_choice": "c81f6ee652c82fa0273f80927403f01ca47120f09cf42d8d439c90c13367e4ad"
+      },
+      "private_only_tests": [
+        "TestValidRecord.test_real_h6a_record_verifies_on_disk"
+      ]
+    },
+    "test_plugin_loop.py": {
+      "original_test_functions": {
+        "PluginLoopTest.test_intact_pipeline_admits_with_full_receipts": "5fbe9cc837933236ff4e030a5ba21200cd7517cc5f6f87cb086e8b480ee6b197",
+        "PluginLoopTest.test_malformed_candidate_raises": "11fb59d17682008d730110b6ec0a3966ecb38f3da95c496c4e2ebd9b65a5411a",
+        "PluginLoopTest.test_admission_without_rea_record_refuses": "e88bc9792e211f00c2468b73093b71479cf7dd1e3e795c72a8a05d0e7382a7a2",
+        "PluginLoopTest.test_rea_hash_drift_refuses": "9dd775fb320970c0e4c225f95ae0f0539e78656e7712455d2731d14caf04a6f7",
+        "PluginLoopTest.test_rea_internally_invalid_refuses": "e36925ab2531c3d0c34d27c21d18c831efaf40a3b0696cb5bc047c510163ba5e",
+        "PluginLoopTest.test_admission_without_jev_decision_refuses": "69e8aed4cc8cd01457b5e2f5c269499417512f4c18a19fcb172ef570855bfae0",
+        "PluginLoopTest.test_jev_wrong_domain_refuses": "98430a9c699e5ae32a131bd4f3bc79dd1f82fc7c2e3a658f06f87cab47ba9311",
+        "PluginLoopTest.test_jev_subject_mismatch_refuses": "2bb1e872db17a20779ac1d1d9445dbc3f956bed987596b665719724b2e8cd473",
+        "PluginLoopTest.test_verdict_mismatch_refuses": "1b1baa18c26452b30436033357e8db994c690725359f6f63b15532eec0f26ff1",
+        "PluginLoopTest.test_below_threshold_escalates_never_admits": "efa655ebfe9b117b43c93db19708919d16e4eb58284ebb85bd541a896332ceeb",
+        "PluginLoopTest.test_threshold_equality_admits": "7a1944ca06e1a078475c82de4d39103f13379a50ef82dc66449ac44288e67d71",
+        "PluginLoopTest.test_registry_round_trip_and_duplicate_rules": "db27086710f58c63e79feb0793eefc029012514996c207e993d1b293ebc8e3d2",
+        "PluginLoopTest.test_malformed_registry_raises": "27da5b6637265405ff57f6605d637d9ecd5928a334b70d7b23c441b429bd87fa",
+        "PluginLoopTest.test_real_lever_candidate_admits_against_live_tree": "4593f0d94c2beadec0e19056b353af09a59e94a91c32b535e566ec306fb62fce"
+      },
+      "private_check": "eval/private_reference/plugin_recorded_corpus.py",
+      "original_sha256": "b7d9d7bdb1010737fdf3d3c507b581f44a69afb6b6b12012882bc5065b956e62",
+      "original_functions": {
+        "_sha": "fd0acf822b43f9b17b5a62c7b32099237573db0f338222fb1ec500b0135bb62c",
+        "LoopFixture.__init__": "df78ec3db51f8e662a91fbdc4ec1ac028c533a9bbc6007ff1a5194822f222670",
+        "LoopFixture._cleanup": "d94b899655fc253d75587ccb3777e3e7912e21a319eda0ee0115f4ed9728ab29",
+        "LoopFixture.refresh_candidate": "c84d6fd736170272423b5572c096e9ff1d505df8a97978ff658bb42ce2cd0bf7",
+        "LoopFixture.admit": "b3dfe66829cda9c1a06e3703479285f58ce9e86c70770b78355a0d68854d8ec3",
+        "PluginLoopTest.test_intact_pipeline_admits_with_full_receipts": "5fbe9cc837933236ff4e030a5ba21200cd7517cc5f6f87cb086e8b480ee6b197",
+        "PluginLoopTest.test_malformed_candidate_raises": "11fb59d17682008d730110b6ec0a3966ecb38f3da95c496c4e2ebd9b65a5411a",
+        "PluginLoopTest.test_admission_without_rea_record_refuses": "e88bc9792e211f00c2468b73093b71479cf7dd1e3e795c72a8a05d0e7382a7a2",
+        "PluginLoopTest.test_rea_hash_drift_refuses": "9dd775fb320970c0e4c225f95ae0f0539e78656e7712455d2731d14caf04a6f7",
+        "PluginLoopTest.test_rea_internally_invalid_refuses": "e36925ab2531c3d0c34d27c21d18c831efaf40a3b0696cb5bc047c510163ba5e",
+        "PluginLoopTest.test_admission_without_jev_decision_refuses": "69e8aed4cc8cd01457b5e2f5c269499417512f4c18a19fcb172ef570855bfae0",
+        "PluginLoopTest.test_jev_wrong_domain_refuses": "98430a9c699e5ae32a131bd4f3bc79dd1f82fc7c2e3a658f06f87cab47ba9311",
+        "PluginLoopTest.test_jev_subject_mismatch_refuses": "2bb1e872db17a20779ac1d1d9445dbc3f956bed987596b665719724b2e8cd473",
+        "PluginLoopTest.test_verdict_mismatch_refuses": "1b1baa18c26452b30436033357e8db994c690725359f6f63b15532eec0f26ff1",
+        "PluginLoopTest.test_below_threshold_escalates_never_admits": "efa655ebfe9b117b43c93db19708919d16e4eb58284ebb85bd541a896332ceeb",
+        "PluginLoopTest.test_threshold_equality_admits": "7a1944ca06e1a078475c82de4d39103f13379a50ef82dc66449ac44288e67d71",
+        "PluginLoopTest.test_registry_round_trip_and_duplicate_rules": "db27086710f58c63e79feb0793eefc029012514996c207e993d1b293ebc8e3d2",
+        "PluginLoopTest.test_malformed_registry_raises": "27da5b6637265405ff57f6605d637d9ecd5928a334b70d7b23c441b429bd87fa",
+        "PluginLoopTest.test_real_lever_candidate_admits_against_live_tree": "4593f0d94c2beadec0e19056b353af09a59e94a91c32b535e566ec306fb62fce"
+      },
+      "private_only_tests": [
+        "PluginLoopTest.test_real_lever_candidate_admits_against_live_tree"
+      ]
+    },
+    "test_settlement.py": {
+      "original_test_functions": {
+        "SettlementTest.test_intact_action_settles_direct": "96dd718a79d7b4e630c7191ef6e9fa4a6ff81b6d57649f62d45cec61e82fdc4b",
+        "SettlementTest.test_fabricated_done_without_receipts_fails": "97ed82743ae84a246ad96d057015e755a53aa778e1484a22ff987ebbe5ca677b",
+        "SettlementTest.test_open_node_is_listed_never_failed": "277c0b2534419335e1a9378573b08b70819cfff87ec38de75f1b021c9744fe99",
+        "SettlementTest.test_missing_record_file_fails": "b2c95873dc2259160b637911a76c5d4afe170bb6d393a0100b05b43295ec4dba",
+        "SettlementTest.test_sigless_exit_note_fails_unverifiable": "7871d3a1317ee6631de54f78244754625acae144bee2cbc53f8a2eb57edec694",
+        "SettlementTest.test_tampered_body_fails_signature_check": "e5f59cd23399884f296481ad2993d2a1c3b76ad0ba4b64398e27a26767cc82b5",
+        "SettlementTest.test_tampered_tail_fails_tail_check": "cc216fe9fb5a518220a47b1778d7d72d76683ad6698638939c00aab1b4c54c14",
+        "SettlementTest.test_newer_applied_failure_under_done_mark_fails": "63f3b4cf2e2d261cdab2f8329cefcb7e31118b7a43e830689b6c11796ed69d35",
+        "SettlementTest.test_reclaim_note_after_success_is_benign": "fe8f228e208063b2f82e9c08cd2057f0df5dd88624538bd3f4be4c5596b33285",
+        "SettlementTest.test_secs_mismatch_fails": "4a924c59c34f24b66a20da073169aebb30f7bb4d331a4a1dbdb74c66f9e768e4",
+        "SettlementTest.test_no_applied_attempt_fails": "616135fbb846c79e979facf0b07088fbb107ab2098f26d2eae0f0ada5911bff1",
+        "SettlementTest.test_inverse_redaction_settles_post_signing_hygiene_redaction": "ea43f7edf32c8d1546a19a66d8cefc8f76e760fdbf330c496def99fb04cc898d",
+        "SettlementTest.test_empty_scan_refuses": "a91e5b620d659ae1fb8ecb95d1c77ad6ac1729943745169289f1da919b840f4a",
+        "SettlementTest.test_unrecognized_mark_fails_closed": "b6e044603eb480beba8b041eadf4b774186b8166113e42087b90744f763697d5",
+        "SettlementTest.test_missing_plan_file_fails_closed": "df09366055f72b27925929ba385d8364495c948aed948a95461170544bc4c0f9",
+        "SettlementTest.test_document_schema_and_serialisation": "b81eded808c20f8b5696f6eb50a1d5c069da14e87ab57cf2cc294d333e69e8d5",
+        "SettlementTest.test_real_v3_plans_have_zero_failed_actions": "2a2b16b1689a3fc756dfa9f89372b380817969ba4d6159caeaedb531e621823c"
+      },
+      "private_check": "eval/private_reference/settlement_recorded_context.py",
+      "original_sha256": "7d88e689eaa66beea8d511f9077c3878ddbbcfbf594d999f1b6c75434645759b",
+      "original_functions": {
+        "gate_artifacts": "33b7a31541d7056ed4ce71f8a5fa470a1b5fd16341bb7760e474352252fc1879",
+        "plan_text": "c0bc776634c08ac71acc37f8bb014d861cec50d8dfbb7f70f2a7405e9bdf08f8",
+        "Fixture.__init__": "93b5963a4659b333fe9a8a95f60815b2c793648ff33529fa4a35630971d4ff30",
+        "Fixture._cleanup": "d94b899655fc253d75587ccb3777e3e7912e21a319eda0ee0115f4ed9728ab29",
+        "Fixture.scan": "cc96de1da83ec2a958c00343fba4594c71babf3c11a2dd2dc1dc41b86194bee5",
+        "SettlementTest.test_intact_action_settles_direct": "96dd718a79d7b4e630c7191ef6e9fa4a6ff81b6d57649f62d45cec61e82fdc4b",
+        "SettlementTest.test_fabricated_done_without_receipts_fails": "97ed82743ae84a246ad96d057015e755a53aa778e1484a22ff987ebbe5ca677b",
+        "SettlementTest.test_open_node_is_listed_never_failed": "277c0b2534419335e1a9378573b08b70819cfff87ec38de75f1b021c9744fe99",
+        "SettlementTest.test_missing_record_file_fails": "b2c95873dc2259160b637911a76c5d4afe170bb6d393a0100b05b43295ec4dba",
+        "SettlementTest.test_sigless_exit_note_fails_unverifiable": "7871d3a1317ee6631de54f78244754625acae144bee2cbc53f8a2eb57edec694",
+        "SettlementTest.test_tampered_body_fails_signature_check": "e5f59cd23399884f296481ad2993d2a1c3b76ad0ba4b64398e27a26767cc82b5",
+        "SettlementTest.test_tampered_tail_fails_tail_check": "cc216fe9fb5a518220a47b1778d7d72d76683ad6698638939c00aab1b4c54c14",
+        "SettlementTest.test_newer_applied_failure_under_done_mark_fails": "63f3b4cf2e2d261cdab2f8329cefcb7e31118b7a43e830689b6c11796ed69d35",
+        "SettlementTest.test_reclaim_note_after_success_is_benign": "fe8f228e208063b2f82e9c08cd2057f0df5dd88624538bd3f4be4c5596b33285",
+        "SettlementTest.test_secs_mismatch_fails": "4a924c59c34f24b66a20da073169aebb30f7bb4d331a4a1dbdb74c66f9e768e4",
+        "SettlementTest.test_no_applied_attempt_fails": "616135fbb846c79e979facf0b07088fbb107ab2098f26d2eae0f0ada5911bff1",
+        "SettlementTest.test_inverse_redaction_settles_post_signing_hygiene_redaction": "ea43f7edf32c8d1546a19a66d8cefc8f76e760fdbf330c496def99fb04cc898d",
+        "SettlementTest.test_empty_scan_refuses": "a91e5b620d659ae1fb8ecb95d1c77ad6ac1729943745169289f1da919b840f4a",
+        "SettlementTest.test_unrecognized_mark_fails_closed": "b6e044603eb480beba8b041eadf4b774186b8166113e42087b90744f763697d5",
+        "SettlementTest.test_missing_plan_file_fails_closed": "df09366055f72b27925929ba385d8364495c948aed948a95461170544bc4c0f9",
+        "SettlementTest.test_document_schema_and_serialisation": "b81eded808c20f8b5696f6eb50a1d5c069da14e87ab57cf2cc294d333e69e8d5",
+        "SettlementTest.test_real_v3_plans_have_zero_failed_actions": "2a2b16b1689a3fc756dfa9f89372b380817969ba4d6159caeaedb531e621823c"
+      },
+      "private_only_tests": [
+        "SettlementTest.test_real_v3_plans_have_zero_failed_actions"
+      ],
+      "requires_original_signing_context": true
     }
-  }
+  },
+  "original_function_count": 93,
+  "original_test_count": 75,
+  "private_isolated_check_count": 12
 }

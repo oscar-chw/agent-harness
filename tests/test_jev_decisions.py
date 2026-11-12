@@ -62,11 +62,6 @@ class TestValidRecord(unittest.TestCase):
             self.assertIs(jev.validate(record), record)
             self.assertTrue(jev.verify_bindings(record, tmp))
 
-    def test_real_h6a_record_verifies_on_disk(self):
-        self.assertTrue(REAL_RECORD.is_file())
-        record = jev.verify_record(str(REAL_RECORD), str(REPO))
-        self.assertEqual(record["verdict"], "ship-opt-in-default-off")
-        self.assertEqual(record["domain"], "adoption")
 
     def test_boolean_and_score_kinds(self):
         with tempfile.TemporaryDirectory() as tmp:

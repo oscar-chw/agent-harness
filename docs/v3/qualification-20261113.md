@@ -68,7 +68,7 @@ NOT_RUN. The public aggregate is in
 
 The current local regression command was
 `HARNESS_STAGING_PYTHON=/opt/homebrew/bin/python3.11 PYTHONPATH=src python3 -m pytest -q tests eval --tb=short`.
-It returned 3,020 passed, 2 skipped and 2 expected failures. The local path selects
+It returned 3,021 passed, 2 skipped and 2 expected failures. The local path selects
 the local wheel-capable interpreter and can be replaced with an equivalent
 Python 3.9+ environment carrying setuptools 61+ and wheel.
 
@@ -106,12 +106,12 @@ passes for their exact scope.
 
 ## Public test portability
 
-Public CI runs the distributed pure helper and integration checks. Nine checks
+Public CI runs the distributed pure helper and integration checks. Twelve checks
 requiring the private frozen retrieval corpus are retained unabridged under
 `eval/private_reference`, outside ordinary test discovery. AST-hash preservation
 checks reject removed or weakened assertions. Explicit private collection fails
-when the corpus is absent. The authorized local run exercised all 21 original
-functions, including the retained pure checks. Public CI reports private-corpus
+when the corpus is absent. The authorized local run exercised all retained original
+functions and methods, including the retained pure checks. Public CI reports private-corpus
 execution as NOT_RUN. [Evaluation scope](../../eval/private_reference/README.md)
 
 The rc2 correction prevents a timeout from reporting a probe as observed before
