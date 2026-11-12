@@ -12,6 +12,7 @@ _REGISTRY = [
     ("codex", "codex", "CodexAdapter"),
     ("copilot-vscode", "copilot_vscode", None),
     ("cursor", "cursor", None),
+    ("kimi", "kimi", "KimiAdapter"),
     ("gemini", "gemini", None),
     ("agents-md", "agents_md", None),
     ("claude-desktop", "claude_desktop", None),

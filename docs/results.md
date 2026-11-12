@@ -1,7 +1,7 @@
 # Results: what was measured, and how far each number goes
 
 Every result behind the README's Results table, with its qualifier and its source. Not everything gained:
-Claude with the harness used 1.24x plain's tokens in the v0.1.1 eval, two of the seven tools were measured,
+Claude with the harness used 1.24x plain's tokens in the v0.1.1 eval, two of the eight tools were measured,
 and the public synthetic eval has no results yet.
 
 ## The A/B eval (historical, private corpus)

@@ -1,0 +1,141 @@
+{
+  "schema": "harness.presets/v1",
+  "revision": "v1",
+  "source": {
+    "repository": "https://github.com/oscar-chw/agent-harness",
+    "base_revision": "3de9ccb3ffd9d7bdcccdc61cfdf4820b5e1295d4",
+    "license": "MIT"
+  },
+  "clients": [
+    "claude-code",
+    "codex"
+  ],
+  "capabilities": {
+    "work-loop": {
+      "path": "skills/work-loop/SKILL.md",
+      "sha256": "56b5271d1e9a300dc6ae735a87ca9fea2bcc59dc54bce4d98452643a315bfe86"
+    },
+    "verify-before-done": {
+      "path": "skills/verify-before-done/SKILL.md",
+      "sha256": "fb41e8babe1e7c041cf27c66a219d6b5e10daad7a730009e7c9b61750f26f197"
+    },
+    "data-job-trial-run": {
+      "path": "skills/data-job-trial-run/SKILL.md",
+      "sha256": "f6ebda927d1c38f28d3fd4b1a16ef4051a465a731de08113600685b5209a8c55"
+    },
+    "standards": {
+      "path": "skills/standards/SKILL.md",
+      "sha256": "96b52d5b9460ac6e071076fe63893e19019cf9dcef0e3bf23eb1f64178cd3d25"
+    }
+  },
+  "presets": {
+    "source-notes": {
+      "trigger": "source-notes",
+      "negative_triggers": [
+        "single_fact",
+        "reference_only",
+        "explicitly_disabled"
+      ],
+      "inputs": [
+        "sources",
+        "learning_requirements"
+      ],
+      "capabilities": [
+        "work-loop",
+        "verify-before-done"
+      ],
+      "tools": [
+        "read-files"
+      ],
+      "permissions": [
+        "local-read"
+      ],
+      "output_contract": "Source-linked notes with page/section coverage and explicit inference labels.",
+      "check_contract": "Check requested source coverage, citation resolution and unsupported claims; preserve missing evidence.",
+      "max_body_bytes": 16000,
+      "reversal": "Reselect on changed project, request/authority, source or tool availability; no persistent settings to undo."
+    },
+    "draft-message": {
+      "trigger": "draft-message",
+      "negative_triggers": [
+        "single_fact",
+        "reference_only",
+        "explicitly_disabled"
+      ],
+      "inputs": [
+        "verified_facts",
+        "recipient_purpose"
+      ],
+      "capabilities": [
+        "verify-before-done"
+      ],
+      "tools": [
+        "read-files"
+      ],
+      "permissions": [
+        "local-read"
+      ],
+      "output_contract": "A preview draft with checked names, dates and purpose; sending is separate.",
+      "check_contract": "Reconcile factual details against named sources; exact sending authorization is outside this selection.",
+      "max_body_bytes": 16000,
+      "reversal": "Reselect on changed project, request/authority, source or tool availability; no persistent settings to undo."
+    },
+    "project-reconcile": {
+      "trigger": "project-reconcile",
+      "negative_triggers": [
+        "single_fact",
+        "reference_only",
+        "explicitly_disabled"
+      ],
+      "inputs": [
+        "goals",
+        "ownership",
+        "status_evidence"
+      ],
+      "capabilities": [
+        "work-loop",
+        "verify-before-done"
+      ],
+      "tools": [
+        "read-files"
+      ],
+      "permissions": [
+        "local-read"
+      ],
+      "output_contract": "Current objectives, trade-offs, owners, dependencies, conflicting status and next checks.",
+      "check_contract": "Resolve each completion claim to evidence; mark unknown ownership and conflicting decisions explicitly.",
+      "max_body_bytes": 16000,
+      "reversal": "Reselect on changed project, request/authority, source or tool availability; no persistent settings to undo."
+    },
+    "reproduce-science": {
+      "trigger": "reproduce-science",
+      "negative_triggers": [
+        "single_fact",
+        "reference_only",
+        "explicitly_disabled"
+      ],
+      "inputs": [
+        "protocol",
+        "data_manifest",
+        "resource_budget"
+      ],
+      "capabilities": [
+        "work-loop",
+        "data-job-trial-run",
+        "standards",
+        "verify-before-done"
+      ],
+      "tools": [
+        "read-files",
+        "python"
+      ],
+      "permissions": [
+        "local-read"
+      ],
+      "output_contract": "Bounded reproduction plan and evidence, fixed metric/seed/environment and retained negative results.",
+      "check_contract": "Check original protocol, data identity, tiny/sample/full admission, independent oracle and uncertainty; no job is started by selection.",
+      "max_body_bytes": 16000,
+      "reversal": "Reselect on changed project, request/authority, source or tool availability; no persistent settings to undo."
+    }
+  }
+}

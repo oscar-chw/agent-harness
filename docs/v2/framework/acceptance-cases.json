@@ -1,0 +1,561 @@
+{
+  "schema": "harness.framework-acceptance-cases/v1",
+  "as_of": "2026-11-02",
+  "status": "DESIGN_SPECIFICATION",
+  "execution_policy": "Root owns implementation, original gates and final integrated verification. Existing regressions are supporting references only; see verification.json for this worker's exact runs. No native/model/install/network action is authorized by these examples.",
+  "cases": [
+    {
+      "id": "F01",
+      "capabilities": [
+        "dependency-dag",
+        "control-repair"
+      ],
+      "claim_class": "existing_mechanism",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Disposable graph: frontend=1, backend=2, docs=3 needs2, delivery=4 needs1,3.",
+        "Independent gate1 initially fails; gates2 and3 can pass."
+      ],
+      "when": [
+        "Run backend gate and docs gate; inspect ready/status; repair frontend and rerun its original gate; finally run delivery gate."
+      ],
+      "must_observe": [
+        "After frontend failure: 1 pending, 2/3 accepted, 4 blocked.",
+        "After repair: 4 becomes ready only after required branches are current; own gate still decides done."
+      ],
+      "negative_control": [
+        "Add needs4 to node1: cyclic prerequisites must be rejected without dispatch.",
+        "A worker claiming success while gate1 fails must not release node4."
+      ],
+      "existing_regression": [
+        "tests/test_plan_versions.py::test_long_reverse_order_dependency_chain_and_cycles_do_not_recurse",
+        "tests/test_plan_versions.py::test_join_waits_for_both_current_parent_results"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F02",
+      "capabilities": [
+        "same-graph-join",
+        "versioned-evidence",
+        "join-invalidation"
+      ],
+      "claim_class": "existing_mechanism",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Enable ## versions: v1; declare actual inputs/checks/outputs for required nodes and integration.",
+        "Accept both branches and their join; retain content-addressed receipts."
+      ],
+      "when": [
+        "Mutate frontend input; inspect versions before refresh; refresh; rerun affected gates."
+      ],
+      "must_observe": [
+        "Frontend and delivery stale; unrelated backend/docs receipt identities unchanged.",
+        "Refresh records invalidation and retains old receipts; delivery cannot run with stale prerequisites."
+      ],
+      "negative_control": [
+        "Delete/corrupt a required receipt or declared output: never accept from a remaining done mark.",
+        "A gate that exits0 after changing its bound input must fail publication."
+      ],
+      "existing_regression": [
+        "tests/test_plan_versions.py::test_change_reopens_only_affected_dependency_closure_and_preserves_sources",
+        "tests/test_plan_versions.py::test_gate_changes_input_then_exit_zero_is_not_accepted",
+        "tests/test_plan_versions.py::test_missing_or_corrupt_receipt_is_held_not_silently_reaccepted"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F03",
+      "capabilities": [
+        "join-invalidation"
+      ],
+      "claim_class": "existing_mechanism",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Accepted versioned child and dependent integration; preserve old receipt IDs."
+      ],
+      "when": [
+        "Reverify child to a new result receipt even if output bytes remain the same; inspect old integration binding."
+      ],
+      "must_observe": [
+        "Old integration is stale because its parent result identity changed; rerun integration."
+      ],
+      "negative_control": [
+        "Restoring old input bytes after persisted invalidation must not restore old acceptance automatically."
+      ],
+      "existing_regression": [
+        "tests/test_plan_versions.py::test_reverification_uses_new_receipts_and_old_history_remains",
+        "tests/test_plan_versions.py::test_restoring_old_file_does_not_undo_persisted_invalidation"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F04",
+      "capabilities": [
+        "versioned-evidence"
+      ],
+      "claim_class": "existing_mechanism_and_explicit_input_policy",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Versioned node declares check source in checks and an environment-fingerprint artifact in inputs."
+      ],
+      "when": [
+        "Claim node, then change check or fingerprint before original gate."
+      ],
+      "must_observe": [
+        "Bound change prevents acceptance/execution as applicable; old evidence retained.",
+        "Undeclared environment is expressly outside the present mechanism."
+      ],
+      "negative_control": [
+        "Change only an undeclared file: do not claim the mechanism detects it.",
+        "Legacy graph without versions marker must not report current content-bound evidence."
+      ],
+      "existing_regression": [
+        "tests/test_plan_versions.py::test_check_change_after_claim_prevents_execution",
+        "tests/test_plan_versions.py::test_legacy_plan_does_not_gain_new_files_or_change_gate_semantics"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F05",
+      "capabilities": [
+        "operational-cas"
+      ],
+      "claim_class": "existing_mechanism",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Two independent clients read task versionN."
+      ],
+      "when": [
+        "ClientA writes with expectedN/requestA; clientB writes with expectedN/requestB; clientB refreshes cursor/snapshot before deciding."
+      ],
+      "must_observe": [
+        "Only one original write commits; stale CAS conflicts.",
+        "Task projection, event and request record commit together."
+      ],
+      "negative_control": [
+        "Inject transaction failure: no event or replay record remains."
+      ],
+      "existing_regression": [
+        "tests/test_operational_state.py::test_stale_snapshot_and_change_cursor_reconcile",
+        "tests/test_operational_state.py::test_failed_transaction_has_no_event_or_request_replay"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F06",
+      "capabilities": [
+        "operational-cas",
+        "fenced-leases"
+      ],
+      "claim_class": "existing_mechanism",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "A claim committed but response was lost; original request fields retained privately."
+      ],
+      "when": [
+        "Replay identical request ID/inputs; attempt same-ID changed input; advance clock past expiry."
+      ],
+      "must_observe": [
+        "Identical retry returns original result without another mutation/event.",
+        "Changed-input retry conflicts; expired replay is not a fresh lease.",
+        "Refresh and reconcile process state before new authorized work."
+      ],
+      "negative_control": [
+        "A consumer treating a replayed token as current must be rejected by a subsequent owned operation after expiry."
+      ],
+      "existing_regression": [
+        "tests/test_operational_state.py::test_atomic_event_projection_and_idempotent_retry",
+        "tests/test_operational_state.py::test_cas_lease_expiry_and_fencing"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F07",
+      "capabilities": [
+        "fenced-leases"
+      ],
+      "claim_class": "existing_mechanism_with_process_boundary",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "WorkerA claim expires; no inference about whether its file-writing process stopped."
+      ],
+      "when": [
+        "Inspect process/scope; after safe takeover workerB claims current version; workerA tries release/renew."
+      ],
+      "must_observe": [
+        "B has larger fence; A cannot change leased state.",
+        "Packets expose lease activity/fence metadata without raw tokens; file-write isolation remains unproven."
+      ],
+      "negative_control": [
+        "Do not dispatch B into a shared write scope solely because the ledger lease expired."
+      ],
+      "existing_regression": [
+        "tests/test_operational_state.py::test_dead_worker_lease_expires_and_new_process_fences_it"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F08",
+      "capabilities": [
+        "source-freshness",
+        "cold-recovery"
+      ],
+      "claim_class": "existing_mechanism",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Task links a current source-memory receipt; caller has old operational cursor."
+      ],
+      "when": [
+        "Withdraw source without task mutation; read changes/snapshot and attempt claim/renew."
+      ],
+      "must_observe": [
+        "Memory invalidation is visible despite unchanged operational head; claim/renew blocked.",
+        "Current unexpired holder may release; exact historical replay is not freshness evidence."
+      ],
+      "negative_control": [
+        "Checkpoint/stop/resume must not silently erase the linked memory receipt."
+      ],
+      "existing_regression": [
+        "tests/test_operational_state.py::test_withdrawal_blocks_lease_renewal_but_not_exact_prior_replay",
+        "tests/test_task_control_bridge.py::test_human_checkpoint_does_not_erase_a_source_memory_dependency"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F09",
+      "capabilities": [
+        "source-freshness"
+      ],
+      "claim_class": "consumer_policy_gap",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Task has stale memory link. Current low-level put accepts omitted memory_receipt and clears it."
+      ],
+      "when": [
+        "Root integrates a task consumer; inspect its update operation and then retry blocked claim."
+      ],
+      "must_observe": [
+        "Consumer uses preserving checkpoint/update semantics, or explicitly revalidates and retains the intended source link.",
+        "No update claims a recovered source merely by erasing its dependency."
+      ],
+      "negative_control": [
+        "Perform put without receipt: mechanism may permit claim afterward; this must be reported as a consumer-policy violation, not falsely described as prevented by current API."
+      ],
+      "existing_regression": [],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F10",
+      "capabilities": [
+        "cold-recovery",
+        "file-handoff"
+      ],
+      "claim_class": "existing_mechanism",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Persist goal/checkpoint/next/blocked_on and current evidence; stop original reader process."
+      ],
+      "when": [
+        "Fresh process reads project handoffs and task status; then checks original graph context/versions."
+      ],
+      "must_observe": [
+        "Goal, block, next and evidence hash recover without global registry or model call.",
+        "An active lease displays leased_unverified; no wakeup is implied."
+      ],
+      "negative_control": [
+        "Missing/corrupt checkpoint or operational DB: unavailable/missing/invalid, never fresh empty or done.",
+        "A packet containing PASS cannot mark graph complete."
+      ],
+      "existing_regression": [
+        "tests/test_operational_idle_recovery.py::test_snapshot_is_the_existing_owner_recovery_command_in_a_new_process",
+        "tests/test_task_control_bridge.py::test_task_control_refuses_fake_progress_and_active_lease_stop",
+        "tests/test_handoff_readback.py::test_reads_an_unregistered_peer_packet_without_global_storage"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F11",
+      "capabilities": [
+        "cold-recovery",
+        "operational-cas"
+      ],
+      "claim_class": "cross_store_recovery_policy",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Graph gate commits PASS receipt; process stops before optional operational checkpoint."
+      ],
+      "when": [
+        "Recover from graph+receipt; rebuild advisory checkpoint; inspect gate-run count."
+      ],
+      "must_observe": [
+        "Completion is derived only from the current original gate evidence; summary repair does not rerun a completed external effect.",
+        "If graph receipt is stale, repair checkpoint does not make it current."
+      ],
+      "negative_control": [
+        "Invert crash order: a checkpoint says PASS but original gate has not run; graph remains incomplete."
+      ],
+      "existing_regression": [],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F12",
+      "capabilities": [
+        "permission-hold"
+      ],
+      "claim_class": "existing_mechanism",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Node1 denied by fixture guard; independent nodes2 and4; dependent node3 needs1. No real native/model call."
+      ],
+      "when": [
+        "Run local stub drain; cold resume; try force/attended flags against held node."
+      ],
+      "must_observe": [
+        "Node1 gets NOT_RUN and permission hold with no executed gate attempt; node3 blocked;2/4 can pass.",
+        "Cold runner does not reattempt denied effect or clear hold."
+      ],
+      "negative_control": [
+        "Resolved fixture preflight alone must not erase the recorded hold; operator records resolution.",
+        "Incidental worker denial with a genuinely passing independent gate need not invalidate completed work."
+      ],
+      "existing_regression": [
+        "tests/test_permission_recovery.py::test_guard_refusal_is_not_a_test_failure_and_blocks_direct_retry",
+        "tests/test_permission_recovery.py::test_denied_unfinished_node_is_held_once_while_independent_chain_finishes",
+        "tests/test_permission_recovery.py::test_incidental_worker_denial_does_not_invalidate_a_real_passing_gate"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F13",
+      "capabilities": [
+        "permission-posture",
+        "permission-hold"
+      ],
+      "claim_class": "native_authority_boundary",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Current assignment forbids native config/guard edits and denied-effect retries."
+      ],
+      "when": [
+        "Inspect packet and source preference selection without installing/changing policy."
+      ],
+      "must_observe": [
+        "preserve is noninteractive unspecified default; preference does not grant tool/native authority.",
+        "Any unsupported native grant path remains blocked with exact rejecting layer."
+      ],
+      "negative_control": [
+        "A profile label, chat instruction or hold removal is not proof of a native approval consumer."
+      ],
+      "existing_regression": [
+        "tests/test_permission_profiles.py::test_unspecified_noninteractive_install_preserves_native_policy"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F14",
+      "capabilities": [
+        "control-repair"
+      ],
+      "claim_class": "existing_advisory_method",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Current artifact has independent FAIL receipt with intent-gap; prior native attempt timed out."
+      ],
+      "when": [
+        "Call method decision with bound current paths; repair artifact; provide current PASS; test timeout with and without artifact."
+      ],
+      "must_observe": [
+        "FAIL selects revise and intent-gap diagnosis; existing artifact selects verify rather than blind rerun.",
+        "PASS suppresses old failure diagnosis but still asks caller to verify provenance.",
+        "Task-specific gate remains unchanged."
+      ],
+      "negative_control": [
+        "Stale request/context or wrong artifact digest is rejected.",
+        "A hand-authored hash-matching PASS is only advisory input and cannot independently close graph."
+      ],
+      "existing_regression": [
+        "tests/test_method_control.py::test_bad_artifact_triggers_intent_gap_and_cause_analysis_without_user_diagnosis",
+        "tests/test_method_control.py::test_diagnosis_matches_failure_and_a_current_pass_supersedes_it",
+        "tests/test_method_control.py::test_timeout_feedback_switches_based_on_actual_artifact"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F15",
+      "capabilities": [
+        "control-repair"
+      ],
+      "claim_class": "proportionality_behavior",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Supplied evidence is adequate for a direct answer; zero consequential uncertainty/dependencies."
+      ],
+      "when": [
+        "Obtain method decision and complete relevant content check."
+      ],
+      "must_observe": [
+        "DIRECT; no mandatory plan, worker, web campaign or checkpoint.",
+        "A consequential missing requirement may change routing without weakening checks."
+      ],
+      "negative_control": [
+        "Several real dependencies returns PLAN; existing failing artifact invokes diagnosis.",
+        "Do not claim native agent compliance from the helper output alone."
+      ],
+      "existing_regression": [
+        "tests/test_method_control.py::test_direct_simple_work_and_plan_only_for_real_dependencies"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F16",
+      "capabilities": [
+        "child-correlation",
+        "cross-graph-join"
+      ],
+      "claim_class": "proposed_manifest_integration",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Manifest maps project-local graph/node to child task, own packet and result receipt; integration depends on required terminals."
+      ],
+      "when": [
+        "Root consumer resolves manifest, current graph receipts, source scope and generation before integration."
+      ],
+      "must_observe": [
+        "Each required result is current in the same intended graph/project; own integration gate runs.",
+        "Manifest is an input/reference, never an alternative completion mark."
+      ],
+      "negative_control": [
+        "Duplicate node/task, unknown required node, parent ancestry cycle, path escape/symlink, wrong-project receipt, missing required member or stale generation: refuse join.",
+        "OperationalState nested children value is rejected; no new API is implied."
+      ],
+      "existing_regression": [],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F17",
+      "capabilities": [
+        "ownership-metadata",
+        "worktree-coordination"
+      ],
+      "claim_class": "proposed_dispatch_preflight_and_integration",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Frontend worker owns frontend/; backend owns backend/; root owns shared schema/lockfile/evaluator."
+      ],
+      "when": [
+        "Compare canonical write targets before authorized dispatch; root merges/integrates after independent work."
+      ],
+      "must_observe": [
+        "Disjoint branches proceed; shared generated outputs and ancestor-directory overlap serialize or use authorized isolation.",
+        "Both worktrees use explicit common PLAN_DIR only when authorized; operational ledgers remain separate by path."
+      ],
+      "negative_control": [
+        "frontend/ versus frontend/generated/ or symlink alias is overlapping.",
+        "No claim that advisory write_scope or a ledger fence prevents arbitrary filesystem edits."
+      ],
+      "existing_regression": [],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F18",
+      "capabilities": [
+        "ui-grouping"
+      ],
+      "claim_class": "proposed_read_only_projection",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Frontend failed; backend/docs current; integration waiting; some activity/source information is unavailable."
+      ],
+      "when": [
+        "Render one human-goal group with deliverables, owners, separate gate/activity/freshness and original evidence links."
+      ],
+      "must_observe": [
+        "Backend/docs retain current status; parent has actionable dependency reason.",
+        "UNKNOWN liveness is visible; no raw tokens, bulk source bodies or automatic state writes."
+      ],
+      "negative_control": [
+        "Stale PASS must not appear accepted; navigation/group rename cannot change receipt, hold or graph mark."
+      ],
+      "existing_regression": [],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F19",
+      "capabilities": [
+        "file-first-coordination",
+        "file-handoff"
+      ],
+      "claim_class": "existing_reader_and_writer_policy",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "One compact packet per worker, all under project handoffs/task/."
+      ],
+      "when": [
+        "Writer uses atomic replace after material result; reader inspects at start/resume/dependency boundary."
+      ],
+      "must_observe": [
+        "Reader sees a complete old or new packet and hash; packets contain evidence/next/held actions.",
+        "No messages, confirmations, heartbeat, scheduled polling, peer activation or inferred wakeup."
+      ],
+      "negative_control": [
+        "Symlink/FIFO/oversized packet or aggregate overflow must fail explicitly without disclosing target contents.",
+        "A no-handoff result means absence of packet, not success."
+      ],
+      "existing_regression": [
+        "tests/test_handoff_readback.py::test_symlinked_packet_and_oversized_packet_are_refused",
+        "tests/test_handoff_readback.py::test_nonregular_packet_does_not_hang_the_reader",
+        "tests/test_handoff_readback.py::test_directory_and_aggregate_limits_are_not_silent_truncation"
+      ],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F20",
+      "capabilities": [
+        "general-statecharts"
+      ],
+      "claim_class": "architecture_scope",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Required cases use a root DAG, bounded node repair, explicit joins and file-based handoffs."
+      ],
+      "when": [
+        "Map each case to existing primitives before selecting any extra runtime."
+      ],
+      "must_observe": [
+        "No additional engine installed/proposed as necessary while these cases fit.",
+        "Arbitrary statechart communication remains missing, never relabeled implemented."
+      ],
+      "negative_control": [
+        "A real case requiring cyclic prerequisite scheduling or nested concurrent-region semantics must first demonstrate why the existing bounded iteration/DAG cannot satisfy its invariants."
+      ],
+      "existing_regression": [],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    },
+    {
+      "id": "F21",
+      "capabilities": [
+        "native-parity",
+        "measured-efficacy"
+      ],
+      "claim_class": "qualification_and_claim_boundary",
+      "status": "SPECIFIED_NOT_EXECUTED_AS_COMPOSITION_CASE",
+      "given": [
+        "Retained dev2 install and four-case development pilot; Air dev2 parity unverified; this worker has source tests only."
+      ],
+      "when": [
+        "Root evaluates exact release candidate on authorized installed/native/device and frozen held-out/control tasks."
+      ],
+      "must_observe": [
+        "Separate source, installation, current native behavior, device parity and efficacy receipts.",
+        "Include failed attempts and orchestration usage; require quality>=baseline AND aggregate tokens<=baseline for improvement."
+      ],
+      "negative_control": [
+        "Source tests, report counts, a version label, old client receipt or toy pilot cannot establish v2 complete or broad improvement.",
+        "Cumulative candidate225182 vs control222367 from retained dev2 R&D must not be reported as net savings."
+      ],
+      "existing_regression": [],
+      "root_acceptance": "Run the real command/gate in a disposable project; nonzero or missing required evidence means no acceptance. No worker narrative closes the root gate."
+    }
+  ]
+}

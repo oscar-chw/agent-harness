@@ -1,0 +1,353 @@
+{
+  "schema": "harness.public-component-result/v1",
+  "status": "PARTIAL_WITH_7_METADATA_BUDGET_ERRORS",
+  "date": "2026-11-06",
+  "component": "installed dev7 lexical shared-note retrieval, adapted LongMemEval_S-cleaned corpus",
+  "package_version": "2.0.0.dev7",
+  "dataset_commit": "98d7416c24c778c2fee6e6f3006e7a073259d48f",
+  "dataset_sha256": "d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442",
+  "planned": 500,
+  "attempted": 500,
+  "graded": 463,
+  "abstention_excluded": 30,
+  "errors": 7,
+  "metrics": {
+    "candidate": {
+      "recall_any": 0.9136069114470843,
+      "recall_all": 0.714902807775378,
+      "ndcg": 0.8120624084309619
+    },
+    "baseline": {
+      "recall_any": 0.24190064794816415,
+      "recall_all": 0.058315334773218146,
+      "ndcg": 0.09890733790181841
+    },
+    "paired_recall_all_delta": {
+      "mean": 0.6565874730021598,
+      "bootstrap_95_percentile": [
+        0.6112311015118791,
+        0.7041036717062635
+      ],
+      "resamples": 1000,
+      "seed": 20261106,
+      "limit": "conditional on graded cases; questions may be dependent"
+    }
+  },
+  "coverage_adjusted_recall_all_lower_bound": {
+    "candidate": 0.7042553191489361,
+    "baseline": 0.0574468085106383
+  },
+  "excerpt_evidence_turn_recall": {
+    "n": 463,
+    "mean": 0.424622030237581,
+    "scope": "additional evidence-turn-occurrence coverage, not answer correctness"
+  },
+  "by_question_type": {
+    "knowledge-update": {
+      "planned": 78,
+      "attempted": 78,
+      "graded": 71,
+      "abstention_excluded": 6,
+      "errors": 1,
+      "not_run": 0,
+      "metrics": {
+        "candidate": {
+          "recall_any": 0.9577464788732394,
+          "recall_all": 0.8169014084507042,
+          "ndcg": 0.8847248574195172
+        },
+        "baseline": {
+          "recall_any": 0.43661971830985913,
+          "recall_all": 0.014084507042253521,
+          "ndcg": 0.17020693432655665
+        },
+        "paired_recall_all_delta": {
+          "mean": 0.8028169014084507,
+          "bootstrap_95_percentile": [
+            0.7183098591549296,
+            0.8873239436619719
+          ],
+          "resamples": 1000,
+          "seed": 20261106,
+          "limit": "conditional on graded cases; questions may be dependent"
+        }
+      },
+      "status": "PARTIAL_RETRIEVAL_COMPONENT",
+      "model_calls": 0,
+      "full_v2": "NOT_QUALIFIED",
+      "promotion": "NOT_GRANTED",
+      "excerpt_evidence_turn_recall": {
+        "n": 71,
+        "mean": 0.4248826291079812,
+        "scope": "additional evidence-turn-occurrence coverage, not answer correctness"
+      },
+      "coverage_adjusted_recall_all_lower_bound": {
+        "candidate": 0.8055555555555556,
+        "baseline": 0.013888888888888888
+      },
+      "token_efficiency": "NOT_MEASURED; no model was used",
+      "scope": "adapted both-role shared-note retrieval and declared session labels; no QA or leaderboard claim"
+    },
+    "multi-session": {
+      "planned": 133,
+      "attempted": 133,
+      "graded": 121,
+      "abstention_excluded": 12,
+      "errors": 0,
+      "not_run": 0,
+      "metrics": {
+        "candidate": {
+          "recall_any": 0.9421487603305785,
+          "recall_all": 0.5702479338842975,
+          "ndcg": 0.7655981468865253
+        },
+        "baseline": {
+          "recall_any": 0.30578512396694213,
+          "recall_all": 0.008264462809917356,
+          "ndcg": 0.08275914748851253
+        },
+        "paired_recall_all_delta": {
+          "mean": 0.5619834710743802,
+          "bootstrap_95_percentile": [
+            0.47107438016528924,
+            0.6446280991735537
+          ],
+          "resamples": 1000,
+          "seed": 20261106,
+          "limit": "conditional on graded cases; questions may be dependent"
+        }
+      },
+      "status": "COMPLETED_RETRIEVAL_COMPONENT",
+      "model_calls": 0,
+      "full_v2": "NOT_QUALIFIED",
+      "promotion": "NOT_GRANTED",
+      "excerpt_evidence_turn_recall": {
+        "n": 121,
+        "mean": 0.5055096418732783,
+        "scope": "additional evidence-turn-occurrence coverage, not answer correctness"
+      },
+      "coverage_adjusted_recall_all_lower_bound": {
+        "candidate": 0.5702479338842975,
+        "baseline": 0.008264462809917356
+      },
+      "token_efficiency": "NOT_MEASURED; no model was used",
+      "scope": "adapted both-role shared-note retrieval and declared session labels; no QA or leaderboard claim"
+    },
+    "single-session-assistant": {
+      "planned": 56,
+      "attempted": 56,
+      "graded": 50,
+      "abstention_excluded": 0,
+      "errors": 6,
+      "not_run": 0,
+      "metrics": {
+        "candidate": {
+          "recall_any": 0.88,
+          "recall_all": 0.88,
+          "ndcg": 0.88
+        },
+        "baseline": {
+          "recall_any": 0.16,
+          "recall_all": 0.16,
+          "ndcg": 0.09908791144718446
+        },
+        "paired_recall_all_delta": {
+          "mean": 0.72,
+          "bootstrap_95_percentile": [
+            0.56,
+            0.86
+          ],
+          "resamples": 1000,
+          "seed": 20261106,
+          "limit": "conditional on graded cases; questions may be dependent"
+        }
+      },
+      "status": "PARTIAL_RETRIEVAL_COMPONENT",
+      "model_calls": 0,
+      "full_v2": "NOT_QUALIFIED",
+      "promotion": "NOT_GRANTED",
+      "excerpt_evidence_turn_recall": {
+        "n": 50,
+        "mean": 0.02,
+        "scope": "additional evidence-turn-occurrence coverage, not answer correctness"
+      },
+      "coverage_adjusted_recall_all_lower_bound": {
+        "candidate": 0.7857142857142857,
+        "baseline": 0.14285714285714285
+      },
+      "token_efficiency": "NOT_MEASURED; no model was used",
+      "scope": "adapted both-role shared-note retrieval and declared session labels; no QA or leaderboard claim"
+    },
+    "single-session-preference": {
+      "planned": 30,
+      "attempted": 30,
+      "graded": 30,
+      "abstention_excluded": 0,
+      "errors": 0,
+      "not_run": 0,
+      "metrics": {
+        "candidate": {
+          "recall_any": 0.7333333333333333,
+          "recall_all": 0.7333333333333333,
+          "ndcg": 0.6797596420238124
+        },
+        "baseline": {
+          "recall_any": 0.13333333333333333,
+          "recall_all": 0.13333333333333333,
+          "ndcg": 0.1143558852691131
+        },
+        "paired_recall_all_delta": {
+          "mean": 0.6,
+          "bootstrap_95_percentile": [
+            0.4,
+            0.8
+          ],
+          "resamples": 1000,
+          "seed": 20261106,
+          "limit": "conditional on graded cases; questions may be dependent"
+        }
+      },
+      "status": "COMPLETED_RETRIEVAL_COMPONENT",
+      "model_calls": 0,
+      "full_v2": "NOT_QUALIFIED",
+      "promotion": "NOT_GRANTED",
+      "excerpt_evidence_turn_recall": {
+        "n": 30,
+        "mean": 0.36666666666666664,
+        "scope": "additional evidence-turn-occurrence coverage, not answer correctness"
+      },
+      "coverage_adjusted_recall_all_lower_bound": {
+        "candidate": 0.7333333333333333,
+        "baseline": 0.13333333333333333
+      },
+      "token_efficiency": "NOT_MEASURED; no model was used",
+      "scope": "adapted both-role shared-note retrieval and declared session labels; no QA or leaderboard claim"
+    },
+    "single-session-user": {
+      "planned": 70,
+      "attempted": 70,
+      "graded": 64,
+      "abstention_excluded": 6,
+      "errors": 0,
+      "not_run": 0,
+      "metrics": {
+        "candidate": {
+          "recall_any": 0.875,
+          "recall_all": 0.875,
+          "ndcg": 0.8671875
+        },
+        "baseline": {
+          "recall_any": 0.140625,
+          "recall_all": 0.140625,
+          "ndcg": 0.11706691983934756
+        },
+        "paired_recall_all_delta": {
+          "mean": 0.734375,
+          "bootstrap_95_percentile": [
+            0.609375,
+            0.859375
+          ],
+          "resamples": 1000,
+          "seed": 20261106,
+          "limit": "conditional on graded cases; questions may be dependent"
+        }
+      },
+      "status": "COMPLETED_RETRIEVAL_COMPONENT",
+      "model_calls": 0,
+      "full_v2": "NOT_QUALIFIED",
+      "promotion": "NOT_GRANTED",
+      "excerpt_evidence_turn_recall": {
+        "n": 64,
+        "mean": 0.1953125,
+        "scope": "additional evidence-turn-occurrence coverage, not answer correctness"
+      },
+      "coverage_adjusted_recall_all_lower_bound": {
+        "candidate": 0.875,
+        "baseline": 0.140625
+      },
+      "token_efficiency": "NOT_MEASURED; no model was used",
+      "scope": "adapted both-role shared-note retrieval and declared session labels; no QA or leaderboard claim"
+    },
+    "temporal-reasoning": {
+      "planned": 133,
+      "attempted": 133,
+      "graded": 127,
+      "abstention_excluded": 6,
+      "errors": 0,
+      "not_run": 0,
+      "metrics": {
+        "candidate": {
+          "recall_any": 0.937007874015748,
+          "recall_all": 0.6456692913385826,
+          "ndcg": 0.7924351589981544
+        },
+        "baseline": {
+          "recall_any": 0.18110236220472442,
+          "recall_all": 0.031496062992125984,
+          "ndcg": 0.06156057689051612
+        },
+        "paired_recall_all_delta": {
+          "mean": 0.6141732283464567,
+          "bootstrap_95_percentile": [
+            0.5275590551181102,
+            0.7007874015748031
+          ],
+          "resamples": 1000,
+          "seed": 20261106,
+          "limit": "conditional on graded cases; questions may be dependent"
+        }
+      },
+      "status": "COMPLETED_RETRIEVAL_COMPONENT",
+      "model_calls": 0,
+      "full_v2": "NOT_QUALIFIED",
+      "promotion": "NOT_GRANTED",
+      "excerpt_evidence_turn_recall": {
+        "n": 127,
+        "mean": 0.6359580052493439,
+        "scope": "additional evidence-turn-occurrence coverage, not answer correctness"
+      },
+      "coverage_adjusted_recall_all_lower_bound": {
+        "candidate": 0.6456692913385826,
+        "baseline": 0.031496062992125984
+      },
+      "token_efficiency": "NOT_MEASURED; no model was used",
+      "scope": "adapted both-role shared-note retrieval and declared session labels; no QA or leaderboard claim"
+    }
+  },
+  "reported_loop_seconds": 50.8538405,
+  "timing_exclusions": [
+    "download",
+    "initial hash check and JSON loading"
+  ],
+  "environment": {
+    "python": "3.9.6",
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "module_sha256": {
+    "agent_harness": "d1b76dc837a1869d4f9e525027af1eeb4e7cc4214af183d3584b6324f3c9bdd5",
+    "vault_retrieval": "c32b9c702eeb7fc14fd702ef4e968794853d7f7b9419bab0a84302d69426451d",
+    "vault_sources": "87c66aaf7e27d5ed3a3d490408ddb7e1f73e9c6a4ce35d7324aed5283e89d299",
+    "kb": "af063d2cca1178e41d1716490dbd854a0d26a3dd051b9b4bb7c9997128084df9",
+    "adapter": "6c20179c8460b396e8f99aa6fc14b5938fc95da69b33f485e4480d53abae4ee5"
+  },
+  "runner_sha256": "6d95c193cec4697063e6681cfae3ea0d5fb1021a6bfb3cdb68813b1f1719a4d8",
+  "results_sha256": "841923c4e8bbc7c3bcd844870bf7f64741a305f1cf7ee40195872fb87545e9a9",
+  "report_sha256": "7fb1aa6470bf6453bc5d5ef885c90e6c2c99ca8f52b66cc6fec1681043ecb3a5",
+  "model_calls": 0,
+  "token_efficiency": "NOT_MEASURED",
+  "official_qa_score": "NOT_RUN",
+  "qmd_comparison": "NOT_RUN",
+  "full_v2": "NOT_QUALIFIED",
+  "promotion": "NOT_GRANTED",
+  "public_submission": "NOT_GRANTED",
+  "limitations": [
+    "adapted both-role corpus; upstream flat index uses user text only",
+    "retrieval metrics do not establish answer correctness",
+    "seven budget errors retained",
+    "30 abstention questions excluded from retrieval scoring as upstream does",
+    "bootstrap interval conditional on graded cases; questions may be dependent",
+    "first20 were development inputs; remaining480 reported separately in the raw report",
+    "input text and outputs remain private local artifacts"
+  ]
+}

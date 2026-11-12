@@ -16,6 +16,7 @@ import os
 import re
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
 
@@ -324,9 +325,65 @@ def _defined_elsewhere(text: str, path: Tuple[str, ...]) -> bool:
     return True
 
 
+def _array_table(name: str, rows: List[dict]) -> str:
+    return "".join(f"[[{_toml_key(name)}]]\n" + "".join(
+        f"{_toml_key(k)} = {_toml_val(v)}\n" for k, v in row.items()) + "\n" for row in rows)
+
+
+def _replace_value(lines: List[str], hit: int, new: str) -> None:
+    """Replace a whole TOML value, including multiline arrays, without leaving continuation lines."""
+    depth = 0
+    quote = None
+    escaped = False
+    end = hit + 1
+    for index in range(hit, len(lines)):
+        line = lines[index]
+        start = line.find("=") + 1 if index == hit else 0
+        for char in line[start:]:
+            if quote:
+                if escaped:
+                    escaped = False
+                elif char == "\\" and quote == '"':
+                    escaped = True
+                elif char == quote:
+                    quote = None
+            elif char in ('"', "'"):
+                quote = char
+            elif char == "#":
+                break
+            elif char in "[{":
+                depth += 1
+            elif char in "]}":
+                depth -= 1
+        end = index + 1
+        if depth == 0:
+            break
+    lines[hit:end] = [new]
+
+
 def _set_keys(text: str, name: str, body: dict) -> str:
-    path = _norm_table(name)
+    path = _norm_table(name) if name else None  # '+' alone owns selected root keys, not a table named ''.
     blocks = _split_blocks(text)
+    if path is None:
+        parsed = load_toml(text)
+        body = dict(body)
+        for key, value in list(body.items()):
+            if not (isinstance(value, list) and all(isinstance(row, dict) for row in value)):
+                continue
+            existing = parsed.get(key)
+            if existing is not None and not isinstance(existing, list):
+                raise InstallError(f"your config defines {key} as a non-array value")
+            existing = existing or []
+            additions = [row for row in value if row not in existing]
+            array_tables = any(bp == (key,) and raw.lstrip().startswith("[[") for bp, raw in blocks)
+            if array_tables:
+                text = text.rstrip("\n") + ("\n\n" if additions else "") + _array_table(key, additions)
+                del body[key]
+            else:
+                body[key] = existing + additions
+        if not body:
+            return text
+        blocks = _split_blocks(text)
     i = _header_index(blocks, path)
     if i is None:
         if _defined_elsewhere(text, path):
@@ -339,12 +396,12 @@ def _set_keys(text: str, name: str, body: dict) -> str:
     for k, v in body.items():
         new = f"{_toml_key(k)} = {_toml_val(v)}\n"
         rx = re.compile(_KEYLINE.format(key=re.escape(_toml_key(k))))
-        hit = next((n for n, ln in enumerate(lines) if n > 0 and rx.match(ln)), None)
+        hit = next((n for n, ln in enumerate(lines) if (path is None or n > 0) and rx.match(ln)), None)
         if hit is not None:
-            lines[hit] = new
+            _replace_value(lines, hit, new)
         else:
-            last = max(n for n, ln in enumerate(lines) if n == 0 or ln.strip())   # after the last non-blank line
-            if not lines[last].endswith("\n"):
+            last = max((n for n, ln in enumerate(lines) if n == 0 or ln.strip()), default=-1)
+            if last >= 0 and not lines[last].endswith("\n"):
                 lines[last] += "\n"
             lines.insert(last + 1, new)
     blocks[i] = (path, "".join(lines))
@@ -354,19 +411,51 @@ def _set_keys(text: str, name: str, body: dict) -> str:
 def _drop_keys(text: str, name: str, body: dict, orig: str) -> str:
     """Our keys out of the user's [name]; a key the original had gets the original's line back; the header
     goes too when we created the table and nothing else is left in it."""
-    path = _norm_table(name)
+    path = _norm_table(name) if name else None
     blocks = _split_blocks(text)
     i = _header_index(blocks, path)
     if i is None:
         return text
+    handled = set()
+    if path is None:
+        original = load_toml(orig or "")
+        for key, value in body.items():
+            if not (isinstance(value, list) and all(isinstance(row, dict) for row in value)):
+                continue
+            handled.add(key)
+            before = original.get(key) or []
+            kept = []
+            for block_path, raw in blocks:
+                if block_path == (key,) and raw.lstrip().startswith("[["):
+                    row = load_toml(raw).get(key, [None])[0]
+                    if row in value and row not in before:
+                        continue
+                kept.append((block_path, raw))
+            blocks = kept
+            text = "".join(raw for _, raw in blocks)
+            current = load_toml(text).get(key)
+            if isinstance(current, list):
+                remaining = [row for row in current if row not in value or row in before]
+                i = _header_index(blocks, None)
+                lines = blocks[i][1].splitlines(keepends=True)
+                hit = next((n for n, line in enumerate(lines)
+                            if re.match(_KEYLINE.format(key=re.escape(_toml_key(key))), line)), None)
+                if hit is not None:
+                    if remaining or key in original:
+                        _replace_value(lines, hit, f"{_toml_key(key)} = {_toml_val(remaining)}\n")
+                    else:
+                        _replace_value(lines, hit, "")
+                    blocks[i] = (None, "".join(lines))
     ob = _split_blocks(orig or "")
     oi = _header_index(ob, path)
     olines = ob[oi][1].splitlines(keepends=True) if oi is not None else []
     lines = blocks[i][1].splitlines(keepends=True)
     for k in body:
+        if k in handled:
+            continue
         rx = re.compile(_KEYLINE.format(key=re.escape(_toml_key(k))))
-        hit = next((n for n, ln in enumerate(lines) if n > 0 and rx.match(ln)), None)
-        was = next((ln for n, ln in enumerate(olines) if n > 0 and rx.match(ln)), None)
+        hit = next((n for n, ln in enumerate(lines) if (path is None or n > 0) and rx.match(ln)), None)
+        was = next((ln for n, ln in enumerate(olines) if (path is None or n > 0) and rx.match(ln)), None)
         if hit is not None:
             if was is not None:
                 lines[hit] = was if was.endswith("\n") else was + "\n"
@@ -699,7 +788,9 @@ def uninstall(hh: Path, log: Callable[[str], None] = print) -> List[str]:
             except OSError:
                 pass
         done.append(str(p))
-    for sub in ("lib", "content", "profile"):
+    # The profile holds user rules and knowledge, including data added after
+    # installation. Uninstall package code, never this persistent user store.
+    for sub in ("lib", "content"):
         _remove_any(hh / sub)
     (hh / STATE).unlink()
     return done
@@ -745,6 +836,11 @@ def build_rules(content: Path, profile: dict, profile_dir: Optional[Path], hh: P
     The pointer replaces the `<!-- harness:descriptor -->` line when AGENTS.md has one."""
     agents = Path(content) / "AGENTS.md"
     text = agents.read_text(encoding="utf-8").rstrip("\n") if agents.is_file() else "# Agent rules"
+    from .permission_profiles import render_sudo, saved_sudo
+    try:
+        text = render_sudo(text, saved_sudo(hh, profile))
+    except (ValueError, OSError) as error:
+        raise InstallError(f"privilege policy: {error}") from error
     desc = descriptor_name(profile, profile_dir)
     pointer = ""
     if desc:
@@ -780,22 +876,48 @@ def kb_paths(profile: dict, profile_dir: Optional[Path]) -> List[Path]:
 
 # ---------------------------------------------------------------- copying the harness itself
 
-def copy_harness(hh: Path, source: Path, profile_dir: Optional[Path]) -> None:
+def _replace_profile(hh: Path, source: Path) -> Optional[Path]:
+    """Stage first; retain the prior profile outside the new knowledge roots."""
+    stage = Path(tempfile.mkdtemp(prefix=".profile-stage-", dir=hh))
+    target = hh / "profile"
+    previous = None
+    try:
+        shutil.copytree(source, stage / "profile", ignore=IGNORE)
+        if target.exists() or target.is_symlink():
+            # User-data stashes under modified/ are deliberately never pruned.
+            previous = hh / "backup" / stage.name.lstrip(".") / "modified" / "profile"
+            previous.parent.mkdir(parents=True)
+            target.rename(previous)
+        (stage / "profile").rename(target)
+        return previous
+    except BaseException:
+        if (previous is not None and (previous.exists() or previous.is_symlink())
+                and not (target.exists() or target.is_symlink())):
+            previous.rename(target)
+        raise
+    finally:
+        _remove_any(stage)  # Only this call's unpublished staging tree.
+
+
+def copy_harness(hh: Path, source: Path, profile_dir: Optional[Path]) -> Optional[Path]:
     hh.mkdir(parents=True, exist_ok=True)
     for sub in ("memory", "lessons"):
         (hh / sub).mkdir(exist_ok=True)
     lib = hh / "lib" / "agent_harness"
-    if lib.resolve() != PKG_DIR:
+    selected_package = Path(source) / "src" / "agent_harness"
+    package = selected_package if selected_package.is_dir() else PKG_DIR
+    if lib.resolve() != package.resolve():
         _remove_any(lib)
-        shutil.copytree(PKG_DIR, lib, ignore=IGNORE)
+        shutil.copytree(package, lib, ignore=IGNORE)
     src_content = Path(source) / "content"
     if src_content.is_dir() and src_content.resolve() != (hh / "content").resolve():
         _remove_any(hh / "content")
         shutil.copytree(src_content, hh / "content", ignore=IGNORE)
+    previous = None
     if profile_dir and Path(profile_dir).resolve() != (hh / "profile").resolve():
-        _remove_any(hh / "profile")
-        shutil.copytree(Path(profile_dir), hh / "profile", ignore=IGNORE)
+        previous = _replace_profile(hh, Path(profile_dir))
     write_launcher(hh)
+    return previous
 
 
 LAUNCHER = """#!/bin/sh

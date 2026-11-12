@@ -1,0 +1,19 @@
+{
+  "id": "assign-a-stable-source-id",
+  "canonical_url": null,
+  "aliases": [],
+  "revision": null,
+  "acquired_at": null,
+  "access": "NOT_CHECKED",
+  "read_coverage": "NOT_READ",
+  "evidence_location": null,
+  "mechanism": null,
+  "implementation_observations": [],
+  "reported_effects": [],
+  "locally_measured_effects": [],
+  "limits": [],
+  "requirement_ids": [],
+  "decision": "PENDING_RESEARCH",
+  "reason": "Research and retention are required even when implementation is deferred",
+  "next_check": null
+}

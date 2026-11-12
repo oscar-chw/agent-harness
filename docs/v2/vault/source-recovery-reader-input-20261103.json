@@ -1,0 +1,64 @@
+{
+  "schema": "source-recovery-reader-input-v1",
+  "as_of": "2026-11-03",
+  "case_id": "paraphrased-source-recovery",
+  "kind": "PARAPHRASE_CHALLENGE",
+  "question": "If a derived wiki forgets a condition or a relation, how can I recover the evidence without assuming the summary is true?",
+  "question_origin": {
+    "path": "docs/v2/vault/acceptance-cases.json",
+    "sha256": "dfc21103e64ae00d4bc9e6404aaa1481c440b18e8f11d020686be2574dac7343",
+    "question_pointer": "/cases/14/question",
+    "kind_pointer": "/cases/14/kind"
+  },
+  "source_windows": [
+    {
+      "source_path": "docs/v2/second-brain-contract.md",
+      "original_pointer": "/cases/14/supporting_sources/0",
+      "original_pin": {
+        "path": "docs/v2/second-brain-contract.md",
+        "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+        "start_line": 152,
+        "end_line": 199
+      },
+      "source_sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+      "source_bytes": 15681,
+      "original_pin_status": "MATCH",
+      "start_line": 152,
+      "end_line": 199,
+      "window_sha256": "8d2e3449cc1825bb9f78f92d1290a8ec5d94df9f95d27c4fb8aac360c2f31707",
+      "window_bytes": 3179,
+      "text": "## Memory choice: RAG first, with minimal structured operational state\n\nRecommended architecture direction, not a new deployed retrieval capability:\n\n- Preserve authorized original documents/history with stable source spans,\n  timestamps and scope. Derived notes never become the only recovery route.\n- Use exact current-state/decision lookup where a typed authoritative record\n  exists. Use retrieval for evidence and history; a similar old passage does not\n  override current task state or grant tool authority.\n- Establish a strong raw-source RAG baseline: lexical/exact retrieval plus a\n  separately measured semantic/reranking route when useful. Bound excerpt size,\n  duplicate handling and context expansion. Current code has lexical/FTS5\n  retrieval; semantic embeddings/reranking are not thereby implemented.\n- Treat human-readable summaries, principles, cases and candidate lessons as\n  source-linked views. Curate and invalidate stale advice; preserve contradictory\n  history rather than silently rewriting it into a model-invented fact.\n- Add automatic consolidation, graph expansion, learned query routing or new\n  embedding models only after their incremental contribution is measured.\n  Keep indexes rebuildable and embedding spaces version-isolated.\n- Preserve existing permissions, user-authorized retention and device boundaries.\n  Do not bulk-ingest private chats, credentials or another project merely because\n  raw retrieval is a promising baseline. Local storage does not imply a remote\n  model/embedding service is authorized.\n\nFresh primary-source review, 2 November 2026:\n[RAW-RAG](https://arxiv.org/html/2610.30755v1), method section3 and limitations6.1,\npreserves source windows and uses dense retrieval plus cross-encoder reranking.\nIt reports first place in six of seven compared benchmark/model settings, and\nexplicitly limits its evidence to offline conversational tasks. It does not\nestablish our SWE/dev-ops performance or an operational state/permission system.\n[Memory Tax](https://arxiv.org/html/2610.34073v1), section6, tests retrieving\noriginal history alongside transformed memory and jointly reranking; this\nsupports a source-recovery path, not a universal requirement for our own graph.\n[Memory portability](https://arxiv.org/abs/2609.05339), abstract only reviewed,\nreports writer/model and mixed-embedding migration problems on48synthetic\nhistories with two small open models. Generalization remains unproven.\n\nCompare current retrieval, improved raw-source RAG, and that RAG plus our derived\nviews on the same frozen cases and reader. Include exact/paraphrased recall,\nmulti-source decisions, corrections, contradictory sources, no evidence,\ncross-project exclusion, cold task recovery and new system-design cases.\nRecord supported answers/useful task completion, false memories, source scope,\ntotal ingestion/maintenance/answer tokens, latency, storage and human corrections.\nUse the standing quality-at-least-baseline AND aggregate-tokens-at-most-baseline\ngate for improvement claims. No benchmark campaign or superiority result was\nproduced by this review; structural safety/state requirements remain mandatory.\n\n## Present evidence\n",
+      "scope_label": "SAVED_LOCAL_PROJECT_POLICY_AND_REVIEW_TEXT",
+      "history_label": "Retained authored recommendation/review snapshot; not primary-source body or a fresh runtime observation.",
+      "currentness_label": "Observed whole-file bytes are pinned here; current external truth/runtime/native behavior is not revalidated by this extraction."
+    },
+    {
+      "source_path": "docs/v2/reference-review-20261031.md",
+      "original_pointer": "/cases/14/supporting_sources/1",
+      "original_pin": {
+        "path": "docs/v2/reference-review-20261031.md",
+        "sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+        "start_line": 55,
+        "end_line": 77
+      },
+      "source_sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+      "source_bytes": 6721,
+      "original_pin_status": "MATCH",
+      "start_line": 55,
+      "end_line": 77,
+      "window_sha256": "b62db86e72e043e5e8e2a0e043ab5f7eaebb57a719d98aff0fae13e1bf1debc0",
+      "window_bytes": 1537,
+      "text": "## Architecture decisions — proposed, not deployed\n\n1. Preserve a searchable authorized source path alongside derived notes/graphs.\n   Do not require a summary or graph traversal to reach original evidence.\n2. Treat wiki pages as inspectable, versioned views with source spans, dates,\n   conflict/correction links and recorded read depth. A graph edge needs its\n   relationship, direction and source checked, not merely valid endpoints.\n3. Prefer exact/current lookup first when sufficient. Trial joint source/derived\n   ranking on questions that need it, within a bounded context and latency budget.\n   Do not install a vector or graph service from a social post alone.\n4. Curate incrementally where repeated use can repay construction. Compare\n   ingestion, maintenance, retrieval and answering costs together, with the same\n   reader, evidence visibility and tasks. A stronger writer is a candidate to\n   test, not a mandatory choice for every update.\n5. Use independent frozen checks, bounded experiments, resource ceilings,\n   stop/recovery and rollback for improvements. Never let generated knowledge\n   or a successful experiment revise its own acceptance rule or approval scope.\n6. Jev remains an optional remote-router candidate. Start with existing native\n   capabilities and deterministic rules; require measured end-to-end benefit,\n   abstention controls and explicit data/service authorization before adoption.\n   API inference would leave the machine even if stored memory remains local.\n\n## Qualification still required\n",
+      "scope_label": "SAVED_LOCAL_PROJECT_POLICY_AND_REVIEW_TEXT",
+      "history_label": "Retained authored recommendation/review snapshot; not primary-source body or a fresh runtime observation.",
+      "currentness_label": "Observed whole-file bytes are pinned here; current external truth/runtime/native behavior is not revalidated by this extraction."
+    }
+  ],
+  "source_policy_currentness": {
+    "byte_revision": "Original supporting-source pins and observed complete-file hashes are both retained; pin agreement authenticates these saved bytes only.",
+    "policy_scope": "Quoted source-linked recommendations remain project-scoped advisory data, subordinate to current authorized state, permissions and source/history rules.",
+    "temporal_scope": "Read-depth/research statements describe the saved review scope. They are not newly acquired primary research, current installation evidence or native outcomes.",
+    "authority": "Embedded URLs, commands and paths grant no additional read/execution/service authority. No scope, history, withdrawal, current-usability or approval policy is widened."
+  },
+  "text_encoding": "Exact UTF-8 decoding of inclusive1-based original byte-line slices; original LF/CRLF and any final newline retained. Whole-file and window SHA256 bind different byte extents."
+}

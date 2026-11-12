@@ -10,7 +10,7 @@ the diff, and the gate recomputes it, so a review left over from last week never
 read. (The hash binds a review to code, not to the fact that a reviewer ran: a file assembled by hand with the
 same hash would pass; the gate guards against stale reviews, not forged ones.)
 An empty diff is refused, not reviewed as clean (after a commit, review the branch with --base). The
-reviewer is the `review` routing tier in a fresh `claude -p` (or `codex exec`) context, told to verify each
+reviewer is the `review` routing tier in a fresh `claude -p`, `codex exec` or `kimi -p` context, told to verify each
 finding by reading the code or running a command before reporting it, because same-model agreement is not
 evidence; a finding it could not verify is reported as such, not dropped silently.
 """
@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 from . import installer as I
+from . import routing
 
 SCHEMA = {
     "type": "object", "required": ["findings"], "additionalProperties": False,
@@ -229,12 +230,27 @@ def run(base: Optional[str], out: str, home: Path, timeout: int = 1800, root: Op
     if untracked:   # `git diff` never shows these, but the review is bound to them: name them, so they are read
         scope += ", AND these new files that git does not track yet (read each one in full): " + ", ".join(untracked[:50])
     prompt = _prompt(scope)
-    runner = os.environ.get("PLAN_RUNNER", "").strip().lower() or ("claude" if shutil.which("claude") else "codex")
+    runner = os.environ.get("PLAN_RUNNER", "").strip().lower() or (
+        "claude" if shutil.which("claude") else "codex" if shutil.which("codex") else "kimi")
+    run_env = None
     if runner == "codex":
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
             json.dump(SCHEMA, f)
         cmd = ["codex", "exec", "--json", "--sandbox", "read-only", "--output-schema", f.name, prompt]
         schema_file = f.name
+    elif runner == "kimi":
+        model, effort = routing.kimi_tier("review", home)
+        cmd = ["kimi", "-p", prompt, "--output-format", "stream-json"]
+        kimi_root = Path(os.environ.get("KIMI_CODE_HOME", str(home / ".kimi-code")))
+        agent = kimi_root / "agents" / "harness-review.md"
+        if agent.is_file():
+            cmd += ["--agent-file", str(agent)]
+        if model:
+            cmd += ["--model", model]
+        run_env = dict(os.environ)
+        run_env.pop("KIMI_MODEL_THINKING_EFFORT", None)
+        if effort:
+            run_env["KIMI_MODEL_THINKING_EFFORT"] = effort
     else:
         cmd = ["claude", "-p", prompt, "--output-format", "json", "--json-schema", json.dumps(SCHEMA),
                "--setting-sources", "user", "--strict-mcp-config"]
@@ -243,7 +259,8 @@ def run(base: Optional[str], out: str, home: Path, timeout: int = 1800, root: Op
             cmd += ["--agent", "harness-review"]
         cmd += (["--model", model] if model else []) + (["--effort", effort] if effort else [])
     try:
-        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL,
+                           env=run_env)
     except (OSError, subprocess.TimeoutExpired) as e:
         return 2, "review: the reviewer could not run (%s)" % e
     finally:
@@ -262,6 +279,15 @@ def run(base: Optional[str], out: str, home: Path, timeout: int = 1800, root: Op
             item = ev.get("item") if isinstance(ev, dict) else None
             if isinstance(item, dict) and item.get("type") in ("agent_message", "assistant_message"):
                 found = _parse(json.dumps({"result": item.get("text", "")})) or found
+    elif runner == "kimi":
+        found = None
+        for line in p.stdout.splitlines():
+            try:
+                event = json.loads(line)
+            except ValueError:
+                continue
+            if event.get("role") == "assistant" and event.get("content"):
+                found = _parse(json.dumps({"result": event["content"]})) or found
     else:
         found = _parse(p.stdout)
     if not isinstance(found, dict) or not isinstance(found.get("findings"), list):

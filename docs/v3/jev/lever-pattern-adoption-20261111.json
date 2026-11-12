@@ -1,0 +1,61 @@
+{
+  "schema": "harness.jev-decision/v1",
+  "record_id": "jev-lever-pattern-adoption-20261111",
+  "created": "2026-11-11",
+  "subject": {
+    "name": "lever-experiment-contract-pattern",
+    "question": "Adopt Lever's experiment-contract pattern (pattern-only) as a repo capability?"
+  },
+  "kind": "choice",
+  "domain": "adoption",
+  "options": ["adopt-pattern-only", "hold", "reject"],
+  "score_range": null,
+  "verdict": "adopt-pattern-only",
+  "confidence": {
+    "level": "high",
+    "basis": "REA record rea-lever-20261105 verified on disk by the admission loop: 6 claims (5 observed, including a source-observed local-fit claim; 1 inference declared as such), MIT license evidence bound, pinned commit e9c4befa; the pattern is already embodied as src/agent_harness/loop_contract.py via plan v2-completion behind its gated test surface — referenced here as text, not hash-bound, because it is live source"
+  },
+  "policy": {
+    "execute_at_or_above": "medium",
+    "below": "escalate"
+  },
+  "scope": "repo-local pattern adoption: the frozen experiment-contract discipline only (freeze cases/checks/acceptance before observing; never compensate a failed case with gains elsewhere); no upstream code imported or executed; Lever's autonomy defaults, spend tiers, automatic fanout, merge workflow and scheduling explicitly not adopted per the REA decision summary",
+  "reversibility": "reversible",
+  "authority": "plan v3-rea-support nodes 1-7, all gated (check_rea_v0.py + the push-tier wrapper), verdict docs/v3/rea-support-v0-verdict-20261111.md; admission recorded by plan v3-settlement-plugin-loop node 6",
+  "inputs": [
+    {
+      "ref": "docs/v3/rea/lever-20261105.json",
+      "kind": "local-file",
+      "role": "the qualification record for this capability (harness.rea-record/v1)",
+      "digest": "5c9e0c7da76579d0d1a2e5f81eb59bc2c1e76a03710177c2f5c529f17a37850b"
+    },
+    {
+      "ref": "docs/v3/rea-support-design-20261111.md",
+      "kind": "local-file",
+      "role": "the REA v0 design the qualification record was validated against",
+      "digest": "dd89b108d7c99d0395162c5a3ed2c12fb46f2665351d5140b3269a24fde1072f"
+    },
+    {
+      "ref": "docs/v3/rea-support-v0-verdict-20261111.md",
+      "kind": "local-file",
+      "role": "the REA workstream verdict carrying the pattern-only decision",
+      "digest": "1c4d1073de482891b6db3fc0aad9e09fd2587954fe020130b3903f0f62f25d64"
+    },
+    {
+      "ref": "upstream:github/lever@e9c4befaf4f6f7b256d66e422330756cba1b19e8",
+      "kind": "upstream-pin",
+      "role": "the analyzed upstream source, bound by commit pin (zero-network v0: upstream bytes are not hashed locally)",
+      "digest": "e9c4befaf4f6f7b256d66e422330756cba1b19e8"
+    }
+  ],
+  "receipts": [
+    ".harness-work/eval-pipeline-20261110/runs/run-20261111T005928Z-2deaf2a8.json"
+  ],
+  "unknowns": [
+    "upstream runtime behavior is unexercised (M: NOT_RUN in the REA record); documented routing is not proof a model follows it",
+    "whether the pinned tree changed upstream after 2026-11-05 is unrechecked (zero-network v0)",
+    "fitness is assessed for the frozen experiment-contract seam only; Lever's other skills, dependencies and automation recipes were not analyzed"
+  ],
+  "links": {},
+  "promotion": "NOT_GRANTED"
+}

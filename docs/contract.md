@@ -13,6 +13,10 @@ Hard rules for all code here:
   `python3 -m unittest` (use unittest-style tests or plain asserts in functions pytest collects; keep
   both working: prefer `unittest.TestCase`).
 - Tests never touch the real `$HOME`: use a temp dir and pass it as `home`.
+- Every new/changed/deleted file under `tests/` or `eval/` needs a sha256-bound tamper attestation in
+  `.harness-work/tamper-attestations.json` (schema `harness.tamper-attestations/v1`, dated non-empty
+  reason) BEFORE the push tier runs — an unrecorded test-surface diff fails the push tier. Practice
+  detail: `docs/v3/eval-pipeline-design-20261110.md`.
 
 ## Layout and owners
 
@@ -22,7 +26,7 @@ src/agent_harness/cli.py                 install | uninstall | status | doctor |
 src/agent_harness/installer.py           plan/apply/backup/restore, ask + warn            (A2)
 src/agent_harness/adapters/base.py       Adapter interface (below)                        (A2)
 src/agent_harness/adapters/claude_code.py, codex.py                                       (A2)
-src/agent_harness/adapters/copilot_vscode.py, cursor.py, gemini.py, agents_md.py          (A3)
+src/agent_harness/adapters/copilot_vscode.py, cursor.py, kimi.py, gemini.py, agents_md.py  (A3)
 src/agent_harness/mcp/server.py          stdio MCP server (JSON-RPC 2.0, newline-delimited) (A1)
 src/agent_harness/mcp/kb.py              knowledge index + partial retrieval               (A1)
 src/agent_harness/mcp/memory.py          memory + lessons (self-learning)                  (A1)
@@ -69,7 +73,7 @@ budget.
 | `lesson_add` | `mistake: str, fix: str, trigger: str` | id. Self-learning: recorded after a failure or correction |
 | `lesson_search` | `query: str, k: int=3` | the lessons relevant to the task at hand |
 | `session_search` | `query: str, k: int=5, session: str=""` | dated excerpts (<=300 chars) of the user's own past Claude Code / Codex messages; FTS5 index in `index.sqlite`, incremental by byte offset, redacted before storage, 64 MB cap (oldest dropped) |
-| `skill_manage` | `action: create|update|list|view|archive, name, description, body, old, new` | learned procedures in `~/.agents/skills/learned/<name>/SKILL.md` (agentskills format; sections When to Use / Procedure / Pitfalls / Verification; near-duplicates refused; body <= 12,000 chars; 40 active, least used archived to `HARNESS_HOME/skills-archive/`) |
+| `skill_manage` | `action: draft|correct|list|view|archive, project, candidate, name` | `draft` stores a dormant project-scoped procedure with pinned source and task-input episodes in `procedures.sqlite`. `correct` requires the old ID in `name` and a replacement `candidate`; it atomically withdraws old advice, preserves its evidence and leaves the linked replacement proposed. `harness improve --apply` currently rejects caller-attested comparisons; local freeze/bind receipts stay `HOLD_UNVERIFIED_BOUNDARY` and cannot activate a method. Future promotion requires native actor isolation, effective model and usage-to-artifact provenance, independent frozen grading, no per-case quality regression, a measurable gain, and aggregate tokens including overhead no greater than baseline. Legacy active rows without native verification are withheld from recall; rollback or stale source also stops recall. No learned `SKILL.md` is generated. `list` and `view` also expose pre-existing learned skills. Direct `create`/`update` and automatic application of legacy proposals are refused; `archive` applies only to legacy skills. |
 | `run_checks` | `cmd: str="", timeout: int=300` | OFF by default (`HARNESS_ENABLE=run_checks`): the project's checks run: exit code + only the failures and summary (<= 2 KB); recorded for the Stop gate |
 
 Caps (anti-bloat): memory 500 items/scope, lessons 200; beyond that the least-used, oldest are archived
@@ -123,6 +127,9 @@ JSON/TOML merges keep the user's other keys; instruction files are replaced (bac
   macOS `~/Library/Application Support/Code/User`, Linux `~/.config/Code/User`, Remote-SSH server side
   `~/.vscode-server/data/Machine/` (machine settings).
 - Cursor: `~/.cursor/mcp.json` (`mcpServers`), rules `.cursor/rules/*.mdc`, AGENTS.md.
+- Kimi Code: `$KIMI_CODE_HOME/AGENTS.md`, `mcp.json` (`mcpServers`), additive user hooks in `config.toml`, tier
+  agents in `agents/`; project `.kimi-code/AGENTS.md`, `mcp.json` and agents, shared skills in `~/.agents/skills`.
+  Existing harness `cwd`/`env`/enablement and user hooks survive reinstall.
 - Gemini CLI: `~/.gemini/GEMINI.md`, `~/.gemini/settings.json` (`mcpServers`, `context.fileName` may list
   `AGENTS.md`).
 - Generic: `AGENTS.md` for any tool that reads it (Codex, Cursor, Copilot, Gemini via setting, OpenCode, ...).

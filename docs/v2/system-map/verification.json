@@ -1,0 +1,40 @@
+{
+  "scope": "Source guard repair and target architecture booklet; not native installation or approval-bridge qualification",
+  "pdf_sha256": "2ebe846e1a414a171443737705cd4119d1c56e09c56a95ff83365b828c0391e9",
+  "pages": 8,
+  "titles": [
+    "System hierarchy",
+    "Adaptive task workflow",
+    "Decision policy",
+    "Guard decision and false positives",
+    "Approval while you are away",
+    "Memory retrieval and source authority",
+    "Cross-session pickup without message relays",
+    "Learning, evaluation and safe updates"
+  ],
+  "page_png_sha256": {
+    "page-1.png": "35ffdf1095907225c82f8271664033f4dddd0296f443f877e2f7dd37ae50d9a6",
+    "page-2.png": "a412e57c56acca17ec110db8c22c776160cd72624b0a9cc7663769a5a993e93b",
+    "page-3.png": "c663e82023e05a8b4e734df42b6391dd9b5fe4ed65f3e88955e209067c7dd578",
+    "page-4.png": "a1c25111e15cb205caf4e778d86d543c740905e520f7ea5bd0d8aa070daff8f2",
+    "page-5.png": "38b22f849a64b4e2c2e462aad2dff88aed3edf7a737c98b51b34213b452911ce",
+    "page-6.png": "c336c81d53133240b2d0bfdf78ad41434effd9bebe0023f323fe227aa6c18d74",
+    "page-7.png": "a49502a8002fe1469ae12835a47716ef4eb404110482b3e8c2dc7d06361bd0be",
+    "page-8.png": "ed7cff5dd751ac6e5f9e9a876269b108ce3459eeedf6f8e08804347b27adb513"
+  },
+  "guard_sha256": "45eeb79bcdd977d0dfb5e36b8d3e2c056af4f2bdd3d9f61773ee139f254c0576",
+  "test_sha256": "525cef08ac2a44491f23759286e17b628960c5752cf697fd020ab036a3dbd328",
+  "checks": {
+    "failing_reproduction": "1 failed, 1 passed before source repair",
+    "guard_suite": "542 passed, 2 xfailed",
+    "broader_selection": "581 passed, 2 xfailed",
+    "overbroad_exemption_mutation": "rejected",
+    "existing_installed_guard_regressions": "427 PASS, 0 FAIL",
+    "ruff": "PASS",
+    "pdf_readback": "8 pages and expected independent headings",
+    "visual_review": "all 8 pages; updated pages 2/4/8 reinspected"
+  },
+  "source_installation": "NOT_RUN",
+  "native_approval_consumer": "NOT_QUALIFIED",
+  "model_calls": 0
+}

@@ -1,0 +1,158 @@
+{
+  "schema": "harness.benchmark-coverage/v1",
+  "status": "PLANNED_NOT_ADMITTED",
+  "reviewed_at": "2026-11-06",
+  "baseline_arms": [
+    "native-current",
+    "previous-harness-frozen",
+    "candidate",
+    "minimal-workflow"
+  ],
+  "claude": "NOT_RUN_OWNER_EXCLUDED",
+  "paid_extra_usage": "FORBIDDEN",
+  "dataset_training": "FORBIDDEN",
+  "benchmarks": [
+    {
+      "id": "swe-bench-verified",
+      "capability": "coding",
+      "primary_source": "https://www.swebench.com/SWE-bench/guides/evaluation/",
+      "source_depth": "official-web-page-or-README-only",
+      "upstream_commit": null,
+      "dataset_sha256": null,
+      "license_review": "NOT_RUN",
+      "status": "NOT_RUN",
+      "score": null,
+      "admission_gap": "official-container-grader"
+    },
+    {
+      "id": "terminal-bench-4",
+      "capability": "terminal",
+      "primary_source": "https://www.tbench.ai/run",
+      "source_depth": "official-web-page-or-README-only",
+      "upstream_commit": null,
+      "dataset_sha256": null,
+      "license_review": "NOT_RUN",
+      "status": "NOT_RUN",
+      "score": null,
+      "admission_gap": "GPU-and-runner-admission"
+    },
+    {
+      "id": "terminal-bench-2",
+      "capability": "terminal-historical",
+      "primary_source": "https://www.tbench.ai/?version=2.0",
+      "source_depth": "official-web-page-or-README-only",
+      "upstream_commit": null,
+      "dataset_sha256": null,
+      "license_review": "NOT_RUN",
+      "status": "NOT_RUN",
+      "score": null,
+      "admission_gap": "separate-historical-pack"
+    },
+    {
+      "id": "skillsbench-1.1",
+      "capability": "skills",
+      "primary_source": "https://www.skillsbench.ai/",
+      "source_depth": "official-web-page-or-README-only",
+      "upstream_commit": null,
+      "dataset_sha256": null,
+      "license_review": "NOT_RUN",
+      "status": "NOT_RUN",
+      "score": null,
+      "admission_gap": "paired-skill-loading"
+    },
+    {
+      "id": "longmemeval",
+      "capability": "memory",
+      "primary_source": "https://github.com/xiaowu0162/LongMemEval",
+      "source_depth": "official-web-page-or-README-only",
+      "upstream_commit": null,
+      "dataset_sha256": null,
+      "license_review": "NOT_RUN",
+      "status": "NOT_RUN",
+      "score": null,
+      "admission_gap": "variant-and-grader-pin"
+    },
+    {
+      "id": "longmemeval-v2",
+      "capability": "memory",
+      "primary_source": "https://github.com/xiaowu0162/LongMemEval-V2",
+      "source_depth": "official-web-page-or-README-only",
+      "upstream_commit": null,
+      "dataset_sha256": null,
+      "license_review": "NOT_RUN",
+      "status": "NOT_RUN",
+      "score": null,
+      "admission_gap": "variant-and-grader-pin"
+    },
+    {
+      "id": "locomo",
+      "capability": "memory",
+      "primary_source": "https://github.com/snap-research/locomo",
+      "source_depth": "official-web-page-or-README-only",
+      "upstream_commit": null,
+      "dataset_sha256": null,
+      "license_review": "NOT_RUN",
+      "status": "NOT_RUN",
+      "score": null,
+      "admission_gap": "summary-and-grader-pin"
+    },
+    {
+      "id": "deepresearch-bench",
+      "capability": "research",
+      "primary_source": "https://github.com/Ayanami0730/deep_research_bench",
+      "source_depth": "official-web-page-or-README-only",
+      "upstream_commit": null,
+      "dataset_sha256": null,
+      "license_review": "NOT_RUN",
+      "status": "NOT_RUN",
+      "score": null,
+      "admission_gap": "native-only-judge-adapter-not-official-score"
+    },
+    {
+      "id": "bfcl-v4",
+      "capability": "tool-use",
+      "primary_source": "https://gorilla.cs.berkeley.edu/leaderboard.html",
+      "source_depth": "official-web-page-or-README-only",
+      "upstream_commit": null,
+      "dataset_sha256": null,
+      "license_review": "NOT_RUN",
+      "status": "NOT_RUN",
+      "score": null,
+      "admission_gap": "upstream-pin-and-native-tool-interface"
+    },
+    {
+      "id": "tau2-bench",
+      "capability": "stateful-interaction",
+      "primary_source": "https://github.com/sierra-research/tau2-bench",
+      "source_depth": "official-web-page-or-README-only",
+      "upstream_commit": null,
+      "dataset_sha256": null,
+      "license_review": "NOT_RUN",
+      "status": "NOT_RUN",
+      "score": null,
+      "admission_gap": "agent-and-user-native-provider-admission"
+    }
+  ],
+  "local_regressions": {
+    "contract": "docs/v2/vault/acceptance-cases.json",
+    "status": "NOT_QUALIFIED"
+  },
+  "additional_scope_review": [
+    "browser-GUI",
+    "security",
+    "test-honesty",
+    "maintainability"
+  ],
+  "must_report": [
+    "model-effort-tier",
+    "task-ids-and-hashes",
+    "baseline-and-candidate",
+    "native-and-grader-environment",
+    "planned-attempted-graded-and-infrastructure-failures",
+    "per-task-and-class-quality",
+    "paired-uncertainty",
+    "full-token-ledger-including-overhead",
+    "raw-and-adapted-score-labels",
+    "privacy-and-license-review"
+  ]
+}

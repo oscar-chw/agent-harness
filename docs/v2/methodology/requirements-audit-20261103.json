@@ -1,0 +1,3023 @@
+{
+  "schema": "harness.requirements-audit/methodology/v1",
+  "as_of": "2026-11-03T02:00:53.953886+08:00",
+  "scope": "H05 section8 and retained later v2 methodology/learning/evaluation only; integration input, not stable-v2 or efficacy certification",
+  "owner_source_receipt": {
+    "id": "H05-20261010",
+    "sha256": "3685b7d7e274b84d6e3bae9743ce4de091009251fb2187a21c577650edc3847e",
+    "line_count": 87,
+    "read_scope": "Full87-line supplied owner brief read; assigned section8 only transcribed",
+    "private_original": "Retained by integration owner; opaque source identity, no home/private path published",
+    "assigned_section": 8,
+    "assigned_lines": [
+      61,
+      66
+    ],
+    "assigned_text": "8. HARD ADOPTION AND v0.5 GATES\nFreeze representative tasks and evaluators before optimizing: daily/admin research, software feature/bug work, document/data work, quant/science reproduction, long-session resume and cross-agent memory handoff. Compare on identical cases, initial repository state, available tools and declared budgets. Separate model changes from harness changes. Repeat stochastic cases with paired results and uncertainty; retain negative and failed runs.\n\nThe user's constraint is strict: quality must be equal or higher AND tokens equal or lower. Count all agents, input/output, reasoning where exposed, retries, tool output, injected instructions, retrieval/compaction and indexing/maintenance amortization. Report cache usage separately; lower billed tokens or cheaper models do not by themselves meet the total-token requirement. Track task correctness, coverage, user corrections, groundedness, safety/recovery, tokens per completed task and latency. No task-class regression may be hidden by a better overall average. Unknown usage or insufficient evidence means NOT_RUN/inconclusive, not an efficiency win. Finite tests cannot prove universal superiority; state the evaluated scope.\n\nDeliver a compact source-linked design and decision matrix, reusable shared-core/adapters specification, usable local vault/retrieval pilot, frozen eval cases/results, migration/rollback instructions and an end-to-end cold-session demonstration on the actually supported clients. Run existing release/guard checks unchanged. Do not label or tag v0.5 until the required gates pass. Ask before a long/costly run or consequential rollout, with the concrete ready result and expected resource use. Start with bounded research, plan reconciliation and reversible local slices now; do not stop after writing recommendations.\n"
+  },
+  "later_source": {
+    "path": "docs/v2/second-brain-contract.md",
+    "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+    "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+  },
+  "source_tree": {
+    "head": "60735e2b35088c0e458e78e8a3fe3f1574c2d970",
+    "dirty_shared_checkout": true,
+    "atomic_frozen_release_snapshot": false
+  },
+  "complete": false,
+  "integration_owner": "root",
+  "claim_class": "requirements_source_reconciliation_only",
+  "status_semantics": {
+    "implementation": "Inspected mechanism/document presence only, never model efficacy; missing is bounded to the inspected relevant sources.",
+    "local_qualification": "All statuses not_run for current full assigned clauses; referenced historical receipts do not qualify current source or the complete workload.",
+    "native_qualification": "All statuses not_run for current assigned clauses; no native/model call in this assignment. Old bounded canaries remain scoped history."
+  },
+  "records": [
+    {
+      "id": "H05-08",
+      "title": "HARD ADOPTION AND v0.5 GATES",
+      "source_section": 8,
+      "source_lines": [
+        61,
+        66
+      ],
+      "clauses": [
+        {
+          "id": "H05-08.01",
+          "requirement": "Freeze representative task inputs before optimization.",
+          "source_quote": "Freeze representative tasks and evaluators before optimizing",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              },
+              {
+                "path": "eval/questions/synthetic.json",
+                "sha256": "d414f5cf80ca5927cdca690a95f141175057db004ea5ef1fdff16bb43c0e6843",
+                "why": "Inspected public synthetic kinds fact/procedure/multihop/undocumented/memory/recall/repeat; answer-bearing development data, not unseen final evidence."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "The complete current-workload frozen input manifest is not established.",
+          "next_check": "Bind task inputs and source/environment revisions before optimizing; reject changed/development-overlapping input."
+        },
+        {
+          "id": "H05-08.02",
+          "requirement": "Freeze evaluators before optimization.",
+          "source_quote": "Freeze representative tasks and evaluators before optimizing",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              },
+              {
+                "path": "eval/quality_tasks.py",
+                "sha256": "2525fb25ffd7fa703388be027ada2a439c8449e7739c868bf37557b0b9239af2",
+                "why": "Coding dimension definitions and Q01 source fixture; hidden correctness, mutant adequacy, perf/lint/leak/scope/docs/integrity, not complete H05 workload."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Hashes/protocol exist but independently controlled grader provenance and actor-oracle isolation remain unqualified.",
+          "next_check": "Pin evaluator/oracle bytes and test changed-grader/leaked-answer/missing-receipt negatives before any authorized campaign."
+        },
+        {
+          "id": "H05-08.03",
+          "requirement": "Include representative daily/admin research tasks.",
+          "source_quote": "daily/admin research",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v2/methodology/cases.json",
+                "sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+                "why": "Visible synthetic coding/daily/debugging/learning/research decision cases, explicitly not native efficacy or measured token benefit."
+              },
+              {
+                "path": "docs/v2/methodology/selection-cases-20261103.json",
+                "sha256": "a968663b053f185b1b268980599e6c2aa00c0c9bf244127a3b315648d3541509",
+                "why": "Eight visible selection scenario families; overall_domain_acceptance NOT_RUN and unsupported semantic/native dimensions."
+              },
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Visible examples and a four-case historical pilot do not cover a representative independent current workload.",
+          "next_check": "Preregister daily/admin research inputs and independent task-fit/source-support oracles."
+        },
+        {
+          "id": "H05-08.04",
+          "requirement": "Include representative software feature and bug work.",
+          "source_quote": "software feature/bug work",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/quality_tasks.py",
+                "sha256": "2525fb25ffd7fa703388be027ada2a439c8449e7739c868bf37557b0b9239af2",
+                "why": "Coding dimension definitions and Q01 source fixture; hidden correctness, mutant adequacy, perf/lint/leak/scope/docs/integrity, not complete H05 workload."
+              },
+              {
+                "path": "docs/v2/methodology/cases.json",
+                "sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+                "why": "Visible synthetic coding/daily/debugging/learning/research decision cases, explicitly not native efficacy or measured token benefit."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Narrow synthetic coding fixtures are not the full current feature/bug workload qualification.",
+          "next_check": "Freeze both feature and bug tasks with hidden outcome, regression and integrity checks."
+        },
+        {
+          "id": "H05-08.05",
+          "requirement": "Include representative document and data tasks.",
+          "source_quote": "document/data work",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/quality_tasks.py",
+                "sha256": "2525fb25ffd7fa703388be027ada2a439c8449e7739c868bf37557b0b9239af2",
+                "why": "Coding dimension definitions and Q01 source fixture; hidden correctness, mutant adequacy, perf/lint/leak/scope/docs/integrity, not complete H05 workload."
+              },
+              {
+                "path": "docs/v2/methodology/selection-cases-20261103.json",
+                "sha256": "a968663b053f185b1b268980599e6c2aa00c0c9bf244127a3b315648d3541509",
+                "why": "Eight visible selection scenario families; overall_domain_acceptance NOT_RUN and unsupported semantic/native dimensions."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "CSV/SQL examples do not establish representative document/data native outcomes.",
+          "next_check": "Freeze source-bound document and data transformations and independently check completeness/correctness."
+        },
+        {
+          "id": "H05-08.06",
+          "requirement": "Include quant/science reproduction with a falsifiable outcome oracle.",
+          "source_quote": "quant/science reproduction",
+          "implementation": {
+            "status": "missing",
+            "evidence": [
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              },
+              {
+                "path": "eval/questions/synthetic.json",
+                "sha256": "d414f5cf80ca5927cdca690a95f141175057db004ea5ef1fdff16bb43c0e6843",
+                "why": "Inspected public synthetic kinds fact/procedure/multihop/undocumented/memory/recall/repeat; answer-bearing development data, not unseen final evidence."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "No quant/science reproduction family is established by the inspected evaluation packets.",
+          "next_check": "Preregister a bounded reproduction, data/code/environment identities and independent numerical/scientific acceptance."
+        },
+        {
+          "id": "H05-08.07",
+          "requirement": "Include long-session resume, beyond a fresh process lookup.",
+          "source_quote": "long-session resume",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": "docs/v1/scope-correction-checkpoint.md",
+                "sha256": "f6f7037fcbc4e0f01a2d13456e1bdfcbdec2d5fa8e2197f27692f3af3257c5ec",
+                "why": "Historical bounded native synthetic recall plus source/index canary limits inspected; not current cross-client/compaction/token qualification."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Bounded resume bindings and cold source readers are not a complete long-session/compaction task evaluation.",
+          "next_check": "Check actual interrupted/compacted task recovery against the same outcome oracle with complete usage."
+        },
+        {
+          "id": "H05-08.08",
+          "requirement": "Include cross-agent memory handoff.",
+          "source_quote": "cross-agent memory handoff",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/memory_task_canary.py",
+                "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+                "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+              },
+              {
+                "path": "docs/v1/scope-correction-checkpoint.md",
+                "sha256": "f6f7037fcbc4e0f01a2d13456e1bdfcbdec2d5fa8e2197f27692f3af3257c5ec",
+                "why": "Historical bounded native synthetic recall plus source/index canary limits inspected; not current cross-client/compaction/token qualification."
+              },
+              {
+                "path": "docs/v1/ACCEPTANCE-MATRIX.md",
+                "sha256": "fb3a22fe45e0840e5dc2c13938fa1054a439784cb9ea41379421e14e3c9ef05b",
+                "why": "Retained source/local/native and independent-promotion boundaries inspected; historical report, not fresh execution."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Source-process/history probes do not establish current bidirectional fresh installed-client outcomes.",
+          "next_check": "Verify authorized fresh Claude-to-Codex and reverse scoped handoffs, source recovery and negative boundaries without transcript copying."
+        },
+        {
+          "id": "H05-08.09",
+          "requirement": "Compare treatment arms on identical cases.",
+          "source_quote": "Compare on identical cases",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Declared input hashes do not authenticate what each actor actually received.",
+          "next_check": "Bind each paired invocation to the same frozen task hash and reject substituted or absent pairs."
+        },
+        {
+          "id": "H05-08.10",
+          "requirement": "Compare from identical initial repository state.",
+          "source_quote": "initial repository state",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Historical fresh-project helpers do not bind the complete current starting tree and overlays.",
+          "next_check": "Freeze/recreate both starting trees and reject one-arm state contamination."
+        },
+        {
+          "id": "H05-08.11",
+          "requirement": "Compare with identical available tools.",
+          "source_quote": "available tools",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Declared tools hashes/allowlists are not effective native tool/permission identity.",
+          "next_check": "Verify actual per-arm tool and permission availability; mismatch invalidates the pair."
+        },
+        {
+          "id": "H05-08.12",
+          "requirement": "Compare within identical declared budgets.",
+          "source_quote": "declared budgets",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Metadata equality is not verified full-campaign enforcement or accounting.",
+          "next_check": "Freeze per-arm/campaign budgets and reject changed limits or unaccounted attempts."
+        },
+        {
+          "id": "H05-08.13",
+          "requirement": "Separate model changes from harness changes.",
+          "source_quote": "Separate model changes from harness changes.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Matched declared metadata does not prove effective model/effort; current launcher explicitly lacks that proof.",
+          "next_check": "Bind actual model/effort; evaluate model changes as a separate controlled factor."
+        },
+        {
+          "id": "H05-08.14",
+          "requirement": "Repeat stochastic cases.",
+          "source_quote": "Repeat stochastic cases with paired results and uncertainty",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Historical repetitions are not a preregistered sufficiently repeated current H05 campaign.",
+          "next_check": "Declare repetition/stop rules before running and retain every attempt."
+        },
+        {
+          "id": "H05-08.15",
+          "requirement": "Retain paired results for stochastic comparisons.",
+          "source_quote": "paired results",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              },
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              },
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": [
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              }
+            ]
+          },
+          "gap": "Historical four-case development pairs are not the complete representative held-out comparison.",
+          "next_check": "Require each arm/task/repetition record and preserve losing/failed pairs."
+        },
+        {
+          "id": "H05-08.16",
+          "requirement": "Report uncertainty in stochastic comparisons.",
+          "source_quote": "uncertainty",
+          "implementation": {
+            "status": "missing",
+            "evidence": [
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              },
+              {
+                "path": "eval/quality_report.py",
+                "sha256": "69a385a72d4a05af05cf566eb607a9afc22fc538a546e5bfb56b1b7b903fc3f8",
+                "why": "Historical gain/baseline source uses median token ceiling1.15 and aggregate dimensions; not H05 strict whole-token/per-class qualification."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "The old coding rule uses separated ranges rather than a general current paired uncertainty analysis.",
+          "next_check": "Report paired effects, uncertainty/standard error where appropriate, sample scope and dependencies; inconclusive remains inconclusive."
+        },
+        {
+          "id": "H05-08.17",
+          "requirement": "Retain negative and failed runs.",
+          "source_quote": "retain negative and failed runs.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              },
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              },
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": [
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              }
+            ]
+          },
+          "gap": "A retained failed round is useful, but no complete immutable current attempt ledger is qualified.",
+          "next_check": "Refuse deletion of failed/aborted/adaptation runs or their usage from the registered campaign."
+        },
+        {
+          "id": "H05-08.18",
+          "requirement": "Require quality equal or higher jointly with tokens equal or lower.",
+          "source_quote": "quality must be equal or higher AND tokens equal or lower.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "eval/quality_report.py",
+                "sha256": "69a385a72d4a05af05cf566eb607a9afc22fc538a546e5bfb56b1b7b903fc3f8",
+                "why": "Historical gain/baseline source uses median token ceiling1.15 and aggregate dimensions; not H05 strict whole-token/per-class qualification."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Strict arithmetic is not independently graded workload efficacy; historical coding aggregate rule is insufficient.",
+          "next_check": "Reject any required quality regression even when total tokens fall; apply the token condition simultaneously."
+        },
+        {
+          "id": "H05-08.19",
+          "requirement": "Require total tokens equal or lower jointly with nonregressing quality.",
+          "source_quote": "quality must be equal or higher AND tokens equal or lower.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "eval/quality_report.py",
+                "sha256": "69a385a72d4a05af05cf566eb607a9afc22fc538a546e5bfb56b1b7b903fc3f8",
+                "why": "Historical gain/baseline source uses median token ceiling1.15 and aggregate dimensions; not H05 strict whole-token/per-class qualification."
+              },
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": [
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              }
+            ]
+          },
+          "gap": "Usage completeness is unverified; old median<=1.15x rule is not H05; cumulative pilot candidate tokens exceed control.",
+          "next_check": "Verify full C<=B and quality>=baseline together; reject a one-token overage despite improved quality."
+        },
+        {
+          "id": "H05-08.20",
+          "requirement": "Count every agent, including coordinator, workers, reviewers and graders.",
+          "source_quote": "Count all agents",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              },
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "No inspected authenticated collector proves every role/call is included.",
+          "next_check": "Reconcile all provider invocation IDs and reject an omitted helper/judge/coordinator call."
+        },
+        {
+          "id": "H05-08.21",
+          "requirement": "Count all input and output tokens.",
+          "source_quote": "input/output",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              },
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Per-run fields exist without verified full-campaign completeness/provenance.",
+          "next_check": "Verify provider semantics and all input/output across every attempt; absent counts are not zero."
+        },
+        {
+          "id": "H05-08.22",
+          "requirement": "Count and report reasoning where exposed without double counting subsets.",
+          "source_quote": "reasoning where exposed",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Launcher preserves optional validated reasoning-output subsets; no complete cross-role/provider campaign report.",
+          "next_check": "Preserve exposed reasoning and include it once; label unexposed usage unavailable, never fabricate it."
+        },
+        {
+          "id": "H05-08.23",
+          "requirement": "Count retries and failed candidate revisions.",
+          "source_quote": "retries",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Historical failures are retained, but all-campaign retry completeness is not independently proved.",
+          "next_check": "Include failed/aborted/adaptation attempts; reject latest-success-only accounting."
+        },
+        {
+          "id": "H05-08.24",
+          "requirement": "Count model-consumed tool output.",
+          "source_quote": "tool output",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              },
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Tool bytes and provider totals do not prove full usage coverage; bytes are not tokens.",
+          "next_check": "Verify provider totals cover consumed tool output and charge separate model calls once; no byte proxy."
+        },
+        {
+          "id": "H05-08.25",
+          "requirement": "Count injected instructions.",
+          "source_quote": "injected instructions",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Prompt hashes and historical fixed-context probes are not complete injected-context accounting.",
+          "next_check": "Bind prompt revisions per invocation and include their provider-counted input in total usage."
+        },
+        {
+          "id": "H05-08.26",
+          "requirement": "Count retrieval and compaction model usage.",
+          "source_quote": "retrieval/compaction",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": "eval/memory_task_canary.py",
+                "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+                "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Source/cold-reader probes are not a complete retrieval/compaction usage ledger.",
+          "next_check": "Check all retrieval/resume/compaction calls or retain UNKNOWN; never substitute response bytes."
+        },
+        {
+          "id": "H05-08.27",
+          "requirement": "Amortize indexing and maintenance token usage over a fixed horizon.",
+          "source_quote": "indexing/maintenance amortization",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/index_maintenance_canary.py",
+                "sha256": "2ddae02657e457adba570762bb484bb5c4dd1658b14aa3ab3da2aa5080b176e8",
+                "why": "Selected disposable copy/query-equivalence assertions emit model_evidence NOT_RUN; not measured maintenance model-token amortization."
+              },
+              {
+                "path": "eval/kb_retrieval_profile.py",
+                "sha256": "555fd6577cf0d9f94bb315f4064fd79f74d01d98447329e834e95ccbcaf7bacf",
+                "why": "CPU retrieval/equal ordered-hit probe explicitly separates response bytes from model tokens/answer quality."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "CPU copy/query equivalence does not measure model-token amortization or its horizon.",
+          "next_check": "Record model-assisted ingest/index/maintenance usage and preregister amortization; disclose genuine zero-model operations separately."
+        },
+        {
+          "id": "H05-08.28",
+          "requirement": "Report cache usage separately.",
+          "source_quote": "Report cache usage separately",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              },
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Cache fields exist, but no complete current campaign report is qualified.",
+          "next_check": "Report cache subsets and total input/output separately; neither subtract cache nor add it twice."
+        },
+        {
+          "id": "H05-08.29",
+          "requirement": "Do not substitute lower billed tokens or cheaper models for total tokens.",
+          "source_quote": "lower billed tokens or cheaper models do not by themselves meet the total-token requirement.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              },
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Declared arithmetic supports this rule but a complete model-controlled current comparison is missing.",
+          "next_check": "Reject billing-only savings when total tokens increase or model identity changes."
+        },
+        {
+          "id": "H05-08.30",
+          "requirement": "Track task correctness.",
+          "source_quote": "task correctness",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/quality_tasks.py",
+                "sha256": "2525fb25ffd7fa703388be027ada2a439c8449e7739c868bf37557b0b9239af2",
+                "why": "Coding dimension definitions and Q01 source fixture; hidden correctness, mutant adequacy, perf/lint/leak/scope/docs/integrity, not complete H05 workload."
+              },
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Narrow coding/synthetic correctness does not cover every required workload class.",
+          "next_check": "Bind correctness oracles to each class and report all pairs/attempts."
+        },
+        {
+          "id": "H05-08.31",
+          "requirement": "Track coverage.",
+          "source_quote": "coverage",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/questions/synthetic.json",
+                "sha256": "d414f5cf80ca5927cdca690a95f141175057db004ea5ef1fdff16bb43c0e6843",
+                "why": "Inspected public synthetic kinds fact/procedure/multihop/undocumented/memory/recall/repeat; answer-bearing development data, not unseen final evidence."
+              },
+              {
+                "path": "docs/v2/methodology/cases.json",
+                "sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+                "why": "Visible synthetic coding/daily/debugging/learning/research decision cases, explicitly not native efficacy or measured token benefit."
+              },
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Case inventory is not a verified complete requirement/task denominator.",
+          "next_check": "Freeze the denominator and report every missing/unrun case explicitly."
+        },
+        {
+          "id": "H05-08.32",
+          "requirement": "Track user corrections.",
+          "source_quote": "user corrections",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "asked_user detection is not a validated user-correction/outcome ledger.",
+          "next_check": "Record actual corrections with source/task identity and grade their effect."
+        },
+        {
+          "id": "H05-08.33",
+          "requirement": "Track groundedness.",
+          "source_quote": "groundedness",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/memory_task_canary.py",
+                "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+                "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+              },
+              {
+                "path": "src/agent_harness/vault_retrieval.py",
+                "sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+                "why": "Selected scoped lexical/FTS5, source pins, stale/unknown refusal and abstention source; no semantic reranking/embedding comparison."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Cited source mechanics do not generally prove adjacent answer entailment.",
+          "next_check": "Independently check claim-to-source support, contradiction and honest missing evidence."
+        },
+        {
+          "id": "H05-08.34",
+          "requirement": "Track safety and recovery.",
+          "source_quote": "safety/recovery",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/quality_tasks.py",
+                "sha256": "2525fb25ffd7fa703388be027ada2a439c8449e7739c868bf37557b0b9239af2",
+                "why": "Coding dimension definitions and Q01 source fixture; hidden correctness, mutant adequacy, perf/lint/leak/scope/docs/integrity, not complete H05 workload."
+              },
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": "eval/memory_task_canary.py",
+                "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+                "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Scope/integrity/recovery components do not constitute a complete comparative workload evaluation.",
+          "next_check": "Evaluate scope/authority, failure and recovery outcomes per task with independent negatives."
+        },
+        {
+          "id": "H05-08.35",
+          "requirement": "Track tokens per completed task.",
+          "source_quote": "tokens per completed task",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              },
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Per-run counts lack a verified completed-task denominator and all failure/overhead charges.",
+          "next_check": "Report total campaign tokens over the declared completed-task denominator with failures visible."
+        },
+        {
+          "id": "H05-08.36",
+          "requirement": "Track latency.",
+          "source_quote": "latency",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              },
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Wall times exist, but current complete end-to-end paired latency is unqualified.",
+          "next_check": "Measure task and campaign latency under matched conditions and retain failed-attempt time."
+        },
+        {
+          "id": "H05-08.37",
+          "requirement": "Do not hide task-class regression with a better average.",
+          "source_quote": "No task-class regression may be hidden by a better overall average.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "eval/quality_report.py",
+                "sha256": "69a385a72d4a05af05cf566eb607a9afc22fc538a546e5bfb56b1b7b903fc3f8",
+                "why": "Historical gain/baseline source uses median token ceiling1.15 and aggregate dimensions; not H05 strict whole-token/per-class qualification."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Per-case arithmetic helps, but complete class coverage and authenticated grades remain absent.",
+          "next_check": "A regressing class/dimension must fail even when aggregate quality rises."
+        },
+        {
+          "id": "H05-08.38",
+          "requirement": "Unknown usage or insufficient evidence is NOT_RUN/inconclusive, never an efficiency win.",
+          "source_quote": "Unknown usage or insufficient evidence means NOT_RUN/inconclusive, not an efficiency win.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "docs/v2/methodology/selection-cases-20261103.json",
+                "sha256": "a968663b053f185b1b268980599e6c2aa00c0c9bf244127a3b315648d3541509",
+                "why": "Eight visible selection scenario families; overall_domain_acceptance NOT_RUN and unsupported semantic/native dimensions."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Modern explicit unknown flags do not repair all historical zero defaults or certify campaign completeness.",
+          "next_check": "Inject missing/ambiguous/resumed/partial usage and insufficient evidence; no efficiency PASS."
+        },
+        {
+          "id": "H05-08.39",
+          "requirement": "State finite evaluated scope; do not claim universal superiority.",
+          "source_quote": "Finite tests cannot prove universal superiority; state the evaluated scope.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              },
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              },
+              {
+                "path": ".harness-work/v2-completion/installed-readback.json",
+                "sha256": "b8f8ca08662e4488162d909cd6909ce9265812df55dd8facdb5f06f1d097ec6f",
+                "why": "Local dev3 receipt reports models_called0, promotion NOT_RUN and Air NOT_VERIFIED; not native LLM efficacy or complete v2."
+              },
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Pilot/canary records state limits; no general H05 efficacy scope has passed.",
+          "next_check": "Every verdict names evaluated workload/revisions/models and rejects universal claims."
+        },
+        {
+          "id": "H05-08.40",
+          "requirement": "Deliver a compact source-linked design and decision matrix.",
+          "source_quote": "a compact source-linked design and decision matrix",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v2/framework/README.md",
+                "sha256": "88a9887c8892a7dec1808155e103315aa30c77318a0889f6057346ad525dcb90",
+                "why": "Shared runtime/capability/original-gate ownership specification exists; component documentation not complete integration qualification."
+              },
+              {
+                "path": "docs/v2/philosophy/README.md",
+                "sha256": "3f9e98bc96961891d71016fb7d3c05d89b2a05235d1ca85ba25f1e1597c92e22",
+                "why": "Design/transfer/reference pack explicitly hypothetical and visible development material; no measured competence."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Source-linked artifacts exist, but complete H05 clause reconciliation/delivery qualification is unfinished.",
+          "next_check": "Bind the matrix to all original clauses, decisions, sources, gaps and executable outcome checks."
+        },
+        {
+          "id": "H05-08.41",
+          "requirement": "Deliver a reusable shared-core/adapters specification.",
+          "source_quote": "reusable shared-core/adapters specification",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v2/framework/README.md",
+                "sha256": "88a9887c8892a7dec1808155e103315aa30c77318a0889f6057346ad525dcb90",
+                "why": "Shared runtime/capability/original-gate ownership specification exists; component documentation not complete integration qualification."
+              },
+              {
+                "path": "docs/v1/USABLE-WORKFLOW.md",
+                "sha256": "6a32a154224ed10295a7004811a059c206be103f9c1b5d7e0d933ba42dfa719a",
+                "why": "Shared project/core/adapters workflow plus source-bound preparation/correction/rollback and held promotion; guide not complete outcome evidence."
+              },
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Shared-core specification exists; complete installed-client loading and integration remain partial.",
+          "next_check": "Verify one canonical core plus thin adapters and supported-client boundaries."
+        },
+        {
+          "id": "H05-08.42",
+          "requirement": "Deliver a usable local vault/retrieval pilot.",
+          "source_quote": "usable local vault/retrieval pilot",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/vault_retrieval.py",
+                "sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+                "why": "Selected scoped lexical/FTS5, source pins, stale/unknown refusal and abstention source; no semantic reranking/embedding comparison."
+              },
+              {
+                "path": "eval/memory_task_canary.py",
+                "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+                "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+              },
+              {
+                "path": "docs/v2/vault/README.md",
+                "sha256": "3da6d0f058c6f30dad974fd612d5ef3f98040a3f8ed2c662e1f3735ae989424d",
+                "why": "Source-coverage/recall contract distinguishes retained identity, read depth and measurement; canonical live vault not edited."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Scoped lexical/source pilots do not establish broader raw-RAG comparison or entire corpus quality.",
+          "next_check": "Verify source-preserving scoped ingest/query/maintenance and useful task outcomes without editing canonical live vault here."
+        },
+        {
+          "id": "H05-08.43",
+          "requirement": "Deliver frozen eval cases and actual results.",
+          "source_quote": "frozen eval cases/results",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v2/methodology/cases.json",
+                "sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+                "why": "Visible synthetic coding/daily/debugging/learning/research decision cases, explicitly not native efficacy or measured token benefit."
+              },
+              {
+                "path": "eval/questions/synthetic.json",
+                "sha256": "d414f5cf80ca5927cdca690a95f141175057db004ea5ef1fdff16bb43c0e6843",
+                "why": "Inspected public synthetic kinds fact/procedure/multihop/undocumented/memory/recall/repeat; answer-bearing development data, not unseen final evidence."
+              },
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Public development packs and historical narrow results are not a final representative independent held-out suite.",
+          "next_check": "Freeze new final inputs/evaluators and retain actual results/failures under separate campaign authority."
+        },
+        {
+          "id": "H05-08.44",
+          "requirement": "Deliver migration and rollback instructions.",
+          "source_quote": "migration/rollback instructions",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v1/USABLE-WORKFLOW.md",
+                "sha256": "6a32a154224ed10295a7004811a059c206be103f9c1b5d7e0d933ba42dfa719a",
+                "why": "Shared project/core/adapters workflow plus source-bound preparation/correction/rollback and held promotion; guide not complete outcome evidence."
+              },
+              {
+                "path": ".harness-work/v2-completion/activation.json",
+                "sha256": "f4a51220ae36479d8b5878835abf27e92fe04f694a0b0b56fc1071c1319bcd22",
+                "why": "Local observation canary scope/version/promotion/Air/backup fields inspected; private backup paths not reproduced; not stable release."
+              },
+              {
+                "path": "docs/v2/methodology/native-promotion.md",
+                "sha256": "96bf938a3407d2fbb21025c4fc35e54929736c8a41dcdd97c13b10b8d667587e",
+                "why": "Independent oracle isolation, effective model, usage/artifact provenance and positive-consumer holds; proposed qualification path only."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Procedure rollback/canary backup instructions are not complete reversible shared-core/client migration qualification.",
+          "next_check": "Bind exact migration/rollback artifacts and verify recovery and original preservation at each authorized boundary."
+        },
+        {
+          "id": "H05-08.45",
+          "requirement": "Deliver end-to-end cold-session demonstrations on actually supported clients.",
+          "source_quote": "an end-to-end cold-session demonstration on the actually supported clients.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": ".harness-work/v2-completion/installed-readback.json",
+                "sha256": "b8f8ca08662e4488162d909cd6909ce9265812df55dd8facdb5f06f1d097ec6f",
+                "why": "Local dev3 receipt reports models_called0, promotion NOT_RUN and Air NOT_VERIFIED; not native LLM efficacy or complete v2."
+              },
+              {
+                "path": "docs/v1/scope-correction-checkpoint.md",
+                "sha256": "f6f7037fcbc4e0f01a2d13456e1bdfcbdec2d5fa8e2197f27692f3af3257c5ec",
+                "why": "Historical bounded native synthetic recall plus source/index canary limits inspected; not current cross-client/compaction/token qualification."
+              },
+              {
+                "path": "docs/v1/ACCEPTANCE-MATRIX.md",
+                "sha256": "fb3a22fe45e0840e5dc2c13938fa1054a439784cb9ea41379421e14e3c9ef05b",
+                "why": "Retained source/local/native and independent-promotion boundaries inspected; historical report, not fresh execution."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": [
+              {
+                "path": ".harness-work/v2-completion/installed-readback.json",
+                "sha256": "b8f8ca08662e4488162d909cd6909ce9265812df55dd8facdb5f06f1d097ec6f",
+                "why": "Local dev3 receipt reports models_called0, promotion NOT_RUN and Air NOT_VERIFIED; not native LLM efficacy or complete v2."
+              }
+            ]
+          },
+          "gap": "Local zero-model and historical single-client probes do not establish current complete multi-client/bidirectional demos; Air unverified.",
+          "next_check": "Run authorized fresh-client complete outcomes and detect unsupported/unloaded components, separately from source checks."
+        },
+        {
+          "id": "H05-08.46",
+          "requirement": "Run existing release/guard checks unchanged on the exact candidate.",
+          "source_quote": "Run existing release/guard checks unchanged.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "scripts/check.sh",
+                "sha256": "ab5d6bc6ddce66415a3140e8dcc62e49bbfea4906f9b1f9c9676aba2bed83064",
+                "why": "Original source-suite, secret scan and disposable install/demo sequence inspected; not executed during this audit."
+              },
+              {
+                "path": ".harness-work/v2-completion/qualified-source.json",
+                "sha256": "1eaf641c30c0370736cacbcc84361809b1094b10ed9c40550f726fcc3b657603",
+                "why": "Exact old integrated PASS/file bindings inspected; current-file mismatches mean it is historical rather than current whole-tree qualification."
+              },
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": [
+              {
+                "path": ".harness-work/v2-completion/qualified-source.json",
+                "sha256": "1eaf641c30c0370736cacbcc84361809b1094b10ed9c40550f726fcc3b657603",
+                "why": "Exact old integrated PASS/file bindings inspected; current-file mismatches mean it is historical rather than current whole-tree qualification."
+              }
+            ]
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Historical full-source PASS has current source mismatches; original terminal release gate remains open/absent.",
+          "next_check": "Freeze the candidate and run the original valid release/guard checks; stale green cannot qualify current files."
+        },
+        {
+          "id": "H05-08.47",
+          "requirement": "Do not label/tag the target release before required gates pass.",
+          "source_quote": "Do not label or tag v0.5 until the required gates pass.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              },
+              {
+                "path": ".harness-work/v2-completion/installed-readback.json",
+                "sha256": "b8f8ca08662e4488162d909cd6909ce9265812df55dd8facdb5f06f1d097ec6f",
+                "why": "Local dev3 receipt reports models_called0, promotion NOT_RUN and Air NOT_VERIFIED; not native LLM efficacy or complete v2."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Dev3 is a bounded development canary; original v0.5 obligations and final stable v2 gates remain open.",
+          "next_check": "Require current terminal evidence before an authorized target/stable label or tag; never equate dev3 with stable v2."
+        },
+        {
+          "id": "H05-08.48",
+          "requirement": "Ask before a long or costly run.",
+          "source_quote": "Ask before a long/costly run",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "content/skills/work-loop/SKILL.md",
+                "sha256": "8d1f25e68e4f1219128aa6c0f0b8d2e7b8f82475a33418f084023c770899f2bc",
+                "why": "Current proportional brief/evidence/repair/authority guidance inspected; instructions are not universal native compliance."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Guidance is not a universally enforced scoped approval system.",
+          "next_check": "Present the ready bounded experiment and resource estimate; obtain required authority before execution."
+        },
+        {
+          "id": "H05-08.49",
+          "requirement": "Ask before a consequential rollout.",
+          "source_quote": "or consequential rollout",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "content/skills/work-loop/SKILL.md",
+                "sha256": "8d1f25e68e4f1219128aa6c0f0b8d2e7b8f82475a33418f084023c770899f2bc",
+                "why": "Current proportional brief/evidence/repair/authority guidance inspected; instructions are not universal native compliance."
+              },
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              },
+              {
+                "path": "docs/v2/methodology/native-promotion.md",
+                "sha256": "96bf938a3407d2fbb21025c4fc35e54929736c8a41dcdd97c13b10b8d667587e",
+                "why": "Independent oracle isolation, effective model, usage/artifact provenance and positive-consumer holds; proposed qualification path only."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Historical local canaries do not grant stable/public/live rollout authority.",
+          "next_check": "Obtain scope-specific rollout authority only after the result is concrete and reviewable."
+        },
+        {
+          "id": "H05-08.50",
+          "requirement": "Approval includes the concrete ready result and expected resource use.",
+          "source_quote": "with the concrete ready result and expected resource use.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "content/skills/work-loop/SKILL.md",
+                "sha256": "8d1f25e68e4f1219128aa6c0f0b8d2e7b8f82475a33418f084023c770899f2bc",
+                "why": "Current proportional brief/evidence/repair/authority guidance inspected; instructions are not universal native compliance."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "No current campaign/rollout approval packet is supplied by this audit.",
+          "next_check": "Bind exact artifact/effect/targets and resource estimate to the required approval."
+        },
+        {
+          "id": "H05-08.51",
+          "requirement": "Start with bounded research.",
+          "source_quote": "Start with bounded research",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v2/vault/README.md",
+                "sha256": "3da6d0f058c6f30dad974fd612d5ef3f98040a3f8ed2c662e1f3735ae989424d",
+                "why": "Source-coverage/recall contract distinguishes retained identity, read depth and measurement; canonical live vault not edited."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              },
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Bounded artifacts exist; complete source reconciliation and end-goal closure remain unfinished.",
+          "next_check": "Continue scoped source reconciliation without an unrestricted model/research campaign."
+        },
+        {
+          "id": "H05-08.52",
+          "requirement": "Reconcile the existing plan.",
+          "source_quote": "plan reconciliation",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Current graph retains original terminal obligations and separate component results.",
+          "next_check": "Integrate all four workers into one original requirement/graph manifest without dropping unmet clauses."
+        },
+        {
+          "id": "H05-08.53",
+          "requirement": "Use reversible local implementation slices within authority.",
+          "source_quote": "reversible local slices now",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": ".harness-work/v2-completion/installed-readback.json",
+                "sha256": "b8f8ca08662e4488162d909cd6909ce9265812df55dd8facdb5f06f1d097ec6f",
+                "why": "Local dev3 receipt reports models_called0, promotion NOT_RUN and Air NOT_VERIFIED; not native LLM efficacy or complete v2."
+              },
+              {
+                "path": ".harness-work/v2-completion/activation.json",
+                "sha256": "f4a51220ae36479d8b5878835abf27e92fe04f694a0b0b56fc1071c1319bcd22",
+                "why": "Local observation canary scope/version/promotion/Air/backup fields inspected; private backup paths not reproduced; not stable release."
+              },
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": "src/agent_harness/workgraph/gate_learning.py",
+                "sha256": "a07958a6e78e99ee829d9eb20c679aef6c019a867db4970681bf9e5cd420eb0d",
+                "why": "Selected bounded observation/acceptance identity source explicitly does not promote observations to trusted rules."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": [
+              {
+                "path": ".harness-work/v2-completion/installed-readback.json",
+                "sha256": "b8f8ca08662e4488162d909cd6909ce9265812df55dd8facdb5f06f1d097ec6f",
+                "why": "Local dev3 receipt reports models_called0, promotion NOT_RUN and Air NOT_VERIFIED; not native LLM efficacy or complete v2."
+              }
+            ]
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Actual local slices do not qualify stable complete v2 or universal self-learning.",
+          "next_check": "Bind current slice, backup, original preservation and readback separately from efficacy/release."
+        },
+        {
+          "id": "H05-08.54",
+          "requirement": "Do not stop the objective at recommendations alone.",
+          "source_quote": "do not stop after writing recommendations.",
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "src/agent_harness/workgraph/gate_learning.py",
+                "sha256": "a07958a6e78e99ee829d9eb20c679aef6c019a867db4970681bf9e5cd420eb0d",
+                "why": "Selected bounded observation/acceptance identity source explicitly does not promote observations to trusted rules."
+              },
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Actual runtime work exists but original integrated end-state and terminal checks remain incomplete.",
+          "next_check": "Root continues authorized implementation/integration/checks; hold only a real unresolved prerequisite."
+        }
+      ]
+    },
+    {
+      "id": "V2-METHOD-CORE",
+      "title": "Converged four-layer/proportional outcome acceptance",
+      "source_document": "docs/v2/second-brain-contract.md",
+      "source_heading": "Architecture",
+      "source_kind": "retained_v2_contract_not_verbatim_owner_quote",
+      "clauses": [
+        {
+          "id": "V2-METHOD-CORE.01",
+          "requirement": "One design composes framework/workflow, methodology, philosophy/first principles and the vault through memory/retrieval, without competing harnesses.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              },
+              {
+                "path": "docs/v2/framework/README.md",
+                "sha256": "88a9887c8892a7dec1808155e103315aa30c77318a0889f6057346ad525dcb90",
+                "why": "Shared runtime/capability/original-gate ownership specification exists; component documentation not complete integration qualification."
+              },
+              {
+                "path": "docs/v2/philosophy/README.md",
+                "sha256": "3f9e98bc96961891d71016fb7d3c05d89b2a05235d1ca85ba25f1e1597c92e22",
+                "why": "Design/transfer/reference pack explicitly hypothetical and visible development material; no measured competence."
+              },
+              {
+                "path": "docs/v2/vault/README.md",
+                "sha256": "3da6d0f058c6f30dad974fd612d5ef3f98040a3f8ed2c662e1f3735ae989424d",
+                "why": "Source-coverage/recall contract distinguishes retained identity, read depth and measurement; canonical live vault not edited."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Separate layer artifacts exist; complete integrated outcomes are not qualified.",
+          "next_check": "Reconcile all layers into one original graph and test cross-layer complete outcomes."
+        },
+        {
+          "id": "V2-METHOD-CORE.02",
+          "requirement": "Load relevant pieces proportionately; simple daily work needs no plan/research/diagram/multiple-agent ceremony.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "content/skills/work-loop/SKILL.md",
+                "sha256": "8d1f25e68e4f1219128aa6c0f0b8d2e7b8f82475a33418f084023c770899f2bc",
+                "why": "Current proportional brief/evidence/repair/authority guidance inspected; instructions are not universal native compliance."
+              },
+              {
+                "path": "docs/v2/methodology/cases.json",
+                "sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+                "why": "Visible synthetic coding/daily/debugging/learning/research decision cases, explicitly not native efficacy or measured token benefit."
+              },
+              {
+                "path": "docs/v2/methodology/selection-cases-20261103.json",
+                "sha256": "a968663b053f185b1b268980599e6c2aa00c0c9bf244127a3b315648d3541509",
+                "why": "Eight visible selection scenario families; overall_domain_acceptance NOT_RUN and unsupported semantic/native dimensions."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Advice/development cases do not demonstrate native semantic selection or quality/token results.",
+          "next_check": "Pair simple direct controls with tasks requiring deeper evidence; grade outcomes rather than ritual text."
+        },
+        {
+          "id": "V2-METHOD-CORE.03",
+          "requirement": "Judge integration on complete tasks; strong components separately do not prove the best combination.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              },
+              {
+                "path": "docs/v2/framework/README.md",
+                "sha256": "88a9887c8892a7dec1808155e103315aa30c77318a0889f6057346ad525dcb90",
+                "why": "Shared runtime/capability/original-gate ownership specification exists; component documentation not complete integration qualification."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Original complete-task acceptance remains open despite component/canary results.",
+          "next_check": "Run matched complete-task integration and counterexamples on the exact candidate."
+        }
+      ],
+      "retained_source": {
+        "path": "docs/v2/second-brain-contract.md",
+        "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+        "heading": "Architecture",
+        "quote": "## Architecture\n\nExecution model: cooperating stateful activities, not a mandatory linear\npipeline. A decision tree is a restricted branching structure. A general\nexecution graph can include cycles, shared work, parallel branches and joins;\nhierarchical statecharts add nested states and concurrent regions. References:\n[W3C SCXML](https://www.w3.org/TR/scxml/) execution/state semantics,\n[Stately parallel states](https://stately.ai/docs/parallel-states), and\n[LangGraph graph API](https://docs.langchain.com/oss/python/langgraph/graph-api),\ninspected 2 November 2026. Reuse concepts; no framework installation is implied.\n\nModel task, worker, artifact/evaluation and retrieval/source freshness as\ndistinct correlated state domains. Events/evidence can trigger a local retry,\nfurther research, replanning, partial progress or a join. Correlation is explicit\nthrough task/source/artifact identities and versions. A parent can compose\nchildren, but child completion must not bypass the parent's integration check.\nAvoid unlimited spawning or materializing every theoretical combined state.\n\nThe existing workgraph is a dependency DAG: cyclic prerequisites are refused.\nIts nodes themselves change state and can return to pending after failed gates;\nthat is a control-state cycle, not a dependency cycle. OperationalState provides\nproject-scoped CAS, leases and events. These are useful existing pieces, not a\ncompleted runtime for arbitrary communicating hierarchical statecharts. New\ncomposition must earn its place through crash/replay/duplicate-event/stale-\nevidence/join tests; preserve the original completion authority.\n\nExample: frontend fails, backend passes, documentation depends only on backend.\nRetain backend's valid result, let documentation proceed, diagnose frontend,\nand hold the parent delivery until relevant branches and integration pass.\nIf the cause is a wrong requirement, revisit that decision rather than blindly\nrunning the same coding loop. A simple daily answer can finish directly.\n\nThe four requested parts form one design: framework/workflow owns execution and\nrecovery; methodology supplies relevant procedures; philosophy/first principles\nguides choices; the local vault supplies source-backed knowledge and cases.\nMemory/retrieval connects them. Load relevant pieces rather than imposing all\nprocedures and roles on every task. Integration must be judged on complete tasks;\nselecting strong components separately does not demonstrate the best combination.\n\n1. Thin application/provider adapters preserve native identity and permissions.\n2. Task routing selects the smallest appropriate workflow and relevant skills.\n3. Project contracts hold requirements, constraints, decisions and ownership.\n4. Shared local knowledge holds source-backed explanations, patterns, tradeoffs,\n   worked examples and playbooks. Retrieve small relevant sections.\n5. Task state holds plans, execution evidence, checkpoints and handoffs.\n6. Execution and verification iterate at the boundary actually being claimed.\n7. Learning proposes reusable lessons from observed outcomes/corrections;\n   independent checks decide promotion, retention and rollback.\n\nOriginal sources remain authoritative; summaries, search indexes and any future\ngraph are derived views. Facts, proposed designs, current project state and\ntentative lessons have different authority and must not be mixed.\n",
+        "attribution": "Actual retained-v2 section text, not a verbatim owner statement; clauses are requirement paraphrases for integration review."
+      }
+    },
+    {
+      "id": "V2-METHOD-LEARN",
+      "title": "Observed learning, independent evaluation and lifecycle",
+      "source_document": "docs/v2/second-brain-contract.md",
+      "source_heading": "Architecture",
+      "source_kind": "retained_v2_contract_not_verbatim_owner_quote",
+      "clauses": [
+        {
+          "id": "V2-METHOD-LEARN.01",
+          "requirement": "Observed evidence/corrections may propose lessons; observations are not verified active rules.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/workgraph/gate_learning.py",
+                "sha256": "a07958a6e78e99ee829d9eb20c679aef6c019a867db4970681bf9e5cd420eb0d",
+                "why": "Selected bounded observation/acceptance identity source explicitly does not promote observations to trusted rules."
+              },
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "content/templates/learning-review.md",
+                "sha256": "d51d3b412130839c907d3a52d1361be5b25df58986911c15455aa7d215c7bd96",
+                "why": "Review template names baseline, independent grader, actor isolation, all-role usage, exclusions and rollback; template is not observed qualification."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Bounded observations/drafts exist; demonstrated beneficial learning is absent.",
+          "next_check": "Bind relevant independent recurrent episodes and keep drafts dormant pending qualification."
+        },
+        {
+          "id": "V2-METHOD-LEARN.02",
+          "requirement": "Independent checks decide promotion, retention and rollback.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "docs/v2/methodology/native-promotion.md",
+                "sha256": "96bf938a3407d2fbb21025c4fc35e54929736c8a41dcdd97c13b10b8d667587e",
+                "why": "Independent oracle isolation, effective model, usage/artifact provenance and positive-consumer holds; proposed qualification path only."
+              },
+              {
+                "path": "content/templates/learning-review.md",
+                "sha256": "d51d3b412130839c907d3a52d1361be5b25df58986911c15455aa7d215c7bd96",
+                "why": "Review template names baseline, independent grader, actor isolation, all-role usage, exclusions and rollback; template is not observed qualification."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Promotion refuses caller/binder attestations; native actor/oracle, grader, model and usage provenance remain unqualified.",
+          "next_check": "Qualify independent boundaries and a narrowly accepting consumer while forged/stale negatives remain refused."
+        },
+        {
+          "id": "V2-METHOD-LEARN.03",
+          "requirement": "Original sources stay authoritative; summaries/indexes, current state and tentative lessons have different authority.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/vault_retrieval.py",
+                "sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+                "why": "Selected scoped lexical/FTS5, source pins, stale/unknown refusal and abstention source; no semantic reranking/embedding comparison."
+              },
+              {
+                "path": "eval/memory_task_canary.py",
+                "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+                "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+              },
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Scoped mechanics do not prove broad semantic truth/contradiction resolution.",
+          "next_check": "Test original recovery, contradictions, stale/withdrawn advice and no-evidence abstention on complete tasks."
+        },
+        {
+          "id": "V2-METHOD-LEARN.04",
+          "requirement": "Correction/rollback withdraw bad advice, preserve history and requalify dependent outcomes.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "eval/memory_task_canary.py",
+                "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+                "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+              },
+              {
+                "path": "docs/v1/USABLE-WORKFLOW.md",
+                "sha256": "6a32a154224ed10295a7004811a059c206be103f9c1b5d7e0d933ba42dfa719a",
+                "why": "Shared project/core/adapters workflow plus source-bound preparation/correction/rollback and held promotion; guide not complete outcome evidence."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Atomic correction and synthetic lifecycle fixtures do not qualify current native promoted-method behavior.",
+          "next_check": "Verify cold relevant recall, wrong-project refusal, correction/withdrawal and rollback at the actual claimed boundary."
+        }
+      ],
+      "retained_source": {
+        "path": "docs/v2/second-brain-contract.md",
+        "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+        "heading": "Architecture",
+        "quote": "## Architecture\n\nExecution model: cooperating stateful activities, not a mandatory linear\npipeline. A decision tree is a restricted branching structure. A general\nexecution graph can include cycles, shared work, parallel branches and joins;\nhierarchical statecharts add nested states and concurrent regions. References:\n[W3C SCXML](https://www.w3.org/TR/scxml/) execution/state semantics,\n[Stately parallel states](https://stately.ai/docs/parallel-states), and\n[LangGraph graph API](https://docs.langchain.com/oss/python/langgraph/graph-api),\ninspected 2 November 2026. Reuse concepts; no framework installation is implied.\n\nModel task, worker, artifact/evaluation and retrieval/source freshness as\ndistinct correlated state domains. Events/evidence can trigger a local retry,\nfurther research, replanning, partial progress or a join. Correlation is explicit\nthrough task/source/artifact identities and versions. A parent can compose\nchildren, but child completion must not bypass the parent's integration check.\nAvoid unlimited spawning or materializing every theoretical combined state.\n\nThe existing workgraph is a dependency DAG: cyclic prerequisites are refused.\nIts nodes themselves change state and can return to pending after failed gates;\nthat is a control-state cycle, not a dependency cycle. OperationalState provides\nproject-scoped CAS, leases and events. These are useful existing pieces, not a\ncompleted runtime for arbitrary communicating hierarchical statecharts. New\ncomposition must earn its place through crash/replay/duplicate-event/stale-\nevidence/join tests; preserve the original completion authority.\n\nExample: frontend fails, backend passes, documentation depends only on backend.\nRetain backend's valid result, let documentation proceed, diagnose frontend,\nand hold the parent delivery until relevant branches and integration pass.\nIf the cause is a wrong requirement, revisit that decision rather than blindly\nrunning the same coding loop. A simple daily answer can finish directly.\n\nThe four requested parts form one design: framework/workflow owns execution and\nrecovery; methodology supplies relevant procedures; philosophy/first principles\nguides choices; the local vault supplies source-backed knowledge and cases.\nMemory/retrieval connects them. Load relevant pieces rather than imposing all\nprocedures and roles on every task. Integration must be judged on complete tasks;\nselecting strong components separately does not demonstrate the best combination.\n\n1. Thin application/provider adapters preserve native identity and permissions.\n2. Task routing selects the smallest appropriate workflow and relevant skills.\n3. Project contracts hold requirements, constraints, decisions and ownership.\n4. Shared local knowledge holds source-backed explanations, patterns, tradeoffs,\n   worked examples and playbooks. Retrieve small relevant sections.\n5. Task state holds plans, execution evidence, checkpoints and handoffs.\n6. Execution and verification iterate at the boundary actually being claimed.\n7. Learning proposes reusable lessons from observed outcomes/corrections;\n   independent checks decide promotion, retention and rollback.\n\nOriginal sources remain authoritative; summaries, search indexes and any future\ngraph are derived views. Facts, proposed designs, current project state and\ntentative lessons have different authority and must not be mixed.\n",
+        "attribution": "Actual retained-v2 section text, not a verbatim owner statement; clauses are requirement paraphrases for integration review."
+      }
+    },
+    {
+      "id": "V2-METHOD-RAG",
+      "title": "Measured source-preserving retrieval and derived-view contribution",
+      "source_document": "docs/v2/second-brain-contract.md",
+      "source_heading": "Memory choice: RAG first, with minimal structured operational state",
+      "source_kind": "retained_v2_contract_not_verbatim_owner_quote",
+      "clauses": [
+        {
+          "id": "V2-METHOD-RAG.01",
+          "requirement": "Compare current retrieval, improved raw-source RAG and that RAG plus derived views on the same frozen cases and reader.",
+          "source_quote": null,
+          "implementation": {
+            "status": "missing",
+            "evidence": [
+              {
+                "path": "src/agent_harness/vault_retrieval.py",
+                "sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+                "why": "Selected scoped lexical/FTS5, source pins, stale/unknown refusal and abstention source; no semantic reranking/embedding comparison."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              },
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "No complete three-arm semantic/reranking/derived-view model comparison is established.",
+          "next_check": "Preregister three arms, identical reader/evidence visibility and independent outcome checks before an authorized campaign."
+        },
+        {
+          "id": "V2-METHOD-RAG.02",
+          "requirement": "Cover exact/paraphrased recall, multi-source decisions, correction, contradiction, no evidence, cross-project exclusion, cold recovery and new system designs.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/questions/synthetic.json",
+                "sha256": "d414f5cf80ca5927cdca690a95f141175057db004ea5ef1fdff16bb43c0e6843",
+                "why": "Inspected public synthetic kinds fact/procedure/multihop/undocumented/memory/recall/repeat; answer-bearing development data, not unseen final evidence."
+              },
+              {
+                "path": "eval/memory_task_canary.py",
+                "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+                "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+              },
+              {
+                "path": "docs/v2/methodology/cases.json",
+                "sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+                "why": "Visible synthetic coding/daily/debugging/learning/research decision cases, explicitly not native efficacy or measured token benefit."
+              },
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Some synthetic exact/correction/privacy controls exist; full named outcome coverage is missing.",
+          "next_check": "Freeze an independent case/oracle for every named class and retain absent coverage."
+        },
+        {
+          "id": "V2-METHOD-RAG.03",
+          "requirement": "Record supported/useful completion, false memories, source scope, total ingestion/maintenance/answer tokens, latency, storage and human corrections.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/runner.py",
+                "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+                "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+              },
+              {
+                "path": "eval/memory_task_canary.py",
+                "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+                "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+              },
+              {
+                "path": "eval/kb_retrieval_profile.py",
+                "sha256": "555fd6577cf0d9f94bb315f4064fd79f74d01d98447329e834e95ccbcaf7bacf",
+                "why": "CPU retrieval/equal ordered-hit probe explicitly separates response bytes from model tokens/answer quality."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Narrow counters are not a complete model-outcome/false-memory/all-stage usage collector.",
+          "next_check": "Bind all named metrics to real per-arm task/invocation evidence and explicit unknown values."
+        },
+        {
+          "id": "V2-METHOD-RAG.04",
+          "requirement": "Require quality at least baseline and aggregate tokens at most baseline, preserving mandatory structural safety/state requirements.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              },
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Arithmetic/scope components do not substitute for independent measured comparison or permit safety tradeoffs.",
+          "next_check": "Reject scope/safety/quality regression or token overage despite a favorable headline metric."
+        },
+        {
+          "id": "V2-METHOD-RAG.05",
+          "requirement": "Add consolidation, graph expansion, learned routing or embeddings only after measured incremental contribution; preserve rebuildable/version-isolated indexes.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/vault_retrieval.py",
+                "sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+                "why": "Selected scoped lexical/FTS5, source pins, stale/unknown refusal and abstention source; no semantic reranking/embedding comparison."
+              },
+              {
+                "path": "eval/index_maintenance_canary.py",
+                "sha256": "2ddae02657e457adba570762bb484bb5c4dd1658b14aa3ab3da2aa5080b176e8",
+                "why": "Selected disposable copy/query-equivalence assertions emit model_evidence NOT_RUN; not measured maintenance model-token amortization."
+              },
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Lexical/FTS/copy equivalence exists; measured model benefit and embedding-space migration remain unqualified.",
+          "next_check": "Compare one addition against the same simpler baseline and test source recovery/version separation."
+        },
+        {
+          "id": "V2-METHOD-RAG.06",
+          "requirement": "Preserve permission/retention/device boundaries; local retrieval direction grants no remote embedding/model or cross-project ingestion authority.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/vault_retrieval.py",
+                "sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+                "why": "Selected scoped lexical/FTS5, source pins, stale/unknown refusal and abstention source; no semantic reranking/embedding comparison."
+              },
+              {
+                "path": "eval/memory_task_canary.py",
+                "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+                "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+              },
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Allowed IDs/source checks are not authentication or universal native enforcement.",
+          "next_check": "Keep disallowed sources and unauthorized remote providers held without widening access for sharing."
+        }
+      ],
+      "retained_source": {
+        "path": "docs/v2/second-brain-contract.md",
+        "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+        "heading": "Memory choice: RAG first, with minimal structured operational state",
+        "quote": "## Memory choice: RAG first, with minimal structured operational state\n\nRecommended architecture direction, not a new deployed retrieval capability:\n\n- Preserve authorized original documents/history with stable source spans,\n  timestamps and scope. Derived notes never become the only recovery route.\n- Use exact current-state/decision lookup where a typed authoritative record\n  exists. Use retrieval for evidence and history; a similar old passage does not\n  override current task state or grant tool authority.\n- Establish a strong raw-source RAG baseline: lexical/exact retrieval plus a\n  separately measured semantic/reranking route when useful. Bound excerpt size,\n  duplicate handling and context expansion. Current code has lexical/FTS5\n  retrieval; semantic embeddings/reranking are not thereby implemented.\n- Treat human-readable summaries, principles, cases and candidate lessons as\n  source-linked views. Curate and invalidate stale advice; preserve contradictory\n  history rather than silently rewriting it into a model-invented fact.\n- Add automatic consolidation, graph expansion, learned query routing or new\n  embedding models only after their incremental contribution is measured.\n  Keep indexes rebuildable and embedding spaces version-isolated.\n- Preserve existing permissions, user-authorized retention and device boundaries.\n  Do not bulk-ingest private chats, credentials or another project merely because\n  raw retrieval is a promising baseline. Local storage does not imply a remote\n  model/embedding service is authorized.\n\nFresh primary-source review, 2 November 2026:\n[RAW-RAG](https://arxiv.org/html/2610.30755v1), method section3 and limitations6.1,\npreserves source windows and uses dense retrieval plus cross-encoder reranking.\nIt reports first place in six of seven compared benchmark/model settings, and\nexplicitly limits its evidence to offline conversational tasks. It does not\nestablish our SWE/dev-ops performance or an operational state/permission system.\n[Memory Tax](https://arxiv.org/html/2610.34073v1), section6, tests retrieving\noriginal history alongside transformed memory and jointly reranking; this\nsupports a source-recovery path, not a universal requirement for our own graph.\n[Memory portability](https://arxiv.org/abs/2609.05339), abstract only reviewed,\nreports writer/model and mixed-embedding migration problems on48synthetic\nhistories with two small open models. Generalization remains unproven.\n\nCompare current retrieval, improved raw-source RAG, and that RAG plus our derived\nviews on the same frozen cases and reader. Include exact/paraphrased recall,\nmulti-source decisions, corrections, contradictory sources, no evidence,\ncross-project exclusion, cold task recovery and new system-design cases.\nRecord supported answers/useful task completion, false memories, source scope,\ntotal ingestion/maintenance/answer tokens, latency, storage and human corrections.\nUse the standing quality-at-least-baseline AND aggregate-tokens-at-most-baseline\ngate for improvement claims. No benchmark campaign or superiority result was\nproduced by this review; structural safety/state requirements remain mandatory.\n",
+        "attribution": "Actual retained-v2 section text, not a verbatim owner statement; clauses are requirement paraphrases for integration review."
+      }
+    },
+    {
+      "id": "V2-METHOD-APP",
+      "title": "Complete application and development-versus-release acceptance",
+      "source_document": "docs/v2/second-brain-contract.md",
+      "source_heading": "Whole-application acceptance",
+      "source_kind": "retained_v2_contract_not_verbatim_owner_quote",
+      "clauses": [
+        {
+          "id": "V2-METHOD-APP.01",
+          "requirement": "Development increments are work slices, not predeclared releases; source, installed, native canary and broad efficacy evidence remain distinct.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              },
+              {
+                "path": ".harness-work/v2-completion/installed-readback.json",
+                "sha256": "b8f8ca08662e4488162d909cd6909ce9265812df55dd8facdb5f06f1d097ec6f",
+                "why": "Local dev3 receipt reports models_called0, promotion NOT_RUN and Air NOT_VERIFIED; not native LLM efficacy or complete v2."
+              },
+              {
+                "path": ".harness-work/v2-completion/qualified-source.json",
+                "sha256": "1eaf641c30c0370736cacbcc84361809b1094b10ed9c40550f726fcc3b657603",
+                "why": "Exact old integrated PASS/file bindings inspected; current-file mismatches mean it is historical rather than current whole-tree qualification."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Dev3 local readback exists; old source mismatches and open terminal gates prevent stable v2 qualification.",
+          "next_check": "Bind source/install/native evidence independently and reject release from a dev label or stale green log."
+        },
+        {
+          "id": "V2-METHOD-APP.02",
+          "requirement": "V3 requires demonstrated new capability; a version number justifies neither breakthrough claims nor architectural rewrite.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              },
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "This retained future constraint is not a measured new capability.",
+          "next_check": "Require separately defined capability and current evidence before any V3 claim."
+        },
+        {
+          "id": "V2-METHOD-APP.03",
+          "requirement": "Freeze local-only small-CRUD, multi-tenant business, retrieval-assistant, background-job/data-pipeline and failure/recovery design tasks.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v2/methodology/cases.json",
+                "sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+                "why": "Visible synthetic coding/daily/debugging/learning/research decision cases, explicitly not native efficacy or measured token benefit."
+              },
+              {
+                "path": "docs/v2/philosophy/README.md",
+                "sha256": "3f9e98bc96961891d71016fb7d3c05d89b2a05235d1ca85ba25f1e1597c92e22",
+                "why": "Design/transfer/reference pack explicitly hypothetical and visible development material; no measured competence."
+              },
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Authored design examples are not the exact independent five-family frozen suite/results.",
+          "next_check": "Freeze unseen task inputs and outcome oracles for every named family before optimization."
+        },
+        {
+          "id": "V2-METHOD-APP.04",
+          "requirement": "Include missing-evidence and simple-task controls.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/questions/synthetic.json",
+                "sha256": "d414f5cf80ca5927cdca690a95f141175057db004ea5ef1fdff16bb43c0e6843",
+                "why": "Inspected public synthetic kinds fact/procedure/multihop/undocumented/memory/recall/repeat; answer-bearing development data, not unseen final evidence."
+              },
+              {
+                "path": "docs/v2/methodology/cases.json",
+                "sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+                "why": "Visible synthetic coding/daily/debugging/learning/research decision cases, explicitly not native efficacy or measured token benefit."
+              },
+              {
+                "path": "docs/v2/methodology/selection-cases-20261103.json",
+                "sha256": "a968663b053f185b1b268980599e6c2aa00c0c9bf244127a3b315648d3541509",
+                "why": "Eight visible selection scenario families; overall_domain_acceptance NOT_RUN and unsupported semantic/native dimensions."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Visible absence/directness controls are not native complete-task outcomes.",
+          "next_check": "Reject fabricated evidence and unnecessary process burden in independent negative/positive controls."
+        },
+        {
+          "id": "V2-METHOD-APP.05",
+          "requirement": "Resolve requirements/data flow, API/data models, authorization, failure/concurrency, tests, deployment/observability, recovery and real tradeoffs in each relevant design.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v2/philosophy/README.md",
+                "sha256": "3f9e98bc96961891d71016fb7d3c05d89b2a05235d1ca85ba25f1e1597c92e22",
+                "why": "Design/transfer/reference pack explicitly hypothetical and visible development material; no measured competence."
+              },
+              {
+                "path": "docs/v2/framework/README.md",
+                "sha256": "88a9887c8892a7dec1808155e103315aa30c77318a0889f6057346ad525dcb90",
+                "why": "Shared runtime/capability/original-gate ownership specification exists; component documentation not complete integration qualification."
+              },
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Hypothetical cases/contracts are not complete implemented/checked application designs.",
+          "next_check": "Evaluate every named dimension against requirements and changed constraints without invented scores."
+        },
+        {
+          "id": "V2-METHOD-APP.06",
+          "requirement": "Avoid mandatory distribution for small apps; cite retrieved evidence and distinguish proposals from measurements.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "docs/v2/philosophy/README.md",
+                "sha256": "3f9e98bc96961891d71016fb7d3c05d89b2a05235d1ca85ba25f1e1597c92e22",
+                "why": "Design/transfer/reference pack explicitly hypothetical and visible development material; no measured competence."
+              },
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Tradeoff/attribution guidance is not measured native general design ability.",
+          "next_check": "Use changed-scale/ownership/availability counterfactuals and unsupported-claim negatives."
+        },
+        {
+          "id": "V2-METHOD-APP.07",
+          "requirement": "Building/operating requires executable verification beyond design documents.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "scripts/check.sh",
+                "sha256": "ab5d6bc6ddce66415a3140e8dcc62e49bbfea4906f9b1f9c9676aba2bed83064",
+                "why": "Original source-suite, secret scan and disposable install/demo sequence inspected; not executed during this audit."
+              },
+              {
+                "path": "src/agent_harness/launch.py",
+                "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+                "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+              },
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Component checks exist but not complete deployment/operation outcome qualification.",
+          "next_check": "Run authorized task-specific application/operation checks separately from design review."
+        },
+        {
+          "id": "V2-METHOD-APP.08",
+          "requirement": "Compare useful outcomes and total tokens with the current baseline.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "src/agent_harness/procedures.py",
+                "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+                "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+              },
+              {
+                "path": "docs/v2/methodology/evaluation.md",
+                "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+                "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+              },
+              {
+                "path": ".harness-work/v2-increments/iterations.json",
+                "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+                "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Historical development pilot is neither current held-out baseline nor net savings.",
+          "next_check": "Freeze current unchanged control plus complete usage and per-task nonregression."
+        },
+        {
+          "id": "V2-METHOD-APP.09",
+          "requirement": "Test cold recovery, correction/staleness, source scope and both-device delivery.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "eval/memory_task_canary.py",
+                "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+                "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+              },
+              {
+                "path": "docs/v1/scope-correction-checkpoint.md",
+                "sha256": "f6f7037fcbc4e0f01a2d13456e1bdfcbdec2d5fa8e2197f27692f3af3257c5ec",
+                "why": "Historical bounded native synthetic recall plus source/index canary limits inspected; not current cross-client/compaction/token qualification."
+              },
+              {
+                "path": ".harness-work/v2-completion/installed-readback.json",
+                "sha256": "b8f8ca08662e4488162d909cd6909ce9265812df55dd8facdb5f06f1d097ec6f",
+                "why": "Local dev3 receipt reports models_called0, promotion NOT_RUN and Air NOT_VERIFIED; not native LLM efficacy or complete v2."
+              },
+              {
+                "path": "docs/v1/ACCEPTANCE-MATRIX.md",
+                "sha256": "fb3a22fe45e0840e5dc2c13938fa1054a439784cb9ea41379421e14e3c9ef05b",
+                "why": "Retained source/local/native and independent-promotion boundaries inspected; historical report, not fresh execution."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Source-process/older client probes do not prove current full native recovery or Air parity.",
+          "next_check": "Run cold/resumed/corrected/scope negatives and device-specific readback only through authorized routes."
+        },
+        {
+          "id": "V2-METHOD-APP.10",
+          "requirement": "Missing coverage stays missing; one successful toy task is not broad qualification.",
+          "source_quote": null,
+          "implementation": {
+            "status": "partial",
+            "evidence": [
+              {
+                "path": "plan/v2-completion.md",
+                "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+                "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+              },
+              {
+                "path": "docs/v2/methodology/cases.json",
+                "sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+                "why": "Visible synthetic coding/daily/debugging/learning/research decision cases, explicitly not native efficacy or measured token benefit."
+              },
+              {
+                "path": "docs/v2/methodology/selection-cases-20261103.json",
+                "sha256": "a968663b053f185b1b268980599e6c2aa00c0c9bf244127a3b315648d3541509",
+                "why": "Eight visible selection scenario families; overall_domain_acceptance NOT_RUN and unsupported semantic/native dimensions."
+              },
+              {
+                "path": "docs/v2/second-brain-contract.md",
+                "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+                "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+              }
+            ]
+          },
+          "local_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "native_qualification": {
+            "status": "not_run",
+            "evidence": []
+          },
+          "gap": "Public packs are bounded and whole-workload terminal coverage remains unfinished.",
+          "next_check": "Retain the complete original clause denominator and reject complete=true from a narrow canary."
+        }
+      ],
+      "retained_source": {
+        "path": "docs/v2/second-brain-contract.md",
+        "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+        "heading": "Whole-application acceptance",
+        "quote": "## Whole-application acceptance\n\nSmall-version qualification order: dev1 adaptive general guidance, expert\nself-diagnosis and the concrete persistent-KB repair; dev2 a measured stronger\nraw-source retrieval baseline and correction/recovery cases; subsequent\nincrements expand worked system designs/domain cases and evaluated learning.\nThese are work increments, not predeclared successful releases. Keep development\nversus stable, source checks versus installed behavior, and canary versus broad\nefficacy separate. V3 needs a demonstrated new capability; no breakthrough claim\nor architectural rewrite is justified by a version number alone.\n\nUse frozen local-only design tasks: a small CRUD app, a multi-tenant business\nsystem, a retrieval assistant, a background-job/data pipeline and a failure/\nrecovery incident. Include missing-evidence and simple-task controls.\n\nEach relevant design must resolve requirements and data flow, API/data models,\nauthorization, failure/concurrency behavior, tests, deployment/observability,\nrecovery and real tradeoffs. No mandatory distributed architecture for a small\napp. Cite retrieved evidence and distinguish proposal from measured behavior.\nBuilding and operating a system require executable verification beyond design.\n\nCompare useful outcomes and total tokens with the current baseline. Test cold\nrecovery, correction/staleness, source scope and both-device delivery. Missing\ncoverage stays missing; one successful toy task is not broad qualification.\n",
+        "attribution": "Actual retained-v2 section text, not a verbatim owner statement; clauses are requirement paraphrases for integration review."
+      }
+    }
+  ],
+  "inspected_evidence": [
+    {
+      "path": "src/agent_harness/procedures.py",
+      "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+      "why": "Selected evaluate/freeze_case/_native_tokens/bind_hold/change/correct/_active source: bound arithmetic, dormant lifecycle and refusal of caller-attested promotion."
+    },
+    {
+      "path": "src/agent_harness/launch.py",
+      "sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e",
+      "why": "Selected prepare/resume/result parser source: prompt/source bindings, cached/reasoning usage fields, ambiguous/partial/resumed usage and effective-model limitations."
+    },
+    {
+      "path": "eval/runner.py",
+      "sha256": "d32043fbd28eaed7456f4cd4f04bb079f7447d97cfb5f77cf6945e3a07e074dd",
+      "why": "Selected parsers/prepare_work/command/run/v02: historical per-condition synthetic runner, raw logs, fresh fixture state, cache/usage/repetition/outcome fields; not full modern campaign provenance."
+    },
+    {
+      "path": "eval/quality_report.py",
+      "sha256": "69a385a72d4a05af05cf566eb607a9afc22fc538a546e5bfb56b1b7b903fc3f8",
+      "why": "Historical gain/baseline source uses median token ceiling1.15 and aggregate dimensions; not H05 strict whole-token/per-class qualification."
+    },
+    {
+      "path": "eval/quality_tasks.py",
+      "sha256": "2525fb25ffd7fa703388be027ada2a439c8449e7739c868bf37557b0b9239af2",
+      "why": "Coding dimension definitions and Q01 source fixture; hidden correctness, mutant adequacy, perf/lint/leak/scope/docs/integrity, not complete H05 workload."
+    },
+    {
+      "path": "eval/questions/synthetic.json",
+      "sha256": "d414f5cf80ca5927cdca690a95f141175057db004ea5ef1fdff16bb43c0e6843",
+      "why": "Inspected public synthetic kinds fact/procedure/multihop/undocumented/memory/recall/repeat; answer-bearing development data, not unseen final evidence."
+    },
+    {
+      "path": "docs/v2/methodology/cases.json",
+      "sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+      "why": "Visible synthetic coding/daily/debugging/learning/research decision cases, explicitly not native efficacy or measured token benefit."
+    },
+    {
+      "path": "docs/v2/methodology/selection-cases-20261103.json",
+      "sha256": "a968663b053f185b1b268980599e6c2aa00c0c9bf244127a3b315648d3541509",
+      "why": "Eight visible selection scenario families; overall_domain_acceptance NOT_RUN and unsupported semantic/native dimensions."
+    },
+    {
+      "path": "docs/v2/methodology/evaluation.md",
+      "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+      "why": "Proposed frozen unchanged-baseline, disjoint held-out, per-case/dimension and complete-total-token protocol plus enforcing-surface/gap matrix; not a run."
+    },
+    {
+      "path": "docs/v2/methodology/native-promotion.md",
+      "sha256": "96bf938a3407d2fbb21025c4fc35e54929736c8a41dcdd97c13b10b8d667587e",
+      "why": "Independent oracle isolation, effective model, usage/artifact provenance and positive-consumer holds; proposed qualification path only."
+    },
+    {
+      "path": "content/templates/learning-review.md",
+      "sha256": "d51d3b412130839c907d3a52d1361be5b25df58986911c15455aa7d215c7bd96",
+      "why": "Review template names baseline, independent grader, actor isolation, all-role usage, exclusions and rollback; template is not observed qualification."
+    },
+    {
+      "path": "plan/v2-completion.md",
+      "sha256": "3b8435e5efe7886cde2194102fd93e9e1fc6a870b42524960e0df2384acaa4d2",
+      "why": "Current original graph retains requirements/case/learning/native/release/device terminal holds and narrowly scoped local component/canary results."
+    },
+    {
+      "path": ".harness-work/v2-completion/qualified-source.json",
+      "sha256": "1eaf641c30c0370736cacbcc84361809b1094b10ed9c40550f726fcc3b657603",
+      "why": "Exact old integrated PASS/file bindings inspected; current-file mismatches mean it is historical rather than current whole-tree qualification."
+    },
+    {
+      "path": ".harness-work/v2-increments/iterations.json",
+      "sha256": "dda9f1b528442f63d566eb26d480dfb3fe44411686c06163b74444c317f82934",
+      "why": "Both four-case native development rounds inspected: first token FAIL, second round PASS, cumulative candidate225182 versus control222367, net savings false; not current held-out efficacy."
+    },
+    {
+      "path": ".harness-work/v2-completion/installed-readback.json",
+      "sha256": "b8f8ca08662e4488162d909cd6909ce9265812df55dd8facdb5f06f1d097ec6f",
+      "why": "Local dev3 receipt reports models_called0, promotion NOT_RUN and Air NOT_VERIFIED; not native LLM efficacy or complete v2."
+    },
+    {
+      "path": ".harness-work/v2-completion/activation.json",
+      "sha256": "f4a51220ae36479d8b5878835abf27e92fe04f694a0b0b56fc1071c1319bcd22",
+      "why": "Local observation canary scope/version/promotion/Air/backup fields inspected; private backup paths not reproduced; not stable release."
+    },
+    {
+      "path": "docs/v1/ACCEPTANCE-MATRIX.md",
+      "sha256": "fb3a22fe45e0840e5dc2c13938fa1054a439784cb9ea41379421e14e3c9ef05b",
+      "why": "Retained source/local/native and independent-promotion boundaries inspected; historical report, not fresh execution."
+    },
+    {
+      "path": "docs/v1/USABLE-WORKFLOW.md",
+      "sha256": "6a32a154224ed10295a7004811a059c206be103f9c1b5d7e0d933ba42dfa719a",
+      "why": "Shared project/core/adapters workflow plus source-bound preparation/correction/rollback and held promotion; guide not complete outcome evidence."
+    },
+    {
+      "path": "docs/v2/framework/README.md",
+      "sha256": "88a9887c8892a7dec1808155e103315aa30c77318a0889f6057346ad525dcb90",
+      "why": "Shared runtime/capability/original-gate ownership specification exists; component documentation not complete integration qualification."
+    },
+    {
+      "path": "docs/v2/philosophy/README.md",
+      "sha256": "3f9e98bc96961891d71016fb7d3c05d89b2a05235d1ca85ba25f1e1597c92e22",
+      "why": "Design/transfer/reference pack explicitly hypothetical and visible development material; no measured competence."
+    },
+    {
+      "path": "docs/v2/vault/README.md",
+      "sha256": "3da6d0f058c6f30dad974fd612d5ef3f98040a3f8ed2c662e1f3735ae989424d",
+      "why": "Source-coverage/recall contract distinguishes retained identity, read depth and measurement; canonical live vault not edited."
+    },
+    {
+      "path": "docs/v2/second-brain-contract.md",
+      "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+      "why": "Assigned Architecture, Memory choice and Whole-application acceptance plus general scope/proportionality inspected as later v2 requirements."
+    },
+    {
+      "path": "eval/memory_task_canary.py",
+      "sha256": "afe4acaa134b0837549e25b2a255828b4a83821bf0a80fdb448d1040e6ece5cb",
+      "why": "Selected cold source-process/correction/withdrawal/scope assertions; emitted native_model_evidence NOT_RUN, model_tokens NOT_MEASURED, no live migration."
+    },
+    {
+      "path": "eval/index_maintenance_canary.py",
+      "sha256": "2ddae02657e457adba570762bb484bb5c4dd1658b14aa3ab3da2aa5080b176e8",
+      "why": "Selected disposable copy/query-equivalence assertions emit model_evidence NOT_RUN; not measured maintenance model-token amortization."
+    },
+    {
+      "path": "eval/kb_retrieval_profile.py",
+      "sha256": "555fd6577cf0d9f94bb315f4064fd79f74d01d98447329e834e95ccbcaf7bacf",
+      "why": "CPU retrieval/equal ordered-hit probe explicitly separates response bytes from model tokens/answer quality."
+    },
+    {
+      "path": "src/agent_harness/vault_retrieval.py",
+      "sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+      "why": "Selected scoped lexical/FTS5, source pins, stale/unknown refusal and abstention source; no semantic reranking/embedding comparison."
+    },
+    {
+      "path": "src/agent_harness/mcp/kb.py",
+      "sha256": "41a0d48778027f2fde60f8017bac9cef490a0e9952977b30ef06dbf4599afcb9",
+      "why": "Lexical/FTS/path function inventory inspected; not a full-file runtime or semantic answer audit."
+    },
+    {
+      "path": "src/agent_harness/workgraph/gate_learning.py",
+      "sha256": "a07958a6e78e99ee829d9eb20c679aef6c019a867db4970681bf9e5cd420eb0d",
+      "why": "Selected bounded observation/acceptance identity source explicitly does not promote observations to trusted rules."
+    },
+    {
+      "path": "scripts/check.sh",
+      "sha256": "ab5d6bc6ddce66415a3140e8dcc62e49bbfea4906f9b1f9c9676aba2bed83064",
+      "why": "Original source-suite, secret scan and disposable install/demo sequence inspected; not executed during this audit."
+    },
+    {
+      "path": "content/skills/work-loop/SKILL.md",
+      "sha256": "8d1f25e68e4f1219128aa6c0f0b8d2e7b8f82475a33418f084023c770899f2bc",
+      "why": "Current proportional brief/evidence/repair/authority guidance inspected; instructions are not universal native compliance."
+    },
+    {
+      "path": "tests/test_v1_learning_loop.py",
+      "sha256": "b3a10be4a767a864117a7fc785679f978742fd3535d22f0d9989447eb348584b",
+      "why": "Invalid comparison/usage/nonregression/gain fixtures inspected; synthetic source tests not run during this reconciliation."
+    },
+    {
+      "path": "tests/test_launch.py",
+      "sha256": "e509ce1dbfb337a2ec776cce5245d7e2c30e6b65406b1df57fd4d5bd3bd4f9a7",
+      "why": "Stub ambiguous-usage and requested-profile cases inspected; not actual native denial/effective-model proof."
+    },
+    {
+      "path": "docs/v1/scope-correction-checkpoint.md",
+      "sha256": "f6f7037fcbc4e0f01a2d13456e1bdfcbdec2d5fa8e2197f27692f3af3257c5ec",
+      "why": "Historical bounded native synthetic recall plus source/index canary limits inspected; not current cross-client/compaction/token qualification."
+    },
+    {
+      "path": "handoffs/v2-increments/local-20261102.md",
+      "sha256": "cf424104e11f54004bc110cab87194707ff4d1220ceef6c55211afc919844068",
+      "why": "Retained four-case native rounds, cumulative-token caution, installed limits and Air holds inspected; historical reported scope only."
+    }
+  ],
+  "historical_receipt_drift": {
+    "path": ".harness-work/v2-completion/qualified-source.json",
+    "sha256": "1eaf641c30c0370736cacbcc84361809b1094b10ed9c40550f726fcc3b657603",
+    "current_mismatches": [
+      {
+        "path": "content/skills/session-memory/SKILL.md",
+        "receipt_sha256": "d2862eb473e58bf8eb2e134588331f4519820a8737773f1910eaf108aaf013cc",
+        "current_sha256": "f282730325b82caed25ca0c837bd32885d4bf9f0bc35dc514e2fe5ba29adde15"
+      },
+      {
+        "path": "content/skills/work-loop/SKILL.md",
+        "receipt_sha256": "9a429f05f1773af87dbf4a71620bce14708c6660eb21932104fe0e794c9e309f",
+        "current_sha256": "8d1f25e68e4f1219128aa6c0f0b8d2e7b8f82475a33418f084023c770899f2bc"
+      },
+      {
+        "path": "src/agent_harness/__init__.py",
+        "receipt_sha256": "673492c0a37f9add4ee6a4cd23cc0cccba467e27829d81934cbf7e79b7522bef",
+        "current_sha256": "9302f103bc3ea40e41c26004f3b5278584f9dbcc39cdbf251ce2e1b06e627a37"
+      },
+      {
+        "path": "src/agent_harness/cli.py",
+        "receipt_sha256": "baace0009341ec56a1bdd29741f3c9d54ffa50228d3d3ea14059d2f429902db8",
+        "current_sha256": "e1d84b068e361ebf10a32157f6d5e6daced463b058599996505578e1ad4a34c0"
+      },
+      {
+        "path": "src/agent_harness/launch.py",
+        "receipt_sha256": "2201c6ee17be7c6da9f3081b876e8d13b2f50c215911abdfea502e222bd97134",
+        "current_sha256": "5e45f5e68ee489f238d77234a82fa1e1a0de20b167f82d65d1e59b97ce00525e"
+      },
+      {
+        "path": "src/agent_harness/method_control.py",
+        "receipt_sha256": "ca4d6dfa476069a6acb26f773c3f2c23d240077bae2b2df329e88510ab309a3f",
+        "current_sha256": "f3cc51acd4ee3f4f1fbcf7ed139c5ea87e0c432078e0ad15c54f0208343fe93b"
+      },
+      {
+        "path": "src/agent_harness/workgraph/plan.py",
+        "receipt_sha256": "38ed0c51beb5adf58390f11af163ddb0c92e052437c237a67aa0a18896be820d",
+        "current_sha256": "93bf9a219579e113a1268727a6e02644670927490ec9134fa7b28051600040b5"
+      }
+    ],
+    "conclusion": "Historical integrated PASS is stale for current whole-tree release; original result/history remains retained."
+  },
+  "original_terminal_gate_presence": {
+    "check_requirements.py": false,
+    "check_cases.py": false,
+    "check_learning.py": false,
+    "check_native.py": false,
+    "check_release.py": false,
+    "check_devices.py": false
+  },
+  "optional_tests": {
+    "status": "authored_not_executed",
+    "path": "tests/test_qualification_contract.py",
+    "sha256": "0446ace45540ec8de89b01539b1bce3a018c67774a9491d7b58c2c4cdc0a9dda",
+    "interface_source": {
+      "path": "handoffs/v2-completion/qualification-contract.md",
+      "sha256": "00331348a3f0b40fe6b2bba8ee8b2f53f00effee2277da75e8dca6630e25337e"
+    },
+    "scope": "13 independent structural contract-test families from the published schema; all receipt metadata synthetic, no model/native outcome invented; root owns execution.",
+    "not_covered": "Later-extension exact wire fields, aggregate16MiB/2048-clause boundaries and mid-read mutation require root coverage; no guessed extension schema."
+  },
+  "checks_run": {
+    "behavioral": "NOT_RUN",
+    "native": "NOT_RUN",
+    "original_parent_gates": "NOT_RUN",
+    "artifact_structure": "Author static assertions PASS:54 exact H05 quotes+23 heading-bound later clauses, unique IDs, all relative evidence hashes current, no private paths; no runtime/native/original parent gate.",
+    "optional_test_static": "Python AST parsed13 unique test families; Ruff exit0 All checks passed. Behavioral test execution NOT_RUN."
+  },
+  "authoring_failure_retained": {
+    "command": "Initial inline audit generator",
+    "result": "Initial generator: TypeError, missing next_check argument. Replacement generator: row-width assertion expected6 instead of the intended5 fields. Both stopped before writing audit files.",
+    "recovery": "Replaced ad-hoc positional calls with explicit fixed-width records; corrected author-only guard from6 to the actual5-field row contract and proved a four-field invalid row still fails. No original test/gate modified."
+  },
+  "summary": {
+    "h05_sections": [
+      8
+    ],
+    "h05_clauses": 54,
+    "later_v2_clauses": 23,
+    "records": 5,
+    "clause_count_is_not_quality_or_behavior_evidence": true,
+    "implementation": {
+      "partial": 74,
+      "missing": 3
+    }
+  },
+  "scope_note": "This is an audit fragment; root must review semantic support and map source bindings into the published aggregate schema. Structural consistency cannot prove all natural-language clauses were captured."
+}

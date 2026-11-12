@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import secrets
 import shlex
 import shutil
 import signal
@@ -19,6 +20,7 @@ if __package__ in (None, ""):  # run as a file: make the package importable
 
 from . import installer as I  # noqa: E402
 from .adapters import all_adapters  # noqa: E402
+from .board_hooks import participate as board_participate  # noqa: E402
 
 MB = 1024 * 1024
 BASE_CAP = 20 * MB
@@ -105,6 +107,11 @@ def memory_digest(hh: Path, project=None) -> str:
 def build_ctx(home: Path, hh: Path, content: Path, profile_dir: Optional[Path], project, extra_mcp,
               with_index: bool):
     ctx = I.make_ctx(home, hh, content, profile_dir, project, extra_mcp)
+    from .permission_profiles import validate
+    try:
+        ctx.permission_profile = validate(I.load_state(hh).get("permission_profile", "preserve"))
+    except ValueError as exc:
+        raise I.InstallError(str(exc)) from exc
     if with_index:
         for extra_part in (kb_index(hh, ctx.profile, profile_dir), memory_digest(hh, project)):
             if extra_part:
@@ -147,6 +154,16 @@ def cmd_install(args) -> int:
     if not args.dry_run and not args.yes and not I.is_tty():
         _out("Refusing to change your tool setup without a terminal to ask you. Re-run with --yes to accept.")
         return 2
+    from .permission_profiles import choose
+    try:
+        selected_policy = choose(getattr(args, "permission_profile", None),
+                                 state.get("permission_profile"),
+                                 not args.dry_run and not args.yes and I.is_tty())
+    except ValueError as exc:
+        _out("harness: " + str(exc))
+        return 2
+    ctx.permission_profile = selected_policy
+    _out("Permission profile: " + selected_policy + "; native/organization restrictions and other owners' hooks stay.")
     chosen = []
     for name in tools:
         a = adapters[name]
@@ -163,16 +180,24 @@ def cmd_install(args) -> int:
     if not chosen:
         _out("Nothing installed.")
         return 0
-    I.copy_harness(hh, source, profile_dir if profile_dir != hh / "profile" else None)
+    previous_profile = I.copy_harness(hh, source, profile_dir if profile_dir != hh / "profile" else None)
+    if previous_profile is not None:
+        _out(f"Previous profile retained at {previous_profile}; not merged into the new knowledge scope.")
     installed_profile = hh / "profile" if (hh / "profile").is_dir() else None
     ctx = build_ctx(home, hh, hh / "content", installed_profile, project, extra, with_index=True)
+    ctx.permission_profile = selected_policy
     # the content folder was just replaced, so the tools installed earlier are refreshed too (as `update` does):
     # their files live there, and every tool on the machine gets the same rules
     earlier = [n for n in state.get("tools", []) if n in adapters and n not in chosen]
     changes = [(n, adapters[n].plan(ctx)) for n in chosen + earlier]
-    state = I.apply(hh, changes, state, [home] + ([project] if project else []))
+    roots = [home] + ([project] if project else [])
+    if any(n == "kimi" for n in chosen + earlier):
+        from .adapters.kimi import kimi_home
+        roots.append(kimi_home(ctx))
+    state = I.apply(hh, changes, state, roots)
     state.update({"source": str(source), "project": str(project) if project else None,
-                  "tools": sorted(set(state.get("tools", [])) | set(chosen))})
+                  "tools": sorted(set(state.get("tools", [])) | set(chosen)),
+                  "permission_profile": selected_policy})
     I.save_state(hh, state)
     state = extensions_step(home, hh, state, ctx, args.yes)
     for n in chosen:
@@ -186,9 +211,15 @@ def cmd_install(args) -> int:
 
 
 def _real_home(home: Path) -> bool:
+    """Editor CLIs can escape HOME overrides; compare with the account home on POSIX."""
     try:
-        return Path(home).resolve() == Path.home().resolve()
-    except OSError:
+        if os.name == "posix":
+            import pwd
+            account_home = Path(pwd.getpwuid(os.getuid()).pw_dir)
+        else:
+            account_home = Path.home()
+        return Path(home).resolve() == account_home.resolve()
+    except (ImportError, KeyError, OSError):
         return False
 
 
@@ -252,7 +283,45 @@ def cmd_uninstall(args) -> int:
     return 0
 
 
+def cmd_source_coverage(args) -> int:
+    from .source_coverage import coverage_report
+    try:
+        result = coverage_report(args.ledger, source_id=args.source_id, reconciliation=args.reconciliation)
+    except ValueError as error:
+        print(f"harness source-coverage: {error}", file=sys.stderr)
+        return 2
+    print(json.dumps(result, sort_keys=True))
+    return 0
+
+
+def cmd_source_inventory(args) -> int:
+    from .source_inventory import default_roots, inventory_sources
+    home, hh = _paths(args)
+    roots = default_roots(home)
+    roots += [{"kind": "archive-jsonl", "path": path, "reader_supported": False}
+              for path in args.archive_root]
+    result = inventory_sources(roots, hh / "index.sqlite", args.limit, args.seconds)
+    if not args.details:
+        result.pop("entries")
+    print(json.dumps(result, sort_keys=True))
+    return 2 if result["index_status"] == "UNREADABLE" or result["scan_status"] == "INCOMPLETE" else 0
+
+
+def cmd_cache_status(args) -> int:
+    from .cache_status import inspect_cache
+    _, hh = _paths(args)
+    result = inspect_cache(hh)
+    print(json.dumps(result, sort_keys=True))
+    return 2 if result["status"] == "UNREADABLE" else 0
+
+
 def cmd_status(args) -> int:
+    if getattr(args, "runtime", False):
+        from . import runtime_inventory
+        _, hh = _paths(args)
+        report = runtime_inventory.inspect_runtime(hh, launcher=sys.argv[0])
+        _out(json.dumps(report, indent=1) if args.json else runtime_inventory.render(report))
+        return 0
     if getattr(args, "matrix", False):
         from . import matrix
         m = matrix.matrix(sorted(all_adapters()))
@@ -346,9 +415,18 @@ def cmd_doctor(args) -> int:
     except Exception as e:
         _out(f"[info] pruning stopped early: {e}")
     size = I.dir_size(hh)
-    cap = WARM_CAP if state.get("extra_mcp") else BASE_CAP
+    index_names = ("index.sqlite", "index.sqlite-wal", "index.sqlite-shm")
+    index_size = 0
+    for name in index_names:
+        path = hh / name
+        if path.is_file() and not path.is_symlink():
+            index_size += path.stat().st_size
+    base_size = max(0, size - index_size)
     rep = storage.report(hh, apparent=True)
-    check(size < cap, f"disk footprint {size / MB:.1f} MB (cap {cap // MB} MB)",
+    base_rep = [item for item in rep["largest"] if item[0] not in index_names]
+    check(base_size < BASE_CAP, f"base disk footprint {base_size / MB:.1f} MB (cap {BASE_CAP // MB} MB)",
+          "over the cap; largest: " + ", ".join(f"{n} {storage.human(b)}" for n, b in base_rep[:3]))
+    check(size < WARM_CAP, f"warmed disk footprint {size / MB:.1f} MB (cap {WARM_CAP // MB} MB)",
           "over the cap; largest: " + ", ".join(f"{n} {storage.human(b)}" for n, b in rep["largest"][:3]))
     cc = home / ".claude" / "projects"
     if cc.is_dir():
@@ -524,8 +602,8 @@ EDIT_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 # Arm skill_nudge (HARNESS_ENABLE=skill_nudge; off by default until the eval shows it helps): after a long turn
 # with no skill saved, one reminder, as Hermes' post-session review but inside the session.
 NUDGE_TOOLS = 10   # the calibration's first sessions of repeat questions took 11-16 tool calls
-NUDGE_REASON = ("Long task: if you worked out a procedure worth repeating, found the working path after errors, "
-                "or were corrected, save it now with skill_manage (one call); otherwise just finish.")
+NUDGE_REASON = ("Long task: if a method recurred on distinct task inputs, use skill_manage draft with bound "
+                "source episodes; independent comparison is required before use. Otherwise finish.")
 
 
 def _own_memory(path: str) -> bool:
@@ -551,9 +629,11 @@ def stop_hook(stdin=None) -> int:
     no passing run_checks covers the current files; without it, ask for the checks. Never loops."""
     try:
         data = json.loads((stdin or sys.stdin).read() or "{}")
+        board_participate(data, "stop", deliver=False)
         try:   # candidate lessons first, also after the harness's own block: its marker records a turn once
             from . import capture
-            capture.capture_turn(I.harness_home(Path.home()), data["transcript_path"], str(data.get("session_id")))
+            capture.capture_turn(I.harness_home(Path.home()), data["transcript_path"],
+                                 str(data.get("session_id")), project=Path.cwd())
         except Exception:
             pass
         if data.get("stop_hook_active"):
@@ -602,13 +682,102 @@ def stop_hook(stdin=None) -> int:
     return 0
 
 
+def _kimi_wire(session_id: str) -> Path:
+    home = Path(os.environ.get("KIMI_CODE_HOME", str(Path.home() / ".kimi-code")))
+    for line in (home / "session_index.jsonl").read_text(encoding="utf-8").splitlines():
+        row = json.loads(line)
+        if row.get("sessionId") == session_id:
+            return Path(row["sessionDir"]) / "agents" / "main" / "wire.jsonl"
+    raise OSError(f"Kimi session {session_id} is not in the session index")
+
+
+def kimi_stop_hook(stdin=None) -> int:
+    """Capture native Kimi turn evidence before applying the once-per-turn check reminder."""
+    try:
+        data = json.loads((stdin or sys.stdin).read() or "{}")
+        board_participate(data, "stop", deliver=False)
+        session = str(data.get("session_id") or "")
+        wire = _kimi_wire(session)
+        from . import capture
+        events, _ = capture._last_kimi_turn_info(str(wire))
+        try:
+            capture.capture_kimi_turn(I.harness_home(Path.home()), wire, session,
+                                      project=Path(data.get("cwd") or Path.cwd()))
+        except Exception:
+            pass
+        turns = [event.get("uuid") for event in events if event.get("type") == "user"
+                 and any(isinstance(c, dict) and c.get("type") == "text"
+                         for c in (event.get("message") or {}).get("content") or [])]
+        if not turns:
+            return 0
+        latest = str(turns[-1])
+        edited = False
+        for event in events:
+            if event.get("type") != "assistant":
+                continue
+            for call in (event.get("message") or {}).get("content") or []:
+                if not isinstance(call, dict) or call.get("type") != "tool_use" \
+                        or call.get("name") not in EDIT_TOOLS:
+                    continue
+                args = call.get("input") or {}
+                edited |= not _own_memory(str(args.get("path") or args.get("file_path") or ""))
+        if not edited:
+            return 0
+        reason = STOP_REASON
+        from .mcp import checks
+        from .mcp.state import project_root
+        root = project_root(data.get("cwd") or None)
+        if not checks.disabled("run_checks") and checks.gated(root) and checks.fingerprint(root):
+            stale, why = checks.unchecked_changes(root)
+            reason = GATE_REASON.format(why=why) if stale else ""
+        if not reason:
+            return 0
+        import hashlib
+        marker = I.harness_home(Path.home()) / "state" / (
+            "stop-kimi-" + hashlib.sha256(session.encode()).hexdigest())
+        if marker.is_file() and marker.read_text() == latest:
+            return 0
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        marker.write_text(latest)
+        print(reason, file=sys.stderr)
+        return 2
+    except Exception:
+        return 0
+
+
+def kimi_precompact_hook(stdin=None) -> int:
+    """PreCompact is observation-only in Kimi, so persist state rather than printing an ignored reminder."""
+    try:
+        data = json.loads((stdin or sys.stdin).read() or "{}")
+        board_participate(data, "precompact", deliver=False)
+        session = str(data.get("session_id") or "unknown")
+        project = str(data.get("cwd") or Path.cwd())
+        from .mcp.state import STATE_MAX_BYTES, State
+        state = State()
+        existing = state.state_load(project)
+        if existing == "no saved state":
+            existing = "## Goal\nResume current work from the active plan and handoffs.\n"
+        addition = ("\n## PreCompact\nKimi session %s reached compaction; revalidate the current plan, "
+                    "handoffs and gates before continuing.\n" % session)
+        state.session_note("Kimi session %s reached compaction; revalidate the current plan and gates" % session,
+                           project=project)
+        updated = existing.rstrip("\n") + addition
+        if len(updated.encode("utf-8")) <= STATE_MAX_BYTES:
+            state.state_save(updated, project=project)
+    except Exception:
+        pass
+    return 0
+
+
 def capture_hook(stdin=None) -> int:
     """A Stop hook that only records candidate lessons: for a setup that keeps its own rules and hooks and wants
     nothing else from the harness at turn end (no check reminder, never blocks). Always exits 0, prints nothing."""
     try:
         data = json.loads((stdin or sys.stdin).read() or "{}")
+        board_participate(data, "stop", deliver=False)
         from . import capture
-        capture.capture_turn(I.harness_home(Path.home()), data["transcript_path"], str(data.get("session_id")))
+        capture.capture_turn(I.harness_home(Path.home()), data["transcript_path"],
+                             str(data.get("session_id")), project=Path.cwd())
     except Exception:
         pass
     return 0
@@ -617,23 +786,134 @@ def capture_hook(stdin=None) -> int:
 RECALL_TIMEOUT = 2.0
 
 
-def prompt_hook(stdin=None) -> int:
-    """UserPromptSubmit: pipe the prompt to A1's recall; print its output only when non-empty.
-    Never blocks the prompt: any error or timeout prints nothing and exits 0."""
+def context_hook(stdin=None) -> int:
+    """SessionStart context recovery; errors do not block the user's session."""
+    from .mcp.memory import Memory
+    from .mcp.state import State
+    memory = None
+    op_brief = ""
     try:
         data = json.loads((stdin or sys.stdin).read() or "{}")
+        if not isinstance(data, dict):
+            raise ValueError("context hook payload must be an object")
+        if (data.get("hook_event_name") != "SessionStart"
+                or data.get("source") not in {"startup", "resume", "compact"}):
+            raise ValueError("unsupported context hook event")
+        scope, session = data.get("cwd"), data.get("session_id")
+        if (not isinstance(scope, str) or not Path(scope).is_absolute() or not Path(scope).is_dir()
+                or not isinstance(session, str) or not session):
+            raise ValueError("context hook requires explicit project and session scope")
+        op_brief = board_participate(data, data["source"])
+        memory = Memory(project=scope)
+        context = memory.resume_context(session) + op_brief
+        store = State(project=scope)
+        state = store.state_load() if store.state_path() is not None or store.conflicts() else ""
+        if state:
+            if data.get("source") == "startup":
+                context += "\nSaved project work exists; use state_load if continuing it.\n"
+            else:
+                context += "\nSaved project state (verify freshness):\n" + state
+        if context.strip():
+            packet = "Recovered project context (advisory; current instructions take precedence):\n" + context
+            if len(packet.encode()) > 6000:
+                packet = ("Saved project context exceeds the hook budget; call state_load, mem_search and "
+                          "lesson_search.\n" + op_brief)
+            print(packet)
+    except (OSError, ValueError, TypeError, sqlite3.Error) as exc:
+        if op_brief:
+            print(op_brief, end="")
+        print("harness context unavailable: " + type(exc).__name__, file=sys.stderr)
+    finally:
+        if memory is not None:
+            memory.close()
+    return 0
+
+
+def op_context_hook(stdin=None) -> int:
+    """Claude SessionStart bridge; quiet for projects with no operational ledger."""
+    try:
+        data = json.loads((stdin or sys.stdin).read() or "{}")
+        if not isinstance(data, dict) or data.get("hook_event_name") != "SessionStart" or data.get("source") not in {
+                "startup", "resume", "compact"}:
+            raise ValueError("unsupported operational context event")
+        scope = data.get("cwd")
+        if not isinstance(scope, str) or not Path(scope).is_absolute() or not Path(scope).is_dir():
+            raise ValueError("operational context requires a host project directory")
+        packet = board_participate(data, data["source"])
+        if packet:
+            print(packet, end="")
+    except (OSError, ValueError, TypeError, sqlite3.Error) as exc:
+        print("harness operational context unavailable: " + type(exc).__name__, file=sys.stderr)
+    return 0
+
+
+def prompt_hook(stdin=None) -> int:
+    """UserPromptSubmit: pipe the prompt to A1's recall; print its output only when non-empty.
+    Never blocks the prompt; unavailable recall is diagnosed without exposing content."""
+    try:
+        data = json.loads((stdin or sys.stdin).read() or "{}")
+        if not isinstance(data, dict):
+            raise ValueError("hook payload must be an object")
+        board_context = board_participate(data, "prompt")
+        if board_context:
+            sys.stdout.write(board_context)
         prompt = data.get("prompt") or ""
+        if not isinstance(prompt, str):
+            raise ValueError("hook prompt must be text")
         if not prompt.strip():
             return 0
         cmd = [sys.executable, "-m", "agent_harness.mcp.memory", "recall",
                "--session", str(data.get("session_id") or "none")]
+        if "cwd" in data:
+            scope = data["cwd"]
+            if not isinstance(scope, str) or not Path(scope).is_absolute() or not Path(scope).is_dir():
+                print("harness recall: invalid project scope; no context injected", file=sys.stderr)
+                return 0
+            cmd += ["--project", str(Path(scope).resolve())]
         env = dict(os.environ, PYTHONPATH=str(I.PKG_DIR.parent))
         p = subprocess.run(cmd, input=prompt, capture_output=True, text=True, timeout=RECALL_TIMEOUT, env=env)
         if p.returncode == 0 and p.stdout.strip():
-            sys.stdout.write(p.stdout if p.stdout.endswith("\n") else p.stdout + "\n")
-    except Exception:
-        pass
+            recalled = p.stdout if p.stdout.endswith("\n") else p.stdout + "\n"
+            if board_context and len((board_context + recalled).encode("utf-8")) > 1200:
+                recalled = "harness recall omitted from hook context budget; use mem_search and lesson_search.\n"
+            sys.stdout.write(recalled)
+        elif p.returncode != 0:
+            print("harness recall unavailable: subprocess exit %s" % p.returncode, file=sys.stderr)
+    except (OSError, ValueError, TypeError, subprocess.TimeoutExpired) as exc:
+        print("harness recall unavailable: " + type(exc).__name__, file=sys.stderr)
     return 0
+
+
+def cmd_model_registry(args) -> int:
+    from . import discovery_cycle
+    home, _ = _paths(args)
+    try:
+        result = discovery_cycle.routing_candidate(home) if args.routing_candidate else discovery_cycle.registry(home)
+    except ValueError as exc:
+        _out(json.dumps({"status": "HOLD", "reason": str(exc)}))
+        return 1
+    _out(json.dumps(result, indent=2))
+    return 0
+
+
+def cmd_daily_discovery(args) -> int:
+    from . import discovery_cycle
+    home, hh = _paths(args)
+    try:
+        if args.history:
+            result = {"history": discovery_cycle.history(hh), "archives": discovery_cycle.archive_history(hh)}
+        elif args.enable_schedule or args.disable_schedule or args.schedule_status:
+            from . import daily_schedule
+            operation = (daily_schedule.enable if args.enable_schedule else daily_schedule.disable
+                         if args.disable_schedule else daily_schedule.status)
+            result = operation(hh, home)
+        else:
+            result = discovery_cycle.schedule(hh) if args.schedule else discovery_cycle.run(hh, home)
+    except (OSError, ValueError, sqlite3.Error) as exc:
+        _out(json.dumps({"status": "UNAVAILABLE", "reason": type(exc).__name__}))
+        return 1
+    _out(json.dumps(result, indent=2))
+    return 1 if result.get("status") in ("FETCH_FAILED", "RETENTION_HOLD") else 0
 
 
 def cmd_self_update(args) -> int:
@@ -647,6 +927,128 @@ def cmd_self_update(args) -> int:
 def cmd_improve(args) -> int:
     from . import improve
     _, hh = _paths(args)
+    adopt_campaign = getattr(args, 'adopt_campaign', None)
+    assess_campaign = getattr(args, 'assess_campaign', None)
+    complete_usage = getattr(args, 'complete_usage', False)
+    auto_adopt = getattr(args, 'adopt_if_qualified', False)
+    evaluation_run = getattr(args, 'evaluation_run', None)
+    campaign_actions = (args.prepare_campaign, args.collect_campaign_development, args.execute_campaign,
+                        adopt_campaign, assess_campaign)
+    if any(x is not None for x in campaign_actions) or complete_usage or auto_adopt or evaluation_run:
+        from . import procedure_campaign
+        try:
+            if (sum(x is not None for x in campaign_actions)
+                    + sum(bool(x) for x in (args.prepare_native_draft, args.execute_native_draft, args.prepare_procedure,
+                    args.inspect_procedure, args.weekly_intake, args.propose, args.draft_procedure,
+                    args.correct_procedure, args.rollback, args.apply, args.trend, args.eval))) != 1:
+                raise ValueError('campaign requires exactly one action')
+            if any(x is not None and not x.strip() for x in
+                   campaign_actions):
+                raise ValueError('campaign action value cannot be empty')
+            if complete_usage and not args.prepare_campaign:
+                raise ValueError('--complete-usage must be frozen with --prepare-campaign')
+            if auto_adopt and not args.execute_campaign:
+                raise ValueError('--adopt-if-qualified requires --execute-campaign')
+            if evaluation_run and not (adopt_campaign or assess_campaign):
+                raise ValueError('--evaluation-run requires --adopt-campaign or --assess-campaign')
+            if (adopt_campaign or assess_campaign) and (not evaluation_run or args.oracle_root):
+                raise ValueError('campaign replay requires --evaluation-run and no new oracle')
+            if args.prepare_campaign:
+                if not args.oracle_root:
+                    raise ValueError('campaign freeze needs an explicit --oracle-root')
+                observer = {'require_complete_usage': True} if complete_usage else {}
+                result = procedure_campaign.prepare(hh, args.project, args.oracle_root, args.prepare_campaign,
+                                                    **observer)
+            elif adopt_campaign:
+                result = procedure_campaign.adopt(hh, args.project, adopt_campaign, run_id=evaluation_run)
+            elif assess_campaign:
+                result = procedure_campaign.assess(hh, args.project, assess_campaign, run_id=evaluation_run)
+            else:
+                if args.oracle_root:
+                    raise ValueError('--oracle-root is only for freezing a campaign')
+                result = (procedure_campaign.run(hh, args.project, args.execute_campaign)
+                          if args.execute_campaign is not None else
+                          procedure_campaign.collect_development(hh, args.project, args.collect_campaign_development))
+            if auto_adopt and result['status'] == 'GRADED_HELD':
+                result = procedure_campaign.adopt(hh, args.project, args.execute_campaign,
+                                                 run_id=result['trial_run_id'])
+            _out(json.dumps(result, ensure_ascii=False))
+            return 0 if result['status'] in ('PREPARED', 'DEVELOPMENT_PASSED', 'GRADED_HELD',
+                                            'QUALIFIED_UNADOPTED', 'active') else 1
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            _out('improve: refused: ' + str(exc))
+            return 1
+    if args.prepare_native_draft or args.execute_native_draft or args.oracle_root:
+        from . import procedure_preparation
+        try:
+            if sum(bool(x) for x in (args.prepare_native_draft, args.execute_native_draft,
+                    args.prepare_procedure, args.inspect_procedure, args.weekly_intake,
+                    args.propose, args.draft_procedure, args.correct_procedure,
+                    args.rollback, args.apply, args.trend, args.eval)) != 1:
+                raise ValueError('native drafting requires exactly one action')
+            if args.prepare_native_draft:
+                if not args.oracle_root:
+                    raise ValueError('native drafting needs an explicit --oracle-root')
+                result = procedure_preparation.prepare(hh, args.project, args.oracle_root, args.prepare_native_draft)
+            else:
+                if args.oracle_root or not args.execute_native_draft:
+                    raise ValueError('--oracle-root is only for freezing a native draft')
+                result = procedure_preparation.execute(hh, args.project, args.execute_native_draft)
+            _out(json.dumps(result, ensure_ascii=False))
+            return 0 if result['status'] in ('PREPARED', 'DRAFTED_HELD') else 1
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            _out('improve: refused: ' + str(exc))
+            return 1
+    if args.prepare_procedure or args.inspect_procedure:
+        from . import procedures
+        try:
+            if sum(bool(x) for x in (args.prepare_procedure, args.inspect_procedure,
+                                     args.weekly_intake, args.propose, args.draft_procedure,
+                                     args.correct_procedure, args.rollback, args.apply,
+                                     args.trend, args.eval)) != 1:
+                raise ValueError("preparation or inspection requires exactly one action")
+            result = (procedures.prepare(args.project, procedures.read_json(args.prepare_procedure))
+                      if args.prepare_procedure else procedures.inspect(hh, args.project, args.inspect_procedure))
+            _out(json.dumps(result, ensure_ascii=False))
+            return 0
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            _out("improve: refused: " + str(exc))
+            return 1
+    if args.weekly_intake:
+        if any((args.propose, args.draft_procedure, args.correct_procedure,
+                args.rollback, args.apply, args.trend)):
+            _out("intake: HOLD — weekly intake cannot also draft, apply, roll back or judge a release")
+            return 1
+        from .weekly_intake import take
+        try:
+            result = take(hh, since=args.since, max_items=args.max_items,
+                          max_output_bytes=args.max_output_bytes)
+        except (OSError, ValueError) as error:
+            _out("intake: HOLD — " + str(error))
+            return 1
+        # One compact wire format regardless of --json: otherwise the human
+        # rendering could exceed the budget after the cursor had advanced.
+        _out(json.dumps(result, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+        return 0
+    if args.draft_procedure or args.correct_procedure or args.rollback or (args.apply and args.apply.startswith("pr-")):
+        from . import procedures
+        try:
+            if args.correct_procedure and (not args.draft_procedure or any((args.rollback, args.apply,
+                                                                            args.trend, args.propose, args.eval))):
+                raise ValueError("--correct-procedure needs one --draft-procedure file and no other action")
+            if args.draft_procedure:
+                candidate = procedures.read_json(args.draft_procedure)
+                result = (procedures.correct(hh, args.project, args.correct_procedure, candidate)
+                          if args.correct_procedure else procedures.draft(hh, args.project, candidate))
+            else:
+                evidence = procedures.read_json(args.eval) if args.eval else None
+                result = procedures.change(hh, args.project, args.rollback or args.apply,
+                                           evidence, rollback=bool(args.rollback))
+            _out(json.dumps(result))
+            return 0
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            _out("improve: refused: " + str(exc))
+            return 1
     if args.trend:
         rc, msg = improve.trend(args.trend, args.release, args.new_baseline)
     elif args.apply:
@@ -658,7 +1060,9 @@ def cmd_improve(args) -> int:
             "%s  seen %sx  [%s] %s" % (p["id"], p["count"], p["source"], p["summary"]) for p in props) or \
             "improve: nothing has recurred yet"
     else:
-        rc, msg = 2, "harness improve: --propose, --apply ID --eval FILE, or --trend HISTORY"
+        rc, msg = 2, ("harness improve: --prepare-procedure FILE, --draft-procedure FILE, "
+                      "--inspect-procedure ID, --propose, or --trend HISTORY; "
+                      "v1 promotion requires independent native evidence and remains held")
     _out(msg)
     return rc
 
@@ -736,26 +1140,315 @@ def cmd_review(args) -> int:
 
 # ---------------------------------------------------------------- main
 
+def cmd_vault_read(args) -> int:
+    from .vault_sources import read_shared_source
+    try:
+        result = read_shared_source(args.vault_root, vault_id=args.vault_id, source=args.source,
+                                    sha256=args.sha256, start_line=args.start_line,
+                                    end_line=args.end_line, max_bytes=args.max_bytes)
+    except (OSError, ValueError) as error:
+        print(f"harness vault-read: {error}", file=sys.stderr)
+        return 2
+    sys.stdout.write(json.dumps(result, ensure_ascii=False))
+    return 0
+
+
+def cmd_vault_document(args) -> int:
+    from .vault_sources import read_shared_document
+    try:
+        result = read_shared_document(args.vault_root, vault_id=args.vault_id, manifest=args.manifest,
+                                      manifest_sha256=args.manifest_sha256, document_id=args.document_id,
+                                      start_line=args.start_line, end_line=args.end_line, max_bytes=args.max_bytes)
+    except (OSError, ValueError) as error:
+        print(f"harness vault-document: {error}", file=sys.stderr)
+        return 2
+    sys.stdout.write(json.dumps(result, ensure_ascii=False))
+    return 0
+
+
+def cmd_vault_search(args) -> int:
+    from .vault_retrieval import search_shared_documents
+    try:
+        result = search_shared_documents(args.vault_root, vault_id=args.vault_id, manifest=args.manifest,
+                                          manifest_sha256=args.manifest_sha256, allowed_ids=args.allow_id,
+                                          query=args.query, backend=args.backend,
+                                          max_results=args.max_results, max_bytes=args.max_bytes,
+                                          context_lines=args.context_lines, omission_format=args.omission_format)
+    except (OSError, ValueError) as error:
+        print(f"harness vault-search: {error}", file=sys.stderr)
+        return 2
+    sys.stdout.write(json.dumps(result, ensure_ascii=False))
+    return 0
+
+
+def _memory_object(raw, label):
+    def unique_object(pairs):
+        value = dict(pairs)
+        if len(value) != len(pairs):
+            raise ValueError(f"duplicate field in memory {label}")
+        return value
+
+    if len(raw.encode("utf-8")) > 1024:
+        raise ValueError(f"memory {label} exceeds the 1024-byte input budget")
+    try:
+        value = json.loads(raw, object_pairs_hook=unique_object)
+    except json.JSONDecodeError:
+        raise ValueError(f"memory {label} must be a JSON object") from None
+    if not isinstance(value, dict):
+        hint = "; omit --cursor for the first page" if label == "cursor" else ""
+        raise ValueError(f"memory {label} must be a JSON object{hint}")
+    return value
+
+
+def cmd_memory_page(args) -> int:
+    from .project_memory import ProjectMemory
+    try:
+        cursor = _memory_object(args.cursor, "cursor") if args.cursor is not None else None
+        store = ProjectMemory(args.project_root, args.project_id)
+        result = store.search_page(args.query, allowed_sensitivities=args.allow_sensitivity,
+                                   allowed_scopes=args.allow_scope, layers=args.layer, cursor=cursor,
+                                   page_size=args.page_size, max_bytes=args.max_bytes)
+    except (OSError, ValueError) as error:
+        print(f"harness memory-page: {error}", file=sys.stderr)
+        return 2
+    # The API budgets UTF-8 JSON bytes, irrespective of the caller's terminal encoding.
+    sys.stdout.buffer.write(json.dumps(result, ensure_ascii=False).encode("utf-8"))
+    return 0
+
+
+def cmd_memory_read(args) -> int:
+    from .project_memory import ProjectMemory
+    try:
+        receipt = _memory_object(args.receipt, "receipt")
+        store = ProjectMemory(args.project_root, args.project_id)
+        scope = {"allowed_sensitivities": args.allow_sensitivity, "allowed_scopes": args.allow_scope,
+                 "layers": args.layer, "max_bytes": args.max_bytes}
+        if args.recover:
+            if args.sources:
+                raise ValueError("--sources cannot be combined with --recover")
+            if args.historical:
+                raise ValueError("--recover cannot be combined with --historical")
+            verified = (_memory_object(args.verified_receipt, "verified receipt")
+                        if args.verified_receipt is not None else None)
+            result = store.recover(receipt, phase=args.recover, depends_on_memory=True,
+                                   verified_receipt=verified, **scope)
+        else:
+            if args.verified_receipt is not None:
+                raise ValueError("--verified-receipt requires --recover")
+            result = store.read_scoped(receipt, historical=args.historical,
+                                       include_sources=args.sources, **scope)
+    except (OSError, ValueError) as error:
+        print(f"harness memory-read: {error}", file=sys.stderr)
+        return 2
+    sys.stdout.buffer.write(json.dumps(result, ensure_ascii=False).encode("utf-8"))
+    return 0
+
+
+def cmd_op(args) -> int:
+    from .operational_state import Conflict, OperationalState, dispatch
+    try:
+        if args.action == "snapshot":
+            request = {"action": "snapshot"}
+        elif args.action == "changes":
+            request = {"action": "changes", "cursor": args.cursor, "limit": args.limit}
+        else:
+            raw = sys.stdin.read(8193)
+            if len(raw.encode("utf-8")) > 8192:
+                raise ValueError("operational request exceeds 8192 bytes")
+            def unique(pairs):
+                value = dict(pairs)
+                if len(value) != len(pairs):
+                    raise ValueError("duplicate operational request field")
+                return value
+            request = json.loads(raw, object_pairs_hook=unique)
+            if not isinstance(request, dict):
+                raise ValueError("operational request must be a JSON object")
+            if request.get("action", args.action) != args.action:
+                raise ValueError("operational action does not match command")
+            request["action"] = args.action
+        _, hh = _paths(args)
+        result = dispatch(OperationalState.for_host(hh), request)
+    except (OSError, ValueError, Conflict, json.JSONDecodeError) as error:
+        print(f"harness op: {error}", file=sys.stderr)
+        return 2
+    print(json.dumps(result, ensure_ascii=False))
+    return 0
+
+
+def cmd_task(args) -> int:
+    """Human-facing view of the same host-scoped operational ledger as MCP op_state."""
+    from .operational_state import OperationalState, dispatch
+    try:
+        checkpoint_fields = ("goal", "stage", "summary", "next", "resource", "checkpoint", "evidence")
+        if args.action != "checkpoint" and any(getattr(args, key) is not None for key in checkpoint_fields):
+            raise ValueError("checkpoint fields require the checkpoint action")
+        if args.action != "stop" and args.reason is not None:
+            raise ValueError("reason requires the stop action")
+        if args.action in ("status", "evidence") and (args.expected is not None or args.request_id is not None):
+            raise ValueError("read-only task actions do not accept mutation fields")
+        _, hh = _paths(args)
+        store = OperationalState.for_host(hh)
+        if args.action in ("status", "evidence"):
+            if args.action == "evidence" and not args.task:
+                raise ValueError("evidence needs a task id")
+            result = dispatch(store, {"action": args.action, **({"task": args.task} if args.task else {})})
+        else:
+            if not args.task:
+                raise ValueError("checkpoint, stop and resume need a task id")
+            if args.request_id is not None and args.expected is None:
+                raise ValueError("--request-id requires --expected so a retry preserves its original version")
+            snapshot = store.snapshot()
+            row = next((item for item in snapshot["tasks"] if item["task"] == args.task), None)
+            expected = args.expected if args.expected is not None else row["version"] if row else 0
+            request = {"action": args.action, "task": args.task, "expected": expected,
+                       "request_id": args.request_id or "cli-" + secrets.token_hex(16)}
+            if args.action == "checkpoint":
+                value = dict(row["value"]) if row else {}
+                for key in ("goal", "stage", "summary", "next", "resource", "checkpoint"):
+                    supplied = getattr(args, key)
+                    if supplied is not None:
+                        value[key] = supplied
+                if args.evidence is not None:
+                    value["evidence"] = args.evidence
+                    value["evidence_sha256"] = store.bind_evidence(args.evidence)
+                request["value"] = value
+            elif args.action == "stop":
+                request["reason"] = args.reason
+            result = dispatch(store, request)
+    except (OSError, ValueError) as error:
+        print(f"harness task: {error}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False))
+    elif args.action == "status":
+        if not result["tasks"]:
+            _out("No local tasks in this project.")
+        for row in result["tasks"]:
+            value = row["value"]
+            _out(f"{row['task']} v{row['version']} {row['activity']}")
+            for key in ("goal", "stage", "checkpoint", "next", "blocked_on"):
+                if value.get(key):
+                    _out(f"  {key}: {value[key]}")
+            if value.get("evidence"):
+                _out(f"  evidence: {value['evidence']} ({row['evidence_status']}; reference only)")
+    elif args.action == "evidence":
+        _out(f"{result['task']}: {result['path'] or 'none'} ({result['status']}; reference only)")
+    else:
+        _out(f"{result['task']} v{result['version']}: {args.action} recorded; run the graph gate to prove completion")
+    return 0
+
+
+def cmd_launch(args) -> int:
+    from .launch import execute, prepare
+    try:
+        if args.execute:
+            if not args.receipt_out:
+                raise ValueError("--execute requires --receipt-out")
+            result = execute(args.project_root, args.request, args.receipt_out, timeout=args.timeout,
+                             workspace_write=args.workspace_write, method_policy=args.method_policy,
+                             resume_receipt=args.resume_receipt, artifact_path=args.artifact,
+                             gate_receipt_path=args.gate_receipt,
+                             native_model=args.native_model, native_effort=args.native_effort,
+                             eval_deny_root=args.eval_deny_root,
+                             eval_enforce_boundary=getattr(args, 'eval_enforce_boundary', False),
+                             eval_parent_boundary=getattr(args, 'eval_parent_boundary', False))
+        else:
+            if args.receipt_out:
+                raise ValueError("--receipt-out requires --execute")
+            if args.workspace_write:
+                raise ValueError("--workspace-write requires --execute")
+            if args.resume_receipt:
+                raise ValueError("--resume-receipt requires --execute")
+            if args.artifact or args.gate_receipt:
+                raise ValueError("--artifact and --gate-receipt require --execute")
+            if args.native_model or args.native_effort:
+                raise ValueError("--native-model and --native-effort require --execute")
+            if args.eval_deny_root:
+                raise ValueError("--eval-deny-root requires --execute")
+            if getattr(args, 'eval_enforce_boundary', False) or getattr(args, 'eval_parent_boundary', False):
+                raise ValueError("--eval-enforce-boundary requires --execute")
+            result = prepare(args.project_root, args.request, method_policy=args.method_policy)
+    except (OSError, ValueError, RuntimeError) as error:
+        print(f"harness launch: {error}", file=sys.stderr)
+        return 2
+    print(json.dumps(result, ensure_ascii=False))
+    return 0 if result["native_completion"] in ("NOT_RUN", "COMPLETED_UNGRADED") else 1
+
+
+def cmd_loop_check(args) -> int:
+    """Assess declared measurements without running them or granting promotion."""
+    import hashlib
+    from .launch import _json
+    from .loop_contract import assess
+    from .qualification import Bindings
+    try:
+        bindings = Bindings(args.project_root)
+        raw = bindings.read_current(args.contract)
+        contract = _json(raw)
+        results = _json(bindings.read_current(args.results))
+        report = assess(contract, results, contract_sha256=hashlib.sha256(raw).hexdigest())
+        bindings.finish()
+    except (OSError, ValueError, TypeError, RuntimeError) as error:
+        print(f"harness loop-check: {error}", file=sys.stderr)
+        return 2
+    print(json.dumps(report, ensure_ascii=False, allow_nan=False))
+    return 0 if report["decision"] == "ACCEPT_CANDIDATE" else 1
+
+
+def cmd_method(args) -> int:
+    from .method_control import decide
+    try:
+        result = decide(args.project_root, args.request, receipt_path=args.receipt,
+                        artifact_path=args.artifact, gate_receipt_path=args.gate_receipt,
+                        dependencies=args.dependencies,
+                        uncertainty=args.uncertainty)
+    except (OSError, ValueError, TypeError) as error:
+        print(f"harness method: {error}", file=sys.stderr)
+        return 2
+    print(json.dumps(result, ensure_ascii=False))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="harness", description=__doc__)
     ap.add_argument("--home", help=argparse.SUPPRESS)
     sub = ap.add_subparsers(dest="cmd")
+    p = sub.add_parser("privileges", help="toggle sudo instructions without changing native permissions")
+    p.add_argument("--mode", choices=("deny", "ask", "adaptive", "scoped"), help="omit to inspect; approval is scoped, never unrestricted")
+    from .native_evidence import add_parser
+    add_parser(sub)
+    from .continuation import add_parser as add_continuation_parser
+    add_continuation_parser(sub)
     p = sub.add_parser("install", help="set up your AI coding tools")
     p.add_argument("--tools", help="comma-separated tool names, or 'all' (default: the ones found)")
     p.add_argument("--yes", action="store_true", help="accept every tool without asking")
     p.add_argument("--profile", help="profile directory (profile.toml + descriptor)")
+    p.add_argument("--permission-profile", choices=("preserve", "explicit", "autonomous"),
+                   help="choose native review posture; --yes alone never increases autonomy")
     p.add_argument("--project", help="install into this project instead of your user settings")
     p.add_argument("--dry-run", action="store_true", help="show the plan, write nothing")
     p.add_argument("--source", help=argparse.SUPPRESS)
     sub.add_parser("uninstall", help="restore what was there before")
     p = sub.add_parser("status", help="what is installed, for which tools")
-    p.add_argument("--matrix", action="store_true", help="which tool gets which feature, and why not")
+    status_mode = p.add_mutually_exclusive_group()
+    status_mode.add_argument("--matrix", action="store_true", help="which tool gets which feature, and why not")
+    status_mode.add_argument("--runtime", action="store_true", help="read-only current package, PATH and installed-code identities")
     p.add_argument("--json", action="store_true")
     p = sub.add_parser("explain", help="what a session actually used: rules, skills, harness tools, checks, tokens")
     p.add_argument("--client", choices=["claude-code", "codex"], default="claude-code")
     p.add_argument("--session", help="transcript path (default: the newest for this client and folder)")
     p.add_argument("--json", action="store_true")
     sub.add_parser("doctor", help="check the installation")
+    sub.add_parser("cache-status", help="read-only scoped index inventory; no pruning or source text")
+    p = sub.add_parser("source-coverage", help="read-only selected-ledger declarations, not verified knowledge")
+    p.add_argument("--ledger", type=Path, required=True, help="explicit authorized coverage JSON; no automatic search")
+    p.add_argument("--source-id", help="exact source ID or canonical URL in that ledger")
+    p.add_argument("--reconciliation", type=Path, help="explicit hash-bound additions/corrections; no linked files opened")
+    p = sub.add_parser("source-inventory", help="read-only declared transcript metadata and index coverage")
+    p.add_argument("--archive-root", action="append", default=[], help="explicit archive directory; no automatic import")
+    p.add_argument("--limit", type=int, default=100_000, help="maximum filesystem entries examined")
+    p.add_argument("--seconds", type=float, default=10, help="metadata scan time budget")
+    p.add_argument("--details", action="store_true", help="include hashed source identifiers and metadata")
     p = sub.add_parser("warmup", help="build the knowledge index and install optional plugins")
     p.add_argument("--background", action="store_true")
     p.add_argument("--include-optional", action="store_true", help="also install plugins marked optional")
@@ -769,11 +1462,52 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--ssh-cmd", help="ssh command to use (default: ssh)")
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--config", action="store_true", help="save --remote/--ssh-cmd as the default")
+    p = sub.add_parser("model-registry", help="observe four model families without changing routing")
+    p.add_argument("--routing-candidate", action="store_true", help="emit a held profile for the existing route resolver")
+    p = sub.add_parser("daily-discovery", help="bounded official-source diff; proposals only, no installs")
+    schedule_actions = p.add_mutually_exclusive_group()
+    schedule_actions.add_argument("--history", action="store_true", help="read bounded discovery audit metadata without source text")
+    schedule_actions.add_argument("--schedule", action="store_true", help="describe the inactive daily schedule without fetching")
+    schedule_actions.add_argument("--enable-schedule", action="store_true", help="enable this user's bounded macOS discovery timer")
+    schedule_actions.add_argument("--disable-schedule", action="store_true", help="disable discovery, preserving its history and runner")
+    schedule_actions.add_argument("--schedule-status", action="store_true", help="read back the native discovery timer")
     p = sub.add_parser("self-update", help="update to the newest release whose checks passed (at most daily)")
     p.add_argument("--check", action="store_true", help="say what it would do, change nothing")
     p.add_argument("--now", action="store_true", help="ignore the once-a-day limit")
-    p = sub.add_parser("improve", help="turn repeated lessons into proposals; apply one only behind an eval gain")
+    p = sub.add_parser("improve", help="source-bound learning with independent evaluation and rollback")
+    p.add_argument('--prepare-campaign', metavar='FILE',
+                   help='freeze development and held-out tasks before collecting any experience; no model call')
+    p.add_argument('--collect-campaign-development', metavar='CAMPAIGN_ID',
+                   help='explicitly execute and grade frozen development tasks; consumes included quota, never promotes')
+    p.add_argument('--execute-campaign', metavar='CAMPAIGN_ID',
+                   help='explicitly run the three frozen stages once; consumes native quota, ends held and never promotes')
+    p.add_argument('--complete-usage', action='store_true',
+                   help='freeze required terminal upstream usage observation for all campaign calls')
+    p.add_argument('--adopt-campaign', metavar='CAMPAIGN_ID',
+                   help='replay controller-owned evidence and adopt only if every admission gate passes')
+    p.add_argument('--assess-campaign', metavar='CAMPAIGN_ID',
+                   help='replay quality and full campaign token cost without inference or adoption')
+    p.add_argument('--evaluation-run', metavar='RUN_ID', help='exact frozen trial to replay for adoption')
+    p.add_argument('--adopt-if-qualified', action='store_true',
+                   help='after --execute-campaign, run the same strict admission gate automatically')
+    p.add_argument('--prepare-native-draft', metavar='FILE',
+                   help='freeze one source-bound native drafting invocation; no model call yet')
+    p.add_argument('--execute-native-draft', metavar='RUN_ID',
+                   help='consume one frozen native drafting invocation; never promote')
+    p.add_argument('--oracle-root', metavar='DIR', help='existing project-local denied evaluator directory')
+    p.add_argument("--prepare-procedure", metavar="FILE",
+                   help="emit candidate JSON with hashes from explicit project episode files; no save or activation")
+    p.add_argument("--inspect-procedure", metavar="ID", help="read one scoped method's lifecycle and correction links")
+    p.add_argument("--weekly-intake", action="store_true", help="on-demand changed evidence only; no model or promotion")
+    p.add_argument("--since", type=int, help="expected intake cursor; refuse stale readers")
+    p.add_argument("--max-items", type=int, default=10, help="maximum changed candidates, 1..20")
+    p.add_argument("--max-output-bytes", type=int, default=2048, help="conservative output budget, 120..4096 bytes")
     p.add_argument("--propose", action="store_true")
+    p.add_argument("--draft-procedure", metavar="FILE", help="draft a scoped v1 method from source episodes")
+    p.add_argument("--correct-procedure", metavar="ID",
+                   help="withdraw this scoped method and link a proposed replacement from --draft-procedure")
+    p.add_argument("--project", help="absolute project directory for v1 procedures")
+    p.add_argument("--rollback", metavar="ID", help="revoke an active v1 procedure; preserve its evidence")
     p.add_argument("--apply", metavar="ID")
     p.add_argument("--eval", metavar="FILE", help="paired eval result for --apply")
     p.add_argument("--trend", metavar="HISTORY", help="refuse a release that scores below the previous one")
@@ -796,22 +1530,166 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--base", help="review the branch against this ref (default: uncommitted changes)")
     p.add_argument("--out", help="findings file (default: .agent-harness-review.json in the project)")
     p.add_argument("--gate", metavar="FILE", help="exit 0 only if FILE is a valid review with no must-fix")
+    p = sub.add_parser("vault-read", help="read one pinned source from a shared vault without making a local copy")
+    p.add_argument("--vault-root", required=True)
+    p.add_argument("--vault-id", required=True)
+    p.add_argument("--source", required=True, help="relative source path inside the authorized shared root")
+    p.add_argument("--sha256", required=True, help="digest from the approved source catalogue")
+    p.add_argument("--start-line", type=int, default=1)
+    p.add_argument("--end-line", type=int)
+    p.add_argument("--max-bytes", type=int, default=65536)
+    p = sub.add_parser("vault-document", help="read a document from one pinned public shared-vault catalogue")
+    p.add_argument("--vault-root", required=True)
+    p.add_argument("--vault-id", required=True)
+    p.add_argument("--manifest", default="manifest.json")
+    p.add_argument("--manifest-sha256", required=True)
+    p.add_argument("--document-id", required=True)
+    p.add_argument("--start-line", type=int, default=1)
+    p.add_argument("--end-line", type=int)
+    p.add_argument("--max-bytes", type=int, default=65536)
+    p = sub.add_parser("vault-search", help="find exact cited excerpts within an explicit shared-document scope")
+    p.add_argument("--vault-root", required=True)
+    p.add_argument("--vault-id", required=True)
+    p.add_argument("--manifest", default="manifest.json")
+    p.add_argument("--manifest-sha256", required=True)
+    p.add_argument("--allow-id", action="append", required=True, help="approved document ID; repeat for each allowed source")
+    p.add_argument("--query", required=True)
+    p.add_argument("--backend", choices=("lexical", "fts5"), default="lexical")
+    p.add_argument("--max-results", type=int, default=5)
+    p.add_argument("--max-bytes", type=int, default=8192)
+    p.add_argument("--context-lines", type=int, default=0,
+                   help="include 0..8 source lines before/after each match, within the same byte cap")
+    p.add_argument("--omission-format", choices=("full", "manifest-index"), default="full",
+                   help="opt-in v2 manifest-index references avoid repeating omitted source pins")
+    p = sub.add_parser("memory-page", help="read one scoped page from an existing opt-in project memory")
+    p.add_argument("--project-root", required=True, help="authorized project root; never auto-initialized")
+    p.add_argument("--project-id", required=True, help="expected stable project UUID")
+    p.add_argument("--query", required=True)
+    p.add_argument("--allow-sensitivity", action="append", required=True, help="allowed sensitivity; repeat as needed")
+    p.add_argument("--allow-scope", action="append", required=True, help="allowed item scope; repeat as needed")
+    p.add_argument("--layer", action="append", required=True, help="allowed memory layer; repeat as needed")
+    p.add_argument("--cursor", help="next_cursor JSON object from the preceding page (at most 1024 UTF-8 bytes)")
+    p.add_argument("--page-size", type=int, default=5)
+    p.add_argument("--max-bytes", type=int, default=8192)
+    p = sub.add_parser("memory-read", help="resolve an exact retained memory receipt with explicit scope")
+    p.add_argument("--sources", action="store_true", help="review the exact saved source spans; never grants recovery approval")
+    p.add_argument("--project-root", required=True, help="authorized project root; never auto-initialized")
+    p.add_argument("--project-id", required=True, help="expected stable project UUID")
+    p.add_argument("--receipt", required=True, help="receipt JSON object from a page or save (at most 1024 UTF-8 bytes)")
+    p.add_argument("--allow-sensitivity", action="append", required=True)
+    p.add_argument("--allow-scope", action="append", required=True)
+    p.add_argument("--layer", action="append", required=True)
+    p.add_argument("--historical", action="store_true", help="explicitly read retained history without claiming it is current")
+    p.add_argument("--recover", choices=("resume", "compact"), help="revalidate this dependency against retained current state")
+    p.add_argument("--verified-receipt", help="complete previously verified receipt JSON; valid only with --recover")
+    p.add_argument("--max-bytes", type=int, default=8192)
+    p = sub.add_parser("op", help="local project task state: snapshot, changes or a CAS mutation")
+    p.add_argument("action", choices=("snapshot", "changes", "put", "claim", "renew", "release", "withdraw"))
+    p.add_argument("--cursor", type=int, default=0, help="for changes: prior cursor")
+    p.add_argument("--limit", type=int, default=100, help="for changes: maximum events")
+    p = sub.add_parser("task", help="shared project task state: status, checkpoint, stop, resume, evidence")
+    p.add_argument("action", choices=("status", "checkpoint", "stop", "resume", "evidence"))
+    p.add_argument("task", nargs="?", help="task id; optional only for status")
+    p.add_argument("--goal")
+    p.add_argument("--stage")
+    p.add_argument("--summary")
+    p.add_argument("--next")
+    p.add_argument("--resource")
+    p.add_argument("--checkpoint", help="existing project-local plan or checkpoint file")
+    p.add_argument("--evidence", help="project-local receipt path (reference only, not proof of PASS)")
+    p.add_argument("--reason", help="why new claims must stop; does not kill an active worker")
+    p.add_argument("--expected", type=int, help="task version from status; omitted uses latest with CAS")
+    p.add_argument("--request-id", help="idempotency key; requires --expected for stable retries")
+    p.add_argument("--json", action="store_true", help="machine-readable result of the same task contract")
+    p = sub.add_parser("launch", help="prepare scoped current context; optionally invoke one bounded native Codex turn")
+    p.add_argument("--project-root", required=True)
+    p.add_argument("--request", required=True, help="project-relative launch request JSON")
+    p.add_argument("--execute", action="store_true", help="explicitly run native Codex read-only")
+    p.add_argument("--workspace-write", action="store_true", help="use Codex workspace-write sandbox for explicit code tasks")
+    p.add_argument("--method-policy", choices=("existing", "adaptive"), default="existing",
+                   help="opt-in method-choice prompt for paired evaluation; no authority or grader changes")
+    p.add_argument("--resume-receipt", help="project-relative prior failed or gate-rejected receipt for a same-thread continuation")
+    p.add_argument("--artifact", help="existing project-relative artifact for independent feedback")
+    p.add_argument("--gate-receipt", help="independent failed gate result bound to that artifact")
+    p.add_argument("--receipt-out", help="new project-relative JSON receipt; required with --execute")
+    p.add_argument("--timeout", type=float, default=120)
+    p.add_argument("--native-model", help="pin requested Codex model for a controlled eval")
+    p.add_argument("--native-effort", help="pin requested Codex effort with --native-model; not effective-identity proof")
+    p.add_argument("--eval-deny-root", help="opt-in deny of a fixture sibling oracle or verified projection's frozen answer pack; profile use is not verified by this flag")
+    p.add_argument("--eval-enforce-boundary", action="store_true",
+                   help="require an OS-probed local read-only boundary before actor launch; remote tools remain unverified")
+    p.add_argument("--eval-parent-boundary", action="store_true",
+                   help="also protect the whole native client; requires enforced evaluation")
+    p = sub.add_parser("loop-check", help="read-only frozen comparison; never promotes or executes a trial")
+    p.add_argument("--project-root", required=True)
+    p.add_argument("--contract", required=True, help="project-relative frozen contract JSON")
+    p.add_argument("--results", required=True, help="project-relative measured-results JSON")
+    p = sub.add_parser("method", help="read-only method decision from current task and observed feedback")
+    p.add_argument("--project-root", required=True)
+    p.add_argument("--request", required=True)
+    p.add_argument("--receipt", help="project-relative previous native receipt")
+    p.add_argument("--artifact", help="project-relative expected artifact")
+    p.add_argument("--gate-receipt", help="project-relative independent gate result bound to artifact bytes")
+    p.add_argument("--dependencies", type=int, default=0)
+    p.add_argument("--uncertainty", choices=("none", "consequential"), default="none")
+    from .presets import add_parser as add_preset_parser
+    add_preset_parser(sub)
+    handoff = sub.add_parser("handoff", help="read bounded project handoff files; no global database")
+    handoff.add_argument("--task", help="exact task directory identifier")
+    handoff.add_argument("--list", action="store_true", help="list packet names and sizes without their text; needs --task")
+    handoff.add_argument("--packet", action="append", help="read only this exact Markdown filename; repeatable; needs --task")
+    workspace = sub.add_parser("workspace", help="inspect a bounded task artifact workspace; no automatic deletion")
+    workspace.add_argument("--task", required=True, help="one exact task identifier")
+    workspace.add_argument("--init", action="store_true", help="prepare one reusable index, scratch and outputs")
     sub.add_parser("_hook-stop")
+    sub.add_parser("_hook-kimi-stop")
+    sub.add_parser("_hook-kimi-precompact")
     sub.add_parser("_hook-prompt")
+    sub.add_parser("_hook-context")
+    sub.add_parser("_hook-op")
     sub.add_parser("_hook-capture")
     return ap
 
 
 def main(argv: Optional[List[str]] = None) -> int:
     args = build_parser().parse_args(argv)
-    fn = {"install": cmd_install, "uninstall": cmd_uninstall, "status": cmd_status, "doctor": cmd_doctor, "explain": cmd_explain,
+    if args.cmd == "privileges":
+        from .permission_profiles import command
+        return command(args)
+    if args.cmd == "workspace":
+        from .workspace import command
+        return command(args)
+    if args.cmd == "handoff":
+        from .handoff import command
+        return command(args)
+    if args.cmd == "evidence":
+        from .native_evidence import command
+        return command(args)
+    if args.cmd == "preset":
+        from .presets import command
+        return command(args)
+    if args.cmd == "continuation":
+        from .continuation import command
+        return command(args)
+    fn = {"install": cmd_install, "uninstall": cmd_uninstall, "status": cmd_status, "cache-status": cmd_cache_status, "source-inventory": cmd_source_inventory, "source-coverage": cmd_source_coverage, "doctor": cmd_doctor, "explain": cmd_explain,
           "warmup": cmd_warmup, "update": cmd_update, "learn": cmd_learn, "sync": cmd_sync,
           "review": cmd_review, "run": cmd_run, "discover": cmd_discover,
-          "improve": cmd_improve, "self-update": cmd_self_update}.get(args.cmd)
+          "improve": cmd_improve, "model-registry": cmd_model_registry, "daily-discovery": cmd_daily_discovery, "self-update": cmd_self_update, "vault-read": cmd_vault_read,
+          "vault-document": cmd_vault_document, "vault-search": cmd_vault_search,
+          "memory-page": cmd_memory_page, "memory-read": cmd_memory_read,
+          "launch": cmd_launch, "loop-check": cmd_loop_check, "method": cmd_method, "op": cmd_op, "task": cmd_task}.get(args.cmd)
     if args.cmd == "_hook-stop":
         return stop_hook()
+    if args.cmd == "_hook-kimi-stop":
+        return kimi_stop_hook()
+    if args.cmd == "_hook-kimi-precompact":
+        return kimi_precompact_hook()
     if args.cmd == "_hook-prompt":
         return prompt_hook()
+    if args.cmd == "_hook-context":
+        return context_hook()
+    if args.cmd == "_hook-op":
+        return op_context_hook()
     if args.cmd == "_hook-capture":
         return capture_hook()
     if fn is None:

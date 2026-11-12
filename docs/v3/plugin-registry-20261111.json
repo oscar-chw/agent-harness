@@ -1,0 +1,24 @@
+{
+  "entries": [
+    {
+      "admitted_at": "2026-11-11",
+      "confidence": "high",
+      "detail": "admitted: REA-qualified, JEV adoption verdict 'adopt-pattern-only' at high confidence (threshold medium)",
+      "jev": {
+        "ref": "docs/v3/jev/lever-pattern-adoption-20261111.json",
+        "sha256": "f60667ef2a2770cb472e7df0b8ea595af9e644e04534ca6f17a91ec5fced8978"
+      },
+      "kind": "pattern",
+      "name": "lever-experiment-contract-pattern",
+      "promotion": "NOT_GRANTED",
+      "rea": {
+        "ref": "docs/v3/rea/lever-20261105.json",
+        "sha256": "5c9e0c7da76579d0d1a2e5f81eb59bc2c1e76a03710177c2f5c529f17a37850b"
+      },
+      "schema": "harness.plugin-admission/v1",
+      "status": "admitted",
+      "verdict": "adopt-pattern-only"
+    }
+  ],
+  "schema": "harness.plugin-registry/v1"
+}

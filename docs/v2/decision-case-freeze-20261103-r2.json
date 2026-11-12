@@ -1,0 +1,104 @@
+{
+  "schema": "harness.decision-case-freeze/v1",
+  "as_of": "2026-11-03",
+  "scope": "visible development case contract and finite oracle calibration; no native actor quality or implementation proof",
+  "case_ids": [
+    "DC-01",
+    "DC-02",
+    "DC-03",
+    "DC-04",
+    "DC-05",
+    "DC-06"
+  ],
+  "variant_ids": [
+    "DC-01.control",
+    "DC-01.isolation",
+    "DC-01.renamed",
+    "DC-02.control",
+    "DC-02.no_contract",
+    "DC-02.key_spelling",
+    "DC-03.control",
+    "DC-03.systemwide",
+    "DC-03.instance_rename",
+    "DC-04.control",
+    "DC-04.received_payments",
+    "DC-04.label_change",
+    "DC-05.control",
+    "DC-05.correction",
+    "DC-05.distractor",
+    "DC-05.missing_current_bytes",
+    "DC-06.control",
+    "DC-06.accessibility",
+    "DC-06.title_only"
+  ],
+  "inputs": [
+    {
+      "path": "docs/v2/philosophy/decision-contract-20261103.json",
+      "sha256": "9fd78c01f8e4d656595dd4f2733301ae1d1a5ff71ed1442d712173e34d1d712d"
+    },
+    {
+      "path": "docs/v2/philosophy/decision-contract-20261103.md",
+      "sha256": "c0de1b2e5fb53c4aed4223f795eb3ce17cb89a87787b916fe0c74deee74e285e"
+    },
+    {
+      "path": "docs/v2/methodology/decision-eval-contract-20261103.json",
+      "sha256": "5818c1625b33fabbf75e9a03717b882188c556879dee13d907c32788551dcacf"
+    },
+    {
+      "path": "docs/v2/methodology/decision-eval-contract-20261103.md",
+      "sha256": "d631924e710c55188811165f9e695632e2529fd14e79e216cb2ea58dd061f328"
+    },
+    {
+      "path": "docs/v2/vault/decision-source-bindings-20261103.json",
+      "sha256": "9ae18bbe0f9d2d970c67c0dad2f3b6e73cc81807ba8e35ca95f1bf52bc22089d"
+    },
+    {
+      "path": "docs/v2/vault/decision-source-bindings-20261103.md",
+      "sha256": "79ee4d68b6261f42ca071ed87591f0cea8c8b8630dcccf92fc519f99f0adc57b"
+    },
+    {
+      "path": "docs/v2/framework/decision-integration-20261103.md",
+      "sha256": "2caecb400dcf3b21d7072835d0af9f55e3558fb8e104abff1eb85120b0a9b2fc"
+    },
+    {
+      "path": "docs/v2/decision-primary-excerpts-20261103.json",
+      "sha256": "0196a31b948b6aedf2cd6e928b005e19a7f025264cfd6d0b1e3cf5aee7aa4a58"
+    },
+    {
+      "path": "docs/v2/decision-cases.md",
+      "sha256": "61956bd86b64ee7eb89a0cf6db91fd5a438de8a765656c80ab56126cfd79fce5"
+    },
+    {
+      "path": "docs/v2/decision-case-review-20261103.md",
+      "sha256": "57a5e31222d9c01cffb562fd2842a6406eb3294eef4903bbe202934e177cfab3"
+    },
+    {
+      "path": "docs/v2/check_decision_cases.py",
+      "sha256": "bec298cacd7781eb586a65d72aa2804cd0309869bcfec272993b7ec1811fad7d"
+    },
+    {
+      "path": "src/agent_harness/sql_outcome.py",
+      "sha256": "815d0efa95e39d456f7d57c2987ff48e78c2c06cc1f199270dde7b0dc7052fb2"
+    },
+    {
+      "path": "tests/test_sql_outcome.py",
+      "sha256": "c1e657ca19fade504d1f17ea583e4808abca9644ebdb0cd118cd5d4405cf39f5"
+    },
+    {
+      "path": "tests/test_decision_cases.py",
+      "sha256": "1c10854ffd59f0a43c557e9f9dc6b849762f2f29131baa8e62b26de9e820fbfa"
+    },
+    {
+      "path": "docs/v2/framework/decision-case-integration-review-20261103.md",
+      "sha256": "a0e990f76318b394ccc59c4be6d2f562d287e155b6c7847edd44687daed5321c"
+    }
+  ],
+  "native_actor_quality": "NOT_RUN",
+  "comparative_quality_total_usage": "NOT_RUN",
+  "promotion": "HELD",
+  "supersedes": {
+    "path": "docs/v2/decision-case-freeze-20261103.json",
+    "sha256": "7524458a3ad119fb2ba94d5cc2aab40b11f44614f8394683a142a6927908361c",
+    "reason": "Independent P2 deletion controls and additional metamorphic controls exposed missing checks; preserve original freeze and strengthen coverage before any learner run."
+  }
+}

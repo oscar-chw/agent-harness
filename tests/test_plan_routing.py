@@ -32,8 +32,12 @@ def test_a_worker_written_line_is_not_an_attempt():
     assert plan.tier_for(node(["the gate printed exit 1 in 3s — something"])) == "standard"
 
 
-def test_the_node_names_its_tier():
-    assert plan.tier_for(node([FAIL], tier="quick")) == "quick"
+def test_declared_tier_is_a_minimum_and_a_real_gate_failure_escalates_it():
+    # A declared quick start no longer pins retries forever: the user asked to
+    # escalate only after independent failure, while preserving direct deep starts.
+    assert plan.tier_for(node(tier="quick")) == "quick"
+    assert plan.tier_for(node([FAIL], tier="quick")) == "standard"
+    assert plan.tier_for(node([FAIL], tier="deep")) == "deep"
 
 
 def test_codex_cmd_reads_the_harness_tier_file():
@@ -48,7 +52,8 @@ def test_codex_cmd_reads_the_harness_tier_file():
         # an explicit --model wins and no tier effort is forced on it
         cmd = plan.codex_cmd("P", "deep", model="m-y", home=h)
         assert cmd[cmd.index("-m") + 1] == "m-y" and not any("effort" in c for c in cmd)
-        # no tier file: nothing pinned, the account's defaults
+        # This raw command helper omits absent tier settings; _dispatch now
+        # refuses an explicitly declared tier whose agent file is missing.
         assert "-m" not in plan.codex_cmd("P", "quick", home=h)
 
 

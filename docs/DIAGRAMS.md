@@ -13,17 +13,18 @@ dashed = external or private, purple = the path the diagram is about.
 
 ## 1. System overview
 
-What one install writes into each of the seven tools (only Claude Code gets the guard hook), and what the tools
+What one install writes into each of the eight tools (Claude Code and Kimi Code get the guard hook), and what the tools
 then call on the shared MCP server and its local stores.
 
 ```mermaid
 flowchart LR
     INSTALL["harness install<br/>adapters/<br/>backs up files"]
-    subgraph tools["seven tools"]
+    subgraph tools["eight tools"]
         CC["Claude Code<br/>rules, MCP,<br/>skills, guard"]
         CX["Codex<br/>rules, MCP,<br/>skills"]
         CP["Copilot<br/>rules, MCP,<br/>prompt files"]
         CU["Cursor<br/>MCP, rules<br/>per project"]
+        KI["Kimi Code<br/>rules, MCP, skills,<br/>guard, tier agents"]
         GM["Gemini CLI<br/>rules, MCP"]
         CD["Claude desktop<br/>MCP only"]
         JP["JupyterLab<br/>MCP only"]
@@ -40,7 +41,7 @@ flowchart LR
         IDX[("index.sqlite<br/>FTS5")]
         MJ[("memory/<br/>lessons/")]
         NJ[("notices.json")]
-        LRN[("learned<br/>skills")]
+        LRN[("procedures.sqlite<br/>project methods")]
     end
     TR[("Claude Code,<br/>Codex<br/>transcripts")]
 
@@ -52,7 +53,7 @@ flowchart LR
     TR -- "secrets<br/>masked" --> SS
     MEM -- "JSON<br/>per item" --> MJ
     NT -- "once<br/>a day" --> NJ
-    SM -- "SKILL.md" --> LRN
+    SM -- "draft, view" --> LRN
 
     classDef data fill:#dbeafe,stroke:#1d4ed8,color:#0b1220
     classDef step fill:#f1f5f9,stroke:#475569,color:#0b1220
@@ -61,7 +62,7 @@ flowchart LR
     classDef key  fill:#ede9fe,stroke:#6d28d9,color:#0b1220,stroke-width:2px
     class IDX,MJ,NJ,LRN data
     class KB,MEM,SS,SM,NT step
-    class CX,CP,CU,GM,CD,JP ext
+    class CX,CP,CU,KI,GM,CD,JP ext
     class TR ext
     class INSTALL,CC key
     class GUARD gate
@@ -129,8 +130,10 @@ Where in the code: `content/hooks/guard.py` (`main`, `verdict_for_payload`, `ver
 
 ## 3. The A/B eval and its keep rule
 
-How the v0.2 eval is run and decided: two passes, one per installed version, then the keep rule part by part.
+How the v0.2 eval was run and decided: two passes, one per installed version, then the historical keep rule part by part.
 The public phase uses the same runner on the SYNTHETIC set and has no results yet.
+The current project-procedure gate instead requires no held-out per-case quality regression and aggregate
+tokens including overhead no greater than baseline; its promotion generates no learned `SKILL.md`.
 
 ```mermaid
 flowchart TB

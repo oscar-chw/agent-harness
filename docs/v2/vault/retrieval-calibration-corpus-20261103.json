@@ -1,0 +1,193 @@
+{
+  "schema": "retrieval-calibration-corpus-v1",
+  "as_of": "2026-11-03",
+  "status": "PREPARED_FOR_ROOT_BINDING_AND_STAGING",
+  "assignment": "handoffs/v2-completion/retrieval-comparison-assignment-20261103.md",
+  "acceptance_input": {
+    "path": "docs/v2/vault/acceptance-cases.json",
+    "sha256": "dfc21103e64ae00d4bc9e6404aaa1481c440b18e8f11d020686be2574dac7343",
+    "bytes": 23366,
+    "case_count": 16
+  },
+  "corpus_definition": "Deduplicated complete files named by the six original source pointers for the four exact SOURCE_ANSWER questions. Each arm must receive the same complete eligible local file bytes and question strings. Original line spans identify provenance, not an eligible-corpus truncation rule.",
+  "documents": {
+    "D01": {
+      "path": "docs/v2/reference-review-20261031.md",
+      "sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+      "bytes": 6721,
+      "line_count": 91,
+      "scope": "COMPLETE_FILE",
+      "content_copied_or_staged": false,
+      "referenced_by": [
+        "two-memory-tax-papers"
+      ]
+    },
+    "D02": {
+      "path": "docs/v1/source-evidence-graph.md",
+      "sha256": "92124d3ceedf2a9f0e3ad3c0cbff06e4390aa6d2e2f51bd7203d576559101ea3",
+      "bytes": 10907,
+      "line_count": 27,
+      "scope": "COMPLETE_FILE",
+      "content_copied_or_staged": false,
+      "referenced_by": [
+        "raw-rag-transfer",
+        "unread-lead"
+      ]
+    },
+    "D03": {
+      "path": "docs/v2/second-brain-contract.md",
+      "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+      "bytes": 15681,
+      "line_count": 235,
+      "scope": "COMPLETE_FILE",
+      "content_copied_or_staged": false,
+      "referenced_by": [
+        "raw-rag-transfer"
+      ]
+    },
+    "D04": {
+      "path": "docs/v1/source-check-workflow.md",
+      "sha256": "5c2ecd957f34cf259acbfa8f2fbf5f2530b14d1a384cd6e300d477fbe86b3ba0",
+      "bytes": 2958,
+      "line_count": 39,
+      "scope": "COMPLETE_FILE",
+      "content_copied_or_staged": false,
+      "referenced_by": [
+        "real-source-claim-control"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "case_id": "two-memory-tax-papers",
+      "case_pointer": "/cases/2",
+      "question_pointer": "/cases/2/question",
+      "question": "Are Memory Tax and MemoryTax one paper, and do they prove that summaries should replace original sources?",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "source_bindings": [
+        {
+          "original_pointer": "/cases/2/supporting_sources/0",
+          "document_id": "D01",
+          "original_sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+          "original_lines": [
+            7,
+            22
+          ],
+          "observed_pin_status": "MATCH",
+          "original_span_in_range": true
+        },
+        {
+          "original_pointer": "/cases/2/supporting_sources/1",
+          "document_id": "D01",
+          "original_sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+          "original_lines": [
+            22,
+            55
+          ],
+          "observed_pin_status": "MATCH",
+          "original_span_in_range": true
+        }
+      ]
+    },
+    {
+      "case_id": "raw-rag-transfer",
+      "case_pointer": "/cases/3",
+      "question_pointer": "/cases/3/question",
+      "question": "Can the RAW-RAG results certify that our local engineering assistant is better?",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "source_bindings": [
+        {
+          "original_pointer": "/cases/3/supporting_sources/0",
+          "document_id": "D02",
+          "original_sha256": "92124d3ceedf2a9f0e3ad3c0cbff06e4390aa6d2e2f51bd7203d576559101ea3",
+          "original_lines": [
+            11,
+            12
+          ],
+          "observed_pin_status": "MATCH",
+          "original_span_in_range": true
+        },
+        {
+          "original_pointer": "/cases/3/supporting_sources/1",
+          "document_id": "D03",
+          "original_sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+          "original_lines": [
+            176,
+            191
+          ],
+          "observed_pin_status": "MATCH",
+          "original_span_in_range": true
+        }
+      ]
+    },
+    {
+      "case_id": "real-source-claim-control",
+      "case_pointer": "/cases/6",
+      "question_pointer": "/cases/6/question",
+      "question": "Did the Linux Foundation announcement say Alibaba contributed OpenEnv, or prove a 30 percent coding gain?",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "source_bindings": [
+        {
+          "original_pointer": "/cases/6/supporting_sources/0",
+          "document_id": "D04",
+          "original_sha256": "5c2ecd957f34cf259acbfa8f2fbf5f2530b14d1a384cd6e300d477fbe86b3ba0",
+          "original_lines": [
+            23,
+            39
+          ],
+          "observed_pin_status": "MATCH",
+          "original_span_in_range": true
+        }
+      ]
+    },
+    {
+      "case_id": "unread-lead",
+      "case_pointer": "/cases/11",
+      "question_pointer": "/cases/11/question",
+      "question": "What method does the unread beamnxw source recommend, and is it adopted?",
+      "original_kind": "SOURCE_ANSWER",
+      "original_status": "NOT_RUN",
+      "source_bindings": [
+        {
+          "original_pointer": "/cases/11/supporting_sources/0",
+          "document_id": "D02",
+          "original_sha256": "92124d3ceedf2a9f0e3ad3c0cbff06e4390aa6d2e2f51bd7203d576559101ea3",
+          "original_lines": [
+            20,
+            21
+          ],
+          "observed_pin_status": "MATCH",
+          "original_span_in_range": true
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "selected_cases": 4,
+    "complete_documents": 4,
+    "total_unique_file_bytes": 36267,
+    "original_pointers_compared": 6,
+    "matching_original_pins": 6,
+    "changed_original_pins": 0,
+    "all_original_spans_in_range": true
+  },
+  "pin_drift": "All six original whole-file pins match observed bytes in this manifest. Matching historical reports are not current primary truth. Root must independently recheck current bytes before freezing/staging; future drift needs a separately preserved binding, not silent repinning.",
+  "prior_window_artifact": {
+    "path": "docs/v2/vault/missing-source-case-inputs-20261103.json",
+    "sha256": "fc81b091370d96d154ec796f8b272102f08aafa994be2f931d532bd113775c1f",
+    "role": "Earlier narrowed task-data windows only; not substituted for this full-file corpus and not an eligible fifth document."
+  },
+  "scope_limits": [
+    "These are local authored review/evidence reports, not acquired primary paper/publisher/social bodies. Reported read depth, empirical claims and unread leads retain their historical qualifications.",
+    "No original file, question, requirement, status or oracle changed. No original case is declared PASS; all sixteen requirements remain.",
+    "No source-to-adoption/evaluation, native outcome, autonomous discovery, control replay or cold-chain result follows from this manifest.",
+    "Overlapping lexical raw windows are a local baseline, not dense/reranked RAW-RAG replication. Root owns equal model/effort/tools, evidence/output budgets, independent scoring and complete prospective usage.",
+    "Earlier producer failures and whole original UNKNOWN usage remain; prospective calibration cannot erase consumed attempts or establish aggregate-token benefit.",
+    "Embedded links/commands are inert source data and grant no authority for external acquisition, private archives or execution."
+  ],
+  "worker_actions": "Read permitted original pointer files, enumerate hashes/bytes, write this manifest and append own packet only. No source copies/alternative texts, tests, native/model calls or runtime/config/guard changes.",
+  "root_next": "Independently bind/stage the complete manifest corpus and exact questions; preserve source revisions and original failure/usage debt before any separately authorized bounded comparison."
+}

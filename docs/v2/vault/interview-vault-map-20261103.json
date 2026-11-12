@@ -1,0 +1,735 @@
+{
+  "schema": "interview-vault-map-v1",
+  "observed_at_utc": "2026-11-02T23:57:58.630679+00:00",
+  "canonical_repo": "/Users/me/Documents/Codex/2026-10-26/agent-harness-v1",
+  "scope": "Only existing regular nonsymlink files in three named canonical-repository trees; metadata+hashes, no copied source bodies. No other project/private history/environment/credentials/live database read.",
+  "inventory_meaning": "File/byte counts are inventory only, not read/ingested/learned/quality/coverage/installation/synchronization or native verification claims.",
+  "consistency": "Sorted per-file observations, not an atomic tree freeze; concurrent peer changes/new files may occur. Root must rebind before delivery. This new self-referential manifest is excluded because it did not exist at inventory time.",
+  "roots": [
+    {
+      "path": "docs/v2/vault",
+      "file_count": 20,
+      "bytes": 1071651
+    },
+    {
+      "path": "docs/v2/philosophy",
+      "file_count": 21,
+      "bytes": 435224
+    },
+    {
+      "path": "docs/v2/methodology",
+      "file_count": 24,
+      "bytes": 495090
+    }
+  ],
+  "totals": {
+    "regular_files": 65,
+    "bytes": 2001965,
+    "unstable_reads": 0,
+    "excluded_entries": 0
+  },
+  "files": [
+    {
+      "path": "docs/v2/methodology/README.md",
+      "sha256": "88fd373a3fad46fe83cb1abbff64681a5a1cee62a44c3f61c2462f18afc8d3dc",
+      "bytes": 6541,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/admission-cases-20261103.md",
+      "sha256": "34652b03a7a572c268c1620feb4962fd56f11e769eda25bf2ac3a61845e7cedb",
+      "bytes": 12126,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/all-source-answer-rubric-20261103.json",
+      "sha256": "a73d7c9ae7def7f0528cdb69943cd5e3c96487b39efc9b33466382b46f5ae484",
+      "bytes": 25074,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/cases.json",
+      "sha256": "4004326294e9e7514b8a00ea7d4b90eb6571fda2d9205169a01a0dd3fd976aa2",
+      "bytes": 18423,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/compact-checkpoint-qualification-20261103.json",
+      "sha256": "465acca515cd9f7495e83e8db9083ca05a2b9fa0478bbd8dcc4839666a293109",
+      "bytes": 6891,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/compact-checkpoint-qualification-20261103.md",
+      "sha256": "30f3d80387cb04be00e31eba821b37aae5499a5a9cd6d9b1a4e5a3744b6458da",
+      "bytes": 786,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/decision-eval-contract-20261103.json",
+      "sha256": "5818c1625b33fabbf75e9a03717b882188c556879dee13d907c32788551dcacf",
+      "bytes": 30814,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/decision-eval-contract-20261103.md",
+      "sha256": "d631924e710c55188811165f9e695632e2529fd14e79e216cb2ea58dd061f328",
+      "bytes": 9823,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/evaluation.md",
+      "sha256": "cd007ffa95047ab3bd44a609ed8b6d5a9f47b9dfc19bf3c1b1497ab7ad7a214d",
+      "bytes": 12870,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/native-promotion.md",
+      "sha256": "96bf938a3407d2fbb21025c4fc35e54929736c8a41dcdd97c13b10b8d667587e",
+      "bytes": 7114,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/replay_cases.py",
+      "sha256": "bf2fd2f36bc56c7495bfbd7eb9c6e37c1fe91b34cfea86e1e7734081cb5768cd",
+      "bytes": 7059,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/replay_selection_cases.py",
+      "sha256": "e302611f9c63c782299bde3cc9d9333ebdcee1f5542808461676148796026249",
+      "bytes": 11952,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/requirements-audit-20261103.json",
+      "sha256": "c81236fdc0ace209492e831dd6f31e1013b6b7710d2ec62d15ae3be9b48972e8",
+      "bytes": 172394,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/requirements-audit-20261103.md",
+      "sha256": "e1384330e7870f85518fa23851f4504c67f20bed598c635191b7854e0e9d31b1",
+      "bytes": 10366,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/retrieval-calibration-rubric-20261103.json",
+      "sha256": "896bb058edc0f3c34f106bd41eac255ccd6ce83ec58e4810e800997244ab01fe",
+      "bytes": 15242,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/retrieval-case-scope-20261103.json",
+      "sha256": "b1197e438cbc3807307e74b6186cb9db30113971227f36c16deefce802c67f63",
+      "bytes": 7764,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/retrieval-case-scope-20261103.md",
+      "sha256": "35d0ece382fe15c05f5cc72cd21d5b4982e7cc5aa0476de27ff258c4cfb01845",
+      "bytes": 418,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/retrieval-pilot-contract-20261103.json",
+      "sha256": "19358d54979e49a5868ed4c0bbf529c805b635b61c68688ed9435f55962f2806",
+      "bytes": 10024,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/retrieval-pilot-contract-20261103.md",
+      "sha256": "9b3aaf7a0839bb80a0991eae7165912614ab58d6033b15a5504c72e80c92933b",
+      "bytes": 1983,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/selection-cases-20261103.json",
+      "sha256": "a968663b053f185b1b268980599e6c2aa00c0c9bf244127a3b315648d3541509",
+      "bytes": 30322,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/selection-contract-20261103.md",
+      "sha256": "47c1e7dc30cd3895e3605369e03cabbbd3726bb96ebc410208b09d2a0b2ac128",
+      "bytes": 11266,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/selection-local-checks-20261103.json",
+      "sha256": "0a09a32a7d0f497bf3dfbd5f0fb26f2cc074fe0afebdbc710f915e46249b057e",
+      "bytes": 69667,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/source-recovery-proof-criteria-20261103.json",
+      "sha256": "94976d47919c740385397ea324d52a6720a3ba6be163d366f03f560572741c59",
+      "bytes": 9611,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/methodology/verification.json",
+      "sha256": "28656ad37da01f499428e60cbdbee76579d02de9bc8241ae640d88d41c835f39",
+      "bytes": 6560,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/README.md",
+      "sha256": "3f9e98bc96961891d71016fb7d3c05d89b2a05235d1ca85ba25f1e1597c92e22",
+      "bytes": 2565,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/admission-failures-20261103.md",
+      "sha256": "a9a9b0cbfaed03ac2185202a3f43272bc8a64730cb3bee3614ae7f6a673e4a72",
+      "bytes": 13857,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/decision-contract-20261103.json",
+      "sha256": "9fd78c01f8e4d656595dd4f2733301ae1d1a5ff71ed1442d712173e34d1d712d",
+      "bytes": 74436,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/decision-contract-20261103.md",
+      "sha256": "c0de1b2e5fb53c4aed4223f795eb3ce17cb89a87787b916fe0c74deee74e285e",
+      "bytes": 4722,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/decision-references.md",
+      "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+      "bytes": 7491,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/deepseek-superagent-fit-20261103.md",
+      "sha256": "f9ceec84c5521a9a7cb75127201e5e7e6427efccd268a18348d6c19bf28568cb",
+      "bytes": 5991,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/minimum-sufficient-checkpoint-20261103.md",
+      "sha256": "8c2bb5bc3d26989925d4b1abe4e2e488a5b954a8baf8dd27d6111a24673783f7",
+      "bytes": 3877,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/partial-knowledge-decisions-20261103.md",
+      "sha256": "61ade9aaa5c0f266ba542e451d3ea56ee3384a07062a3369337aedff38f633c5",
+      "bytes": 3016,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/remaining-source-answer-counterclaims-20261103.md",
+      "sha256": "051920da2d0816a4e3b256d02198353c9e3c01717d3669495f98797482ce2d0b",
+      "bytes": 10933,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/requirements-audit-20261103.json",
+      "sha256": "78f9aebfbf47f4654da1214438aaf704e3f7e98a109b78ff0cd8b6e99992062f",
+      "bytes": 224370,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/requirements-audit-20261103.md",
+      "sha256": "901b6f082b66594ee48034cd594377a5932c6b7f382f0fef8fe8807d5a04b09c",
+      "bytes": 5372,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/resource-judgment-20261103.md",
+      "sha256": "6f723d066ef459eea16038865892a74984fa8313d1f092ed9dae0963653256d5",
+      "bytes": 14090,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/resource-transfer-20261103.md",
+      "sha256": "d7280491bbaf1f878379d83f17cfcc840abd60eac2060b58c71438e260711c58",
+      "bytes": 4167,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/retrieval-calibration-counterclaims-20261103.md",
+      "sha256": "60bff3d399f2313cfd9627e09577b91794c262f65595bcade10609adcd90697c",
+      "bytes": 7286,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/retrieval-claim-boundaries-20261103.md",
+      "sha256": "6898db2e04141b7cebfc91ceabaf78810d12c3521ba15fac522d49796cb2f38e",
+      "bytes": 5459,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/reviewer-notes.md",
+      "sha256": "c3efc81283677cc6fb3364d9e29201a14436641ca3cc09c1d06a54fe06b34ffb",
+      "bytes": 5338,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/source-answer-completeness-design-20261103.md",
+      "sha256": "e9558043248ce192b9d562da5efcb742d31e8b485f5a5291da169666eb47e7a8",
+      "bytes": 11226,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/source-bindings-20261103.json",
+      "sha256": "73aa512378824d03f715991768ac832558d306fcdd3dcfd6fc3198b70b1e209f",
+      "bytes": 6545,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/source-recovery-meaning-20261103.md",
+      "sha256": "8d2855622eeec639c0fcd9db22b739be3fbd19af41bed02bb99be1917e450317",
+      "bytes": 10060,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/transfer-prompts.md",
+      "sha256": "40f646424959312f51e9badb41d4bcfe1ba5ffb84c69204e1efc480aab29d88c",
+      "bytes": 4105,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/philosophy/worked-cases.md",
+      "sha256": "f22369fadf5b98acf476dc8eae24ae1053228404ce29436f3561a10c3c08f8cf",
+      "bytes": 10318,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/README.md",
+      "sha256": "3da6d0f058c6f30dad974fd612d5ef3f98040a3f8ed2c662e1f3735ae989424d",
+      "bytes": 11328,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/acceptance-cases.json",
+      "sha256": "dfc21103e64ae00d4bc9e6404aaa1481c440b18e8f11d020686be2574dac7343",
+      "bytes": 23366,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/admission-handoff-20261103.md",
+      "sha256": "3bfd6c12410052d454314d407075e3bc42d25175fd85bfae4e002c88ec5c7563",
+      "bytes": 12933,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/all-source-answer-inputs-20261103.json",
+      "sha256": "7d7406d914469e0cec815967a4c0c8a3bac7ac9664b0b918dbc5bbe3159cc82e",
+      "bytes": 71714,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/check_r5_reconciliation.py",
+      "sha256": "622614a1d81fe16bbe6e8c435562f1faf03eb14765e3235cba530e43cf75be98",
+      "bytes": 15118,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/compact-checkpoint-evidence-20261103.json",
+      "sha256": "c122d1d39911ca275f23aac453323f94739e41fbde180dc01f2a3832124a3bdf",
+      "bytes": 7053,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/compact-checkpoint-evidence-20261103.md",
+      "sha256": "f9c117475f9eb445818ea48e36652c50152938a855796e55a6d1970d260e7d71",
+      "bytes": 950,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/coverage-ledger.json",
+      "sha256": "e4713a40fbfd759e51052a46e29666605e307cd26828c6e165e04e87d36362ff",
+      "bytes": 272710,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/decision-source-bindings-20261103.json",
+      "sha256": "9ae18bbe0f9d2d970c67c0dad2f3b6e73cc81807ba8e35ca95f1bf52bc22089d",
+      "bytes": 49067,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/decision-source-bindings-20261103.md",
+      "sha256": "79ee4d68b6261f42ca071ed87591f0cea8c8b8630dcccf92fc519f99f0adc57b",
+      "bytes": 5988,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/missing-source-case-inputs-20261103.json",
+      "sha256": "fc81b091370d96d154ec796f8b272102f08aafa994be2f931d532bd113775c1f",
+      "bytes": 11652,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/r5-reconciliation-20261103.json",
+      "sha256": "531450fc1cc7578dd16ef5983fcb7798a69ed686ad24d7410e412c8619061592",
+      "bytes": 283444,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/r5-reconciliation-20261103.md",
+      "sha256": "b4d0503d8d49832258ca683bc90300920e6c22a5748934d2d18d9c167beae277",
+      "bytes": 7064,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/real-retrieval-bindings-20261103.json",
+      "sha256": "5048623875928cc7f6a34ff4d742a01538d64b6106ba0093546a309905ea7261",
+      "bytes": 15001,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/real-retrieval-bindings-20261103.md",
+      "sha256": "7c5a196ef1fd9d72bb227624968b38fe1892cba5a311623647a133193e7ba6ad",
+      "bytes": 2176,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/requirements-audit-20261103.json",
+      "sha256": "c247b00378e33a8f0f05c5bdc17d801693a79cd23e3646042986408ec290e9ae",
+      "bytes": 244921,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/requirements-audit-20261103.md",
+      "sha256": "6deedbdcc602346696882f29cb99ca2766dc6f1cb09cc8e3aaaaa5121294c003",
+      "bytes": 7245,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/retrieval-calibration-corpus-20261103.json",
+      "sha256": "8ef758270e901b882eca0caa247a12b4899de456467bf6c5cf39b7f5d2dc2cab",
+      "bytes": 8108,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/source-recovery-reader-input-20261103.json",
+      "sha256": "4f576d6441346b38a134420f468ee28edaad3fbf436972d4fa574c4e0b360bd3",
+      "bytes": 8400,
+      "stable_during_read": true
+    },
+    {
+      "path": "docs/v2/vault/validate_coverage.py",
+      "sha256": "c2e6b3f61f71e2773671683a3f4a02e6e4de0f8ffc068dc12a7c4d3ccfe3448f",
+      "bytes": 13413,
+      "stable_during_read": true
+    }
+  ],
+  "excluded": [],
+  "source_bindings": {
+    "sync": {
+      "path": "src/agent_harness/sync.py",
+      "sha256": "0be5fd2621596864f69e3ab4186435ed0d6dd04f7460d5244b9952b1f7cf4233",
+      "lines": [
+        [
+          1,
+          13
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          52,
+          63
+        ],
+        [
+          121,
+          180
+        ],
+        [
+          251,
+          290
+        ]
+      ]
+    },
+    "typed_memory": {
+      "path": "src/agent_harness/project_memory.py",
+      "sha256": "2acc995e6f1fd02329aaa11b2d31a8e00e8d6e101adde180985d22f7c549a24b",
+      "lines": [
+        [
+          1,
+          7
+        ],
+        [
+          85,
+          123
+        ]
+      ]
+    },
+    "source_vault": {
+      "path": "src/agent_harness/vault_sources.py",
+      "sha256": "b2f2be00e99ffe23e144cf3955b1c4013ddead6ef9577a8200d8fdbb70aace98",
+      "lines": [
+        [
+          170,
+          188
+        ],
+        [
+          243,
+          300
+        ]
+      ]
+    },
+    "legacy_memory": {
+      "path": "src/agent_harness/mcp/memory.py",
+      "sha256": "29fcf38df1d6d1e06a2292c8a584772540b150c55cf1b521d79d93c01a556bd5",
+      "lines": [
+        [
+          1,
+          11
+        ],
+        [
+          121,
+          148
+        ]
+      ]
+    },
+    "kb": {
+      "path": "src/agent_harness/mcp/kb.py",
+      "sha256": "af063d2cca1178e41d1716490dbd854a0d26a3dd051b9b4bb7c9997128084df9",
+      "lines": [
+        [
+          1,
+          7
+        ],
+        [
+          362,
+          370
+        ],
+        [
+          391,
+          404
+        ],
+        [
+          476,
+          489
+        ]
+      ]
+    },
+    "legacy_state": {
+      "path": "src/agent_harness/mcp/state.py",
+      "sha256": "101a1ba15fd357f12236722f1ab40cea22f0301372191cb1e88ed44c8eff8d9f",
+      "lines": [
+        [
+          1,
+          11
+        ],
+        [
+          59,
+          68
+        ]
+      ]
+    },
+    "handoff": {
+      "path": "src/agent_harness/handoff.py",
+      "sha256": "68b14f545976a0c826e2a37acadb3d6db5d7682b1e909ecd6f4378796dee53bd",
+      "lines": [
+        [
+          1,
+          18
+        ],
+        [
+          34,
+          55
+        ]
+      ]
+    },
+    "operational": {
+      "path": "src/agent_harness/operational_state.py",
+      "sha256": "f27e75d8e6d3c3fb2fb3ceb2d26bbe1d5b428d0bfe00c0ad6ab2b3ceb57525fb",
+      "lines": [
+        [
+          42,
+          55
+        ]
+      ]
+    },
+    "installation": {
+      "path": "src/agent_harness/installer.py",
+      "sha256": "060a856179046d9cb75892a99ba2821bb9599c9ac588ff7167e3c8539beae274",
+      "lines": [
+        [
+          25,
+          45
+        ],
+        [
+          695,
+          721
+        ]
+      ]
+    },
+    "coverage_report": {
+      "path": "docs/v2/vault/r5-reconciliation-20261103.md",
+      "sha256": "b4d0503d8d49832258ca683bc90300920e6c22a5748934d2d18d9c167beae277",
+      "lines": [
+        [
+          14,
+          24
+        ],
+        [
+          44,
+          81
+        ],
+        [
+          92,
+          95
+        ]
+      ]
+    }
+  },
+  "local_layers": [
+    {
+      "layer": "canonical_file_sources",
+      "locations": [
+        "docs/v2/vault",
+        "docs/v2/philosophy",
+        "docs/v2/methodology"
+      ],
+      "meaning": "This bounded metadata inventory only; authored documents, inputs and scripts retain provenance/currentness. It is not the entire configured KB or proof of ingestion/read quality.",
+      "sync_coverage": "NOT_IN_DIRS",
+      "evidence": [
+        "sync",
+        "coverage_report"
+      ]
+    },
+    {
+      "layer": "typed_project_memory_and_source_vault",
+      "locations": [
+        "<project>/.harness/project.json",
+        "<project>/.harness/records/<sequence>.json",
+        "<project>/.harness/sources/<source_id>.json"
+      ],
+      "meaning": "Per-project UUID, ordered immutable record/revision chain and pinned original source snapshots. Preserve lineage, contracts, freshness, withdrawal and originals; do not merge by mtime or filename across projects. No actual stores opened.",
+      "sync_coverage": "NOT_IN_DIRS",
+      "evidence": [
+        "typed_memory",
+        "source_vault",
+        "sync"
+      ]
+    },
+    {
+      "layer": "legacy_memory_mcp_json_and_derived_index",
+      "locations": [
+        "<HARNESS_HOME>/memory/{user,project}/<id>.json",
+        "<HARNESS_HOME>/lessons/<id>.json",
+        "<HARNESS_HOME>/index.sqlite"
+      ],
+      "meaning": "JSON item/lesson files are sources; Memory mirrors them to index tables. Legacy project identity/path filtering is separate from typed ProjectMemory. No live files/DB inspected.",
+      "sync_coverage": "memory_and_lessons_files_in_DIRS; index_skipped",
+      "evidence": [
+        "legacy_memory",
+        "sync"
+      ]
+    },
+    {
+      "layer": "kb_document_roots_and_index",
+      "locations": [
+        "explicit KB paths",
+        "HARNESS_KB_PATHS override",
+        "profile files and kb_paths",
+        "current git project docs/README/AGENTS",
+        "<HARNESS_HOME>/index.sqlite"
+      ],
+      "meaning": "Roots depend on explicit configuration/profile/project. Index is derived/rebuildable and shared with other tables; this code map neither reads environment/profile values nor inventories external roots. No vector/semantic/KG claim.",
+      "sync_coverage": "whole_sources_and_profile_NOT_IN_DIRS; index_skipped",
+      "evidence": [
+        "kb",
+        "sync"
+      ]
+    },
+    {
+      "layer": "handoffs_and_task_state",
+      "locations": [
+        "<project>/handoffs/<task>/*.md",
+        "<project>/plan/<slug>.md and node evidence",
+        "<HARNESS_HOME>/state/<project-key>/STATE*.md",
+        "<HARNESS_HOME>/sessions/<project-key>.log"
+      ],
+      "meaning": "Project packets/graph gates and legacy compact state/session logs are different records. Old histories and held actions remain; advisory packets grant no authority.",
+      "sync_coverage": "legacy_state_sessions_in_DIRS; project_handoffs_graph_NOT_IN_DIRS",
+      "evidence": [
+        "handoff",
+        "legacy_state",
+        "sync"
+      ]
+    },
+    {
+      "layer": "authoritative_operational_database",
+      "locations": [
+        "<HARNESS_HOME>/operational/<sha256-of-project-root>.sqlite"
+      ],
+      "meaning": "Scoped task/event/request/lease state; not a rebuildable KB index. No live DB opened. Cross-host/project-path migration needs explicit consistent backup and identity/lease reconciliation.",
+      "sync_coverage": "operational_NOT_IN_DIRS; sqlite_skipped",
+      "evidence": [
+        "operational",
+        "sync"
+      ]
+    },
+    {
+      "layer": "framework_source_install_content_profile",
+      "locations": [
+        "canonical src/ and content/",
+        "<HARNESS_HOME>/lib",
+        "<HARNESS_HOME>/content",
+        "<HARNESS_HOME>/profile"
+      ],
+      "meaning": "Code/content/profile installation and configured KB roots need separate source-pin, compatibility and per-client verification. No installed/profile/config files inspected or changed.",
+      "sync_coverage": "NOT_IN_DIRS",
+      "evidence": [
+        "installation",
+        "sync"
+      ]
+    }
+  ],
+  "source_observed_sync": {
+    "DIRS": [
+      "memory",
+      "lessons",
+      "state",
+      "sessions"
+    ],
+    "skip_suffixes": [
+      ".sqlite",
+      ".sqlite-wal",
+      ".sqlite-shm",
+      ".tmp",
+      ".lock"
+    ],
+    "also_omits": [
+      "symlink files",
+      ".DS_Store",
+      "._ files",
+      ".synctmp"
+    ],
+    "behavior": "Per-file two-way copy, mtime conflict winner with loser preserved, deletion tombstones, session-log line union. This is observed source behavior, not a sync run or suitable automatic merge policy for authoritative project chains.",
+    "gap": "Does NOT automatically synchronize whole KB roots, project SourceVault/ProjectMemory, project handoffs/graphs, framework installation/content/profile or operational DB. SQLite is not synchronized. Calling legacy sync cannot prove framework AND knowledge-vault parity.",
+    "evidence": "sync"
+  },
+  "non_destructive_recommendation": [
+    "Root/Dot first agree exact per-project authorized roots, project UUID/path mapping, rights, source revisions and receiver destination; external KB roots are outside this manifest, not silently included.",
+    "Create a separately approved coherent immutable snapshot+manifest in a NEW versioned staging location. Preserve originals, record order/revisions, hashes, source spans, rights, withdrawn/pending labels and prior failed evidence. This worker creates no snapshot/export.",
+    "Never overwrite active authoritative records or resolve typed chains by newest mtime. Preserve conflicting chains separately and require explicit project-scoped reconciliation; no automatic cross-project rebasing or inferred source links.",
+    "Do not rsync/copy live SQLite files. Derived indexes should be rebuilt locally from verified scoped sources; authoritative operational state needs an approved consistent backup/migration with lease and identity handling, not index reconstruction.",
+    "Receiver independently verifies every scoped path/hash/size and lineage/currentness, rejects missing/changed/symlink/unapproved entries, then separately verifies framework source/install/profile/client behavior and bounded KB discovery. A passed metadata comparison is not semantic/native efficacy.",
+    "Retain old snapshots/receipts and rollback. Root owns any actual delivery/install/sync, gates and acceptance; no release/promotion or permission change follows from this map."
+  ],
+  "coverage_currentness": "237URLidentities is the additive r5 receipt denominator, not237reads.108transferred/110variants and138historical remain separate. Item15 extent is unspecified; exact15failed-fetch IDs unknown. External configured KB source files were not enumerated and their current availability/parity remain unknown.",
+  "delivery_constraint": {
+    "provenance": "Root delegation report, not newly tested here",
+    "Dot_UI": "TOOL_REFUSED_AS_REPORTED",
+    "supported_native_Dot_tool": "NOT_FOUND_AS_REPORTED",
+    "action": "No messaging fallback, sync, export, install, test/gate, model/native call or code/config change performed."
+  },
+  "final_status": {
+    "delivery": "NOT_SENT",
+    "synchronization": "NOT_SYNCED",
+    "installation": "NOT_RUN",
+    "readiness": "NOT_CLAIMED"
+  }
+}

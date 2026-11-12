@@ -1,0 +1,179 @@
+{
+  "schema": "harness.methodology-cases/v1",
+  "split": "development",
+  "origin": "authored_synthetic",
+  "claim_class": "structural_and_helper_behavior_only",
+  "not_proven": ["native_method_selection", "domain_quality", "transfer", "token_gain", "promotion"],
+  "cases": [
+    {
+      "id": "daily-arithmetic",
+      "domain": "daily",
+      "probe_kind": "method",
+      "input": {"task": "Split 84 equally between 3 people; give only the amount per person.", "dependencies": 0, "uncertainty": "none"},
+      "expected": {"decision": "direct", "runtime_action": "DIRECT", "diagnosis_checks": null, "observations": ["Answer is 28 per person.", "No plan, delegation or research campaign."]},
+      "failure": "A five-phase plan or a question about the arithmetic prevents the requested direct answer.",
+      "counterexample": {"change": "The task asks to reconcile an existing invoice with unexplained adjustments.", "decision": "investigate", "reason": "The arithmetic inputs are now evidence to verify, not given facts."},
+      "existing_checks": ["tests/test_method_control.py::test_direct_simple_work_and_plan_only_for_real_dependencies"]
+    },
+    {
+      "id": "daily-invoice",
+      "domain": "daily",
+      "probe_kind": "method",
+      "input": {"task": "Verify this draft invoice total before I use it.", "dependencies": 0, "uncertainty": "none", "artifact": "Items: 40 + 44. Draft total: 82."},
+      "expected": {"decision": "investigate", "runtime_action": "VERIFY_ARTIFACT", "diagnosis_checks": null, "observations": ["Identify that 40 + 44 = 84, not 82.", "Check the draft rather than restarting unrelated work."]},
+      "failure": "Artifact existence is treated as verified correctness.",
+      "counterexample": {"change": "There is no invoice; the complete task is simply 40 + 44.", "decision": "direct", "reason": "No artifact or disputed input needs investigation."},
+      "existing_checks": ["tests/test_method_control.py::test_timeout_feedback_switches_based_on_actual_artifact"]
+    },
+    {
+      "id": "daily-authority",
+      "domain": "daily",
+      "probe_kind": "method",
+      "input": {"task": "Send the confidential draft to Alex; two authorized address records have that name and no recipient is specified.", "dependencies": 0, "uncertainty": "consequential"},
+      "expected": {"decision": "investigate", "runtime_action": "CLARIFY", "diagnosis_checks": null, "observations": ["Hold sending until the recipient is resolved.", "Ask only the recipient decision; do not request routine implementation choices."]},
+      "failure": "A guessed recipient turns ambiguity into disclosure authority.",
+      "counterexample": {"change": "The request is only to draft wording locally and names no external recipient.", "decision": "implement", "reason": "A reviewable local draft does not require the sending decision."},
+      "existing_checks": ["tests/test_method_control.py::test_critical_checks_are_selected_only_when_evidence_or_stakes_require_them"]
+    },
+    {
+      "id": "coding-known-repair",
+      "domain": "coding",
+      "probe_kind": "method",
+      "input": {"task": "Repair parse_ids: the contract says an empty string returns []; current code converts the empty field with int(''). Reproduction: assert parse_ids('') == []. Preserve rejection of 'x'.", "dependencies": 0, "uncertainty": "none"},
+      "expected": {"decision": "implement", "runtime_action": "DIRECT", "diagnosis_checks": null, "observations": ["Preserve the failing reproduction, repair empty input and rerun it.", "The malformed input 'x' must still fail."]},
+      "failure": "Broad exception swallowing makes the positive case green while admitting malformed input.",
+      "counterexample": {"change": "The contract does not specify whether empty input is valid and two owning sources disagree.", "decision": "investigate", "reason": "Resolve the actual requirement before changing the parser or its check."},
+      "existing_checks": ["tests/test_method_control.py::test_direct_simple_work_and_plan_only_for_real_dependencies"]
+    },
+    {
+      "id": "coding-dependent-delivery",
+      "domain": "coding",
+      "probe_kind": "method",
+      "input": {"task": "Add a validated API field, update its UI consumer and verify the integrated response. Backend passes; frontend is not yet checked; documentation depends only on the backend.", "dependencies": 3, "uncertainty": "none"},
+      "expected": {"decision": "plan", "runtime_action": "PLAN", "diagnosis_checks": null, "observations": ["Keep the backend receipt valid while the frontend is diagnosed.", "Documentation may proceed on current backend evidence; parent delivery waits for integration."]},
+      "failure": "Either every branch is restarted or one green child is used to claim parent completion.",
+      "counterexample": {"change": "Only one isolated backend function needs a known reversible change.", "decision": "implement", "reason": "There is no multi-output dependency problem to persist."},
+      "existing_checks": ["tests/test_method_control.py::test_direct_simple_work_and_plan_only_for_real_dependencies"]
+    },
+    {
+      "id": "coding-faulty-check",
+      "domain": "coding",
+      "probe_kind": "contract_only",
+      "input": {"task": "An existing gate expects 2 + 2 == 5. The signed task requirement is ordinary integer addition. Preserve the failed gate; correct its mistaken expected value; prove a function returning 5 is rejected."},
+      "expected": {"decision": "diagnose", "observations": ["Record the original failure and requirement evidence.", "Make the smallest correction, reject the invalid result 5, rerun the original gate and affected checks.", "Do not ask for check-only approval when the requirement is independently settled."]},
+      "failure": "Silently deleting the assertion or accepting every result conceals the check defect.",
+      "counterexample": {"change": "The task uses an undocumented custom operation and its intended result is disputed.", "decision": "replan", "reason": "The owner must resolve acceptance; ordinary addition cannot be assumed."},
+      "existing_checks": []
+    },
+    {
+      "id": "research-missing-current-evidence",
+      "domain": "research",
+      "probe_kind": "method",
+      "input": {"task": "Compare the current export limits of two services. Local authorized notes are from 2024 and the limit fields are absent. Do not purchase anything.", "dependencies": 0, "uncertainty": "none"},
+      "expected": {"decision": "investigate", "runtime_action": "DIRECT", "diagnosis_checks": null, "observations": ["Acquire current official evidence for the missing limits, or explicitly report unavailable evidence.", "Bind each limit to its source/date and distinguish unknown from zero."]},
+      "failure": "Stale or missing limits become invented current facts; a long comparison masks the gap.",
+      "counterexample": {"change": "The user supplies complete dated excerpts and asks only for a comparison of those excerpts.", "decision": "direct", "reason": "The bounded question no longer requires a live-service claim."},
+      "existing_checks": ["tests/test_method_control.py::test_direct_simple_work_and_plan_only_for_real_dependencies"]
+    },
+    {
+      "id": "research-intent-gap",
+      "domain": "research",
+      "probe_kind": "method",
+      "input": {"task": "Compare retention and deletion guarantees in the supplied policy excerpts.", "dependencies": 0, "uncertainty": "none", "artifact": "Both services are popular and offer many features.", "gate": {"status": "FAIL", "check_id": "policy-task-fit", "failure_codes": ["intent-gap"]}},
+      "expected": {"decision": "diagnose", "runtime_action": "REVISE_ARTIFACT", "diagnosis_checks": ["original_intent", "observed_result", "acceptance_gap", "cause_hypotheses", "discriminating_check", "bounded_next_action"], "observations": ["Identify that retention/deletion guarantees are missing.", "Check the original excerpts to separate missing source evidence from omitted analysis.", "Repair the comparison and rerun the unchanged task-fit check."]},
+      "failure": "The agent lengthens the popularity summary or asks the user to diagnose its omission.",
+      "counterexample": {"change": "The same artifact has a current adequate PASS receipt for the actual task.", "decision": "direct", "reason": "Do not impose stale failure diagnosis after current acceptance."},
+      "existing_checks": ["tests/test_method_control.py::test_bad_artifact_triggers_intent_gap_and_cause_analysis_without_user_diagnosis"]
+    },
+    {
+      "id": "research-current-pass",
+      "domain": "research",
+      "probe_kind": "method",
+      "input": {"task": "Report the verified bounded policy comparison.", "dependencies": 0, "uncertainty": "none", "prior_status": "FAILED", "artifact": "The supplied excerpt states retention is 30 days; deletion timing is unspecified.", "gate": {"status": "PASS", "check_id": "policy-task-fit", "failure_codes": []}},
+      "expected": {"decision": "direct", "runtime_action": "REPORT_GATE_RECEIPT", "diagnosis_checks": null, "observations": ["Report the accepted result with its evidence scope.", "Do not repeat a diagnosis solely because an older run failed."]},
+      "failure": "An old failure forces unnecessary repair, or a local PASS is overstated as independently authenticated.",
+      "counterexample": {"change": "The artifact changes after the receipt was generated.", "decision": "investigate", "reason": "The old PASS no longer binds the current bytes."},
+      "existing_checks": ["tests/test_method_control.py::test_diagnosis_matches_failure_and_a_current_pass_supersedes_it", "tests/test_method_control.py::test_independent_gate_feedback_revises_method_without_redefining_gate"]
+    },
+    {
+      "id": "debug-timeout-no-artifact",
+      "domain": "debugging",
+      "probe_kind": "method",
+      "input": {"task": "Produce a bounded local analysis; the attempt timed out before any artifact was written.", "dependencies": 0, "uncertainty": "none", "prior_status": "TIMEOUT"},
+      "expected": {"decision": "replan", "runtime_action": "CHANGE_METHOD", "diagnosis_checks": ["observed_progress", "bounded_next_action"], "observations": ["Inspect available progress and choose a smaller discriminating attempt.", "Preserve the failed attempt and its usage; do not repeat it unchanged."]},
+      "failure": "A silent identical retry consumes another full budget without resolving the failure cause.",
+      "counterexample": {"change": "A concrete unfinished artifact survived the timeout.", "decision": "investigate", "reason": "Inspect and grade the useful output before restarting."},
+      "existing_checks": ["tests/test_method_control.py::test_timeout_feedback_switches_based_on_actual_artifact"]
+    },
+    {
+      "id": "debug-timeout-with-artifact",
+      "domain": "debugging",
+      "probe_kind": "method",
+      "input": {"task": "Recover the local analysis after timeout.", "dependencies": 0, "uncertainty": "none", "prior_status": "TIMEOUT", "artifact": "Draft: observed offsets increased in sample 1; the second sample remains unchecked."},
+      "expected": {"decision": "investigate", "runtime_action": "VERIFY_ARTIFACT", "diagnosis_checks": ["observed_progress", "bounded_next_action"], "observations": ["Retain the draft and grade its actual completeness.", "Hold completion until the original required second sample is checked."]},
+      "failure": "A timeout discards recoverable work, or a surviving draft is reported as verified.",
+      "counterexample": {"change": "No draft or observable progress exists.", "decision": "replan", "reason": "There is no artifact to verify; change the bounded method."},
+      "existing_checks": ["tests/test_method_control.py::test_timeout_feedback_switches_based_on_actual_artifact"]
+    },
+    {
+      "id": "debug-runtime-failure",
+      "domain": "debugging",
+      "probe_kind": "method",
+      "input": {"task": "A local parser run failed. Distinguish malformed input from a missing executable before changing the parser.", "dependencies": 0, "uncertainty": "none", "prior_status": "FAILED"},
+      "expected": {"decision": "diagnose", "runtime_action": "DIAGNOSE", "diagnosis_checks": ["failure_layer", "bounded_next_action"], "observations": ["Use the failure evidence to distinguish environment from implementation.", "Run the minimal relevant reproduction before patching."]},
+      "failure": "An environment failure is patched by changing valid parsing behavior.",
+      "counterexample": {"change": "A current passing artifact receipt is available.", "decision": "direct", "reason": "A completed accepted artifact supersedes the older failed run."},
+      "existing_checks": ["tests/test_method_control.py::test_failure_and_stale_dependency_never_become_authority"]
+    },
+    {
+      "id": "debug-stale-request",
+      "domain": "debugging",
+      "probe_kind": "method",
+      "input": {"task": "Create a reviewed local document.", "dependencies": 0, "uncertainty": "none", "prior_status": "FAILED", "mutate_request_after_receipt": "Publish the document externally."},
+      "expected": {"decision": "investigate", "error_contains": "stale", "observations": ["Reject the old request receipt and obtain current task state.", "Do not treat a local drafting receipt as publishing authority."]},
+      "failure": "A stale receipt silently resumes a changed external action.",
+      "counterexample": {"change": "The request/context remains identical to the failed run.", "decision": "diagnose", "reason": "The bound failure can inform the same task's next check."},
+      "existing_checks": ["tests/test_method_control.py::test_failure_and_stale_dependency_never_become_authority"]
+    },
+    {
+      "id": "learning-copied-observation",
+      "domain": "learning",
+      "probe_kind": "contract_only",
+      "input": {"task": "Draft an archive-recovery method from two episodes.", "task_inputs": ["Recover archive A", "Recover archive B"], "source_observations": ["The same copied failure-and-repair report", "The same copied failure-and-repair report"]},
+      "expected": {"decision": "investigate", "observations": ["Refuse the duplicated observation as recurrence evidence.", "Seek independently sourced relevant evidence or retain an unqualified note."]},
+      "failure": "Different task names or hashes are mistaken for two independent successful experiences.",
+      "counterexample": {"change": "The second report records a genuinely separate relevant task and evidence.", "decision": "implement", "reason": "A dormant candidate may be drafted; promotion still needs held-out qualification."},
+      "existing_checks": ["tests/test_v1_learning_loop.py::test_two_task_inputs_one_observation_do_not_establish_recurrence"]
+    },
+    {
+      "id": "learning-independent-draft",
+      "domain": "learning",
+      "probe_kind": "contract_only",
+      "input": {"task": "Prepare a project-local procedure candidate; do not activate it.", "task_inputs": ["Recover archive A with damaged index", "Recover archive B with missing payload"], "source_observations": ["A: checksum failed, repaired index, inventory check passed", "B: missing payload found in backup, restored, inventory check passed"]},
+      "expected": {"decision": "implement", "observations": ["Bind original task/evidence sources, trigger and exclusions.", "Keep the procedure proposed and inspectable; hashes alone do not certify source truth."]},
+      "failure": "Preparation is treated as independent evaluation or active recall authorization.",
+      "counterexample": {"change": "The evidence source changes after preparation.", "decision": "investigate", "reason": "Revalidate the source binding; the prepared digest no longer matches."},
+      "existing_checks": ["tests/test_procedure_preparation.py::test_prepared_candidate_drafts_inspects_corrects_and_still_cannot_promote", "tests/test_procedure_preparation.py::test_source_change_after_preparation_is_rejected_by_draft"]
+    },
+    {
+      "id": "learning-plausible-scores",
+      "domain": "learning",
+      "probe_kind": "contract_only",
+      "input": {"task": "Apply a method using caller-written comparison JSON.", "base_quality": [1, 1], "candidate_quality": [1, 1], "base_tokens": [100, 100], "candidate_tokens": [80, 80], "overhead_tokens": 10, "grader_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "actor_answer_isolation": "UNVERIFIED", "effective_model": "UNKNOWN"},
+      "expected": {"decision": "replan", "observations": ["Arithmetic can pass 170 <= 200 but promotion remains refused.", "Keep the candidate proposed; require independent native provenance and isolation before qualification."]},
+      "failure": "Plausible scores plus a valid-looking grader digest activate the method.",
+      "counterexample": {"change": "Independent native qualification is actually established by a future authorized verifier/consumer.", "decision": "investigate", "reason": "Verify its signed/bound evidence and full release conditions; the current change() still has no accepting promotion path."},
+      "existing_checks": ["tests/test_procedure_independence.py::test_caller_written_scores_and_grader_hash_cannot_activate_a_method", "tests/test_v1_learning_loop.py::test_equal_quality_and_lower_total_tokens_is_a_valid_gain"]
+    },
+    {
+      "id": "learning-total-token-regression",
+      "domain": "learning",
+      "probe_kind": "contract_only",
+      "input": {"task": "Judge a comparison with equal per-case quality.", "base_quality": [1, 1], "candidate_quality": [1, 1], "base_tokens": [100, 100], "candidate_tokens": [80, 80], "overhead_tokens": 41},
+      "expected": {"decision": "diagnose", "observations": ["Reject 160 + 41 = 201 > 200 even though actor-only usage fell.", "Preserve failed/adaptation/review attempts rather than moving them outside accounting."]},
+      "failure": "Only the latest successful candidate outputs are counted, concealing overhead.",
+      "counterexample": {"change": "Complete verified overhead is 10 and all other conditions are unchanged.", "decision": "investigate", "reason": "Arithmetic permits a gain, but the independent native boundary still must be qualified."},
+      "existing_checks": ["tests/test_v1_learning_loop.py::test_promotion_refuses_invalid_or_unmatched_evidence", "tests/test_v1_legacy_promotion.py::test_old_keep_rule_cannot_admit_more_tokens"]
+    }
+  ]
+}

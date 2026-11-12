@@ -1,0 +1,160 @@
+{
+  "schema": "harness.philosophy-source-bindings/v1",
+  "status": "AUTHORING_PROVENANCE_NOT_ACCEPTANCE_OR_EFFICACY",
+  "date": "2026-11-03",
+  "captured_at_utc": "2026-11-02T17:04:55+00:00",
+  "worker_thread_id": "01a19c20-2a09-7073-aeb5-cb5cfdecd3e5",
+  "source_base": "60735e2b35088c0e458e78e8a3fe3f1574c2d970 plus shared uncommitted changes",
+  "primary_research_this_round": "NONE; retained receipts reused; no upstream fetch",
+  "receipt_origin": {
+    "path": "/Users/me/Desktop/Codex/knowledge/public/swe/REFERENCE-SOURCES.json",
+    "sha256": "643d54a98b526c2efcb106549898772885caa315e4e67c824b5ea235663f39ec",
+    "schema": "case-learning-sources/v1",
+    "read_status": "parsed selected prior-primary-read metadata; no new direct upstream read"
+  },
+  "retained_primary_read_receipts": [
+    {
+      "id": "django-admin-tutorial-5-2",
+      "requested_url": "https://docs.djangoproject.com/en/5.2/intro/tutorial02/",
+      "resolved_url": "https://docs.djangoproject.com/en/5.2/intro/tutorial02/",
+      "title": "Writing your first Django app, part 2",
+      "read_depth": "Opened official tutorial; read database setup (SQLite default and PostgreSQL migration note), admin purpose (site managers, not visitors), model registration, generated list/edit/save/delete/history flow. Not the full Django documentation.",
+      "used_for": [
+        "case 1"
+      ]
+    },
+    {
+      "id": "sqlite-transactions",
+      "requested_url": "https://www.sqlite.org/lang_transaction.html",
+      "resolved_url": "https://www.sqlite.org/lang_transaction.html",
+      "title": "SQLite Transaction",
+      "read_depth": "Opened official transaction page; read implicit/manual transaction behavior, nesting/savepoints, concurrent readers, single simultaneous writer, SQLITE_BUSY on read-to-write upgrade, and DEFERRED semantics. No runtime experiment.",
+      "used_for": [
+        "case 2"
+      ]
+    },
+    {
+      "id": "python-sqlite3",
+      "requested_url": "https://docs.python.org/3/library/sqlite3.html",
+      "resolved_url": "https://docs.python.org/3/library/sqlite3.html",
+      "title": "sqlite3 — DB-API 2.0 interface for SQLite databases",
+      "read_depth": "Opened official module docs; read overview, SQLite serverless/prototype context, tutorial/reference/how-to/explanation map. No new DB code run.",
+      "used_for": [
+        "LIBRARY-PACKS.md: SQL + SQLite"
+      ]
+    }
+  ],
+  "local_inputs": [
+    {
+      "id": "S1",
+      "path": "docs/v2/philosophy/decision-references.md",
+      "sha256": "7bc6635d17d7db0ba1fabfcc1f796084589f6a2dec8e90670c7ac5c0d89b6dcf",
+      "inspected_scope": "F1-F3 prior primary-read receipt and decision references"
+    },
+    {
+      "id": "S2-library",
+      "path": "/Users/me/Desktop/Codex/knowledge/public/swe/LIBRARY-PACKS.md",
+      "sha256": "5bdecc2f6b102401b59172b1c1cbe3fe3a3e8e5353da7f8f4cfe6b53728af0df",
+      "inspected_scope": "pack matrix, choosing a stack, evidence boundary; prior runtime observations not re-executed"
+    },
+    {
+      "id": "S2-cases",
+      "path": "/Users/me/Desktop/Codex/knowledge/public/swe/ENGINEERING-CASES.md",
+      "sha256": "63270311f4f79425dae1c3ca9ad99e456c1274992f38590e3bf6c2e04078a9d8",
+      "inspected_scope": "cases 1-2 and candidate lifecycle; documented versus proposed status"
+    },
+    {
+      "id": "S3",
+      "path": "docs/v2/second-brain-contract.md",
+      "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+      "inspected_scope": "design judgment; memory choice; scope and original versus derived authority"
+    },
+    {
+      "id": "S4-method",
+      "path": "src/agent_harness/method_control.py",
+      "sha256": "f3cc51acd4ee3f4f1fbcf7ed139c5ea87e0c432078e0ad15c54f0208343fe93b",
+      "inspected_scope": "module authority disclaimer and decide intent-gap diagnosis branch; source inspection only"
+    },
+    {
+      "id": "S4-route",
+      "path": "src/agent_harness/routing.py",
+      "sha256": "bcfaa62456454a10c54e5a77505996b08d0859f07a60fe9cb01a06d8a36c8ff3",
+      "inspected_scope": "next_decision authority disclaimer; source inspection only"
+    },
+    {
+      "id": "S4-policy",
+      "path": "content/skills/work-loop/reasoning.md",
+      "sha256": "5f6f51389268c213f69510835630b2d9bb8f979a0cab8bb0269c5d098516081b",
+      "inspected_scope": "detect and repair inadequate work; active skill read only"
+    },
+    {
+      "id": "S5-template",
+      "path": "content/templates/learning-review.md",
+      "sha256": "d51d3b412130839c907d3a52d1361be5b25df58986911c15455aa7d215c7bd96",
+      "inspected_scope": "candidate, evaluation, promotion and rollback fields"
+    },
+    {
+      "id": "S5-eval",
+      "path": "/Users/me/Desktop/Codex/knowledge/public/swe/EVAL-INTERVIEW.md",
+      "sha256": "2125296465f403d8e14f15cde0ead6b1d882797db72feb0e09834de328c8db80",
+      "inspected_scope": "baseline comparison protocol and failure handling; not local evaluation execution"
+    },
+    {
+      "id": "coordination",
+      "path": "handoffs/v2-completion/README.md",
+      "sha256": "85eb8e73a2617075413649d5554b5c3be6a3bea10c69310f62f2493293270c07",
+      "inspected_scope": "exclusive write scope and integration authority"
+    },
+    {
+      "id": "round2-authority",
+      "path": "handoffs/v2-completion/round2-20261103.md",
+      "sha256": "bc126284e8a59dda74f51eaaf5d1a8ee956352c9b087609bb894717e6c6ffdfd",
+      "inspected_scope": "Philosophy assignment and held actions"
+    }
+  ],
+  "case_bindings": {
+    "J1": [
+      "S1",
+      "S2-library",
+      "S2-cases"
+    ],
+    "J2": [
+      "S3"
+    ],
+    "J3": [
+      "S1",
+      "S3",
+      "S4-route",
+      "coordination"
+    ],
+    "J4": [
+      "S3",
+      "S5-template",
+      "S5-eval"
+    ],
+    "J5": [
+      "S1",
+      "S3",
+      "S5-eval"
+    ],
+    "J6": [
+      "S4-policy",
+      "S4-method",
+      "S5-eval"
+    ]
+  },
+  "case_status": "HYPOTHETICAL; recommendations and checks INFERRED/PROPOSED; no case executed",
+  "verification": {
+    "owner": "orchestrator",
+    "semantic_source_review": "NOT_RUN",
+    "executable_cases": "NOT_RUN",
+    "model_native_behavior": "NOT_RUN",
+    "paired_quality_total_tokens": "NOT_RUN",
+    "promotion": "NOT_AUTHORISED"
+  },
+  "scope_notes": [
+    "Canonical vault files and active skills were read, never edited.",
+    "Existing library inventory is historical and location-bounded, not rechecked runtime availability.",
+    "Source bytes and prose do not establish installation, adherence, learning, expertise or improvement."
+  ]
+}

@@ -3,14 +3,17 @@
 Markdown/text files are split into sections on headings (# .. ###). Each section has a stable id
 ``relpath#slug`` (numeric suffix on collision, ``-pN`` for parts of a long section split at ~4 KB).
 Search is BM25: SQLite FTS5 when available, a pure-Python BM25 otherwise. The index lives in
-``<HARNESS_HOME>/index.sqlite`` and is refreshed incrementally (mtime + size) before every query.
+``<HARNESS_HOME>/index.sqlite`` and is refreshed from filesystem fingerprints before every query.
 """
 from __future__ import annotations
 
+from functools import lru_cache
+import heapq
 import math
 import os
 import re
 import sqlite3
+import stat
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -32,6 +35,13 @@ MAX_FILE_BYTES = 2_000_000
 _HEADING = re.compile(r"^(#{1,3})[ \t]+(.+?)[ \t#]*$")
 _FENCE = re.compile(r"^\s*(```|~~~)")
 _WORD = re.compile(r"[0-9A-Za-z\u00c0-\uffff]+")  # snake_case splits: access_token -> access, token
+
+
+def _stat_token(st: os.stat_result) -> str:
+    # A copied/restored source can retain size and mtime. Identity and metadata
+    # change time catch ordinary replacements and preserved-mtime edits on Unix.
+    # This is a cache fingerprint, not a content hash or authenticated revision.
+    return ':'.join(str(v) for v in (st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns, st.st_ctime_ns))
 
 
 # ---------------------------------------------------------------- shared helpers
@@ -77,7 +87,7 @@ they this those through to too under until up very was we were what when where w
 with would you your yours please can't don't use using used make want need get got let lets like also""".split())
 
 
-def _stem(w: str) -> str:
+def _stem_uncached(w: str) -> str:
     """Tiny suffix stripper (rotate/rotating/rotation -> rot, backups -> backup). Stdlib-only stand-in
     for a real stemmer; the same function stems documents and queries, so it only has to be consistent."""
     for suf in _SUFFIXES:
@@ -87,6 +97,17 @@ def _stem(w: str) -> str:
     if w.endswith("e") and len(w) > 4:
         w = w[:-1]
     return w
+
+
+@lru_cache(maxsize=1024)
+def _short_stem(w: str) -> str:
+    return _stem_uncached(w)
+
+
+def _stem(w: str) -> str:
+    # Stemming is pure. Cache only short words, never documents or query results;
+    # an arbitrary long token must not consume a retained cache entry.
+    return _short_stem(w) if len(w) <= 64 else _stem_uncached(w)
 
 
 def tokens(text: str) -> List[str]:
@@ -223,6 +244,15 @@ def slugify(title: str) -> str:
 
 def _utf8_cut(text: str, max_bytes: int) -> str:
     return text.encode("utf-8")[:max_bytes].decode("utf-8", "ignore")
+
+
+def _bounded_read_text(text: str, max_bytes: int) -> Tuple[str, bool]:
+    if len(text.encode("utf-8")) <= max_bytes:
+        return text, False
+    # Navigation and the notice consume context too; reserve their bytes before
+    # cutting, rather than appending an unbounded list after limiting the body.
+    notice = "\n[truncated: use kb_search for an exact section ID or a larger max_bytes]\n"
+    return _utf8_cut(text, max_bytes - len(notice.encode("utf-8"))) + notice, True
 
 
 def _parts(body: str, limit: int = PART_BYTES) -> List[str]:
@@ -396,9 +426,107 @@ CANDIDATES = 50
 KB_MIN_SCORE = 0.15
 
 
+# ----------------------------------------------------- opt-in honesty layer (L2)
+# HARNESS_KB_HONESTY=1 (opt-in, default OFF — unset = the honesty block below
+# is skipped entirely and search() is byte-identical to not having it).
+#
+# FROZEN rule, validated in .harness-work/v3-h6a-l2-candidacy (H6a: 15 fresh
+# queries + the frozen 18, all legs green) and confirmed in H3 amendment 1.
+# The constants/functions below are a byte-frozen copy of the eval module
+# l2_rule.py (sha256 4a395400…), itself a byte-verified copy of H3's
+# hybrid_scorer.py (sha256 5060a9b1…, bound into H3 eval artifact
+# 18d4fe09…). tests/test_kb_honesty.py proves the constants still equal the
+# frozen source. Do not tune here: any change is a new hypothesis and needs
+# its own gated plan.
+HONESTY_WINDOW = 10            # the validated window: top-10 scored sections
+
+_L2_WORD = re.compile(r'[a-z0-9]+')
+_L2_MIN_TOKEN_LEN = 2
+_L2_STOPLIST = frozenset('''
+a an the is are was were be been being do does did have has had having
+i you he she it we they me him her us them my your his its our their
+what which who whom when where why how
+should would can could may might must shall will ought
+to of in on at for with by from about between into over under
+and or but not no nor any all both each this that these those there here
+than then so such as if while because until again once just also very
+isn aren wasn weren don doesn didn won wouldn couldn shouldn hasn haven
+s t d ll re ve m o
+'''.split())
+
+
+def _l2_content_tokens(text: str) -> List[str]:
+    return [t for t in _L2_WORD.findall(text.lower())
+            if len(t) >= _L2_MIN_TOKEN_LEN and t not in _L2_STOPLIST]
+
+
+def _l2_content_bigrams(text: str) -> List[Tuple[str, str]]:
+    toks = _L2_WORD.findall(text.lower())
+    out = []
+    for a, b in zip(toks, toks[1:]):
+        if (len(a) >= _L2_MIN_TOKEN_LEN and len(b) >= _L2_MIN_TOKEN_LEN
+                and a not in _L2_STOPLIST and b not in _L2_STOPLIST):
+            out.append((a, b))
+    return out
+
+
+def _honesty_enabled() -> bool:
+    return os.environ.get("HARNESS_KB_HONESTY", "").lower() in ("1", "true", "yes")
+
+
 def _doc_tokens(title: str, body: str) -> List[str]:
     # Title counted twice: a cheap stand-in for FTS5's column weight.
     return tokens(title) * 2 + tokens(body)
+
+
+def discover_files(roots: Sequence[Path], errors: Optional[Dict[str, int]] = None) -> List[Tuple[Path, str]]:
+    found: List[Tuple[Path, str]] = []
+    used: set = set()
+    parents = {}
+
+    def failed(reason):
+        if errors is not None:
+            errors[reason] = errors.get(reason, 0) + 1
+
+    for root in roots:
+        try:
+            mode = root.stat().st_mode
+        except FileNotFoundError:
+            continue  # Default roots include optional README/docs locations.
+        except OSError:
+            failed("root_unavailable")
+            continue
+        if stat.S_ISREG(mode):
+            items = [(root, root.name)]
+        elif stat.S_ISDIR(mode):
+            items = []
+            for dirpath, dirnames, filenames in os.walk(root, onerror=lambda _: failed("enumeration_failed")):
+                dirnames[:] = sorted(d for d in dirnames if d not in SKIP_DIRS and not d.startswith("."))
+                for fn in sorted(filenames):
+                    p = Path(dirpath) / fn
+                    if p.suffix.lower() in TEXT_SUFFIXES:
+                        items.append((p, "%s/%s" % (root.name, p.relative_to(root).as_posix())))
+        else:
+            continue
+        for p, rel in items:
+            if rel in used:
+                rel = "%s/%s" % (root.resolve().parent.name, rel)
+            used.add(rel)
+            # Resolve a shared directory once per discovery, not once per file.
+            # Symlinks still resolve individually; this cache never survives a
+            # refresh, and refresh still checks every source's stat and access.
+            if p.is_symlink():
+                resolved = p.resolve()
+            else:
+                if p.parent not in parents:
+                    parents[p.parent] = p.parent.resolve()
+                resolved = parents[p.parent] / p.name
+            found.append((resolved, rel))
+    return found
+
+
+class SourceUnavailableError(ValueError):
+    """A discovered source is unavailable; a cached copy does not make it readable."""
 
 
 class KB:
@@ -406,11 +534,37 @@ class KB:
                  fts: Optional[bool] = None, db_path: Optional[os.PathLike] = None):
         self.home = harness_home(home)
         self.roots = [Path(p) for p in paths] if paths is not None else default_kb_paths(self.home)
+        # Profile chapters can be published while a client is connected. Keep
+        # explicit roots and the original project/configured paths pinned;
+        # rediscover only the already selected profile directory on each query.
+        self._live_profile = paths is None and not os.environ.get("HARNESS_KB_PATHS")
+        if self._live_profile:
+            initial_profile = set(_profile_folder(self.home))
+            self.roots = [p for p in self.roots if p not in initial_profile]
         self.fts = fts5_available() if fts is None else (fts and fts5_available())
         self.db_path = Path(db_path) if db_path else self.home / "index.sqlite"
         self.con = connect(self.db_path)
         self._bm25: Optional[BM25] = None
+        self._bm25_stamp = None
+        self._honesty_maps: Optional[Tuple[Dict[str, set], Dict[str, set]]] = None
+        self._honesty_stamp = None
+        self._unavailable: Dict[str, Tuple[str, str]] = {}
+        self._discovery_errors: Dict[str, int] = {}
         self._init_schema()
+
+    @property
+    def availability(self) -> dict:
+        """Last query's discovered-source omissions, not whole-corpus completeness.
+
+        Counts reveal no unavailable bodies, titles, paths or foreign cached state.
+        Discovery error counts represent unknown extent, not a missing-file count.
+        Profile configuration resolution is separate from selected-root discovery.
+        """
+        reasons: Dict[str, int] = {}
+        for _, reason in self._unavailable.values():
+            reasons[reason] = reasons.get(reason, 0) + 1
+        return {"unavailable_sources": len(self._unavailable), "reasons": reasons,
+                "discovery_errors": sum(self._discovery_errors.values())}
 
     def _init_schema(self) -> None:
         c = self.con
@@ -423,65 +577,81 @@ class KB:
             CREATE INDEX IF NOT EXISTS kb_sections_path ON kb_sections(path);
             CREATE TEMP TABLE IF NOT EXISTS kb_live(path TEXT PRIMARY KEY);
         """)
-        if "ntok" not in [r[1] for r in c.execute("PRAGMA table_info(kb_sections)")]:
-            c.execute("ALTER TABLE kb_sections ADD COLUMN ntok INTEGER DEFAULT 0")
-        if self.fts:
-            c.execute("CREATE VIRTUAL TABLE IF NOT EXISTS kb_fts USING fts5("
-                      "title, body, tokenize='porter unicode61')")
-        c.commit()
+        # Serialize schema inspection and upgrades for simultaneous cold clients.
+        c.execute("BEGIN IMMEDIATE")
+        try:
+            if "ntok" not in [r[1] for r in c.execute("PRAGMA table_info(kb_sections)")]:
+                c.execute("ALTER TABLE kb_sections ADD COLUMN ntok INTEGER DEFAULT 0")
+            if "stat_token" not in [r[1] for r in c.execute("PRAGMA table_info(kb_files)")]:
+                c.execute("ALTER TABLE kb_files ADD COLUMN stat_token TEXT")
+            if self.fts:
+                c.execute("CREATE VIRTUAL TABLE IF NOT EXISTS kb_fts USING fts5("
+                          "title, body, tokenize='porter unicode61')")
+            c.commit()
+        except sqlite3.Error:
+            c.rollback()
+            raise
 
     # -- discovery
     def _walk(self) -> List[Tuple[Path, str]]:
-        found: List[Tuple[Path, str]] = []
-        used: set = set()
-        for root in self.roots:
-            if _ok(Path.is_file, root):
-                items = [(root, root.name)]
-            elif _ok(Path.is_dir, root):
-                items = []
-                for dirpath, dirnames, filenames in os.walk(root):
-                    dirnames[:] = sorted(d for d in dirnames if d not in SKIP_DIRS and not d.startswith("."))
-                    for fn in sorted(filenames):
-                        p = Path(dirpath) / fn
-                        if p.suffix.lower() in TEXT_SUFFIXES:
-                            items.append((p, "%s/%s" % (root.name, p.relative_to(root).as_posix())))
-            else:
-                continue
-            for p, rel in items:
-                if rel in used:
-                    rel = "%s/%s" % (root.resolve().parent.name, rel)
-                used.add(rel)
-                found.append((p.resolve(), rel))
-        return found
+        profile = _profile_folder(self.home) if self._live_profile else []
+        return discover_files(profile + self.roots, errors=self._discovery_errors)
 
     def refresh(self) -> dict:
-        """Reindex files whose mtime/size changed; drop files that disappeared. Returns counts."""
+        """Reindex changed filesystem fingerprints; drop disappeared files. Returns counts."""
         c = self.con
+        self._unavailable = {}
+        self._discovery_errors = {}
         found = self._walk()
-        known = {r["path"]: (r["mtime"], r["size"], r["rel"]) for r in c.execute("SELECT * FROM kb_files")}
+        known = {r["path"]: (r["stat_token"], r["rel"]) for r in c.execute("SELECT * FROM kb_files")}
         changed = removed = 0
         live = set()
         for p, rel in found:
             key = str(p)
-            live.add(key)
             try:
                 st = p.stat()
+                # Cached text does not grant access after source permissions change.
+                if not os.access(p, os.R_OK):
+                    self._unavailable[key] = (rel, "read_denied")
+                    continue
             except OSError:
+                self._unavailable[key] = (rel, "stat_failed")
+                continue
+            if st.st_size > MAX_FILE_BYTES:
+                self._unavailable[key] = (rel, "size_limit")
                 continue
             k = known.get(key)
-            if k and k[0] == st.st_mtime and k[1] == st.st_size and k[2] == rel:
+            if k and k[0] == _stat_token(st) and k[1] == rel:
+                live.add(key)
                 continue
-            self._index_file(key, rel, st)
+            unavailable = self._index_file(key, rel, st)
+            if unavailable:
+                self._unavailable[key] = (rel, unavailable)
+                continue
+            live.add(key)
             changed += 1
         for key in known:
-            if key not in live and not os.path.exists(key):
-                self._drop_file(key)
-                removed += 1
+            if key not in live:
+                try:
+                    os.stat(key)
+                except FileNotFoundError:
+                    self._drop_file(key)
+                    removed += 1
+                except OSError:
+                    pass  # Inaccessible is not proven absent; retain excluded cache records.
         c.execute("DELETE FROM kb_live")
         c.executemany("INSERT OR IGNORE INTO kb_live(path) VALUES (?)", [(k,) for k in live])
         c.commit()
-        if changed or removed or self._bm25 is None:
-            self._bm25 = None if self.fts else self._build_bm25()
+        stamp = (c.execute("PRAGMA data_version").fetchone()[0], frozenset(live))
+        if not self.fts:
+            # Another connection may have indexed the changed file already;
+            # local changed==0 does not mean this in-memory ranker is current.
+            if changed or removed or self._bm25 is None or stamp != self._bm25_stamp:
+                self._bm25 = self._build_bm25()
+                self._bm25_stamp = stamp
+        if changed or removed or stamp != self._honesty_stamp:
+            self._honesty_maps = None   # rebuilt lazily, only when the flag is on
+            self._honesty_stamp = stamp
         return {"files": len(live), "changed": changed, "removed": removed}
 
     def _drop_file(self, key: str) -> None:
@@ -491,16 +661,24 @@ class KB:
         c.execute("DELETE FROM kb_sections WHERE path=?", (key,))
         c.execute("DELETE FROM kb_files WHERE path=?", (key,))
 
-    def _index_file(self, key: str, rel: str, st: os.stat_result) -> None:
-        self._drop_file(key)
+    def _index_file(self, key: str, rel: str, st: os.stat_result) -> Optional[str]:
         if st.st_size > MAX_FILE_BYTES:
-            text = ""
-        else:
-            try:
-                with open(key, "rb") as f:
-                    text = f.read().decode("utf-8", "replace")
-            except OSError:                 # listed but unreadable for this user: index nothing
-                text = ""
+            return "size_limit"
+        try:
+            with open(key, "rb") as f:
+                before = os.fstat(f.fileno())
+                raw = f.read(MAX_FILE_BYTES + 1)
+                after = os.fstat(f.fileno())
+        except OSError:
+            return "read_failed"
+        if len(raw) > MAX_FILE_BYTES:
+            return "size_limit"
+        if _stat_token(before) != _stat_token(st) or _stat_token(after) != _stat_token(before):
+            return "changed_during_read"
+        text = raw.decode("utf-8", "replace")
+        # Preserve old records on failure, but keep them out of kb_live. Only
+        # a successful current read may replace the derived cached sections.
+        self._drop_file(key)
         c = self.con
         for i, s in enumerate(split_sections(rel, text)):
             cur = c.execute(
@@ -510,20 +688,59 @@ class KB:
             if self.fts:
                 c.execute("INSERT INTO kb_fts(rowid,title,body) VALUES (?,?,?)",
                           (cur.lastrowid, s["title"], s["body"]))
-        c.execute("INSERT OR REPLACE INTO kb_files(path,rel,mtime,size) VALUES (?,?,?,?)",
-                  (key, rel, st.st_mtime, st.st_size))
+        c.execute("INSERT OR REPLACE INTO kb_files(path,rel,mtime,size,stat_token) VALUES (?,?,?,?,?)",
+                  (key, rel, st.st_mtime, st.st_size, _stat_token(st)))
 
     def _build_bm25(self) -> BM25:
         rows = self.con.execute(
             "SELECT s.rowid, s.title, s.body FROM kb_sections s JOIN kb_live l ON l.path=s.path").fetchall()
         return BM25([(r["rowid"], _doc_tokens(r["title"], r["body"])) for r in rows])
 
+    # -- opt-in honesty layer (HARNESS_KB_HONESTY; see the L2 block above)
+    def _build_honesty_maps(self) -> Tuple[Dict[str, set], Dict[str, set]]:
+        """Per-page L2 evidence: content-token sets and adjacent both-content
+        bigram sets, from indexed section bodies joined in ord order (sections
+        partition the page, so the join is token-faithful to the raw page)."""
+        rows = self.con.execute(
+            "SELECT s.rel, s.body FROM kb_sections s JOIN kb_live l ON l.path=s.path "
+            "ORDER BY s.rel, s.ord").fetchall()
+        parts: Dict[str, List[str]] = {}
+        for r in rows:
+            parts.setdefault(r["rel"], []).append(r["body"])
+        tokens, bigrams = {}, {}
+        for rel, bodies in parts.items():
+            text = "".join(bodies)
+            tokens[rel] = set(_l2_content_tokens(text))
+            bigrams[rel] = set(_l2_content_bigrams(text))
+        return tokens, bigrams
+
+    def _honest_miss(self, query: str, window: List[tuple]) -> bool:
+        """Frozen L2: honest miss iff NO query content bigram appears in any
+        candidate page AND the best candidate content-token coverage < 1.0
+        (a unigram-complete candidate = paraphrase evidence, stay silent)."""
+        bigrams = _l2_content_bigrams(query)
+        if not bigrams:
+            return False
+        if self._honesty_maps is None:
+            self._honesty_maps = self._build_honesty_maps()
+        tokens_map, bigram_map = self._honesty_maps
+        pages: List[str] = []
+        for _, r in window:
+            if r["rel"] not in pages:
+                pages.append(r["rel"])
+        if any(b in bigram_map.get(p, ()) for b in bigrams for p in pages):
+            return False
+        q = set(_l2_content_tokens(query))
+        best = max((len(q & tokens_map.get(p, set())) for p in pages), default=0)
+        return best / len(q) < 1.0
+
     # -- tools
     def search(self, query: str, k: int = 5, min_score: Optional[float] = None) -> List[dict]:
         """Top-k sections scoring >= min_score (normalised 0..1, see relevance()); [] beats weak matches.
 
-        FTS5 (or the Python BM25) proposes up to CANDIDATES sections; each is re-scored with relevance()
-        so the threshold means the same thing on both backends.
+        FTS5 streams matching live sections into a bounded top-k heap. Corpus
+        statistics and ranking are scoped before truncation, so another project
+        cannot change this project's results. The fallback uses scoped BM25.
         """
         self.refresh()
         k = max(1, min(int(k), 50))
@@ -536,13 +753,14 @@ class KB:
             rows = c.execute(
                 "SELECT s.rowid, s.sid, s.title, s.rel, s.body, s.bytes FROM kb_fts f "
                 "JOIN kb_sections s ON s.rowid=f.rowid JOIN kb_live l ON l.path=s.path "
-                "WHERE kb_fts MATCH ? ORDER BY bm25(kb_fts, 5.0, 1.0) LIMIT ?",
-                (fts_query(qt.values()), CANDIDATES)).fetchall()
+                "WHERE kb_fts MATCH ?", (fts_query(qt.values()),))
             st = c.execute("SELECT COUNT(*), AVG(s.ntok) FROM kb_sections s JOIN kb_live l ON l.path=s.path"
                            ).fetchone()
             n, avgdl = st[0], st[1] or 0.0
-            df = {t: c.execute("SELECT COUNT(*) FROM kb_fts WHERE kb_fts MATCH ?", (fts_query([w]),)).fetchone()[0]
-                  for t, w in qt.items()}
+            df = {t: c.execute(
+                "SELECT COUNT(*) FROM kb_fts f JOIN kb_sections s ON s.rowid=f.rowid "
+                "JOIN kb_live l ON l.path=s.path WHERE kb_fts MATCH ?",
+                (fts_query([w]),)).fetchone()[0] for t, w in qt.items()}
         else:
             bm = self._bm25 or self._build_bm25()
             rows = []
@@ -552,14 +770,25 @@ class KB:
                 if r:
                     rows.append(r)
             n, avgdl, df = len(bm.keys), bm.avg, {t: bm.df(t) for t in qt}
-        scored = [(relevance(qt, _doc_tokens(r["title"], r["body"]), n, avgdl, df), r) for r in rows]
+        scored = ((relevance(qt, _doc_tokens(r["title"], r["body"]), n, avgdl, df), r) for r in rows)
         # The profile's own files (the machine descriptor, the rules) are the authoritative source for
         # questions about this environment, so among relevant hits they rank first: a wiki page that just
         # repeats "GPU" should not push the descriptor's Machine section out of the top few. The threshold
         # still applies to the unboosted score, so a weak descriptor match is not let through.
         auth = self._authoritative()
-        scored = sorted((x for x in scored if x[0] >= min_score),
-                        key=lambda x: -(x[0] * (DESCRIPTOR_BOOST if x[1]["rel"] in auth else 1.0)))[:k]
+        rank_key = lambda x: (-(x[0] * (DESCRIPTOR_BOOST if x[1]["rel"] in auth else 1.0)),  # noqa: E731
+                              x[1]["sid"], x[1]["rel"])
+        if _honesty_enabled():
+            # Opt-in honesty layer (L2): if the frozen lexical-evidence rule says
+            # no candidate page carries the query's compound evidence, [] is the
+            # honest answer — confident-looking false positives are worse.
+            eligible = [x for x in scored if x[0] >= min_score]
+            window = heapq.nsmallest(HONESTY_WINDOW, eligible, key=rank_key)
+            if self._honest_miss(query, window):
+                return []
+            scored = heapq.nsmallest(k, eligible, key=rank_key)
+        else:
+            scored = heapq.nsmallest(k, (x for x in scored if x[0] >= min_score), key=rank_key)
         return [{"id": r["sid"], "title": r["title"], "path": r["rel"],
                  "snippet": snippet(r["body"].split("\n", 1)[-1] if r["body"].startswith("#") else r["body"],
                                     query),
@@ -598,36 +827,44 @@ class KB:
     def _section_list(page: str, rows: List[sqlite3.Row]) -> str:
         lines = ["Sections of %s (kb_get <id> fetches one):" % page]
         for r in rows:
-            if re.search(r"-p\d+$", r["sid"]) or not r["level"]:
+            # A heading-free page still has a #top section. Hiding level zero
+            # made real memory indexes appear empty despite indexed content.
+            if re.search(r"-p\d+$", r["sid"]):
                 continue
             lines.append("%s%s  %s  (%d B)" % ("  " * max(0, (r["level"] or 1) - 1), r["sid"], r["title"], r["bytes"]))
         return "\n".join(lines) + "\n"
 
     def get(self, id: str, max_bytes: int = 8000) -> dict:
         """One section by id. A page name alone (`docs/x.md`), or the first section of a page, also
-        returns the page's section list, so a page-level id leads straight to the section wanted."""
+        returns the page's section list, so a page-level id leads straight to the section wanted.
+        max_bytes bounds returned text including navigation/notices (legacy minimum 200).
+        The MCP renderer's separate identity header is outside this text budget.
+        """
         self.refresh()
+        max_bytes = max(200, int(max_bytes))
         page, _, slug = id.partition("#")
         r = self._row(id)
         if r is None and (not slug or slug == "top"):
             rows = self._page_rows(page)
             if rows:
                 listing = self._section_list(rows[0]["sid"].split("#")[0], rows)
+                text, truncated = _bounded_read_text(listing, max_bytes)
                 return {"id": rows[0]["sid"].split("#")[0], "title": "sections", "path": rows[0]["sid"].split("#")[0],
-                        "bytes": len(listing.encode("utf-8")), "truncated": False, "text": listing}
+                        "bytes": len(listing.encode("utf-8")), "truncated": truncated, "text": text}
         if r is None:
+            for unavailable_page, reason in self._unavailable.values():
+                if page == unavailable_page:
+                    raise SourceUnavailableError("requested source unavailable: %s; cached text withheld" % reason)
+            if self._discovery_errors:
+                raise SourceUnavailableError("requested section unresolved during partial discovery; "
+                                             "source existence unknown; cached text withheld")
             raise KeyError("no section %r; kb_get <page> lists a page's section ids, kb_search finds them" % id)
-        max_bytes = max(200, int(max_bytes))
-        text, truncated = r["body"], False
-        if r["bytes"] > max_bytes:
-            text = _utf8_cut(text, max_bytes)
-            text += "\n[truncated: showed %d of %d bytes; call kb_get with a larger max_bytes if needed]\n" % (
-                len(text.encode("utf-8")), r["bytes"])
-            truncated = True
+        text = r["body"]
         if r["ord"] == 0:
             rows = self._page_rows(r["rel"])
             if len(rows) > 1:
                 text = text.rstrip("\n") + "\n\n" + self._section_list(r["rel"], rows[1:])
+        text, truncated = _bounded_read_text(text, max_bytes)
         out = {"id": r["sid"], "title": r["title"], "path": r["rel"], "bytes": r["bytes"],
                "truncated": truncated, "text": text}
         nxt = self.con.execute("SELECT sid FROM kb_sections WHERE path=? AND ord=?",

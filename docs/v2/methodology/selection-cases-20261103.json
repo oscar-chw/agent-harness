@@ -1,0 +1,855 @@
+{
+  "schema": "harness.selection-cases/v1",
+  "split": "development",
+  "origin": "authored_synthetic",
+  "claim_class": "supported_local_projections_only",
+  "overall_domain_acceptance": "NOT_RUN",
+  "authority": "INFORMS integration owner; does not close parent gates",
+  "unsupported_dimensions": {
+    "semantic_skill_selection": "No runtime semantic skill fitness/selection oracle is exercised.",
+    "semantic_mcp_selection": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+    "worker_ownership_and_count": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+    "research_claim_support": "Method advice and task-profile routing do not grade source entailment or currency.",
+    "causal_repair_adequacy": "A diagnostic checklist is not a successful discriminating probe or verified causal repair.",
+    "recipe_freshness": "The route stale-context test is not recipe semantic version compatibility or actual selective recall.",
+    "missing_tool_recovery": "A missing model-pair projection does not demonstrate unavailable MCP handling or a valid data substitute.",
+    "native_adoption": "No native model/worker was run or observed choosing these actions.",
+    "efficiency": "No unchanged-baseline/held-out/complete-total-token comparison was run."
+  },
+  "cases": [
+    {
+      "id": "direct-no-tool",
+      "failure": "Calling a connector, creating a graph or delegating a fully specified known arithmetic question adds no missing evidence.",
+      "variants": [
+        {
+          "id": "direct-no-tool/control",
+          "task": "What is 6 times 7? Give just the number.",
+          "changed_evidence": "All inputs are supplied; no external state is needed.",
+          "frozen_outcome": {
+            "answer": 42,
+            "skills": [],
+            "tools": [],
+            "additional_workers": 0
+          },
+          "method_projection": {
+            "input": {
+              "task": "What is 6 times 7? Give just the number.",
+              "dependencies": 0,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "DIRECT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "mechanical",
+                "impact": "low",
+                "uncertainty": "low"
+              },
+              "enabled": false,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "HOLD",
+              "reason": "route_disabled",
+              "tier": null
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "worker_ownership_and_count",
+            "native_adoption",
+            "efficiency"
+          ]
+        },
+        {
+          "id": "direct-no-tool/changed",
+          "task": "Compute order revenue from the supplied local SQLite fixture, including orders with no line items.",
+          "changed_evidence": "The answer now depends on authorized local data and duplicate-join semantics.",
+          "frozen_outcome": {
+            "answer": 150,
+            "skills": [
+              "relevant SQL guidance if needed"
+            ],
+            "tools": [
+              "local sqlite"
+            ],
+            "additional_workers": 0
+          },
+          "method_projection": {
+            "input": {
+              "task": "Compute revenue from the supplied SQLite fixture.",
+              "dependencies": 0,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "DIRECT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "implementation",
+                "impact": "normal",
+                "uncertainty": "low"
+              },
+              "enabled": true,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "DISPATCH",
+              "reason": "task_selected_start",
+              "tier": "standard"
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "worker_ownership_and_count",
+            "native_adoption",
+            "efficiency"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "local-sql",
+      "failure": "Summing order totals after joining line items produces 250 rather than 150; asking a remote model or installing a database is unnecessary for the supplied fixture.",
+      "variants": [
+        {
+          "id": "local-sql/control",
+          "task": "Orders are (1,100),(2,50); line items reference (1),(1),(2). Report revenue once per order.",
+          "changed_evidence": "A complete bounded local fixture and Python sqlite3 are available; no production DB access.",
+          "frozen_outcome": {
+            "revenue": 150,
+            "read_only_source": true,
+            "tools": [
+              "local sqlite"
+            ],
+            "network_calls": 0,
+            "additional_workers": 0
+          },
+          "method_projection": {
+            "input": {
+              "task": "Compute each order total once from the supplied local fixture.",
+              "dependencies": 0,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "DIRECT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "implementation",
+                "impact": "normal",
+                "uncertainty": "low"
+              },
+              "enabled": true,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "DISPATCH",
+              "reason": "task_selected_start",
+              "tier": "standard"
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "worker_ownership_and_count",
+            "native_adoption",
+            "efficiency"
+          ],
+          "sql_projection": {
+            "query": "revenue",
+            "expected": 150,
+            "invalid_join_total": 250
+          }
+        },
+        {
+          "id": "local-sql/changed",
+          "task": "Use the same fixture to count line items, not order revenue.",
+          "changed_evidence": "The requested unit changes from orders to line items; deduplication would now discard valid rows.",
+          "frozen_outcome": {
+            "line_item_count": 3,
+            "tools": [
+              "local sqlite"
+            ],
+            "network_calls": 0,
+            "additional_workers": 0
+          },
+          "method_projection": {
+            "input": {
+              "task": "Count all three line items in the supplied local fixture.",
+              "dependencies": 0,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "DIRECT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "mechanical",
+                "impact": "low",
+                "uncertainty": "low"
+              },
+              "enabled": true,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "DISPATCH",
+              "reason": "task_selected_start",
+              "tier": "quick"
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "worker_ownership_and_count",
+            "native_adoption",
+            "efficiency"
+          ],
+          "sql_projection": {
+            "query": "line_items",
+            "expected": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "uncertain-research",
+      "failure": "Treating absent or stale technical facts as current, or sending a technical evidence gap back to the user as an intent question.",
+      "variants": [
+        {
+          "id": "uncertain-research/control",
+          "task": "Compare current API export limits. Authorized local notes are dated 2024 and omit the limits.",
+          "changed_evidence": "Only the relevant unstable facts are missing; technical research can resolve them.",
+          "frozen_outcome": {
+            "next_action": "investigate",
+            "source_order": [
+              "authorized local evidence",
+              "current official evidence for missing limits"
+            ],
+            "missing_evidence": "disclose",
+            "user_diagnoses_gap": false
+          },
+          "method_projection": {
+            "input": {
+              "task": "Compare current export limits; local notes omit the relevant facts.",
+              "dependencies": 0,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "DIRECT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "investigation",
+                "impact": "normal",
+                "uncertainty": "high"
+              },
+              "enabled": true,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "DISPATCH",
+              "reason": "task_selected_start",
+              "tier": "deep"
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "research_claim_support",
+            "native_adoption",
+            "efficiency"
+          ]
+        },
+        {
+          "id": "uncertain-research/changed",
+          "task": "Compare only these complete supplied excerpts: service A exports 100 rows, B exports 200. Make no current-service claim.",
+          "changed_evidence": "The bounded comparison is fully specified and temporally scoped by the supplied evidence.",
+          "frozen_outcome": {
+            "answer": "B permits 100 more rows in the supplied excerpts",
+            "tools": [],
+            "additional_workers": 0
+          },
+          "method_projection": {
+            "input": {
+              "task": "Compare the two complete supplied excerpts: A 100, B 200.",
+              "dependencies": 0,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "DIRECT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "mechanical",
+                "impact": "low",
+                "uncertainty": "low"
+              },
+              "enabled": true,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "DISPATCH",
+              "reason": "task_selected_start",
+              "tier": "quick"
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "research_claim_support",
+            "native_adoption",
+            "efficiency"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "independent-branches",
+      "failure": "Parallel writers race on the same module, or completed child work is used to claim parent integration.",
+      "variants": [
+        {
+          "id": "independent-branches/control",
+          "task": "Prepare three independent module inventories with exclusive file scopes; integrate them under one owner.",
+          "changed_evidence": "Three ready branches have disjoint inputs/writes, sufficient resources and a parent integration check.",
+          "frozen_outcome": {
+            "next_action": "plan",
+            "parallelism": "bounded by useful disjoint work and available capacity",
+            "additional_workers_max": 3,
+            "parent_done_before_integration": false
+          },
+          "method_projection": {
+            "input": {
+              "task": "Prepare three separately owned inventories and integrate.",
+              "dependencies": 3,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "PLAN",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "investigation",
+                "impact": "normal",
+                "uncertainty": "normal"
+              },
+              "enabled": true,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "DISPATCH",
+              "reason": "task_selected_start",
+              "tier": "standard"
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "worker_ownership_and_count",
+            "native_adoption",
+            "efficiency"
+          ]
+        },
+        {
+          "id": "independent-branches/changed",
+          "task": "The three inventories now update one shared generated index and only one worker slot is available.",
+          "changed_evidence": "The shared write and available capacity remove safe independent execution.",
+          "frozen_outcome": {
+            "next_action": "plan",
+            "parallelism": "serialize shared write",
+            "additional_workers_max": 1,
+            "retain_valid_independent_results": true
+          },
+          "method_projection": {
+            "input": {
+              "task": "Coordinate three outputs with a shared index and one available slot.",
+              "dependencies": 3,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "PLAN",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "design",
+                "impact": "normal",
+                "uncertainty": "high"
+              },
+              "enabled": true,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "DISPATCH",
+              "reason": "task_selected_start",
+              "tier": "deep"
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "worker_ownership_and_count",
+            "native_adoption",
+            "efficiency"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "failed-gate",
+      "failure": "More delegation/effort or longer prose substitutes for intent-result-gap/cause diagnosis; an old failure forces rework despite current acceptance.",
+      "variants": [
+        {
+          "id": "failed-gate/control",
+          "task": "The research artifact discusses popularity, but the unchanged task-fit gate requires retention/deletion guarantees and reports intent-gap.",
+          "changed_evidence": "There is an independently defined failed outcome check bound to the present artifact.",
+          "frozen_outcome": {
+            "next_action": "diagnose",
+            "required_evidence": [
+              "original intent",
+              "actual result",
+              "acceptance gap",
+              "competing causal hypotheses",
+              "discriminating check"
+            ],
+            "user_diagnoses_gap": false,
+            "original_gate_unchanged": true
+          },
+          "method_projection": {
+            "input": {
+              "task": "Compare retention and deletion guarantees.",
+              "dependencies": 0,
+              "uncertainty": "none",
+              "artifact": "Both services are popular.",
+              "gate": {
+                "status": "FAIL",
+                "check_id": "task-fit",
+                "failure_codes": [
+                  "intent-gap"
+                ]
+              }
+            },
+            "expected": {
+              "runtime_action": "REVISE_ARTIFACT",
+              "diagnosis_checks": [
+                "original_intent",
+                "observed_result",
+                "acceptance_gap",
+                "cause_hypotheses",
+                "discriminating_check",
+                "bounded_next_action"
+              ]
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "implementation",
+                "impact": "normal",
+                "uncertainty": "low"
+              },
+              "enabled": true,
+              "scenario": "failed_gate"
+            },
+            "expected": {
+              "decision": "DISPATCH",
+              "reason": "independent_gate_failed",
+              "tier": "deep"
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "causal_repair_adequacy",
+            "native_adoption",
+            "efficiency"
+          ]
+        },
+        {
+          "id": "failed-gate/changed",
+          "task": "A corrected artifact now has a current adequate PASS receipt; an older run was FAILED.",
+          "changed_evidence": "Current artifact acceptance supersedes the older failed attempt.",
+          "frozen_outcome": {
+            "next_action": "report evidence",
+            "repeat_old_diagnosis": false,
+            "additional_workers": 0
+          },
+          "method_projection": {
+            "input": {
+              "task": "Report the accepted bounded comparison.",
+              "dependencies": 0,
+              "uncertainty": "none",
+              "prior_status": "FAILED",
+              "artifact": "Retention is 30 days; deletion timing unspecified.",
+              "gate": {
+                "status": "PASS",
+                "check_id": "task-fit",
+                "failure_codes": []
+              }
+            },
+            "expected": {
+              "runtime_action": "REPORT_GATE_RECEIPT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "implementation",
+                "impact": "normal",
+                "uncertainty": "low"
+              },
+              "enabled": true,
+              "scenario": "current_pass"
+            },
+            "expected": {
+              "decision": "STOP",
+              "reason": "independent_gate_passed",
+              "tier": null
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "causal_repair_adequacy",
+            "native_adoption",
+            "efficiency"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stale-recipe",
+      "failure": "An old recipe overrides a changed requirement/version, or byte-hash agreement is mistaken for proof of semantic freshness.",
+      "variants": [
+        {
+          "id": "stale-recipe/control",
+          "task": "A local recipe targets API v1; the current authorized contract names incompatible v2 behavior. Revalidate before applying.",
+          "changed_evidence": "Recipe version conflicts with the owning source. A separate route-state projection also supplies stale context.",
+          "frozen_outcome": {
+            "next_action": "investigate",
+            "apply_stale_recipe": false,
+            "source_order": [
+              "current owning contract",
+              "current scoped recipe or missing evidence"
+            ],
+            "automatic_skill_promotion": false
+          },
+          "method_projection": {
+            "input": {
+              "task": "Inspect the changed source before applying a v1 recipe.",
+              "dependencies": 0,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "DIRECT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "investigation",
+                "impact": "normal",
+                "uncertainty": "normal"
+              },
+              "enabled": true,
+              "scenario": "stale_context"
+            },
+            "expected": {
+              "decision": "HOLD",
+              "reason": "stale_context",
+              "tier": null
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "recipe_freshness",
+            "native_adoption",
+            "efficiency"
+          ]
+        },
+        {
+          "id": "stale-recipe/changed",
+          "task": "The owning current source and recipe both target v2 and the fixture reproduction matches.",
+          "changed_evidence": "Current source evidence removes the stale-recipe conflict; normal outcome checks remain.",
+          "frozen_outcome": {
+            "next_action": "implement smallest change",
+            "revalidate_original_gate": true,
+            "automatic_skill_promotion": false
+          },
+          "method_projection": {
+            "input": {
+              "task": "Apply the current source-bound v2 recipe to the matching fixture.",
+              "dependencies": 0,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "DIRECT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "implementation",
+                "impact": "normal",
+                "uncertainty": "low"
+              },
+              "enabled": true,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "DISPATCH",
+              "reason": "task_selected_start",
+              "tier": "standard"
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "recipe_freshness",
+            "native_adoption",
+            "efficiency"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "missing-tool",
+      "failure": "A missing connector is reported as a successful call, or a local analogue silently substitutes for required live remote data.",
+      "variants": [
+        {
+          "id": "missing-tool/control",
+          "task": "The advertised SQL MCP connector is unavailable. The task is entirely defined by the supplied local fixture and local sqlite3 is available.",
+          "changed_evidence": "A permitted equivalent can satisfy exactly the same bounded output without connecting to a remote service.",
+          "frozen_outcome": {
+            "next_action": "use authorized equivalent",
+            "tools": [
+              "local sqlite"
+            ],
+            "claim_missing_mcp_called": false,
+            "install_or_enable_connector": false
+          },
+          "method_projection": {
+            "input": {
+              "task": "Use the local fixture to answer the bounded SQL task.",
+              "dependencies": 0,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "DIRECT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "implementation",
+                "impact": "normal",
+                "uncertainty": "low"
+              },
+              "enabled": true,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "DISPATCH",
+              "reason": "task_selected_start",
+              "tier": "standard"
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "missing_tool_recovery",
+            "native_adoption",
+            "efficiency"
+          ]
+        },
+        {
+          "id": "missing-tool/changed",
+          "task": "The task instead requires current production rows; its only authorized connector is unavailable and no local snapshot is supplied.",
+          "changed_evidence": "The substitute no longer has the required data. The route projection separately removes an available model pair.",
+          "frozen_outcome": {
+            "next_action": "hold affected result",
+            "report": "required live evidence/tool unavailable",
+            "invent_remote_rows": false,
+            "install_or_enable_connector": false
+          },
+          "method_projection": {
+            "input": {
+              "task": "Report the unavailable required live evidence; preserve independent work.",
+              "dependencies": 0,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "DIRECT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "implementation",
+                "impact": "normal",
+                "uncertainty": "low"
+              },
+              "enabled": true,
+              "scenario": "missing_pair"
+            },
+            "expected": {
+              "decision": "HOLD",
+              "reason": "model_unavailable",
+              "tier": null
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "missing_tool_recovery",
+            "native_adoption",
+            "efficiency"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "harmful-delegation",
+      "failure": "Extra workers duplicate a complete tiny task, load more private context or contend for scarce resources without a useful independent output.",
+      "variants": [
+        {
+          "id": "harmful-delegation/control",
+          "task": "Translate the supplied phrase good morning to Spanish. Three idle helper slots exist but no independent work is needed.",
+          "changed_evidence": "Capacity exists; there is no evidence that using it benefits this known task.",
+          "frozen_outcome": {
+            "answer": "Buenos días",
+            "additional_workers": 0,
+            "tools": [],
+            "copy_context_to_helpers": false
+          },
+          "method_projection": {
+            "input": {
+              "task": "Translate good morning to Spanish.",
+              "dependencies": 0,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "DIRECT",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "mechanical",
+                "impact": "low",
+                "uncertainty": "low"
+              },
+              "enabled": false,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "HOLD",
+              "reason": "route_disabled",
+              "tier": null
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "worker_ownership_and_count",
+            "native_adoption",
+            "efficiency"
+          ]
+        },
+        {
+          "id": "harmful-delegation/changed",
+          "task": "Inventory three large authorized folders under separate owners, with exclusive outputs and bounded resources; no shared write until integration.",
+          "changed_evidence": "There are now three necessary independent outputs; the owner has authorized this bounded delegation.",
+          "frozen_outcome": {
+            "additional_workers_max": 3,
+            "copy_only_scoped_context": true,
+            "parent_done_before_integration": false
+          },
+          "method_projection": {
+            "input": {
+              "task": "Prepare three independent scoped inventories and integrate them.",
+              "dependencies": 3,
+              "uncertainty": "none"
+            },
+            "expected": {
+              "runtime_action": "PLAN",
+              "diagnosis_checks": null
+            }
+          },
+          "route_projection": {
+            "input": {
+              "task": {
+                "schema": "harness.task-profile/v1",
+                "kind": "investigation",
+                "impact": "normal",
+                "uncertainty": "normal"
+              },
+              "enabled": true,
+              "scenario": "initial"
+            },
+            "expected": {
+              "decision": "DISPATCH",
+              "reason": "task_selected_start",
+              "tier": "standard"
+            }
+          },
+          "unsupported_checks": [
+            "semantic_skill_selection",
+            "semantic_mcp_selection",
+            "worker_ownership_and_count",
+            "native_adoption",
+            "efficiency"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1831 @@
+{
+  "schema": "harness.selection-local-observation/v1",
+  "recorded_at": "2026-11-03T01:05:53.853593+08:00",
+  "scope": "checker-development smoke only; main independent integration verification NOT_RUN",
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 docs/v2/methodology/replay_selection_cases.py --controls",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stderr": "",
+      "receipt": {
+        "authority": "INFORMS root",
+        "claim_class": "supported_local_projections_only",
+        "controls": [
+          {
+            "failure": "got DIRECT, expected PLAN",
+            "mutation": "invent-plan-for-direct",
+            "status": "REJECTED"
+          },
+          {
+            "failure": "route projection mismatch",
+            "mutation": "underqualified-route-expectation",
+            "status": "REJECTED"
+          },
+          {
+            "failure": "SQL projection mismatch",
+            "mutation": "accept-join-fanout-as-revenue",
+            "status": "REJECTED"
+          }
+        ],
+        "not_proven": [
+          "skill fitness",
+          "MCP selection",
+          "useful worker count",
+          "native adoption",
+          "held-out quality",
+          "total-token benefit"
+        ],
+        "overall_domain_acceptance": "NOT_RUN",
+        "pack_sha256": "a968663b053f185b1b268980599e6c2aa00c0c9bf244127a3b315648d3541509",
+        "results": [
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "direct-no-tool/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "HOLD",
+                  "reason": "route_disabled",
+                  "tier": null
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "direct-no-tool/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "local-sql/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              },
+              {
+                "invalid_fanout_result_rejected": 250,
+                "native_tool_selection": "NOT_RUN",
+                "observed": 150,
+                "status": "PASS",
+                "surface": "sqlite3 visible fixture"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "local-sql/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "quick"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              },
+              {
+                "native_tool_selection": "NOT_RUN",
+                "observed": 3,
+                "status": "PASS",
+                "surface": "sqlite3 visible fixture"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "uncertain-research/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "deep"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "research_claim_support",
+                "reason": "Method advice and task-profile routing do not grade source entailment or currency.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "uncertain-research/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "quick"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "research_claim_support",
+                "reason": "Method advice and task-profile routing do not grade source entailment or currency.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "independent-branches/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "PLAN"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "independent-branches/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "PLAN"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "deep"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "failed-gate/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": [
+                    "original_intent",
+                    "observed_result",
+                    "acceptance_gap",
+                    "cause_hypotheses",
+                    "discriminating_check",
+                    "bounded_next_action"
+                  ],
+                  "runtime_action": "REVISE_ARTIFACT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "independent_gate_failed",
+                  "tier": "deep"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "causal_repair_adequacy",
+                "reason": "A diagnostic checklist is not a successful discriminating probe or verified causal repair.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "failed-gate/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "REPORT_GATE_RECEIPT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "STOP",
+                  "reason": "independent_gate_passed",
+                  "tier": null
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "causal_repair_adequacy",
+                "reason": "A diagnostic checklist is not a successful discriminating probe or verified causal repair.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "stale-recipe/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "HOLD",
+                  "reason": "stale_context",
+                  "tier": null
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "recipe_freshness",
+                "reason": "The route stale-context test is not recipe semantic version compatibility or actual selective recall.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "stale-recipe/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "recipe_freshness",
+                "reason": "The route stale-context test is not recipe semantic version compatibility or actual selective recall.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "missing-tool/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "missing_tool_recovery",
+                "reason": "A missing model-pair projection does not demonstrate unavailable MCP handling or a valid data substitute.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "missing-tool/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "HOLD",
+                  "reason": "model_unavailable",
+                  "tier": null
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "missing_tool_recovery",
+                "reason": "A missing model-pair projection does not demonstrate unavailable MCP handling or a valid data substitute.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "harmful-delegation/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "HOLD",
+                  "reason": "route_disabled",
+                  "tier": null
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "harmful-delegation/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "PLAN"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          }
+        ],
+        "scenarios": 8,
+        "schema": "harness.selection-replay/v1",
+        "source_sha256": {
+          "content/routing.toml": "fb6ecb669c9be773859d7c691252e139735ffa0ce5ce06a5ace8628501d925c7",
+          "docs/v2/methodology/replay_cases.py": "bf2fd2f36bc56c7495bfbd7eb9c6e37c1fe91b34cfea86e1e7734081cb5768cd",
+          "docs/v2/methodology/replay_selection_cases.py": "e302611f9c63c782299bde3cc9d9333ebdcee1f5542808461676148796026249",
+          "src/agent_harness/launch.py": "bfc38c1ff54171e2312c239bc9e8eb1f1f74d134bc07def685f4c864db170810",
+          "src/agent_harness/method_control.py": "f3cc51acd4ee3f4f1fbcf7ed139c5ea87e0c432078e0ad15c54f0208343fe93b",
+          "src/agent_harness/routing.py": "bcfaa62456454a10c54e5a77505996b08d0859f07a60fe9cb01a06d8a36c8ff3"
+        },
+        "status": "SUPPORTED_PROJECTIONS_PASS",
+        "supported_projections": 34,
+        "variants": 16
+      }
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 docs/v2/methodology/replay_selection_cases.py --require-outcomes",
+      "exit_code": 2,
+      "expected_exit_code": 2,
+      "stderr": "",
+      "receipt": {
+        "authority": "INFORMS root",
+        "claim_class": "supported_local_projections_only",
+        "controls": "NOT_RUN",
+        "not_proven": [
+          "skill fitness",
+          "MCP selection",
+          "useful worker count",
+          "native adoption",
+          "held-out quality",
+          "total-token benefit"
+        ],
+        "overall_domain_acceptance": "NOT_RUN",
+        "pack_sha256": "a968663b053f185b1b268980599e6c2aa00c0c9bf244127a3b315648d3541509",
+        "results": [
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "direct-no-tool/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "HOLD",
+                  "reason": "route_disabled",
+                  "tier": null
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "direct-no-tool/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "local-sql/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              },
+              {
+                "invalid_fanout_result_rejected": 250,
+                "native_tool_selection": "NOT_RUN",
+                "observed": 150,
+                "status": "PASS",
+                "surface": "sqlite3 visible fixture"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "local-sql/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "quick"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              },
+              {
+                "native_tool_selection": "NOT_RUN",
+                "observed": 3,
+                "status": "PASS",
+                "surface": "sqlite3 visible fixture"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "uncertain-research/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "deep"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "research_claim_support",
+                "reason": "Method advice and task-profile routing do not grade source entailment or currency.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "uncertain-research/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "quick"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "research_claim_support",
+                "reason": "Method advice and task-profile routing do not grade source entailment or currency.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "independent-branches/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "PLAN"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "independent-branches/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "PLAN"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "deep"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "failed-gate/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": [
+                    "original_intent",
+                    "observed_result",
+                    "acceptance_gap",
+                    "cause_hypotheses",
+                    "discriminating_check",
+                    "bounded_next_action"
+                  ],
+                  "runtime_action": "REVISE_ARTIFACT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "independent_gate_failed",
+                  "tier": "deep"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "causal_repair_adequacy",
+                "reason": "A diagnostic checklist is not a successful discriminating probe or verified causal repair.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "failed-gate/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "REPORT_GATE_RECEIPT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "STOP",
+                  "reason": "independent_gate_passed",
+                  "tier": null
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "causal_repair_adequacy",
+                "reason": "A diagnostic checklist is not a successful discriminating probe or verified causal repair.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "stale-recipe/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "HOLD",
+                  "reason": "stale_context",
+                  "tier": null
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "recipe_freshness",
+                "reason": "The route stale-context test is not recipe semantic version compatibility or actual selective recall.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "stale-recipe/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "recipe_freshness",
+                "reason": "The route stale-context test is not recipe semantic version compatibility or actual selective recall.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "missing-tool/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "missing_tool_recovery",
+                "reason": "A missing model-pair projection does not demonstrate unavailable MCP handling or a valid data substitute.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "missing-tool/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "HOLD",
+                  "reason": "model_unavailable",
+                  "tier": null
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "missing_tool_recovery",
+                "reason": "A missing model-pair projection does not demonstrate unavailable MCP handling or a valid data substitute.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "harmful-delegation/control",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "DIRECT"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "HOLD",
+                  "reason": "route_disabled",
+                  "tier": null
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          },
+          {
+            "domain_outcome": "NOT_RUN",
+            "id": "harmful-delegation/changed",
+            "supported_projections": [
+              {
+                "checked_expected": {
+                  "diagnosis_checks": null,
+                  "runtime_action": "PLAN"
+                },
+                "native_method_selection": "NOT_RUN",
+                "status": "PASS",
+                "surface": "method_control.decide"
+              },
+              {
+                "fixture_only": true,
+                "native_dispatch": "NOT_RUN",
+                "observed": {
+                  "decision": "DISPATCH",
+                  "reason": "task_selected_start",
+                  "tier": "standard"
+                },
+                "status": "PASS",
+                "surface": "routing.next_decision"
+              }
+            ],
+            "unsupported": [
+              {
+                "check": "semantic_skill_selection",
+                "reason": "No runtime semantic skill fitness/selection oracle is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "semantic_mcp_selection",
+                "reason": "No actual MCP discovery, permission or tool-selection adapter is exercised.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "worker_ownership_and_count",
+                "reason": "Method dependency advice does not enforce ownership, capacity, privacy or beneficial worker count.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "native_adoption",
+                "reason": "No native model/worker was run or observed choosing these actions.",
+                "status": "NOT_RUN"
+              },
+              {
+                "check": "efficiency",
+                "reason": "No unchanged-baseline/held-out/complete-total-token comparison was run.",
+                "status": "NOT_RUN"
+              }
+            ]
+          }
+        ],
+        "scenarios": 8,
+        "schema": "harness.selection-replay/v1",
+        "source_sha256": {
+          "content/routing.toml": "fb6ecb669c9be773859d7c691252e139735ffa0ce5ce06a5ace8628501d925c7",
+          "docs/v2/methodology/replay_cases.py": "bf2fd2f36bc56c7495bfbd7eb9c6e37c1fe91b34cfea86e1e7734081cb5768cd",
+          "docs/v2/methodology/replay_selection_cases.py": "e302611f9c63c782299bde3cc9d9333ebdcee1f5542808461676148796026249",
+          "src/agent_harness/launch.py": "bfc38c1ff54171e2312c239bc9e8eb1f1f74d134bc07def685f4c864db170810",
+          "src/agent_harness/method_control.py": "f3cc51acd4ee3f4f1fbcf7ed139c5ea87e0c432078e0ad15c54f0208343fe93b",
+          "src/agent_harness/routing.py": "bcfaa62456454a10c54e5a77505996b08d0859f07a60fe9cb01a06d8a36c8ff3"
+        },
+        "status": "NOT_RUN",
+        "supported_projections": 34,
+        "variants": 16
+      }
+    }
+  ]
+}

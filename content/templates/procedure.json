@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "title": "Replace with the repeatable method name",
+  "trigger": "Replace with the narrow task condition where this method helps",
+  "steps": ["Replace with a concrete evidence-backed action and its check"],
+  "exceptions": ["Name a nearby task where this method must not apply"],
+  "episodes": [
+    {"task_id": "episode-one", "path": "evidence/one-result.txt", "task_path": "evidence/one-task.txt"},
+    {"task_id": "episode-two", "path": "evidence/two-result.txt", "task_path": "evidence/two-task.txt"}
+  ]
+}

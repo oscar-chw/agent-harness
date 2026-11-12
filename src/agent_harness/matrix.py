@@ -9,7 +9,7 @@ from typing import Dict
 
 FEATURES = ["guard", "plan", "memory", "review", "run", "discover", "capture", "improve"]
 
-NO_HOOK = "no: the harness installs no hook in %s (Claude Code's PreToolUse/Stop hooks are the only ones wired)"
+NO_HOOK = "no: the harness installs no hook in %s"
 TERMINAL = "no: run `harness %s` in a terminal; it drives Claude Code or Codex, not %s"
 
 _NOTES = {
@@ -18,6 +18,7 @@ _NOTES = {
     "cursor": {"guard": NO_HOOK % "Cursor", "capture": NO_HOOK % "Cursor",
                "review": TERMINAL % ("review", "Cursor"), "run": TERMINAL % ("run", "Cursor"),
                "discover": "no: Open VSX results install with `code`; Cursor's own CLI is not wired yet"},
+    "kimi": {},
     "gemini": {"guard": NO_HOOK % "Gemini CLI", "capture": NO_HOOK % "Gemini CLI",
                "review": TERMINAL % ("review", "Gemini CLI"), "run": TERMINAL % ("run", "Gemini CLI"),
                "discover": "no: Gemini extensions are not searched yet"},

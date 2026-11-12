@@ -2,7 +2,9 @@
 import ast
 import re
 import sys
+import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,7 +13,9 @@ PROFILES = ROOT / "profiles"
 
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
 IPV4 = re.compile(r"(?<![\w.])(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?![\w.])")
-URL_HOST = re.compile(r"https?://([^/\s:'\")\]>]+)", re.I)
+# Recognize an authority token, not a source expression such as https://[^)\s]+.
+# Keep bracketed IPv6 and single-label/private hosts in the scanner's coverage.
+URL_HOST = re.compile(r"https?://(\[[\w:.%~-]+\]|[\w.%~-]+)(?=[/:?#\s'\"()\]>]|$)", re.I)
 PRIVATE_HOST = re.compile(
     r"^(localhost|[^.]+|.*\.(local|lan|internal|intranet|corp|home|localdomain|test)"
     r"|\d{1,3}(\.\d{1,3}){3}|\[.*\])$", re.I)
@@ -141,6 +145,20 @@ class TestProfile(unittest.TestCase):
 
 
 class TestNoPrivateData(unittest.TestCase):
+    def _assert_no_private_data(self, text, rel):
+        """Keep per-file assertions independent of the runner's subTest handling."""
+        self.assertIsNone(EMAIL.search(text), "email in %s" % rel)
+        self.assertIsNone(IPV4.search(text), "IP address in %s" % rel)
+        for host in URL_HOST.findall(text):
+            self.assertIsNone(PRIVATE_HOST.match(host), "private host %s in %s" % (host, rel))
+
+    def test_url_tokens_distinguish_real_hosts_from_a_source_regex(self):
+        self.assertIsNone(URL_HOST.search("re.findall(r'https://[^)\\s]+', text)"))
+        for url, expected in (("https://github.com/x", "github.com"),
+                              ("http://" + "localhost:8080/x", "localhost"),
+                              ("http://[" + "::1]/x", "[::1]")):
+            self.assertEqual(URL_HOST.search(url).group(1), expected)
+
     def test_patterns_catch_the_planted_cases(self):
         # controls: each pattern must fire on what it is meant to catch
         self.assertTrue(EMAIL.search("mail someone@example.org now"))
@@ -154,6 +172,18 @@ class TestNoPrivateData(unittest.TestCase):
         self.assertFalse(PRIVATE_HOST.match(URL_HOST.search("https://github.com/x").group(1)))
         self.assertFalse(IPV4.search("version 1.2.3"))
 
+    def test_original_privacy_gate_still_rejects_a_real_private_url(self):
+        with tempfile.TemporaryDirectory(prefix="privacy-control-") as directory:
+            root = Path(directory)
+            page = root / "case.md"
+            with mock.patch(__name__ + ".ROOT", root), mock.patch(
+                    __name__ + ".shipped_files", return_value=[page] * 11):
+                page.write_text("re.findall(r'https://[^)\\s]+', text)")
+                self.test_no_email_ip_or_private_url()
+                page.write_text("http://" + "nas/api")
+                with self.assertRaisesRegex(AssertionError, "private host"):
+                    self._assert_no_private_data(page.read_text(encoding="utf-8"), page.relative_to(ROOT))
+
     def test_no_email_ip_or_private_url(self):
         files = list(shipped_files())
         self.assertGreater(len(files), 10)
@@ -161,10 +191,7 @@ class TestNoPrivateData(unittest.TestCase):
             text = p.read_text(encoding="utf-8", errors="replace")
             rel = p.relative_to(ROOT)
             with self.subTest(file=str(rel)):
-                self.assertIsNone(EMAIL.search(text), "email in %s" % rel)
-                self.assertIsNone(IPV4.search(text), "IP address in %s" % rel)
-                for host in URL_HOST.findall(text):
-                    self.assertIsNone(PRIVATE_HOST.match(host), "private host %s in %s" % (host, rel))
+                self._assert_no_private_data(text, rel)
 
 
 class TestPackaging(unittest.TestCase):

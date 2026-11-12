@@ -4,16 +4,18 @@ installed  the client's rules file exists and carries the harness rules
 loaded     the session itself records those rules (Codex logs them; Claude Code does not: NOT_OBSERVABLE)
 selected   skills the session was offered (Codex logs them; Claude Code: NOT_OBSERVABLE)
 invoked    skills, harness memory/knowledge tools, workers and checks the transcript shows being called
-verified   checks with their exit codes
+observed   checks with explicit reported exit codes; absent telemetry stays unknown
 Nothing is guessed: a signal the client does not record is NOT_OBSERVABLE. No message text is copied, only tool
 names, skill names and check commands (which can hold secrets in theory, so they are passed through redaction).
+An explicit tool-output exit header is a reported observation, not authenticated
+process telemetry or independent proof that a test's acceptance criteria are sound.
 """
 import hashlib
 import json
 import re
 from pathlib import Path
 
-from .capture import EXIT_LINE, is_check
+from .capture import is_check
 from .redact import redact
 
 NOT_OBSERVABLE = "NOT_OBSERVABLE"
@@ -21,6 +23,7 @@ MARK = "# Working rules"
 RULES = {"claude-code": ".claude/CLAUDE.md", "codex": ".codex/AGENTS.md"}
 SKILL_READ = re.compile(r"skills/([\w.-]+)/SKILL\.md")
 SKILL_LINE = re.compile(r"^- ([\w.:-]+): ", re.M)
+EXIT_HEADER = re.compile(r"\A[ \t\r\n]*Exit code (-?\d+)[ \t]*(?:\r?\n|\Z)")
 
 
 def _events(path):
@@ -43,14 +46,15 @@ def _rules_on_disk(client, home):
 
 
 def _check(cmd, out=None, is_error=False):
-    m = EXIT_LINE.search(out or "") if out is not None else None
-    if m:
-        code = int(m.group(1))
-    elif out is None:
-        code = NOT_OBSERVABLE
-    else:
-        code = 1 if is_error else 0
-    return {"command": redact(cmd)[:160], "exit": code}
+    m = EXIT_HEADER.search(out or "") if out is not None else None
+    code = int(m.group(1)) if m else NOT_OBSERVABLE
+    origin = "tool_output_header" if m else NOT_OBSERVABLE
+    # Tool delivery success is not a command's exit0. An error can also occur
+    # before any command ran, so never invent exit1 from an error flag either.
+    if is_error and code == 0:
+        code, origin = NOT_OBSERVABLE, "CONFLICTING_TOOL_RESULT"
+    return {"command": redact(cmd)[:160], "exit": code, "exit_evidence": origin,
+            "tool_status": ("error" if is_error else "non_error_result") if out is not None else NOT_OBSERVABLE}
 
 
 def _claude(events, r):
@@ -138,13 +142,15 @@ def _codex(events, r):
     r["tokens"] = usage or NOT_OBSERVABLE
 
 
-def explain(client, transcript, home):
+def explain(client, transcript, home, *, advisory_simulation=None):
     if client not in RULES:
         raise ValueError("client must be one of %s" % sorted(RULES))
     r = {"client": client, "transcript": str(transcript), "instructions": _rules_on_disk(client, home),
          "skills": {"available": [], "invoked": []}, "memory": [], "checks": [], "workers": [],
          "compactions": 0, "tokens": NOT_OBSERVABLE, "omissions": []}
     (_claude if client == "claude-code" else _codex)(_events(transcript), r)
+    if advisory_simulation is not None:
+        r["advisory_simulation"] = advisory_simulation.status()
     om = r["omissions"]
     if r["instructions"]["installed"] == "MISSING":
         om.append("rules file missing: %s" % r["instructions"]["path"])
@@ -160,6 +166,10 @@ def explain(client, transcript, home):
     if failed:
         om.append("%d of %d checks failed (last check exit %s)" % (len(failed), len(r["checks"]),
                                                                    r["checks"][-1]["exit"]))
+    uncertain_errors = [c for c in r["checks"] if c["exit"] == NOT_OBSERVABLE
+                        and c.get("tool_status") == "error"]
+    if uncertain_errors:
+        om.append("%d check tool error(s); exit code not observable" % len(uncertain_errors))
     return r
 
 
@@ -185,6 +195,10 @@ def render(r):
              "tokens    %s" % tok]
     if r["omissions"]:
         lines.append("omitted   " + "; ".join(r["omissions"]))
+    if "advisory_simulation" in r:
+        sim = r["advisory_simulation"]
+        lines.append("advisory  %s (synthetic only; native effective mode %s)" %
+                     (sim["mode"], sim["native_effective_mode"]))
     return "\n".join(lines)
 
 

@@ -1,0 +1,560 @@
+{
+  "schema": "harness.vault-acceptance-cases/v1",
+  "as_of": "2026-11-02",
+  "status": "PROPOSED_NOT_RUN",
+  "scope": "Authorized local project documents; metadata may name external sources but does not authorize their acquisition or unrelated project access. No private raw transcripts.",
+  "claim_boundary": "These authored expected answers are a specification, not independent grading, executed cold/native trials, or performance evidence.",
+  "run_contract": {
+    "consumer": "Fresh independent process/session with explicit same source visibility in each arm",
+    "oracle": "Root independently freezes task/answer criteria before candidate use; reject unsupported claims and invalid scope",
+    "arms": [
+      "current scoped lexical/exact",
+      "raw-source windows",
+      "semantic/reranking only after separate authorization",
+      "derived views plus source recovery as a separate arm"
+    ],
+    "metrics": [
+      "supported answers and citations",
+      "missing/false memories",
+      "correction/withdrawal/privacy failures",
+      "whole-task recovery",
+      "complete ingestion/maintenance/reader/worker/retry tokens",
+      "cold/warm latency and storage"
+    ],
+    "improvement_gate": "No per-case quality/scope/correction regression AND aggregate tokens no greater than baseline; count failed attempts and overhead.",
+    "absence_policy": "Missing response/support/usage is NOT_RUN or UNKNOWN, never PASS."
+  },
+  "cases": [
+    {
+      "case_id": "coverage-denominator",
+      "kind": "SOURCE_ANSWER",
+      "status": "NOT_RUN",
+      "question": "Have all of my retained 100-plus harness references been analyzed?",
+      "answer_requirements": [
+        "State 108 transferred identities/110 original variants and retain original incoming UNREAD_UNVERIFIED.",
+        "Report the defined 138-identity ledger snapshot and bounded additional-review scope.",
+        "Distinguish historical reported read depth from current reads: transfer has 98 uninspected, 7 snippets, 1 title, 1 metadata-only, 1 complete post text; no new primary reads.",
+        "No whole-corpus source-to-adoption/evaluation qualification."
+      ],
+      "must_not": [
+        "Claim all 108 are read, all unread now, or all 138 are the full historical corpus."
+      ],
+      "supporting_sources": [
+        {
+          "path": "docs/v2/vault/README.md",
+          "sha256": "3da6d0f058c6f30dad974fd612d5ef3f98040a3f8ed2c662e1f3735ae989424d",
+          "start_line": 7,
+          "end_line": 50
+        },
+        {
+          "path": "docs/v2/source-coverage-20261102.md",
+          "sha256": "297af857b7e23856af8f030de269534f34ce39891c82fe8f3caff081d79be9c8",
+          "start_line": 7,
+          "end_line": 15
+        }
+      ],
+      "external_source_ids": [],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "access-aggregate",
+      "kind": "SOURCE_ANSWER",
+      "status": "NOT_RUN",
+      "question": "Which exact fifteen inventory items were inaccessible?",
+      "answer_requirements": [
+        "The historical checkpoint reports 15 failed attempts without item IDs.",
+        "Do not infer current accessibility; source-specific prior reports may separately record failures.",
+        "Untouched sources are uninspected, not known inaccessible."
+      ],
+      "must_not": [
+        "Fabricate an item list or assign the aggregate to 15 arbitrary rows."
+      ],
+      "supporting_sources": [
+        {
+          "path": "docs/v11/STATUS.md",
+          "sha256": "ad5edf08265a309c5c9b2f377062e287ab84c1755c2d33cb8cfae8759bed3764",
+          "start_line": 74,
+          "end_line": 75
+        },
+        {
+          "path": "docs/v2/source-coverage-20261102.md",
+          "sha256": "297af857b7e23856af8f030de269534f34ce39891c82fe8f3caff081d79be9c8",
+          "start_line": 13,
+          "end_line": 14
+        }
+      ],
+      "external_source_ids": [],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "two-memory-tax-papers",
+      "kind": "SOURCE_ANSWER",
+      "status": "NOT_RUN",
+      "question": "Are Memory Tax and MemoryTax one paper, and do they prove that summaries should replace original sources?",
+      "answer_requirements": [
+        "Distinguish arXiv 2610.34073v1 from 2610.29823.",
+        "The former was reviewed selectively and motivates original-history recovery; the latter abstract-only review reports narrow sampling and caption confounds.",
+        "Neither proves a gain in this harness or justifies deleting originals."
+      ],
+      "must_not": [
+        "Conflate paper identities/read depths or claim local replication."
+      ],
+      "supporting_sources": [
+        {
+          "path": "docs/v2/reference-review-20261031.md",
+          "sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+          "start_line": 7,
+          "end_line": 22
+        },
+        {
+          "path": "docs/v2/reference-review-20261031.md",
+          "sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+          "start_line": 22,
+          "end_line": 55
+        }
+      ],
+      "external_source_ids": [
+        "url-sha256:9c9adb3441ad8a071d392fdbfebd809bc40a5888b0c3dacb35adebcebc80b504",
+        "url-sha256:596d6f51d5290efd67b23aa6b3b79cd8dd530b948d50d5a4fac49eb8bf7423a1"
+      ],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "raw-rag-transfer",
+      "kind": "SOURCE_ANSWER",
+      "status": "NOT_RUN",
+      "question": "Can the RAW-RAG results certify that our local engineering assistant is better?",
+      "answer_requirements": [
+        "Reported results concern offline conversational tasks.",
+        "Selected method/limitations were historically read; no matched local engineering/operations improvement follows.",
+        "Compare against current scoped retrieval on frozen tasks, same reader/source visibility and complete usage."
+      ],
+      "must_not": [
+        "Treat paper ranking or a source map as local adoption/efficacy."
+      ],
+      "supporting_sources": [
+        {
+          "path": "docs/v1/source-evidence-graph.md",
+          "sha256": "92124d3ceedf2a9f0e3ad3c0cbff06e4390aa6d2e2f51bd7203d576559101ea3",
+          "start_line": 11,
+          "end_line": 12
+        },
+        {
+          "path": "docs/v2/second-brain-contract.md",
+          "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+          "start_line": 176,
+          "end_line": 191
+        }
+      ],
+      "external_source_ids": [
+        "url-sha256:52cd138f10900554a92f8e8fad15c54ba50e9bb54454c235b11e9cc9e98a48b0"
+      ],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "current-search-capability",
+      "kind": "SOURCE_ANSWER",
+      "status": "NOT_RUN",
+      "question": "Does the vault already use embeddings and graph traversal to search every retained link?",
+      "answer_requirements": [
+        "Current KB/shared retrieval is lexical/BM25 and FTS5; the shared-document pilot has explicit IDs, max 100 notes/4 MiB.",
+        "Ledger URL count is not ingested searchable source content.",
+        "Semantic/reranker and whole-corpus operational graph comparisons remain missing."
+      ],
+      "must_not": [
+        "Invent an installed embedding service or interpret FTS5 as dense retrieval."
+      ],
+      "supporting_sources": [
+        {
+          "path": "src/agent_harness/vault_retrieval.py",
+          "sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+          "start_line": 26,
+          "end_line": 43
+        },
+        {
+          "path": "docs/v2/knowledge-foundation-audit-20261031.md",
+          "sha256": "15d114229487b4bc6e4a44b40254c4e3576cd3ae5fdee1176c7cefca8d95d57e",
+          "start_line": 48,
+          "end_line": 67
+        }
+      ],
+      "external_source_ids": [],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "citation-does-not-entail",
+      "kind": "SOURCE_ANSWER",
+      "status": "NOT_RUN",
+      "question": "If a source receipt contains port 8081, can a paraphrase or a claim that the port is 9999 be verified just because it cites that receipt?",
+      "answer_requirements": [
+        "A byte-bound citation proves provenance, not arbitrary semantic support.",
+        "ProjectMemory preserves an exact entire cited assertion as verified but marks non-exact purportedly verified claims pending.",
+        "Pending claims are excluded from normal search/recovery; independent semantic checking is missing."
+      ],
+      "must_not": [
+        "Claim a valid receipt verifies a contradictory claim or arbitrary paraphrase."
+      ],
+      "supporting_sources": [
+        {
+          "path": "src/agent_harness/project_memory.py",
+          "sha256": "0ffe43618c880e1788173d10a88963c68ec7039a732b972aa72bd15b8c61e8c0",
+          "start_line": 145,
+          "end_line": 163
+        },
+        {
+          "path": "tests/test_project_memory_claim_support.py",
+          "sha256": "11826f7e791738a3b24ca98183eae0055236a00a362022ae274cce3f9504ce88",
+          "start_line": 61,
+          "end_line": 91
+        }
+      ],
+      "external_source_ids": [],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "real-source-claim-control",
+      "kind": "SOURCE_ANSWER",
+      "status": "NOT_RUN",
+      "question": "Did the Linux Foundation announcement say Alibaba contributed OpenEnv, or prove a 30 percent coding gain?",
+      "answer_requirements": [
+        "Historical smoke check supports Alibaba/OpenSandbox.",
+        "It contradicts Alibaba/OpenEnv and attributes OpenEnv to Hugging Face.",
+        "It does not support a 30 percent coding improvement; keep reported date and lack of fresh revalidation explicit."
+      ],
+      "must_not": [
+        "Conflate source accessibility with support or repeat unsupported numbers."
+      ],
+      "supporting_sources": [
+        {
+          "path": "docs/v1/source-check-workflow.md",
+          "sha256": "5c2ecd957f34cf259acbfa8f2fbf5f2530b14d1a384cd6e300d477fbe86b3ba0",
+          "start_line": 23,
+          "end_line": 39
+        }
+      ],
+      "external_source_ids": [
+        "url-sha256:051cca8ebb343c6f08034720c4846d0e289995b141435dab0ddd735a634ced03"
+      ],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "correction-recovery",
+      "kind": "CORRECTION_REPLAY",
+      "status": "NOT_RUN",
+      "question": "A saved decision changes from port 8081 to 8082. In a fresh consumer, what happens to earlier advice and unrelated work?",
+      "answer_requirements": [
+        "Current advice must use the new revision; retain old receipts only as explicit history.",
+        "Dependent work needs reacceptance; unaffected branch evidence can remain current.",
+        "A valid citation does not let a wrong output pass the original gate."
+      ],
+      "must_not": [
+        "Delete old evidence, reuse superseded advice as current, or rerun unrelated branches without cause."
+      ],
+      "supporting_sources": [
+        {
+          "path": "src/agent_harness/vault_sources.py",
+          "sha256": "b2f2be00e99ffe23e144cf3955b1c4013ddead6ef9577a8200d8fdbb70aace98",
+          "start_line": 263,
+          "end_line": 300
+        },
+        {
+          "path": "tests/test_vault_workflow.py",
+          "sha256": "92a9ed6d2dff103f91d9e48199d2e227d7bf9f13c7ceaa1062a981c643a897be",
+          "start_line": 122,
+          "end_line": 165
+        }
+      ],
+      "external_source_ids": [],
+      "setup": "Root creates a disposable copy/fixture; capture the old decision, accept dependent and independent branches, revise source/record, start a fresh consumer, and retain original/final receipts. Do not edit installed/native sources.",
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "withdrawal-is-terminal",
+      "kind": "SOURCE_ANSWER",
+      "status": "NOT_RUN",
+      "question": "An earlier record was withdrawn. Does asking for historical evidence grant permission to use it as current advice again?",
+      "answer_requirements": [
+        "Historical evidence can remain inspectable under explicit scope.",
+        "Withdrawal is terminal for that record identity; new grant requires new evidence/identity.",
+        "Current recall must refuse withdrawn advice."
+      ],
+      "must_not": [
+        "Resurrect a withdrawn record through an old receipt or historical flag."
+      ],
+      "supporting_sources": [
+        {
+          "path": "src/agent_harness/project_memory.py",
+          "sha256": "0ffe43618c880e1788173d10a88963c68ec7039a732b972aa72bd15b8c61e8c0",
+          "start_line": 170,
+          "end_line": 172
+        },
+        {
+          "path": "src/agent_harness/project_memory.py",
+          "sha256": "0ffe43618c880e1788173d10a88963c68ec7039a732b972aa72bd15b8c61e8c0",
+          "start_line": 197,
+          "end_line": 210
+        }
+      ],
+      "external_source_ids": [],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "cross-project-exclusion",
+      "kind": "SCOPE_CONTROL",
+      "status": "NOT_RUN",
+      "question": "A similarly named page in another project has a better lexical match. Can it influence this project query?",
+      "answer_requirements": [
+        "Use only selected project/configured roots and allowed IDs/sensitivities before scoring.",
+        "Foreign cache must not influence ranking or supply answer text.",
+        "Inventory items 19/20/104 are retained cross-project leads, not access/adoption authority."
+      ],
+      "must_not": [
+        "Read unrelated private documents or broaden roots based on a ledger pointer."
+      ],
+      "supporting_sources": [
+        {
+          "path": "src/agent_harness/vault_retrieval.py",
+          "sha256": "478bf8a4c1ac3a4db727de9b5610f9851b310d7687563377756961656b2792c5",
+          "start_line": 67,
+          "end_line": 83
+        },
+        {
+          "path": "tests/test_kb_scope.py",
+          "sha256": "b9b6231e2fe4e383d5f7006d68b26b61fdf367dbde8c936043e2b420a84558cc",
+          "start_line": 8,
+          "end_line": 34
+        },
+        {
+          "path": "docs/v2/vault/README.md",
+          "sha256": "3da6d0f058c6f30dad974fd612d5ef3f98040a3f8ed2c662e1f3735ae989424d",
+          "start_line": 106,
+          "end_line": 129
+        }
+      ],
+      "external_source_ids": [],
+      "setup": "Root uses disposable authorized/forbidden fixtures with distinct canaries; run both lexical and FTS5 with the same explicit scope. No real private transcript access.",
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "revoked-access",
+      "kind": "SCOPE_CONTROL",
+      "status": "NOT_RUN",
+      "question": "A source was readable before but its permission is revoked. May the cached excerpt still answer the next fresh query?",
+      "answer_requirements": [
+        "Cache cannot grant access after revocation.",
+        "Refuse/omit forbidden content visibly; retain error versus no-match distinction.",
+        "No cache purge or root expansion to fake the result."
+      ],
+      "must_not": [
+        "Return revoked content from cache."
+      ],
+      "supporting_sources": [
+        {
+          "path": "tests/test_retrieval_canaries.py",
+          "sha256": "a22f5626356a34eba5413daf07833a8c850640d0737ae311bdcd8d6a7ceb9dd5",
+          "start_line": 74,
+          "end_line": 89
+        },
+        {
+          "path": "src/agent_harness/mcp/kb.py",
+          "sha256": "41a0d48778027f2fde60f8017bac9cef490a0e9952977b30ef06dbf4599afcb9",
+          "start_line": 504,
+          "end_line": 509
+        }
+      ],
+      "external_source_ids": [],
+      "setup": "Root uses a disposable source, warms the cache, revokes source permission, then launches a fresh consumer. If execution can still read chmod-0, report NOT_VERIFIED rather than claim privacy pass.",
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "unread-lead",
+      "kind": "SOURCE_ANSWER",
+      "status": "NOT_RUN",
+      "question": "What method does the unread beamnxw source recommend, and is it adopted?",
+      "answer_requirements": [
+        "No verified primary content is present in the selected source map.",
+        "Return an uninspected lead and missing read/support/adoption evidence."
+      ],
+      "must_not": [
+        "Invent source content from account/title or turn a pointer into a read."
+      ],
+      "supporting_sources": [
+        {
+          "path": "docs/v1/source-evidence-graph.md",
+          "sha256": "92124d3ceedf2a9f0e3ad3c0cbff06e4390aa6d2e2f51bd7203d576559101ea3",
+          "start_line": 20,
+          "end_line": 21
+        }
+      ],
+      "external_source_ids": [
+        "url-sha256:cb3fed7e48b104e54a83d652500a6051e012a605f0b110b51b9a2656c1e09dfe"
+      ],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "learning-boundary",
+      "kind": "SOURCE_ANSWER",
+      "status": "NOT_RUN",
+      "question": "Does repeated weekly intake or a green binder receipt automatically teach the harness an active skill?",
+      "answer_requirements": [
+        "Weekly intake creates candidate signals; count/hash do not prove independent successful episodes or actor identity.",
+        "Local binder remains HOLD_UNVERIFIED_BOUNDARY; procedures.change refuses promotion.",
+        "Need lawful scoped distinct-input experience, trusted isolation/provenance, independent frozen grading, held-out quality and complete usage, authorized activation/rollback."
+      ],
+      "must_not": [
+        "Claim automatic improvement/promotion or use caller-written scores to bypass the hold."
+      ],
+      "supporting_sources": [
+        {
+          "path": "docs/v1/weekly-learning-intake.md",
+          "sha256": "df65811dc4bc5ef2cefc86e1f087066dfd1d265d130dfd418e718fe1d786e2bf",
+          "start_line": 44,
+          "end_line": 59
+        },
+        {
+          "path": "src/agent_harness/procedures.py",
+          "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+          "start_line": 413,
+          "end_line": 440
+        },
+        {
+          "path": "src/agent_harness/procedures.py",
+          "sha256": "92dcd86e8fba02bc445a31ef338362fca4c43f77c73bd1ed7a690bb6d87ac6e1",
+          "start_line": 369,
+          "end_line": 409
+        }
+      ],
+      "external_source_ids": [],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "cold-version-device-state",
+      "kind": "SOURCE_ANSWER",
+      "status": "NOT_RUN",
+      "question": "A cold session sees local dev2 files. Does this establish that every open client and the MacBook Air now runs dev2?",
+      "answer_requirements": [
+        "The retained handoff reports local dev2 installed/readback, not current all-client state.",
+        "Already open clients may need fresh/reconnected processes; file installation does not rewrite loaded context.",
+        "MacBook Air dev2 catch-up remains NOT_VERIFIED in the retained packet; historical r3 is not dev2 parity."
+      ],
+      "must_not": [
+        "Claim continuous synchronization, all-device parity or new installed readback from this ledger."
+      ],
+      "supporting_sources": [
+        {
+          "path": "handoffs/v2-increments/local-20261102.md",
+          "sha256": "cf424104e11f54004bc110cab87194707ff4d1220ceef6c55211afc919844068",
+          "start_line": 60,
+          "end_line": 84
+        }
+      ],
+      "external_source_ids": [],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "paraphrased-source-recovery",
+      "kind": "PARAPHRASE_CHALLENGE",
+      "status": "NOT_RUN",
+      "question": "If a derived wiki forgets a condition or a relation, how can I recover the evidence without assuming the summary is true?",
+      "answer_requirements": [
+        "Reach the authorized original through source spans/revisions; derived notes are views.",
+        "Current exact/lexical retrieval may miss paraphrases; report a miss honestly and evaluate bounded semantic/reranking only against frozen same-scope cases.",
+        "Do not reread every private conversation or delete originals for compactness."
+      ],
+      "must_not": [
+        "Claim an unimplemented semantic route or universal summary accuracy."
+      ],
+      "supporting_sources": [
+        {
+          "path": "docs/v2/second-brain-contract.md",
+          "sha256": "c15578b287bfa1a0bd4a9e4487322aefd4bd588de453e80a350c206a6a5f189e",
+          "start_line": 152,
+          "end_line": 199
+        },
+        {
+          "path": "docs/v2/reference-review-20261031.md",
+          "sha256": "f6d3c5f0672e0508aafff53b76f3eb0637504a572ab5c24e5512d804c4a13756",
+          "start_line": 55,
+          "end_line": 77
+        }
+      ],
+      "external_source_ids": [],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    },
+    {
+      "case_id": "cold-task-pickup",
+      "kind": "COLD_HANDOFF",
+      "status": "NOT_RUN",
+      "question": "After losing chat context, where does the next authorized worker find live scope and pending work?",
+      "answer_requirements": [
+        "Read handoffs/v2-completion/README.md, own packet, sessions.json and plan/v2-completion.md; use plan context for assigned node.",
+        "Root owns integration/gates; packets and quiet sessions do not prove completion.",
+        "Only owned scope; no routine peer messages, activation, native changes or duplicate polling."
+      ],
+      "must_not": [
+        "Treat a source hit/handoff assertion as authority to close a gate or activate another worker."
+      ],
+      "supporting_sources": [
+        {
+          "path": "handoffs/v2-completion/README.md",
+          "sha256": "85eb8e73a2617075413649d5554b5c3be6a3bea10c69310f62f2493293270c07",
+          "start_line": 7,
+          "end_line": 26
+        },
+        {
+          "path": "plan/v2-completion.md",
+          "sha256": "e2a70de05270e2089c1bf20509d500a8dc3300a24f82d51a6151245758f7cf15",
+          "start_line": 1,
+          "end_line": 24
+        }
+      ],
+      "external_source_ids": [],
+      "setup": null,
+      "independent_oracle_frozen": false,
+      "response_receipt": null,
+      "usage_receipt": null
+    }
+  ]
+}

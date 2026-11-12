@@ -6,8 +6,11 @@ Nothing but protocol messages is ever written to stdout; diagnostics go to stder
 from __future__ import annotations
 
 import datetime
+import hashlib
 import json
+import marshal
 import os
+import re
 import sys
 import time
 import traceback
@@ -22,6 +25,7 @@ if __package__ in (None, ""):  # executed as a script: make `agent_harness` impo
     from agent_harness.mcp.memory import Memory  # type: ignore
     from agent_harness.mcp import sessions, skills  # type: ignore
     from agent_harness.mcp.state import State  # type: ignore
+    from agent_harness.operational_state import OperationalState, dispatch as op_dispatch  # type: ignore
     from agent_harness.workgraph import tool as workgraph_tool  # type: ignore
 else:
     from .. import __version__
@@ -30,16 +34,19 @@ else:
     from .memory import Memory
     from . import sessions, skills
     from .state import State
+    from ..operational_state import OperationalState, dispatch as op_dispatch
     from ..workgraph import tool as workgraph_tool
 
 PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
 LATEST = PROTOCOL_VERSIONS[0]
 SERVER_INFO = {"name": "harness", "version": __version__}
 INSTRUCTIONS = (
-    "Knowledge: pick a section id from the Knowledge index in your rules and kb_get it (kb_get <page> "
-    "lists a page's sections); kb_search only when nothing there fits. Memory: mem_search before answering "
-    "about the user's own setup or past decisions; mem_add when told to remember something."
+    "Knowledge: kb_get indexed page#section; kb_search when none fits. "
+    "Memory: mem_search for prior setup/decisions; mem_add user-requested facts. "
+    "Shared board: op_state status before material work, checkpoint milestones and next actions, "
+    "read changes at task boundaries."
 )
+
 # HARNESS_HOME/notices.json = {"notices": ["one line", ...]}: written by whatever installed the harness
 # (an organisation's own wrapper, e.g. "AI tools update available (v0.1.0 -> v0.2.0): run `acme ai update`"),
 # read here, never fetched. The first pending line joins the instructions of the first session of the
@@ -103,69 +110,74 @@ def _s(**props) -> dict:
 
 TOOLS = [
     {"name": "kb_search",
-     "description": "Search the knowledge base (section ids, snippets, bytes), only when the Knowledge index in "
-                    "your rules has no fitting id; then kb_get the ids you need.",
+     "description": "Search KB when its index has no fitting section; kb_get selected ids.",
      "inputSchema": _s(query={"type": "string", "_req": True}, k={"type": "integer", "default": 5},
-                       min_score={"type": "number", "description": "0..1; weaker matches are dropped"})},
+                       min_score={"type": "number"})},
     {"name": "kb_get",
-     "description": "Fetch ONE section by id (<page>#<slug>). A page name alone returns its section ids.",
+     "description": "Read page#section; a page alone lists section ids.",
      "inputSchema": _s(id={"type": "string", "_req": True},
                        max_bytes={"type": "integer", "default": 8000})},
     {"name": "kb_toc",
-     "description": "Headings tree (ids, titles, bytes) of one page; with no path, the list of pages.",
+     "description": "List page sections, or pages without path.",
      "inputSchema": _s(path={"type": "string", "default": ""})},
     {"name": "mem_add",
-     "description": "Remember one short durable fact the user stated (near-duplicates are merged).",
+     "description": "Save a user-stated fact (near-duplicates merge).",
      "inputSchema": _s(text={"type": "string", "_req": True},
                        tags={"type": "array", "items": {"type": "string"}, "default": []},
                        scope={"type": "string", "enum": ["user", "project"], "default": "user"},
+                       project={"type": "string"},
                        pin={"type": "boolean", "default": False,
-                            "description": "only when the user explicitly asks: shown at every session start"})},
+                            "description": "Explicit user request only; injected at startup"})},
     {"name": "mem_search",
-     "description": "Find remembered facts about the user's own setup, folders, preferences or past decisions.",
+     "description": "Find facts; project is an absolute directory.",
      "inputSchema": _s(query={"type": "string", "_req": True}, k={"type": "integer", "default": 5},
-                       min_score={"type": "number"})},
+                       min_score={"type": "number"},
+                       project={"type": "string"})},
     {"name": "mem_forget",
-     "description": "Forget a remembered fact or lesson by id when it is wrong or stale (archived, not deleted).",
-     "inputSchema": _s(id={"type": "string", "_req": True})},
+     "description": "Archive a scoped fact/lesson by id.",
+     "inputSchema": _s(id={"type": "string", "_req": True},
+                       project={"type": "string"})},
     {"name": "lesson_add",
-     "description": "After a check failed and then passed, or the user corrected you: the mistake, the fix, "
-                    "and when to recall it.",
+     "description": "Save a verified fail-to-pass fix or user correction.",
      "inputSchema": _s(mistake={"type": "string", "_req": True}, fix={"type": "string", "_req": True},
                        trigger={"type": "string", "_req": True})},
     {"name": "lesson_search",
-     "description": "Past lessons that match a risky step you are about to take.",
+     "description": "Find lessons for the current step.",
      "inputSchema": _s(query={"type": "string", "_req": True}, k={"type": "integer", "default": 3},
-                       min_score={"type": "number"})},
+                       min_score={"type": "number"}, project={"type": "string"})},
     {"name": "state_save",
-     "description": "Save unfinished multi-step work (<=4096 bytes, replaces the last save): goal, stage, "
-                    "decisions, next, key files.",
+     "description": "Save goal, stage, decisions and next steps (4096 bytes).",
      "inputSchema": _s(text={"type": "string", "_req": True}, project={"type": "string", "default": ""})},
     {"name": "state_load",
-     "description": "Read this project's saved working state (after a compaction, or to resume work).",
+     "description": "Recover saved project work after resume/compaction.",
      "inputSchema": _s(project={"type": "string", "default": ""})},
+    {"name": "op_state",
+     "description": "Shared task board. Read status; checkpoint milestones. Graph gates prove done.",
+     "inputSchema": _s(action={"type": "string", "enum": ["status", "checkpoint", "stop", "resume", "evidence", "snapshot", "changes", "put", "claim", "renew", "release", "withdraw"], "_req": True},
+                       task={"type": "string"}, expected={"type": "integer"}, request_id={"type": "string"},
+                       value={"type": "object"}, reason={"type": "string"}, memory_receipt={"type": "object"},
+                       token={"type": "string"}, fence={"type": "integer"}, ttl={"type": "integer"},
+                       cursor={"type": "integer"}, limit={"type": "integer"})},
     {"name": "session_note",
-     "description": "Only when files changed: one line (<=300 chars) on what was done and what is next.",
+     "description": "Checkpoint changes and next action (300 chars).",
      "inputSchema": _s(summary={"type": "string", "_req": True})},
     {"name": "session_recent",
-     "description": "The last k session notes for this project.",
+     "description": "Recent project checkpoints.",
      "inputSchema": _s(k={"type": "integer", "default": 5})},
     {"name": "session_search",
-     "description": "Search the user's past conversations (Claude Code, Codex) for what was said or decided "
-                    "earlier: dated excerpts.",
+     "description": "Search past conversations for dated decisions.",
      "inputSchema": _s(query={"type": "string", "_req": True}, k={"type": "integer", "default": 5},
-                       session={"type": "string", "description": "only this session id (prefix)"})},
+                       session={"type": "string", "description": "only this session id (prefix)"},
+                       project={"type": "string"})},
     {"name": "skill_manage",
-     "description": "Learned methods. create one when finding the working method took several tool calls, or the "
-                    "user corrected how; body: ## When to Use, ## Procedure, ## Pitfalls, ## Verification. "
-                    "update (body, or old -> new); list, view, archive.",
-     "inputSchema": _s(action={"type": "string", "enum": ["create", "update", "list", "view", "archive"],
+     "description": "Draft/correct sourced methods. Evaluation gates adoption.",
+     "inputSchema": _s(action={"type": "string", "enum": ["draft", "correct", "create", "update", "list", "view", "archive"],
                                "_req": True},
-                       name={"type": "string"}, description={"type": "string"}, body={"type": "string"},
-                       old={"type": "string"}, new={"type": "string"})},
+                       name={"type": "string"}, project={"type": "string"},
+                       candidate={"type": "object", "description": "schema=1,title,trigger,steps,exceptions,"
+                                  "episodes[{task_id,path,sha256,task_path,task_sha256}]"})},
     {"name": "plan",
-     "description": "Multi-step work as plan/<slug>.md: a node is done only when its gate exits 0. args: "
-                    "new <slug> \"<goal>\" | ready | context <slug> <id> | gate <slug> <id> | status | resume.",
+     "description": "Goal graph. Commands: new SLUG GOAL; ready SLUG; context SLUG ID; gate SLUG ID; status SLUG. Gate exit 0 proves done.",
      "inputSchema": _s(args={"type": "string", "_req": True}, project={"type": "string", "default": ""})},
     {"name": "run_checks",
      "description": "Run this project's own tests/checks (found automatically, or cmd) and return only the "
@@ -184,17 +196,70 @@ class Server:
     def __init__(self, home=None, kb_paths=None, fts: Optional[bool] = None):
         self._home, self._kb_paths, self._fts = home, kb_paths, fts
         self._kb: Optional[KB] = None
+        self._kb_selection = None
+        # Disk overlays do not update an already-imported server. Identify these
+        # loaded methods, not today's file bytes or a claimed package release.
+        methods = (KB.__init__, KB._walk, KB.refresh, KB.get, KB.search, KB.toc,
+                   Server.call_tool)
+        self._kb_code_identity = hashlib.sha256(
+            marshal.dumps(tuple(method.__code__ for method in methods))).hexdigest()
         self._mem: Optional[Memory] = None
         self._state: Optional[State] = None
         self._sessions = None
         self._skills = None
         self._started = time.time()   # sessions that began after this are the one asking: not a past conversation
+        self._board = None
+        self._op_cwd = Path.cwd()       # one MCP session cannot change project scope mid-connection
+
+    def board_context(self):
+        if checks.disabled("op_state"):
+            return ""
+        try:
+            if self._board is None:
+                from agent_harness.shared_board import SharedBoard
+                self._board = SharedBoard(self._home, self._op_cwd)
+            return self._board.context()
+        except (OSError, ValueError, TypeError):
+            return "Shared board unavailable; inspect the project checkpoint before continuing."
+
+    def board_publish(self, name, args, result):
+        if name not in ("session_note", "state_save") or checks.disabled("op_state"):
+            return ""
+        from agent_harness.mcp.state import project_root
+        actual = result.get("project") if isinstance(result, dict) else None
+        actual = actual or self.state._root(args.get("project", "") or "")
+        if project_root(actual) != project_root(self._op_cwd):
+            return ""
+        try:
+            if self._board is None:
+                from agent_harness.shared_board import SharedBoard
+                self._board = SharedBoard(self._home, self._op_cwd)
+            self._board.publish(args.get("summary", args.get("text", "")))
+        except (OSError, ValueError, TypeError):
+            return "Shared board checkpoint unavailable; saved source checkpoint remains authoritative."
+        return ""
 
     @property
     def kb(self) -> KB:
         if self._kb is None:
+            self._kb_selection = ("paths" if self._kb_paths is not None else
+                                  "environment" if os.environ.get("HARNESS_KB_PATHS") else "default")
             self._kb = KB(home=self._home, paths=self._kb_paths, fts=self._fts)
         return self._kb
+
+    def _kb_diagnostics(self) -> dict:
+        """Observed reader state only; no scan, bodies, paths or new authority.
+
+        The Python-specific digest covers selected loaded methods, not the whole
+        package/configuration. A missing digest from an older client proves no cause.
+        """
+        result = {"initialized": self._kb is not None,
+                  "loaded_code_sha256": self._kb_code_identity,
+                  "selection": self._kb_selection}
+        if self._kb is not None:
+            result.update(root_count=len(self._kb.roots), live_profile=self._kb._live_profile,
+                          home_identity=hashlib.sha256(str(self._kb.home).encode()).hexdigest())
+        return result
 
     @property
     def mem(self) -> Memory:
@@ -220,43 +285,86 @@ class Server:
             self._skills = skills.Skills(home=self._home)
         return self._skills
 
+    def memory_call(self, method: str, args: Dict[str, Any], *values) -> Any:
+        """An explicit caller project must not inherit the server's launch directory.
+
+        Keep the selection local to this call: changing the cached Memory object
+        would leak it into later calls that omit project. This is a retrieval
+        scope for one local user, not a cross-user authorization boundary.
+        """
+        if "project" not in args:
+            return getattr(self.mem, method)(*values)
+        project = args["project"]
+        if not isinstance(project, str):
+            raise ValueError("project must be an absolute existing directory")
+        path = Path(project).expanduser()
+        if not path.is_absolute() or not path.is_dir():
+            raise ValueError("project must be an absolute existing directory")
+        memory = Memory(home=self._home, fts=self._fts, project=path)
+        try:
+            return getattr(memory, method)(*values)
+        finally:
+            memory.close()
+
     def skill_manage(self, a: Dict[str, Any]) -> Any:
         act, name = a.get("action"), (a.get("name") or "").strip()
+        from agent_harness import procedures
+        home = harness_home(self._home)
+        if act == "draft":
+            return procedures.draft(home, a.get("project"), a.get("candidate"))
         if act == "list":
-            return self.skills.list()
+            result = self.skills.list()
+            if a.get("project"):
+                result += procedures.list_active(home, a["project"])
+            return result
         if not name:
             raise ValueError("missing argument: name")
-        if act == "create":
-            return self.skills.create(name, a.get("description") or "", a.get("body") or "")
-        if act == "update":
-            return self.skills.update(name, a.get("description") or "", a.get("body") or "", a.get("old") or "",
-                                      a.get("new") or "")
+        if act == "correct":
+            return procedures.correct(home, a.get("project"), name, a.get("candidate"))
+        if act in ("create", "update"):
+            raise ValueError("direct skill writes are disabled; draft a source-bound procedure with skill_manage, "
+                             "then qualify it against an independently graded native comparison; "
+                             "promotion is currently held")
+        procedure_id = re.fullmatch(r"pr-[0-9a-f]{24}", name) is not None
         if act == "view":
+            if procedure_id:
+                return procedures.inspect(home, a.get("project"), name)
             return self.skills.view(name)
         if act == "archive":
+            if procedure_id:
+                raise ValueError("use harness improve --rollback ID --project PATH for a qualified procedure")
             return self.skills.archive(name)
-        raise ValueError("action must be create, update, list, view or archive")
+        raise ValueError("action must be draft, correct, create, update, list, view or archive")
 
     # ------------------------------------------------------------ tools
     def call_tool(self, name: str, args: Dict[str, Any]) -> Any:
         """Run a tool in-process and return its Python result."""
         a = dict(args or {})
+        # A malformed read must not open the index just to report its argument.
+        for tool, field in (("kb_get", "id"), ("kb_search", "query")):
+            if name == tool and field not in a:
+                raise KeyError(field)
+        if name == "op_state":
+            return op_dispatch(OperationalState.for_host(self._home, cwd=self._op_cwd), a)
         table: Dict[str, Callable[[], Any]] = {
             "kb_search": lambda: self.kb.search(a["query"], int(a.get("k", 5)), a.get("min_score")),
             "kb_get": lambda: self.kb.get(a["id"], int(a.get("max_bytes", 8000))),
             "kb_toc": lambda: self.kb.toc(a.get("path", "") or ""),
-            "mem_add": lambda: self.mem.mem_add(a["text"], a.get("tags") or [], a.get("scope", "user"),
-                                                bool(a.get("pin", False))),
-            "mem_search": lambda: self.mem.mem_search(a["query"], int(a.get("k", 5)), a.get("min_score")),
-            "mem_forget": lambda: self.mem.mem_forget(a["id"]),
+            "mem_add": lambda: self.memory_call("mem_add", a, a["text"], a.get("tags") or [],
+                                                  a.get("scope", "user"), bool(a.get("pin", False))),
+            "mem_search": lambda: self.memory_call("mem_search", a, a["query"], int(a.get("k", 5)),
+                                                     a.get("min_score")),
+            "mem_forget": lambda: self.memory_call("mem_forget", a, a["id"]),
             "lesson_add": lambda: self.mem.lesson_add(a["mistake"], a["fix"], a.get("trigger", "")),
-            "lesson_search": lambda: self.mem.lesson_search(a["query"], int(a.get("k", 3)), a.get("min_score")),
+            "lesson_search": lambda: self.memory_call("lesson_search", a, a["query"], int(a.get("k", 3)),
+                                                       a.get("min_score")),
             "state_save": lambda: self.state.state_save(a["text"], a.get("project", "") or ""),
             "state_load": lambda: self.state.state_load(a.get("project", "") or ""),
             "session_note": lambda: self.state.session_note(a["summary"]),
             "session_recent": lambda: self.state.session_recent(int(a.get("k", 5))),
             "session_search": lambda: self.sessions.search(a["query"], int(a.get("k", 5)), a.get("session", "") or "",
-                                                           before=self._started - 5),
+                                                           before=None if a.get("session") else self._started - 5,
+                                                           project=a.get("project", "") or ""),
             "skill_manage": lambda: self.skill_manage(a),
             "run_checks": lambda: checks.run_checks(a.get("cmd", "") or "", int(a.get("timeout", 300)),
                                                     home=self._home),
@@ -268,6 +376,14 @@ class Server:
 
     @staticmethod
     def render(name: str, result: Any) -> str:
+        if name == "op_state":
+            from agent_harness.redact import redact
+            safe = dict(result)
+            if "tasks" in safe:
+                safe["tasks"] = [{**row, "task": redact(row["task"]),
+                                  "value": {key: redact(value) for key, value in row["value"].items()}}
+                                 for row in safe["tasks"]]
+            return json.dumps(safe, ensure_ascii=False, separators=(",", ":"))
         if name == "kb_get":
             head = "[%s] %s — %d bytes%s" % (result["id"], result["path"], result["bytes"],
                                               ", truncated" if result["truncated"] else "")
@@ -307,7 +423,7 @@ class Server:
                     "protocolVersion": want if want in PROTOCOL_VERSIONS else LATEST,
                     "capabilities": {"tools": {"listChanged": False}},
                     "serverInfo": SERVER_INFO,
-                    "instructions": instructions(self._home),
+                    "instructions": "\n".join(filter(None, (instructions(self._home), self.board_context()))),
                 }
             elif method == "ping":
                 result = {}
@@ -320,11 +436,38 @@ class Server:
                 try:
                     out = self.call_tool(name, params.get("arguments") or {})
                     result = {"content": [{"type": "text", "text": self.render(name, out)}], "isError": False}
+                    checkpoint_notice = self.board_publish(name, params.get("arguments") or {}, out)
+                    if name == "op_state" and isinstance(out, dict) and "tasks" in out:
+                        if self._board is None:
+                            self.board_context()
+                        if self._board is not None:
+                            self._board.acknowledge(out)
+                    board_context = self.board_context()
+                    for notice in (checkpoint_notice, board_context):
+                        if notice:
+                            result["content"].append({"type": "text", "text": notice})
+                    if name == "kb_search":
+                        status = self.kb.availability
+                        if status["unavailable_sources"] or status["discovery_errors"]:
+                            discovery = (" %d discovery error(s); unenumerated extent unknown." %
+                                         status["discovery_errors"] if status["discovery_errors"] else "")
+                            notice = ("Partial search: %d discovered source(s) unavailable (%s).%s "
+                                      "Cached text withheld; no hits would not establish absence." %
+                                      (status["unavailable_sources"], json.dumps(status["reasons"], sort_keys=True),
+                                       discovery))
+                            # Preserve the first JSON-list block for legacy readers.
+                            result["content"].append({"type": "text", "text": notice})
+                            result["_meta"] = {"retrieval_availability": status}
                 except (KeyError, ValueError, TypeError, LookupError) as e:
                     text = e.args[0] if isinstance(e, KeyError) and e.args else str(e)
                     if isinstance(e, KeyError) and name != "kb_get":
                         text = "missing argument: %s" % text
                     result = {"content": [{"type": "text", "text": str(text)}], "isError": True}
+                    board_context = self.board_context()
+                    if board_context:
+                        result["content"].append({"type": "text", "text": board_context})
+                if name in ("kb_search", "kb_get", "kb_toc"):
+                    result.setdefault("_meta", {})["agent-harness/kb"] = self._kb_diagnostics()
             elif method.startswith("notifications/"):
                 return None
             else:
