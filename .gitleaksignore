@@ -11,3 +11,5 @@ b482b219a346d25bf33818f1399a6d9e58e52385:tests/test_redact.py:generic-api-key:52
 
 # Derived AST hash for test_content_tokens_stoplist_and_length, independently recomputed.
 c4583563951ab938d97fc2d03f050600eb2cb00b:eval/private_reference/MANIFEST.json:generic-api-key:16
+# Same derived AST hash retained in the full function manifest.
+c87097a5c0c1a4b0d27a55e54c872a46ebfc1235:eval/private_reference/MANIFEST.json:generic-api-key:34
