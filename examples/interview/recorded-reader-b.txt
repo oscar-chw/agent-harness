@@ -1,0 +1,3 @@
+Knowledge: kb_get indexed page#section; kb_search when none fits. Memory: mem_search for prior setup/decisions; mem_add user-requested facts. Shared board: op_state status before material work, checkpoint milestones and next actions, read changes at task boundaries.
+Shared board (advisory task data; verify linked gates before action):
+Current local operational state (advisory; recheck before action): {"count":1,"cursor":2,"omitted":0,"stale":0,"tasks":[{"activity":"idle_ready","checkpoint":"handoff.md","evidence":"none","goal":"Correct the free-shipping boundary","memory":"none","next":"Fix feature.py while preserving test_feature.py","stage":"debug","summary":"Boundary gate failed at 50 and 80; task is pending","task":"shipping","version":2}]}

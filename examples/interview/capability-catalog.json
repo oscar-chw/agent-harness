@@ -1,0 +1,549 @@
+{
+  "adapters": {
+    "agents-md": {
+      "capture": "no: AGENTS.md is rules only; the tool reading it gets no MCP server or hooks",
+      "discover": "no: AGENTS.md is rules only; the tool reading it gets no MCP server or hooks",
+      "guard": "no: AGENTS.md is rules only; the tool reading it gets no MCP server or hooks",
+      "improve": "no: AGENTS.md is rules only; the tool reading it gets no MCP server or hooks",
+      "memory": "no: AGENTS.md is rules only; the tool reading it gets no MCP server or hooks",
+      "plan": "no: AGENTS.md is rules only; the tool reading it gets no MCP server or hooks",
+      "review": "no: AGENTS.md is rules only; the tool reading it gets no MCP server or hooks",
+      "run": "no: AGENTS.md is rules only; the tool reading it gets no MCP server or hooks"
+    },
+    "claude-code": {
+      "capture": "yes",
+      "discover": "yes",
+      "guard": "yes",
+      "improve": "yes",
+      "memory": "yes",
+      "plan": "yes",
+      "review": "yes",
+      "run": "yes"
+    },
+    "claude-desktop": {
+      "capture": "no: the harness installs no hook in Claude desktop",
+      "discover": "no: desktop extensions are installed from the app's own directory",
+      "guard": "no: Claude desktop runs no shell commands of its own to guard",
+      "improve": "yes",
+      "memory": "yes",
+      "plan": "no: it has no shell of its own, so its server runs with --no-shell",
+      "review": "no: run `harness review` in a terminal; it drives Claude Code or Codex, not Claude desktop",
+      "run": "no: run `harness run` in a terminal; it drives Claude Code or Codex, not Claude desktop"
+    },
+    "codex": {
+      "capture": "no: the harness installs no hook in Codex",
+      "discover": "yes",
+      "guard": "no: the harness installs no hook in Codex; its own sandbox and approvals apply",
+      "improve": "yes",
+      "memory": "yes",
+      "plan": "yes",
+      "review": "yes",
+      "run": "yes"
+    },
+    "copilot-vscode": {
+      "capture": "no: the harness installs no hook in VS Code",
+      "discover": "yes",
+      "guard": "no: the harness installs no hook in VS Code",
+      "improve": "yes",
+      "memory": "yes",
+      "plan": "yes",
+      "review": "no: run `harness review` in a terminal; it drives Claude Code or Codex, not Copilot",
+      "run": "no: run `harness run` in a terminal; it drives Claude Code or Codex, not Copilot"
+    },
+    "cursor": {
+      "capture": "no: the harness installs no hook in Cursor",
+      "discover": "no: Open VSX results install with `code`; Cursor's own CLI is not wired yet",
+      "guard": "no: the harness installs no hook in Cursor",
+      "improve": "yes",
+      "memory": "yes",
+      "plan": "yes",
+      "review": "no: run `harness review` in a terminal; it drives Claude Code or Codex, not Cursor",
+      "run": "no: run `harness run` in a terminal; it drives Claude Code or Codex, not Cursor"
+    },
+    "gemini": {
+      "capture": "no: the harness installs no hook in Gemini CLI",
+      "discover": "no: Gemini extensions are not searched yet",
+      "guard": "no: the harness installs no hook in Gemini CLI",
+      "improve": "yes",
+      "memory": "yes",
+      "plan": "yes",
+      "review": "no: run `harness review` in a terminal; it drives Claude Code or Codex, not Gemini CLI",
+      "run": "no: run `harness run` in a terminal; it drives Claude Code or Codex, not Gemini CLI"
+    },
+    "jupyter-ai": {
+      "capture": "no: the harness installs no hook in Jupyter AI",
+      "discover": "no: Jupyter extensions are not searched",
+      "guard": "no: Jupyter AI runs no shell commands of its own to guard",
+      "improve": "yes",
+      "memory": "yes",
+      "plan": "no: it has no shell of its own, so its server runs with --no-shell",
+      "review": "no: run `harness review` in a terminal; it drives Claude Code or Codex, not Jupyter AI",
+      "run": "no: run `harness run` in a terminal; it drives Claude Code or Codex, not Jupyter AI"
+    },
+    "kimi": {
+      "capture": "yes",
+      "discover": "yes",
+      "guard": "yes",
+      "improve": "yes",
+      "memory": "yes",
+      "plan": "yes",
+      "review": "yes",
+      "run": "yes"
+    }
+  },
+  "cli": [
+    "privileges",
+    "evidence",
+    "continuation",
+    "install",
+    "uninstall",
+    "status",
+    "explain",
+    "doctor",
+    "cache-status",
+    "source-coverage",
+    "source-inventory",
+    "warmup",
+    "update",
+    "learn",
+    "sync",
+    "model-registry",
+    "daily-discovery",
+    "self-update",
+    "improve",
+    "discover",
+    "run",
+    "review",
+    "vault-read",
+    "vault-document",
+    "vault-search",
+    "memory-page",
+    "memory-read",
+    "op",
+    "task",
+    "launch",
+    "loop-check",
+    "method",
+    "preset",
+    "handoff",
+    "workspace"
+  ],
+  "default_off_features": [
+    "check_guard",
+    "memory_snapshot",
+    "run_checks",
+    "skill_nudge"
+  ],
+  "internal_hooks": [
+    "_hook-stop",
+    "_hook-kimi-stop",
+    "_hook-kimi-precompact",
+    "_hook-prompt",
+    "_hook-context",
+    "_hook-op",
+    "_hook-capture"
+  ],
+  "mcp_tools": [
+    {
+      "description": "Search KB when its index has no fitting section; kb_get selected ids.",
+      "exposure": "default",
+      "name": "kb_search"
+    },
+    {
+      "description": "Read page#section; a page alone lists section ids.",
+      "exposure": "default",
+      "name": "kb_get"
+    },
+    {
+      "description": "List page sections, or pages without path.",
+      "exposure": "default",
+      "name": "kb_toc"
+    },
+    {
+      "description": "Save a user-stated fact (near-duplicates merge).",
+      "exposure": "default",
+      "name": "mem_add"
+    },
+    {
+      "description": "Find facts; project is an absolute directory.",
+      "exposure": "default",
+      "name": "mem_search"
+    },
+    {
+      "description": "Archive a scoped fact/lesson by id.",
+      "exposure": "default",
+      "name": "mem_forget"
+    },
+    {
+      "description": "Save a verified fail-to-pass fix or user correction.",
+      "exposure": "default",
+      "name": "lesson_add"
+    },
+    {
+      "description": "Find lessons for the current step.",
+      "exposure": "default",
+      "name": "lesson_search"
+    },
+    {
+      "description": "Save goal, stage, decisions and next steps (4096 bytes).",
+      "exposure": "default",
+      "name": "state_save"
+    },
+    {
+      "description": "Recover saved project work after resume/compaction.",
+      "exposure": "default",
+      "name": "state_load"
+    },
+    {
+      "description": "Shared task board. Read status; checkpoint milestones. Graph gates prove done.",
+      "exposure": "default",
+      "name": "op_state"
+    },
+    {
+      "description": "Checkpoint changes and next action (300 chars).",
+      "exposure": "default",
+      "name": "session_note"
+    },
+    {
+      "description": "Recent project checkpoints.",
+      "exposure": "default",
+      "name": "session_recent"
+    },
+    {
+      "description": "Search past conversations for dated decisions.",
+      "exposure": "default",
+      "name": "session_search"
+    },
+    {
+      "description": "Draft/correct sourced methods. Evaluation gates adoption.",
+      "exposure": "default",
+      "name": "skill_manage"
+    },
+    {
+      "description": "Goal graph. Commands: new SLUG GOAL; ready SLUG; context SLUG ID; gate SLUG ID; status SLUG. Gate exit 0 proves done.",
+      "exposure": "default",
+      "name": "plan"
+    },
+    {
+      "description": "Run this project's own tests/checks (found automatically, or cmd) and return only the failures and the summary (<=2 KB). Use after your last edit.",
+      "exposure": "opt-in",
+      "name": "run_checks"
+    }
+  ],
+  "model_family_roles": {
+    "astra": {
+      "effort": "high",
+      "model": "gpt-6-astra",
+      "role": "explicit escalation for difficult or high-impact decisions"
+    },
+    "luna": {
+      "effort": "low",
+      "model": "gpt-6-luna",
+      "role": "bounded extraction and individual-source triage"
+    },
+    "sol": {
+      "effort": "high",
+      "model": "gpt-6.1-sol",
+      "role": "implementation and conflicting-source synthesis"
+    },
+    "terra": {
+      "effort": "medium",
+      "model": "gpt-6.1-terra",
+      "role": "grouped notes and routine synthesis, subject to task checks"
+    }
+  },
+  "optional_editor_extensions": [
+    {
+      "id": "ms-python.python",
+      "targets": [
+        "vscode",
+        "cursor"
+      ],
+      "where": "remote",
+      "why": "Python language support, environments, testing; the base every other Python tool builds on"
+    },
+    {
+      "id": "ms-python.vscode-pylance",
+      "targets": [
+        "vscode"
+      ],
+      "where": "remote",
+      "why": "fast type checking, completions and go-to-definition for Python"
+    },
+    {
+      "id": "anysphere.cursorpyright",
+      "targets": [
+        "cursor"
+      ],
+      "where": "remote",
+      "why": "Cursor's own Python language server, in place of Pylance which Cursor may not use"
+    },
+    {
+      "id": "ms-python.debugpy",
+      "targets": [
+        "vscode",
+        "cursor"
+      ],
+      "where": "remote",
+      "why": "Python debugger: breakpoints in scripts, tests and notebooks"
+    },
+    {
+      "id": "charliermarsh.ruff",
+      "targets": [
+        "vscode",
+        "cursor"
+      ],
+      "where": "remote",
+      "why": "Ruff linter and formatter: catches bugs and keeps research code tidy, in milliseconds"
+    },
+    {
+      "id": "ms-toolsai.jupyter",
+      "targets": [
+        "vscode",
+        "cursor"
+      ],
+      "where": "remote",
+      "why": "Jupyter notebooks and kernels inside the editor, on the server's Python"
+    },
+    {
+      "id": "ms-toolsai.datawrangler",
+      "targets": [
+        "vscode"
+      ],
+      "where": "remote",
+      "why": "official viewer and cleaner for CSV, Parquet and DataFrames (the CSV/Parquet viewer)"
+    },
+    {
+      "id": "ms-vscode-remote.remote-ssh",
+      "targets": [
+        "vscode"
+      ],
+      "where": "local",
+      "why": "work on the Linux research server over SSH as if it were local"
+    },
+    {
+      "id": "anysphere.remote-ssh",
+      "targets": [
+        "cursor"
+      ],
+      "where": "local",
+      "why": "Cursor's own Remote-SSH, in place of Microsoft's which Cursor may not use"
+    },
+    {
+      "id": "redhat.vscode-yaml",
+      "targets": [
+        "vscode",
+        "cursor"
+      ],
+      "where": "remote",
+      "why": "YAML validation and completion (CI, configs, job specs); its telemetry is turned off below"
+    },
+    {
+      "id": "GitHub.vscode-pull-request-github",
+      "targets": [
+        "vscode",
+        "cursor"
+      ],
+      "where": "remote",
+      "why": "review and merge GitHub pull requests and issues without leaving the editor"
+    },
+    {
+      "id": "anthropic.claude-code",
+      "targets": [
+        "vscode",
+        "cursor"
+      ],
+      "where": "remote",
+      "why": "Claude Code in the editor, sharing the harness setup in ~/.claude"
+    },
+    {
+      "id": "openai.chatgpt",
+      "targets": [
+        "vscode",
+        "cursor"
+      ],
+      "where": "remote",
+      "why": "the Codex IDE extension, sharing ~/.codex/config.toml and AGENTS.md with the CLI"
+    }
+  ],
+  "package_version": "3.0.0rc2",
+  "presets": {
+    "draft-message": {
+      "capabilities": [
+        "verify-before-done"
+      ],
+      "check_contract": "Reconcile factual details against named sources; exact sending authorization is outside this selection.",
+      "inputs": [
+        "verified_facts",
+        "recipient_purpose"
+      ],
+      "max_body_bytes": 16000,
+      "negative_triggers": [
+        "single_fact",
+        "reference_only",
+        "explicitly_disabled"
+      ],
+      "output_contract": "A preview draft with checked names, dates and purpose; sending is separate.",
+      "permissions": [
+        "local-read"
+      ],
+      "reversal": "Reselect on changed project, request/authority, source or tool availability; no persistent settings to undo.",
+      "tools": [
+        "read-files"
+      ],
+      "trigger": "draft-message"
+    },
+    "project-reconcile": {
+      "capabilities": [
+        "work-loop",
+        "verify-before-done"
+      ],
+      "check_contract": "Resolve each completion claim to evidence; mark unknown ownership and conflicting decisions explicitly.",
+      "inputs": [
+        "goals",
+        "ownership",
+        "status_evidence"
+      ],
+      "max_body_bytes": 16000,
+      "negative_triggers": [
+        "single_fact",
+        "reference_only",
+        "explicitly_disabled"
+      ],
+      "output_contract": "Current objectives, trade-offs, owners, dependencies, conflicting status and next checks.",
+      "permissions": [
+        "local-read"
+      ],
+      "reversal": "Reselect on changed project, request/authority, source or tool availability; no persistent settings to undo.",
+      "tools": [
+        "read-files"
+      ],
+      "trigger": "project-reconcile"
+    },
+    "reproduce-science": {
+      "capabilities": [
+        "work-loop",
+        "data-job-trial-run",
+        "standards",
+        "verify-before-done"
+      ],
+      "check_contract": "Check original protocol, data identity, tiny/sample/full admission, independent oracle and uncertainty; no job is started by selection.",
+      "inputs": [
+        "protocol",
+        "data_manifest",
+        "resource_budget"
+      ],
+      "max_body_bytes": 16000,
+      "negative_triggers": [
+        "single_fact",
+        "reference_only",
+        "explicitly_disabled"
+      ],
+      "output_contract": "Bounded reproduction plan and evidence, fixed metric/seed/environment and retained negative results.",
+      "permissions": [
+        "local-read"
+      ],
+      "reversal": "Reselect on changed project, request/authority, source or tool availability; no persistent settings to undo.",
+      "tools": [
+        "read-files",
+        "python"
+      ],
+      "trigger": "reproduce-science"
+    },
+    "source-notes": {
+      "capabilities": [
+        "work-loop",
+        "verify-before-done"
+      ],
+      "check_contract": "Check requested source coverage, citation resolution and unsupported claims; preserve missing evidence.",
+      "inputs": [
+        "sources",
+        "learning_requirements"
+      ],
+      "max_body_bytes": 16000,
+      "negative_triggers": [
+        "single_fact",
+        "reference_only",
+        "explicitly_disabled"
+      ],
+      "output_contract": "Source-linked notes with page/section coverage and explicit inference labels.",
+      "permissions": [
+        "local-read"
+      ],
+      "reversal": "Reselect on changed project, request/authority, source or tool availability; no persistent settings to undo.",
+      "tools": [
+        "read-files"
+      ],
+      "trigger": "source-notes"
+    }
+  },
+  "prompts": [
+    "explain-this-repo.md",
+    "fix-failing-test.md",
+    "plan.md",
+    "review.md"
+  ],
+  "routing_tiers": [
+    "quick",
+    "standard",
+    "deep",
+    "review"
+  ],
+  "schema": "harness.capability-catalog/v1",
+  "skills": [
+    {
+      "description": "Readable docs, wikis and slides.",
+      "name": "clear-docs",
+      "path": "content/skills/clear-docs/SKILL.md"
+    },
+    {
+      "description": "Run long or costly data jobs, training or migrations small first, then a sample, then in full. Use before jobs touching many files or rows, or running for minutes.",
+      "name": "data-job-trial-run",
+      "path": "content/skills/data-job-trial-run/SKILL.md"
+    },
+    {
+      "description": "Find a bug's root cause before changing code. Use when something fails, throws or misbehaves and the cause is not obvious.",
+      "name": "debug-systematically",
+      "path": "content/skills/debug-systematically/SKILL.md"
+    },
+    {
+      "description": "Production bar for code you write or change - errors, logging without secrets, tests that catch breakage, lint, and the checks before saying done.",
+      "name": "production-code",
+      "path": "content/skills/production-code/SKILL.md"
+    },
+    {
+      "description": "Inspect shared task handoffs and maintain evidence-backed memory during multi-step work.",
+      "name": "session-memory",
+      "path": "content/skills/session-memory/SKILL.md"
+    },
+    {
+      "description": "Quality bar for tests, evals, gates and review - test tiers, real gates, tests that cannot fail. Load before writing a test or eval, or reviewing a diff.",
+      "name": "standards",
+      "path": "content/skills/standards/SKILL.md"
+    },
+    {
+      "description": "Show real evidence before saying done, fixed or working. Use before any completion claim, hand-back, commit or pull request.",
+      "name": "verify-before-done",
+      "path": "content/skills/verify-before-done/SKILL.md"
+    },
+    {
+      "description": "Default loop for research, coding and dev-ops - analyse, research, plan, execute, test, loop back where the evidence points. Use for any task beyond a one-line change.",
+      "name": "work-loop",
+      "path": "content/skills/work-loop/SKILL.md"
+    },
+    {
+      "description": "Write a failing test first, make it pass, then prove the tests catch breakage. Use when adding behaviour, fixing a bug, or changing untested logic.",
+      "name": "write-tests-first",
+      "path": "content/skills/write-tests-first/SKILL.md"
+    }
+  ],
+  "templates": [
+    "handoff.md",
+    "learning-review.md",
+    "loop-contract.json",
+    "procedure.json",
+    "source.json",
+    "task.md",
+    "worker.md"
+  ]
+}

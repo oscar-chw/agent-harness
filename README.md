@@ -1,278 +1,130 @@
-# agent-harness: Shared Rules, Memory, a Work Graph and a Command Guard for AI Coding Agents
+# Agent Harness
 
-**v3 release candidate.** Read the [four-direction qualification report](docs/v3/qualification-20261113.md)
-for measured memory results and current limits. Generated-procedure learning remains held on token cost.
+Shared task state, source-backed memory and executable completion checks for AI coding clients.
 
-[![ci](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml) [![lint](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml)
+**Current runtime release — v3.0.0rc2.** The candidate is installed and checked on Mac Studio and the research connection account. MacBook readback and broader learning efficacy remain open. [Release](https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0rc2)
 
-One standard-library install that gives Claude Code shared rules, memory, retrieval, lessons and a command guard,
-and gives seven other AI coding tools the rules, the memory tools or both, as far as each supports them. It is for
-anyone who works with several AI coding agents and wants one set of rules and one memory across them, plus a
-guard that blocks catastrophic shell commands. In a private-corpus A/B eval (n=3 per tool: suggestive, not
-significant), past-session search took recall of an earlier session from 1/3 to 3/3 for Claude and 0/3 to 3/3 for
-Codex; on a held-out set, the v0.2 guard blocked 39 of 45 dangerous commands and allowed 20 of 20 safe ones.
+[![CI](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml)
+[![Lint](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml)
 
-[Quick start](#quick-start) · [Docs](docs/README.md) · [All diagrams](docs/DIAGRAMS.md)
+[Walkthroughs](docs/walkthrough/README.md) · [Run the interview demo](examples/interview/README.md) · [All capabilities](docs/CAPABILITIES.md) · [Architecture](examples/interview/architecture.svg) · [Evidence](docs/v3/qualification-20261113.md) · [Install](#install)
 
-The earlier [v2 development record](docs/v2-development.md) retains its original
-qualification scope. The v3 candidate and current measurements are documented above.
+## What happens when a session starts
 
-What one install writes into each tool, and what the tools then call; Claude Code and Kimi Code get the guard:
-
-```mermaid
-flowchart LR
-    INSTALL["harness install<br/>adapters/<br/>backs up files"]
-    subgraph tools["eight tools"]
-        CC["Claude Code<br/>rules, MCP,<br/>skills, guard"]
-        CX["Codex<br/>rules, MCP,<br/>skills"]
-        CP["Copilot<br/>rules, MCP,<br/>prompt files"]
-        CU["Cursor<br/>MCP, rules<br/>per project"]
-        KI["Kimi Code<br/>rules, MCP, skills,<br/>guard, tier agents"]
-        GM["Gemini CLI<br/>rules, MCP"]
-        CD["Claude desktop<br/>MCP only"]
-        JP["JupyterLab<br/>MCP only"]
-    end
-    GUARD["guard.py<br/>exit 2 blocks"]
-    subgraph srv["mcp/server.py"]
-        KB["kb_search<br/>kb_get"]
-        SS["session_search"]
-        MEM["mem_*<br/>lesson_*"]
-        NT["notices"]
-        SM["skill_manage"]
-    end
-    subgraph store["local files"]
-        IDX[("index.sqlite<br/>FTS5")]
-        MJ[("memory/<br/>lessons/")]
-        NJ[("notices.json")]
-        LRN[("procedures.sqlite<br/>project methods")]
-    end
-    TR[("Claude Code,<br/>Codex<br/>transcripts")]
-
-    INSTALL == "writes<br/>config" ==> tools
-    CC == "each Bash<br/>call" ==> GUARD
-    tools -- "MCP<br/>stdio" --> srv
-    KB -- "sections,<br/>BM25" --> IDX
-    SS -- "new<br/>messages" --> IDX
-    TR -- "secrets<br/>masked" --> SS
-    MEM -- "JSON<br/>per item" --> MJ
-    NT -- "once<br/>a day" --> NJ
-    SM -- "draft, view" --> LRN
-
-    classDef data fill:#dbeafe,stroke:#1d4ed8,color:#0b1220
-    classDef step fill:#f1f5f9,stroke:#475569,color:#0b1220
-    classDef gate fill:#fef3c7,stroke:#b45309,color:#0b1220
-    classDef ext  fill:#f8fafc,stroke:#94a3b8,color:#0b1220,stroke-dasharray:4 3
-    classDef key  fill:#ede9fe,stroke:#6d28d9,color:#0b1220,stroke-width:2px
-    class IDX,MJ,NJ,LRN data
-    class KB,MEM,SS,SM,NT step
-    class CX,CP,CU,KI,GM,CD,JP ext
-    class TR ext
-    class INSTALL,CC key
-    class GUARD gate
-```
-
-Where in the code: `src/agent_harness/installer.py`, `adapters/*.py`, `mcp/` (`server.py`, `kb.py`, `memory.py`, `sessions.py`, `skills.py`), `content/hooks/guard.py`; stores under `~/.agent-harness`.
-
-## Why this exists
-
-AI coding tools such as Claude Code, Codex, GitHub Copilot, Cursor and Gemini CLI are only as good as the
-instructions and context they are given. Each has its own instruction file and settings, and no memory shared
-with the others. They forget everything between sessions, re-read whole files, claim work is done without
-checking it, and repeat the same mistakes. Setting up eight tools by hand, and keeping them consistent, is
-tedious and rarely kept up.
-
-## Approach
-
-- **One source of truth, many adapters.** An adapter per tool writes `content/AGENTS.md` where that tool reads its
-  instructions, registers the MCP server (for Claude Code, the guard hook too) and records it for the uninstall.
-- **Partial retrieval.** Documents are split into sections at their headings and indexed in SQLite FTS5 with
-  BM25. The rules carry a compact index of section ids; the agent fetches one section with `kb_get(id)` and
-  calls `kb_search(query)` only when nothing in the index fits.
-- **Memory, lessons, task state, learned methods.** Local stores are shared by the tools on one machine;
-  [the memory placement map](docs/v1/memory-placement.md) distinguishes facts, source knowledge, work state,
-  project evidence and rebuildable search indexes.
-  `skill_manage draft` records a dormant, source-bound project method in `procedures.sqlite`. A matched,
-  independent held-out comparison must show no quality regression on any case or dimension and aggregate
-  tokens, including overhead, no greater than baseline. **Promotion is currently held:** caller-written
-  scores cannot activate a method. The local binder pins task and answer hashes before artifacts exist,
-  then hashes artifacts, computes a narrow exact-byte grade and validates reported usage. It records
-  `HOLD_UNVERIFIED_BOUNDARY` until native actor answer isolation and evaluator provenance are observed.
-  Previously active methods without native verification are quarantined from recall as `held_unverified`;
-  their rows and evidence are retained for inspection or rollback.
-  An explicit correction withdraws a named old method and links a source-bound replacement, which remains
-  proposed; neither the correction nor its CPU tests promote a new skill.
-  Rollback withdraws it; no new learned `SKILL.md` is generated. Existing learned skills remain readable,
-  but direct `skill_manage create/update` and automatic application of legacy proposals are refused.
-  `state_save` / `state_load` carry unfinished work across a compaction. [On-demand weekly intake](docs/v1/weekly-learning-intake.md)
-  reads only changed candidate evidence under a bounded output budget; it never schedules a model or promotes a method.
-- **Past conversations.** `session_search` indexes your own Claude Code and Codex transcripts incrementally,
-  user and assistant messages only, secrets masked before storage, capped at 64 MB.
-- **The guard** analyses a command rather than pattern-matching its text: it tokenises like a shell, unwraps
-  `env`, `xargs`, `bash -c`, `eval`, `$(...)` and heredocs, resolves a relative path against an earlier `cd`,
-  classifies each target, and fails closed on a payload it cannot parse.
-- **The work graph** (v0.3, on by the owner's explicit decision): one markdown file per goal. A node is done only when its gate
-  command exits 0, run by the graph after the guard has passed it; a failed gate returns the node to pending
-  with its output, and claims are atomic with a lease, so parallel sessions never take the same node.
-- **The current learning gate** requires no held-out per-case quality regression, a measurable quality or
-  token gain, and aggregate tokens including overhead no greater than baseline. The +15% allowance describes
-  historical component evaluations ([the rule and its provenance](docs/design-decisions.md#the-keep-rule)).
-
-How the guard decides one command: every check can raise `Blocked`; only a command that passes all of them runs.
+A configured client starts its own local MCP process. The server selects the canonical project, supplies a bounded task-board packet, and exposes scoped memory and document tools. Later tool-response boundaries deliver changed board rows. Independent sessions use the same local records. Small questions can stay direct, while material work can use the graph, checkpoints and executable gates.
 
 ```mermaid
 flowchart TB
-    HOOK["PreToolUse payload<br/>or guard.py --check"]
-    PARSE{"JSON object, command<br/>a string or list?"}
-    subgraph CHECK["check(cmd, depth ≤ 5)"]
-        FORK["fork-bomb patterns<br/>quoted text is data"]
-        COMP["check_computed<br/>names from $(...)"]
-        SUB["$(...) and backtick<br/>bodies"]
-        TOK["tokenize, split at<br/>; && and pipes"]
-        PIPES["pipes into a shell<br/>curl, base64 -d, echo"]
-        XA["check_xargs<br/>find or echo into rm"]
-        SC["check_segment<br/>sudo, rm -r, dd, mv,<br/>force-push"]
-        PROT["check_protected<br/>protected trees"]
-    end
-    PF[("protected-paths file<br/>absolute paths")]
-    BLOCK["exit 2<br/>reason on stderr"]
-    ALLOW["exit 0<br/>command runs"]
-
-    HOOK -- "stdin JSON" --> PARSE
-    PARSE -- "no: fail closed" --> BLOCK
-    PARSE == "yes" ==> FORK
-    FORK == "none" ==> COMP
-    COMP == "readable" ==> SUB
-    SUB -. "depth+1" .-> FORK
-    SUB == "pass" ==> TOK
-    TOK == "segments" ==> PIPES
-    PIPES -. "echoed text,<br/>depth+1" .-> FORK
-    PIPES == "none unseen" ==> XA
-    XA == "safe targets" ==> SC
-    SC -. "bash -c, eval:<br/>depth+1" .-> FORK
-    SC == "safe targets" ==> PROT
-    PF -- "paths" --> PROT
-    CHECK -- "Blocked" --> BLOCK
-    PROT == "nothing raised" ==> ALLOW
-
-    classDef data fill:#dbeafe,stroke:#1d4ed8,color:#0b1220
-    classDef gate fill:#fef3c7,stroke:#b45309,color:#0b1220
-    classDef out  fill:#dcfce7,stroke:#15803d,color:#0b1220
-    classDef ext  fill:#f8fafc,stroke:#94a3b8,color:#0b1220,stroke-dasharray:4 3
-    classDef key  fill:#ede9fe,stroke:#6d28d9,color:#0b1220,stroke-width:2px
-    class HOOK ext
-    class PARSE,BLOCK gate
-    class FORK,COMP,SUB,TOK,PIPES,XA,SC,PROT key
-    class PF data
-    class ALLOW out
+    clients[Native clients and selected models]
+    gateway[Per-client MCP process and supported lifecycle hooks]
+    board[(Project task board)]
+    memory[(Source-backed memory and retrieval)]
+    workGraph[Work graph and executable gates]
+    controls[Command guard and existing execution authority]
+    work[Tools, tests and artifacts]
+    evaluation[Evaluation and scoped adoption]
+    clients --> gateway
+    gateway <-->|Read and checkpoint| board
+    gateway <-->|Retrieve and record| memory
+    gateway -->|Plan tool when enabled| graph
+    workGraph --> controls
+    controls --> work
+    work -->|Failed gate returns pending| graph
+    work -->|Observed outcome and measured cost| evaluation
+    evaluation -.->|Qualified candidate only| memory
 ```
 
-Where in the code: `content/hooks/guard.py` (`verdict_for_payload`, `check`, `check_segment`, `check_protected`); hook entries are in `src/agent_harness/adapters/claude_code.py` and `adapters/kimi.py`. Every part in depth: [docs/how-it-works.md](docs/how-it-works.md).
+[Open the full architecture](examples/interview/architecture.svg) · [Printable PDF](examples/interview/architecture.pdf) · [Mermaid source](examples/interview/architecture.mmd)
 
-## Results
+The board coordinates progress. The work graph owns dependency scheduling and gate settlement. Memory retains evidence and revisions. Models keep their native account, tool and approval boundaries. The shared store is local to an authorized home and canonical project. Cross-device synchronization needs separate configuration and verification.
 
-Each row keeps its qualifier; the full numbers and caveats are in [docs/results.md](docs/results.md).
+## Four connected directions
 
-| What | Result | Scope and evidence |
+| Direction | What it contributes | Where to inspect |
 |---|---|---|
-| Recall of an earlier session, v0.1.1 → v0.2.0 | **Claude 1/3 → 3/3, Codex 0/3 → 3/3** | **private corpus**, one run per question, **n=3** per tool; not significant per tool (Fisher p = 0.40, 0.10). [historical.md](eval/results/historical.md) |
-| Accuracy, 20 questions: plain / v0.1.1 / v0.2.0 | 17 / 18 / 19 of 20, both tools | private corpus, one run each: a 1–2 answer difference is noise. Plain ran in `--safe-mode`, so it is a floor. [historical.md](eval/results/historical.md) |
-| What the harness adds to each Claude request | **~2,450 tokens, an upper bound** | most of the 17k → 37k gap in the eval came from the author's other plugins; Claude used 1.24x plain's tokens in the v0.1.1 eval. [test_context_budget.py](tests/test_context_budget.py) |
-| Guard, held out (v0.2) | **39/45 dangerous blocked (87%), 20/20 safe allowed** | the held-out claim; the set was written by the same build session that fixed the guard. [test_guard_heldout.py](tests/test_guard_heldout.py) |
-| Guard on agentic-os's corpus (v0.3) | **150/231 blocked, held out** | 221/221, and 183/186 on this repo's own corpus, only after fixing with both sets in view. [test_guard_cross.py](tests/test_guard_cross.py) |
-| Work graph (v0.3) | 181 of 203 real nodes gated | the author's own use, **not an A/B eval**; the `plan` tool ships **on** since v0.3.3 by the owner's decision (`HARNESS_DISABLE=plan` turns it off). [tests/workgraph](tests/workgraph) |
-| Public synthetic eval | **no results** | the one attempt failed at the CLI's login: 6 runs, 0 tokens; no rerun planned. [record](eval/results/public-synthetic-2026-10-03-claude-opus-5-1m-not-run.json) |
-| Test suite, Python 3.9 (v0.3.2) | 836 passed, 2 skipped, 2 expected failures | `python3 -m pytest -q tests eval`; CI runs 3.9 and 3.12. [tests/](tests/) |
+| Framework | Transactional task board, version conflicts, leases, recovery and work-graph execution | [Framework walkthrough](docs/walkthrough/framework.md) |
+| Methodology | Intent framing, bounded research, implementation, testing, review and evidence-based iteration | [Methodology walkthrough](docs/walkthrough/methodology.md) |
+| Philosophy | Assumptions, counterexamples, first principles and teaching adapted to the request | [Thinking and philosophy walkthrough](docs/walkthrough/philosophy.md) |
+| Knowledge | Scoped source retrieval, retained corrections, facts, lessons and project handoffs | [Memory hierarchy walkthrough](docs/walkthrough/memory.md) |
 
-## Quick start
+These are task-dependent capabilities. A whole lifecycle is useful where dependencies, risk or recovery justify it.
+
+## What ships
+
+- **9 skills** for work loops, production code, debugging, tests, standards, verification, session memory, data-job trials and clear documentation.
+- **17 MCP tool definitions**, covering knowledge, facts, lessons, saved state, task coordination, session inspection, method candidates and the work graph. `run_checks` is opt-in.
+- **7 templates, 4 reusable prompts and 4 task presets**, with explicit input/output and permission contracts.
+- **4 routing tiers**, constrained by configured model/effort support. Advisory automatic progression ships disabled until configured and qualified.
+- **8 application adapters and a rules-only adapter**, with different native capabilities. Claude Code and Kimi Code receive command guard hooks. Codex uses its native sandbox and approval system.
+- **Discovery, review, learning and maintenance commands** for explicit operation. Optional extensions and host-provided tools retain their own installation and access boundaries.
+
+The [complete catalogue](docs/CAPABILITIES.md) lists every shipped skill, MCP tool, CLI command, template, prompt, preset and adapter limitation. Its [JSON inventory](docs/CAPABILITIES.json) is generated from source. Profile-selected skills and host plugins can extend this inventory.
+
+## A runnable demonstration
+
+The interview pack exercises the installed runtime using a disposable project and home. It runs real CLI and MCP processes with zero model calls.
 
 ```sh
-# Python 3.9+, nothing else
-git clone https://github.com/oscar-chw/agent-harness.git && cd agent-harness
-python3 bin/harness install --dry-run   # every file it would change, for each tool you have; writes nothing
-bash scripts/demo.sh                    # install, doctor and the guard in a throwaway home: DEMO: PASS
-python3 content/hooks/guard.py --check "rm -rf ~"   # blocked, with the reason; exit 2
-python3 bin/harness install             # the real install: asks per tool, backs up every file first
-python3 bin/harness uninstall           # restores every backed-up file
-python3 bin/harness status --matrix     # which tool gets which feature (review, run, discover, improve, ...)
+python3 examples/interview/demo.py --output demo-run
 ```
 
-A real install (without `--dry-run`) **replaces `~/.claude/CLAUDE.md`** and the other tools' instruction files
-with the harness rules, and merges into their settings. Every file is backed up first, and `harness uninstall`
-restores them all. Every command, the demo's output and the checks: [docs/usage.md](docs/usage.md).
+It demonstrates cold-session pickup, a genuine failing test gate, an independent reader recovering the failure, rejection of an old-version update, and a fix passing the unchanged tests. A running reader receives the changed board once. The next unchanged boundary adds zero board bytes.
 
-Development candidate: [the integrated v1 workflow](docs/v1/USABLE-WORKFLOW.md)
-connects durable plans, on-demand templates and source-bound skill preparation.
-Automatic skill promotion and v1 rollout remain held behind their acceptance gates.
-The [v1.1 development checkpoint](docs/v11/STATUS.md) adds an observed model-family registry
-and bounded daily official-source discovery, with explicit qualification and promotion limits.
+Open `examples/interview/guide.html` for the offline architecture, five-minute presenter sequence, recorded CLI replay and source-backed technical Q&A. The optional native-model follow-up has a separate client-specific setup and remains unrun.
 
-## Project structure
+## What has been measured
 
+| Evidence | Observed result | Scope |
+|---|---|---|
+| Current memory against retained source history | 111,825 → 99,886 observed input/output tokens, **10.68% fewer** | 4 authored pairs, matched model/effort/facts, 4/4 correct in each arm; packet-level result |
+| Generated-procedure trial | Candidate-charged 172,569 tokens against baseline 48,969 | Adoption remains held; failed trials and preparation costs retained |
+| Full reasoning-guide treatment | +3.38% tokens and one response-length failure | Treatment remains unadopted; learner transfer unmeasured |
+| rc2 release regression | 3,021 passed, 2 skipped, 2 expected failures | Release-bound run; newer documentation/demo checks are reported by CI |
+| Installed readback | Mac Studio and research account passed cold MCP, board and stale-write checks | MacBook readback remains unverified |
+
+Cached input is included in the memory comparison. Four authored pairs leave general coding productivity, reliable speed gains and net whole-project savings unqualified. [Full protocol and limits](docs/v3/qualification-20261113.md)
+
+Historical guard, recall and component evaluations remain in [results](docs/results.md) and [design decisions](docs/design-decisions.md). Their original dates, small samples and qualification limits still apply.
+
+## Install
+
+Python 3.9+ is required. The package's default runtime uses the standard library.
+
+```sh
+git clone https://github.com/oscar-chw/agent-harness.git
+cd agent-harness
+python3 bin/harness install --dry-run
+python3 bin/harness install
+python3 bin/harness status --matrix
 ```
-bin/harness          the CLI launcher (install, update, uninstall, status, doctor)
-src/agent_harness/   installer, one adapter per tool, the MCP server, the work graph
-content/             what gets installed: the rules (AGENTS.md), skills, prompts, hooks (guard.py)
-profiles/example/    an example deployment profile
-eval/                the A/B eval: runner, report, SYNTHETIC questions and corpus, results
-tests/               the tests, the guard corpus, the held-out guard set, the work-graph suites
-scripts/             check.sh (tests, secret scan, demo), demo.sh, secret-scan.sh
-docs/                how it works, results, design decisions, usage, diagrams
+
+Inspect the dry run first. Installation replaces selected instruction files and merges supported client settings, with backups recorded for uninstall. Profile overrides and existing deployment policies require review. [Installation and rollback details](docs/usage.md)
+
+An interview demo requires an existing harness installation. Its default runtime is `HARNESS_HOME`, or `~/.agent-harness`. The demo creates separate disposable state inside the chosen output directory and refuses an existing output directory.
+
+## Trust and activation boundaries
+
+- Board packets are advisory context. A passing graph gate establishes its declared outcome. Models can still misinterpret instructions, and gates can still be incomplete.
+- Command screening, native approvals and operating-system isolation are separate controls. Supported hooks and configured sandboxing determine the actual execution boundary.
+- Source hashes and receipts bind identity and revision. Semantic correctness needs independent outcome checks.
+- Generated methods stay candidates until their exact scope passes the adoption rules. Self-improvement here changes retained context and procedures through evaluation; model-weight training remains outside the implemented learning path.
+- Knowledge coverage depends on accessible, selected sources and freshness. Personal and organizational vault content stays deployment-specific.
+
+## Documentation and source
+
+[Capability catalogue](docs/CAPABILITIES.md) · [How it works](docs/how-it-works.md) · [Usage](docs/usage.md) · [GitHub and delivery practices](docs/DEVELOPMENT.md) · [All diagrams](docs/DIAGRAMS.md) · [Interview questions](examples/interview/technical-notes.md) · [Documentation index](docs/README.md)
+
+```text
+src/agent_harness/    adapters, MCP, board, memory, routing, review and graph
+content/             rules, skills, templates, prompts and policy catalogues
+examples/interview/  runnable isolated demo and offline presentation guide
+eval/                evaluation instruments and scoped result records
+tests/               behavior, integration, property and evaluation checks
+profiles/            deployment-specific configuration examples
 ```
-
-Docs: see [docs/README.md](docs/README.md).
-
-### Design decisions and trade-offs
-
-- **Standard library only**, so it installs wherever an AI tool runs, including over SSH; the cost is a
-  pure-Python BM25 fallback and hand-written frontmatter and TOML handling.
-- **A guard that fails closed,** and judges the work graph's gates too: a false block can be asked about, a
-  missed `rm -rf ~` cannot be undone; the cost is false positives such as all `sudo`.
-- **One rules file for every tool**, capped at 60 lines by a test because it is paid for in every request.
-
-Each with its cost in full, the keep rule and the setups this replaced: [docs/design-decisions.md](docs/design-decisions.md).
-
-## Limits
-
-- **Private corpus, small n, confounded baseline.** The A/B results cannot be reproduced from this repository,
-  and recall rests on 3 questions with one run each. Plain ran in `--safe-mode`, the harness columns with the
-  author's full account setup, so only v0.1.1 against v0.2.0 isolates the harness; there is no comparison with
-  Claude Code's own `CLAUDE.md` memory, `--resume`, or a grep over past transcripts.
-- **Two of the eight tools were measured;** the other adapters are tested for the files they write only.
-- **The guard is a seat belt, not a sandbox.** Two gaps stay open: a glob after `cd` into a folder named by a
-  variable (`cd $DIR && rm -rf *` is judged as written), and a relative target in a `--check` call, which has
-  no working directory to resolve it against (a real hook payload does). `sudo` is blocked outright.
-- **The work graph has no A/B eval.** Its evidence is the author's own use and an adversarial certification,
-  not a gain measured against plain. It ships on anyway (v0.3.3, the owner's decision): it is what keeps the goal and
-  each step's check on disk through context loss. `HARNESS_DISABLE=plan` turns it off.
-- **`--home DIR` and `HOME=DIR` differ:** only `HOME=DIR` installs VS Code extensions (a download) into the folder.
-- **Packaging was checked offline only,** and needs setuptools>=61 ([details](docs/usage.md#install-caveats)).
-
-## What I learned
-
-Each lesson is drawn from a conclusion an eval record states ([where they come from](docs/results.md#where-the-readmes-lessons-come-from)).
-
-1. **Set the keep rule before the eval, and let it decide.** Historical evaluations shipped `session_search` (recall 6/6 against 1/6 and
-   0/6) and earlier direct-write learned skills; the current draft-and-promotion path has no comparison against plain. The reports call the rule pre-set; no committed record
-   here shows it predates the eval ([source](eval/results/historical.md), "Decisions the report made with its keep rule").
-2. **At n=3 a gain can be indistinguishable from noise.** Claude's second runs spread 0.56x to 1.91x with no
-   skill involved, and creating a skill costs the first run (Codex: 1.73M tokens against 1.34M)
-   ([source](eval/results/historical.md), the `skill_manage` entry).
-3. **A harness's overhead is mostly what it puts in every request.** The v0.1.0 rules cost 4,925 tokens per
-   request and the lean v0.1.1 rules 2,291 (-53%); Codex went from 1.82x plain's tokens to 0.82x and Claude
-   from 1.76x to 1.24x in the v0.1.1 eval; accuracy moved by no more than the noise of one run per question
-   ([source](eval/results/historical.md), "v0.1.1 eval ... accuracy and tokens").
-4. **A check that guards against a failure shows a gain only when the control fails.** Claude did not tamper
-   with or falsely claim "done" on any of 12 control runs, so the two check arms could not be judged
-   ([source](eval/results/historical.md), "the check arms").
-5. **Check that a run reached the model before grading it.** With the CLI's login expired, six runs each
-   "succeeded" in about a second with 0 tokens and were graded as wrong answers; the runner now stops at the
-   first run that cannot authenticate ([source](eval/results/public-synthetic-2026-10-03-claude-opus-5-1m-not-run.json)).
 
 ## Credits and licence
 
-The learning loop (`session_search`, `skill_manage`, the memory snapshot arm) follows the design of Hermes
-Agent; skills use the agentskills.io format; the tools talk to the harness over the Model Context Protocol.
-The work graph and the second guard corpus come from agentic-os, the author's earlier Claude-only harness.
-MIT licence ([LICENSE](LICENSE)).
+The project references Hermes-style memory and skill mechanisms, the Agent Skills format and the Model Context Protocol. The work graph originated in agentic-os. Research references and adoption verdicts remain in the dated design documents. MIT licence. [LICENSE](LICENSE)
 
-Implemented with AI coding agents under Oscar's design and review.
+Implemented with AI coding agents under Oscar's requirements and iterative review.

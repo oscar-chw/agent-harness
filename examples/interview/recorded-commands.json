@@ -1,0 +1,165 @@
+[
+  {
+    "argv": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "-m",
+      "agent_harness.cli",
+      "status",
+      "--runtime",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\n \"schema\": \"harness.runtime-inventory/v1\",\n \"scope\": \"current CLI process\",\n \"current\": {\n  \"root\": \"$RUNTIME/lib/agent_harness\",\n  \"declared_version\": \"3.0.0rc2\",\n  \"files\": {\n   \"__init__.py\": {\n    \"path\": \"$RUNTIME/lib/agent_harness/__init__.py\",\n    \"resolved\": \"$RUNTIME/lib/agent_harness/__init__.py\",\n    \"status\": \"PRESENT\",\n    \"bytes\": 122,\n    \"sha256\": \"7eed699a81506ab57fba90912fd51163818949dd1b4452d1fc37d72a5edc78bc\"\n   },\n   \"cli.py\": {\n    \"path\": \"$RUNTIME/lib/agent_harness/cli.py\",\n    \"resolved\": \"$RUNTIME/lib/agent_harness/cli.py\",\n    \"status\": \"PRESENT\",\n    \"bytes\": 89558,\n    \"sha256\": \"de2e3d88e0837ea5ebeb625250a00e00b92377cb6bd867c6c7deec85557b66f8\"\n   },\n   \"workgraph/plan.py\": {\n    \"path\": \"$RUNTIME/lib/agent_harness/workgraph/plan.py\",\n    \"resolved\": \"$RUNTIME/lib/agent_harness/workgraph/plan.py\",\n    \"status\": \"PRESENT\",\n    \"bytes\": 183759,\n    \"sha256\": \"01b7b43beade66e17f8a21aeeba33dc37c9d6d72d999665131d7d76b4144b6b6\"\n   },\n   \"project_memory.py\": {\n    \"path\": \"$RUNTIME/lib/agent_harness/project_memory.py\",\n    \"resolved\": \"$RUNTIME/lib/agent_harness/project_memory.py\",\n    \"status\": \"PRESENT\",\n    \"bytes\": 30192,\n    \"sha256\": \"e22ad9da2c9ea8e370e658e2aac1a73eb7687376330316183a63353b1efb0789\"\n   },\n   \"vault_retrieval.py\": {\n    \"path\": \"$RUNTIME/lib/agent_harness/vault_retrieval.py\",\n    \"resolved\": \"$RUNTIME/lib/agent_harness/vault_retrieval.py\",\n    \"status\": \"PRESENT\",\n    \"bytes\": 12088,\n    \"sha256\": \"97658292d5dfc2561677e29437f20ce46479feec8b71fbf7dcf29ce9ff03a15a\"\n   },\n   \"scoped_state.py\": {\n    \"path\": \"$RUNTIME/lib/agent_harness/scoped_state.py\",\n    \"resolved\": \"$RUNTIME/lib/agent_harness/scoped_state.py\",\n    \"status\": \"PRESENT\",\n    \"bytes\": 8989,\n    \"sha256\": \"382d64a860983b6b2baef627f6534b8ae68a392be297fbfc564f26479a208883\"\n   },\n   \"question_audit.py\": {\n    \"path\": \"$RUNTIME/lib/agent_harness/question_audit.py\",\n    \"resolved\": \"$RUNTIME/lib/agent_harness/question_audit.py\",\n    \"status\": \"PRESENT\",\n    \"bytes\": 6238,\n    \"sha256\": \"f410a3802492aa232084c0ddbdc079143fce6fc9993367ae8003e44c81834af0\"\n   }\n  }\n },\n \"installed\": {\n  \"root\": \"$DEMO_HOME/harness/lib/agent_harness\",\n  \"declared_version\": \"NOT_OBSERVABLE\",\n  \"files\": {\n   \"__init__.py\": {\n    \"path\": \"$DEMO_HOME/harness/lib/agent_harness/__init__.py\",\n    \"status\": \"MISSING\"\n   },\n   \"cli.py\": {\n    \"path\": \"$DEMO_HOME/harness/lib/agent_harness/cli.py\",\n    \"status\": \"MISSING\"\n   },\n   \"workgraph/plan.py\": {\n    \"path\": \"$DEMO_HOME/harness/lib/agent_harness/workgraph/plan.py\",\n    \"status\": \"MISSING\"\n   },\n   \"project_memory.py\": {\n    \"path\": \"$DEMO_HOME/harness/lib/agent_harness/project_memory.py\",\n    \"status\": \"MISSING\"\n   },\n   \"vault_retrieval.py\": {\n    \"path\": \"$DEMO_HOME/harness/lib/agent_harness/vault_retrieval.py\",\n    \"status\": \"MISSING\"\n   },\n   \"scoped_state.py\": {\n    \"path\": \"$DEMO_HOME/harness/lib/agent_harness/scoped_state.py\",\n    \"status\": \"MISSING\"\n   },\n   \"question_audit.py\": {\n    \"path\": \"$DEMO_HOME/harness/lib/agent_harness/question_audit.py\",\n    \"status\": \"MISSING\"\n   }\n  }\n },\n \"commands\": {\n  \"harness\": {\n   \"selected\": \"$OWNER_HOME/bin/harness\",\n   \"path\": \"$OWNER_HOME/bin/harness\",\n   \"resolved\": \"$OWNER_HOME/bin/harness\",\n   \"status\": \"PRESENT\",\n   \"bytes\": 55,\n   \"sha256\": \"50e54229540354b4ebbbeb97ef0294f037cf46badbeae850ac0c23c45b59a687\"\n  },\n  \"plan\": {\n   \"selected\": \"$OWNER_HOME/bin/plan\",\n   \"path\": \"$OWNER_HOME/bin/plan\",\n   \"resolved\": \"$OWNER_HOME/bin/plan\",\n   \"status\": \"PRESENT\",\n   \"bytes\": 100,\n   \"sha256\": \"72796cc3d2ded2db94e8265ecf4880651dcbe35e1e2ad528856ea6a13b8a42e5\"\n  }\n },\n \"invoked\": {\n  \"path\": \"$RUNTIME/lib/agent_harness/cli.py\",\n  \"resolved\": \"$RUNTIME/lib/agent_harness/cli.py\",\n  \"status\": \"PRESENT\",\n  \"bytes\": 89558,\n  \"sha256\": \"de2e3d88e0837ea5ebeb625250a00e00b92377cb6bd867c6c7deec85557b66f8\"\n },\n \"path_matches_invocation\": false,\n \"comparison\": \"INSTALLED_PACKAGE_MISSING\",\n \"differences\": [\n  \"__init__.py\",\n  \"cli.py\",\n  \"workgraph/plan.py\",\n  \"project_memory.py\",\n  \"vault_retrieval.py\",\n  \"scoped_state.py\",\n  \"question_audit.py\"\n ],\n \"native_sessions\": \"NOT_OBSERVABLE\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "-m",
+      "agent_harness.cli",
+      "task",
+      "checkpoint",
+      "shipping",
+      "--expected",
+      "0",
+      "--goal",
+      "Correct the free-shipping boundary",
+      "--stage",
+      "implementation",
+      "--summary",
+      "Boundary bug reproduced in a small fixture",
+      "--next",
+      "Run the independent shipping boundary gate",
+      "--checkpoint",
+      "handoff.md",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\"task\": \"shipping\", \"version\": 1, \"cursor\": 1, \"status\": \"open\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "-m",
+      "agent_harness.workgraph.plan",
+      "gate",
+      "shipping",
+      "1"
+    ],
+    "exit": 1,
+    "stdout": "FAIL 1 (exit 1, 0s)\n",
+    "stderr": "$ /Library/Developer/CommandLineTools/usr/bin/python3 -m unittest -q test_feature\n======================================================================\nFAIL: test_above_threshold (test_feature.ShippingTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"$DEMO/project/test_feature.py\", line 10, in test_above_threshold\n    self.assertEqual(shipping_fee(80), 0)\nAssertionError: 5 != 0\n\n======================================================================\nFAIL: test_exact_threshold (test_feature.ShippingTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"$DEMO/project/test_feature.py\", line 8, in test_exact_threshold\n    self.assertEqual(shipping_fee(50), 0)\nAssertionError: 5 != 0\n\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nFAILED (failures=2)\n"
+  },
+  {
+    "argv": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "-m",
+      "agent_harness.cli",
+      "task",
+      "checkpoint",
+      "shipping",
+      "--expected",
+      "1",
+      "--goal",
+      "Correct the free-shipping boundary",
+      "--stage",
+      "debug",
+      "--summary",
+      "Boundary gate failed at 50 and 80; task is pending",
+      "--next",
+      "Fix feature.py while preserving test_feature.py",
+      "--checkpoint",
+      "handoff.md",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\"task\": \"shipping\", \"version\": 2, \"cursor\": 2, \"status\": \"open\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "-m",
+      "agent_harness.cli",
+      "task",
+      "status",
+      "shipping",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\"project\": \"$DEMO/project\", \"cursor\": 2, \"tasks\": [{\"task\": \"shipping\", \"version\": 2, \"value\": {\"checkpoint\": \"handoff.md\", \"goal\": \"Correct the free-shipping boundary\", \"next\": \"Fix feature.py while preserving test_feature.py\", \"stage\": \"debug\", \"summary\": \"Boundary gate failed at 50 and 80; task is pending\"}, \"status\": \"open\", \"fence\": 0, \"until\": null, \"memory_receipt\": null, \"updated_cursor\": 2, \"memory_status\": \"none\", \"checkpoint_status\": \"present\", \"evidence_status\": \"none\", \"activity\": \"idle_ready\"}], \"consistency\": \"one operational transaction; memory receipts revalidated separately\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "-m",
+      "agent_harness.cli",
+      "task",
+      "checkpoint",
+      "shipping",
+      "--expected",
+      "1",
+      "--summary",
+      "Outdated writer says complete",
+      "--json"
+    ],
+    "exit": 2,
+    "stdout": "",
+    "stderr": "harness task: task version changed; refresh snapshot and changes\n"
+  },
+  {
+    "argv": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "-m",
+      "agent_harness.cli",
+      "task",
+      "status",
+      "shipping",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\"project\": \"$DEMO/project\", \"cursor\": 2, \"tasks\": [{\"task\": \"shipping\", \"version\": 2, \"value\": {\"checkpoint\": \"handoff.md\", \"goal\": \"Correct the free-shipping boundary\", \"next\": \"Fix feature.py while preserving test_feature.py\", \"stage\": \"debug\", \"summary\": \"Boundary gate failed at 50 and 80; task is pending\"}, \"status\": \"open\", \"fence\": 0, \"until\": null, \"memory_receipt\": null, \"updated_cursor\": 2, \"memory_status\": \"none\", \"checkpoint_status\": \"present\", \"evidence_status\": \"none\", \"activity\": \"idle_ready\"}], \"consistency\": \"one operational transaction; memory receipts revalidated separately\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "-m",
+      "agent_harness.workgraph.plan",
+      "gate",
+      "shipping",
+      "1"
+    ],
+    "exit": 0,
+    "stdout": "PASS 1 (exit 0, 0s)\n",
+    "stderr": "$ /Library/Developer/CommandLineTools/usr/bin/python3 -m unittest -q test_feature\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK\n"
+  },
+  {
+    "argv": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "-m",
+      "agent_harness.cli",
+      "task",
+      "checkpoint",
+      "shipping",
+      "--expected",
+      "2",
+      "--goal",
+      "Correct the free-shipping boundary",
+      "--stage",
+      "verified",
+      "--summary",
+      "All 3 shipping tests passed; graph node is done",
+      "--next",
+      "Review the diff and package the change",
+      "--checkpoint",
+      "handoff.md",
+      "--json"
+    ],
+    "exit": 0,
+    "stdout": "{\"task\": \"shipping\", \"version\": 3, \"cursor\": 3, \"status\": \"open\"}\n",
+    "stderr": ""
+  }
+]

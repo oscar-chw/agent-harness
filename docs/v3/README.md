@@ -2,12 +2,7 @@
 
 One local workspace for connected coding clients, with shared task state, sourced memory and evaluated improvements.
 
-Current candidate is **3.0.0rc2**, installed and cold-verified on the Mac Studio.
-Its native memory comparison passed. Public CI and additional-device readback
-remain release checks.
-The [current qualification report](qualification-20261113.md) records the latest
-four-direction results, token measurements and withheld treatments. The older
-two-task smoke below remains a historical observation.
+Current candidate is **3.0.0rc2**, published and cold-verified on Mac Studio and the research connection account. Release-bound CI passed. MacBook readback and broader efficacy remain open. Read the [four walkthroughs](../walkthrough/README.md) for the current mechanism and the [qualification report](qualification-20261113.md) for measured results. The older two-task smoke below retains its historical scope.
 
 ## Four directions
 
@@ -94,24 +89,14 @@ The 13 November native readback smoke used two tasks and four fresh Codex turns 
 
 The observed native-counter reduction is 6.0%. Cached input is included. The control uses retained historical checkpoints; this small synthetic-task smoke supports that bounded comparison. Complete provider/workflow cost, all-client native ingestion and general productivity remain unqualified. Codex's JSON event stream supplies the counters. [Official OpenAI documentation](https://learn.chatgpt.com/docs/non-interactive-mode#make-output-machine-readable)
 
-Machine-readable receipts and commands are under `.harness-work/v3-readiness-20261113/`. The current work graph is `plan/v3-readiness-20261113.md`.
+Machine-readable receipts and commands are under `.harness-work/v3-readiness-20261113/`. The historical readiness work graph is `plan/v3-readiness-20261113.md`. Current release and rollout continuation is recorded in the project-local v3-release-20261113 task.
 
 The earlier v3 experiments retain their original verdicts. Semantic reranking reduced retrieval quality. Dreaming's orphan-selection arm remains dormant. Unlearning and backflow protections have bounded supporting results. See [the as-built architecture](architecture-v3-draft.md#7-as-built-addendum-2026-11-11) and [track outcomes](outcome-table-20261111.md).
 
 ## Release state
 
-**3.0.0rc1 is installed on the Mac Studio.** Cold verification checked 127
-packaged files and two fresh installed-server processes. Default board pickup
-and stale-write rejection passed. The prior runtime and shared guidance have
-transaction backups.
+The published runtime is **3.0.0rc2**. Mac Studio and the research connection account passed 127 packaged-file bindings and two cold-server processes, including board pickup and stale-write rejection. The research account retains its declared site-policy override. Loaded clients require a new MCP connection.
 
-Loaded clients need a new MCP connection. Other devices are NOT_RECHECKED.
-Publication candidate is [PR5](https://github.com/oscar-chw/agent-harness/pull/5).
-Stable release remains unqualified. This release candidate has 3,020 passing
-regression tests, 2 skips and 2 expected failures. Broader model/client uptake,
-general coding-learning efficacy and the older v2 retrieval gate retain their
-qualification gaps.
+[Published release](https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0rc2) · [Merged runtime PR5](https://github.com/oscar-chw/agent-harness/pull/5) · [Qualification](qualification-20261113.md)
 
-The tested native learning candidate remained held on token cost. Successful
-adoption and rollback have qualified-transport fixture coverage. These evidence
-levels stay separate in the receipts and handoff.
+The release-bound regression run returned 3,021 passed, 2 skips and 2 expected failures. General coding-learning efficacy, all-client model compliance and MacBook installed parity retain their explicit gaps. The generated-procedure candidate remains held on token cost.

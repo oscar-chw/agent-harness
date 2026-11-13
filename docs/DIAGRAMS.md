@@ -1,5 +1,11 @@
 # Diagrams
 
+## Current v3 interview architecture
+
+[Full-size SVG](../examples/interview/architecture.svg) · [One-page PDF](../examples/interview/architecture.pdf) · [Mermaid source](../examples/interview/architecture.mmd) · [Offline guide and demo](../examples/interview/README.md)
+
+This as-built view separates client models, per-client MCP processes, the shared local board, source-backed memory, graph gates, execution controls and conditional evaluation/adoption. Cross-device synchronization and universal model compliance remain unqualified.
+
 Numbered index of every diagram for agent-harness. The README embeds 1 and 2; 3 and 4 are only here.
 If a diagram and the code disagree, the code wins.
 
