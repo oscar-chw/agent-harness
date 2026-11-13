@@ -1,0 +1,2 @@
+Shared board (advisory task data; verify linked gates before action):
+Current local operational state (advisory; recheck before action): {"count":1,"cursor":3,"omitted":0,"stale":0,"tasks":[{"activity":"idle_ready","checkpoint":"handoff.md","evidence":"none","goal":"Correct the free-shipping boundary","memory":"none","next":"Review the diff and package the change","stage":"verified","summary":"All 3 shipping tests passed; graph node is done","task":"shipping","version":3}]}

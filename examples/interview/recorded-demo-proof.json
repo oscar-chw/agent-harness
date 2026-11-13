@@ -1,0 +1,57 @@
+{
+  "schema": "harness.interview-demo/v1",
+  "status": "PASS",
+  "model_calls": 0,
+  "demo_sha256": "3b42f3585050b4ebec431122c8e4fb0cda6fef108eaa3e3914bffa28c4df8df2",
+  "commands_sha256": "455335244aad3f6f64ed4e5e8cf82dd8d855da3644bd245721f79ba2b5121736",
+  "runtime": {
+    "version": "3.0.0rc2",
+    "engine_sha256": "01b7b43beade66e17f8a21aeeba33dc37c9d6d72d999665131d7d76b4144b6b6"
+  },
+  "readers": [
+    {
+      "pid": 81788,
+      "cold_pickup": true,
+      "instruction_bytes": 751,
+      "unchanged_board_bytes": 0
+    },
+    {
+      "pid": 81897,
+      "cold_pickup": true,
+      "instruction_bytes": 755,
+      "unchanged_board_bytes": 0
+    }
+  ],
+  "delta": {
+    "first_bytes": 479,
+    "repeat_bytes": 0,
+    "contains_next_step": true
+  },
+  "stale_write": {
+    "exit": 2,
+    "version_before": 2,
+    "version_after": 2,
+    "version_conflict_observed": true,
+    "summary_preserved": true
+  },
+  "gate": {
+    "before_exit": 1,
+    "before_mark": "pending",
+    "after_exit": 0,
+    "after_mark": "done",
+    "before_tests_run": 3,
+    "before_failures": 2,
+    "after_tests_run": 3,
+    "tests_sha256_before": "8d7fb275128a3e7a220d693f32dd089af524775432869dc8d16b311415cee48a",
+    "tests_sha256_after": "8d7fb275128a3e7a220d693f32dd089af524775432869dc8d16b311415cee48a"
+  },
+  "isolation": {
+    "disposable_home": true,
+    "disposable_project": true
+  },
+  "limits": [
+    "No native model turn",
+    "No universal compliance claim",
+    "Byte suppression is measured here; historical native token evidence is separate"
+  ]
+}

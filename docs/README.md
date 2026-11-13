@@ -1,5 +1,7 @@
 # agent-harness docs
 
+Start with the [capability catalogue](CAPABILITIES.md), [current architecture](../examples/interview/architecture.svg), or [runnable interview guide](../examples/interview/README.md). The [v3 qualification report](v3/qualification-20261113.md) keeps mechanisms, measured outcomes and open rollout separate.
+
 Start with the [project README](../README.md); every page below goes one level deeper.
 
 ## Understand it

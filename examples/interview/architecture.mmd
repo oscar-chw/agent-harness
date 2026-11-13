@@ -1,0 +1,30 @@
+flowchart TB
+    user[User goal and clarification]
+    clientA[Client A and its selected model]
+    clientB[Client B and its selected model]
+    cli[Harness CLI and plan CLI]
+    user --> clientA
+    user --> clientB
+    subgraph localHarness[Local harness on one authorized host]
+        gateway[Per-client MCP server and supported lifecycle hooks]
+        board[Shared task board in project-scoped SQLite]
+        memory[Source-backed memory and scoped retrieval]
+        workGraph[Work graph with dependencies and executable gates]
+        guard[Command guard and configured execution boundary]
+        tools[Tools, tests and artifacts]
+        eval[Evaluation and scoped promotion decision]
+        gateway <-->|Read and checkpoint| board
+        gateway <-->|Retrieve and record| memory
+        gateway -->|Plan tool when enabled| graph
+        workGraph -->|Check command before execution| guard
+        guard -->|Allowed call within existing authority| tools
+        tools -->|Gate failure returns node to pending| graph
+        tools -->|Observed results and full measured cost| eval
+        eval -.->|Admitted scoped candidate only| memory
+    end
+    clientA --> gateway
+    clientB --> gateway
+    cli --> board
+    cli --> workGraph
+    permissions[Native client approvals and OS permissions]
+    permissions -.-> guard
