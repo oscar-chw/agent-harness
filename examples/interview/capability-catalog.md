@@ -148,6 +148,10 @@ The JSON companion retains each limitation's reason. The `agents-md` adapter exp
 The operational board stores task state. Project memory retains source-linked revisions. Facts and lessons have scoped stores. Search indexes are derived views. Profile `kb_paths` selects document sources, and session search handles explicitly supported local history formats. A useful handoff names evidence and the next action.
 Domain coverage depends on the supplied sources and their freshness. This package's mechanism and methodology documents are distinct from a deployment's personal or organizational knowledge vault. Cross-device synchronization requires separate configuration and verification.
 
+## Development and GitHub delivery
+
+The [delivery playbook](https://github.com/oscar-chw/agent-harness/blob/main/docs/DEVELOPMENT.md) covers task/issue scope, branches, PR evidence, CI/CD, reviews, releases and stack-specific check selection. It includes small task/PR/release draft examples. Those documented examples supplement the seven shipped file templates. Repository settings and observed checks establish enforcement.
+
 ## Current evidence
 
 The release candidate's [qualification report](https://github.com/oscar-chw/agent-harness/blob/main/docs/v3/qualification-20261113.md) records the four-pair memory result, retained failed learning trials and remaining gaps. The [interview pack](https://github.com/oscar-chw/agent-harness/blob/main/examples/interview/README.md) exercises installed CLI/MCP processes with disposable data and zero model calls. Generated-procedure adoption remains held after token regression.

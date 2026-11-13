@@ -112,7 +112,7 @@ An interview demo requires an existing harness installation. Its default runtime
 
 ## Documentation and source
 
-[Capability catalogue](docs/CAPABILITIES.md) · [How it works](docs/how-it-works.md) · [Usage](docs/usage.md) · [All diagrams](docs/DIAGRAMS.md) · [Interview questions](examples/interview/technical-notes.md) · [Documentation index](docs/README.md)
+[Capability catalogue](docs/CAPABILITIES.md) · [How it works](docs/how-it-works.md) · [Usage](docs/usage.md) · [GitHub and delivery practices](docs/DEVELOPMENT.md) · [All diagrams](docs/DIAGRAMS.md) · [Interview questions](examples/interview/technical-notes.md) · [Documentation index](docs/README.md)
 
 ```text
 src/agent_harness/    adapters, MCP, board, memory, routing, review and graph
