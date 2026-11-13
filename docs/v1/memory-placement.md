@@ -1,5 +1,7 @@
 # Where work, facts, and knowledge belong
 
+Historical v1 placement and candidate labels are retained below. The [current v3 memory walkthrough](../walkthrough/memory.md) explains default board delivery, source-backed records and current qualification.
+
 The harness has one local entry point (`HARNESS_HOME`, normally `~/.agent-harness`),
 not one giant memory file. A client must use the right store for the claim it is
 making. A search result is context, not permission or proof of completion.

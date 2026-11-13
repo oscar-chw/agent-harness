@@ -2,6 +2,7 @@
 import argparse
 import json
 from pathlib import Path
+import posixpath
 import re
 import sys
 
@@ -53,6 +54,7 @@ def markdown(data):
     rows = ["# Shipped capability catalogue", "",
             "Generated from package source. Run `python3 scripts/build_capability_catalog.py --check` to detect drift.",
             "The JSON companion provides the same inventory for tooling.", "",
+            "For mechanisms and worked examples, read the [four walkthroughs](walkthrough/README.md).", "",
             "## What belongs where", "",
             "| Layer | Purpose | Activation boundary |", "|---|---|---|",
             "| Rules and skills | Guide task framing, implementation, debugging and review | Client loads installed guidance; model compliance needs behavioral checks |",
@@ -126,10 +128,13 @@ def main():
     data = inventory()
     encoded = json.dumps(data, indent=2, sort_keys=True) + "\n"
     document = markdown(data)
-    offline = document.replace("](../", "](https://github.com/oscar-chw/agent-harness/blob/main/")
-    offline = offline.replace("](v3/", "](https://github.com/oscar-chw/agent-harness/blob/main/docs/v3/")
-    offline = offline.replace("](DEVELOPMENT.md)",
-                              "](https://github.com/oscar-chw/agent-harness/blob/main/docs/DEVELOPMENT.md)")
+    def offline_link(match):
+        label, target = match.groups()
+        if target.startswith(("https://", "http://", "#")):
+            return match[0]
+        target = posixpath.normpath(posixpath.join("docs", target))
+        return "[" + label + "](https://github.com/oscar-chw/agent-harness/blob/main/" + target + ")"
+    offline = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", offline_link, document)
     outputs = {ROOT / "docs/CAPABILITIES.json": encoded, ROOT / "docs/CAPABILITIES.md": document,
                ROOT / "examples/interview/capability-catalog.json": encoded,
                ROOT / "examples/interview/capability-catalog.md": offline}

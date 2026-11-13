@@ -3,6 +3,8 @@
 Generated from package source. Run `python3 scripts/build_capability_catalog.py --check` to detect drift.
 The JSON companion provides the same inventory for tooling.
 
+For mechanisms and worked examples, read the [four walkthroughs](walkthrough/README.md).
+
 ## What belongs where
 
 | Layer | Purpose | Activation boundary |

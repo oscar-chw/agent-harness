@@ -7,7 +7,7 @@ Shared task state, source-backed memory and executable completion checks for AI 
 [![CI](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml)
 [![Lint](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml)
 
-[Run the interview demo](examples/interview/README.md) · [All capabilities](docs/CAPABILITIES.md) · [Architecture](examples/interview/architecture.svg) · [Evidence](docs/v3/qualification-20261113.md) · [Install](#install)
+[Walkthroughs](docs/walkthrough/README.md) · [Run the interview demo](examples/interview/README.md) · [All capabilities](docs/CAPABILITIES.md) · [Architecture](examples/interview/architecture.svg) · [Evidence](docs/v3/qualification-20261113.md) · [Install](#install)
 
 ## What happens when a session starts
 
@@ -42,10 +42,10 @@ The board coordinates progress. The work graph owns dependency scheduling and ga
 
 | Direction | What it contributes | Where to inspect |
 |---|---|---|
-| Framework | Transactional task board, version conflicts, leases, recovery and work-graph execution | [Operational state](src/agent_harness/operational_state.py), [graph](src/agent_harness/workgraph/plan.py) |
-| Methodology | Intent framing, bounded research, implementation, testing, review and evidence-based iteration | [Work-loop skill](content/skills/work-loop/SKILL.md), [standards](content/skills/standards/SKILL.md) |
-| Philosophy | Assumptions, counterexamples, first principles and teaching adapted to the request | [Reasoning guidance](content/skills/work-loop/reasoning.md), [qualification](docs/v3/qualification-20261113.md#philosophy-calibration) |
-| Knowledge | Scoped source retrieval, retained corrections, facts, lessons and project handoffs | [Memory placement](docs/v1/memory-placement.md), [vault retrieval](src/agent_harness/vault_retrieval.py) |
+| Framework | Transactional task board, version conflicts, leases, recovery and work-graph execution | [Framework walkthrough](docs/walkthrough/framework.md) |
+| Methodology | Intent framing, bounded research, implementation, testing, review and evidence-based iteration | [Methodology walkthrough](docs/walkthrough/methodology.md) |
+| Philosophy | Assumptions, counterexamples, first principles and teaching adapted to the request | [Thinking and philosophy walkthrough](docs/walkthrough/philosophy.md) |
+| Knowledge | Scoped source retrieval, retained corrections, facts, lessons and project handoffs | [Memory hierarchy walkthrough](docs/walkthrough/memory.md) |
 
 These are task-dependent capabilities. A whole lifecycle is useful where dependencies, risk or recovery justify it.
 
