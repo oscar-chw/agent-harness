@@ -52,9 +52,9 @@ does not require a handoff. This protocol adds no access or messaging authority.
   copying whole conversations, secrets, personal data or hidden reasoning.
 - `state_save` is a small continuation fallback, not a shared multi-writer task
   ledger. `state_load` restores it after compaction; revalidate before acting.
-
 ## Bounds
-Inspect only the needed project/task and disclose missing or stale evidence.
+Graph redesigns: read [graph-memory.md](graph-memory.md); inspect only needed project/task data.
+Disclose missing or stale evidence.
 No polling messages, mandatory whole-history injection, background model calls,
 automatic sharing across users/projects, purging history or weakened gates.
 Tested file/CLI mechanics do not guarantee every model follows this protocol.

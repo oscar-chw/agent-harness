@@ -1,6 +1,6 @@
 ---
 name: clear-docs
-description: Readable docs, wikis and slides.
+description: Readable docs, wikis, slides and web design systems.
 ---
 
 # Clear documents and useful visuals
@@ -18,6 +18,9 @@ Infer the audience and next action from the task; ask only if the difference mat
 - A runbook starts with when to use it, steps and expected results; link diagnosis/rollback.
 - A slide carries one main message. Put detail in notes/handouts, not microscopic text.
 - Reuse the project's format and artifact location. No extra report for a tiny request.
+
+Webpage creation or visual identity work: read [web-design.md](web-design.md).
+Slide decks: read [presentations.md](presentations.md) for structure, editability and file checks.
 
 ## Choose the aid by the question
 

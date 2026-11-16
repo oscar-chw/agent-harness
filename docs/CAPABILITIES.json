@@ -492,7 +492,7 @@
   "schema": "harness.capability-catalog/v1",
   "skills": [
     {
-      "description": "Readable docs, wikis and slides.",
+      "description": "Readable docs, wikis, slides and web design systems.",
       "name": "clear-docs",
       "path": "content/skills/clear-docs/SKILL.md"
     },
