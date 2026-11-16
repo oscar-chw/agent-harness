@@ -19,7 +19,7 @@ Reviewed 16 November 2026. Exact source revisions and inspected paths are in
   concurrent edits, with acceptance criteria for a possible isolated graph trial.
 
 These are references inside two existing skills. Their bodies load on demand.
-The clear-docs discovery description grows by 19 UTF-8 bytes. Existing per-part and total
+The clear-docs discovery description grows by 20 UTF-8 bytes. Existing per-part and total
 context-budget checks pass. Actual task token savings remain unmeasured.
 
 ## Motion selection
@@ -44,8 +44,8 @@ integrated or benchmarked by this refresh.
 
 ## Checks and limits
 
-The focused delivery checks plus content, context-budget, catalogue, installer and
-handoff checks returned 59 PASS and 1 SKIP under Python 3.9. The skip is the existing
+The focused delivery checks plus content, context-budget, catalogue, installer,
+walkthrough and handoff checks returned 64 PASS and 1 SKIP under Python 3.9. The skip is the existing
 Python 3.11+ tomllib profile check. Two skill frontmatter validators and lint pass.
 Eight isolated real-helper checks pass, with zero model calls. They cover Google's
 0.4.0 design lint/export, rejected broken token references, and the pinned Anthropic
