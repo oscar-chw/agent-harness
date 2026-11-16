@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-16",
+  "sources": [
+    {"repository":"google-labs-code/design.md","revision":"1ed38aa9dd4451b9039f9aeb9ed1d2579edafddf","license":"Apache-2.0","reviewed_paths":["README.md","PHILOSOPHY.md","package.json"],"decision":"Adapt intent plus semantic tokens into an optional web-design reference; check the published 0.4.0 CLI separately."},
+    {"repository":"google-labs-code/stitch-skills","revision":"0337446dadde6f8c94210444e2aa9d546126480f","license":"Apache-2.0","reviewed_paths":["plugins/stitch-utilities/skills/design-md/SKILL.md","plugins/stitch-utilities/skills/taste-design/SKILL.md"],"decision":"Reuse task-led design documentation concepts. Perpetual micro-motion, fixed font bans and obligatory asymmetry remain upstream preferences requiring a project-specific reason."},
+    {"repository":"anthropics/skills","revision":"1780c5e5a552fd4d1c9d6a7b0cab26b0c2bef064","license":"Apache-2.0 in skills/pptx/LICENSE.txt at this revision","reviewed_paths":["skills/pptx/SKILL.md","skills/pptx/LICENSE.txt","skills/pptx/scripts/slide_text.py","skills/pptx/scripts/office/validate.py"],"decision":"Download the pinned complete PPTX skill for isolated helper trials; adapt task-relevant presentation checks while preserving native client authoring routes."},
+    {"repository":"ModernRelay/omnigraph","revision":"4f7c2076dc7da3e647849bfadf7636f83d36156e","license":"MIT","reviewed_paths":["README.md"],"decision":"Reference for typed relationships, branch review, provenance and combined retrieval. A future isolated pilot must qualify deletion, correction, isolation, conflicts and total cost before a storage decision."}
+  ],
+  "video": {"url":"https://www.youtube.com/watch?v=FeAysJe6FGA","title":"Omnigraph – open source graph database for your AI agents","acquired":"YouTube oEmbed title and public watch-page description with chapter timestamps","captions":"UNAVAILABLE"},
+  "performance_improvement":"NOT_MEASURED"
+}

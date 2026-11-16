@@ -21,7 +21,7 @@ For mechanisms and worked examples, read the [four walkthroughs](https://github.
 
 | Skill | Purpose |
 |---|---|
-| [clear-docs](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/clear-docs/SKILL.md) | Readable docs, wikis and slides. |
+| [clear-docs](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/clear-docs/SKILL.md) | Readable docs, wikis, slides and web design systems. |
 | [data-job-trial-run](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/data-job-trial-run/SKILL.md) | Run long or costly data jobs, training or migrations small first, then a sample, then in full. Use before jobs touching many files or rows, or running for minutes. |
 | [debug-systematically](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/debug-systematically/SKILL.md) | Find a bug's root cause before changing code. Use when something fails, throws or misbehaves and the cause is not obvious. |
 | [production-code](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/production-code/SKILL.md) | Production bar for code you write or change - errors, logging without secrets, tests that catch breakage, lint, and the checks before saying done. |
