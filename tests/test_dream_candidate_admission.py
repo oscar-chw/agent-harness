@@ -160,6 +160,47 @@ def test_scanning_an_empty_queue_creates_no_store(corpus):
     assert not (corpus / ".harness").exists()
 
 
+def test_review_packet_cli_deduplicates_without_losing_exact_evidence(corpus):
+    first = D.propose(corpus, "memory/contracts.md", "memory/reference.md", origin="dream-v1")
+    other = corpus / "memory/other.md"
+    other.write_bytes("# Approach\r\nEvidence in café.\r\n".encode())
+    second = D.propose(corpus, first["source"], "memory/other.md", origin="dream-v1")
+    result = subprocess.run(dream_cli(corpus, "review", first["id"], second["id"]),
+                            capture_output=True, text=True, timeout=10)
+    assert result.returncode == 0, result.stderr
+    packet = json.loads(result.stdout)
+    assert len(packet["sources"]) == 3
+    assert [row["id"] for row in packet["candidates"]] == [first["id"], second["id"]]
+    for candidate in (first, second):
+        for path, digest in candidate["sources"].items():
+            assert packet["sources"][path] == {
+                "sha256": digest, "text": (corpus / path).read_bytes().decode("utf-8")
+            }
+    assert D.read(corpus, first["id"])["status"] == "proposed"
+
+
+def test_review_packet_refuses_excess_output(corpus):
+    for name in ("contracts", "reference"):
+        (corpus / "memory" / f"{name}.md").write_text("# Evidence\n" + "x" * 33000)
+    candidate = D.propose(corpus, "memory/contracts.md", "memory/reference.md", origin="dream-v1")
+    result = subprocess.run(dream_cli(corpus, "review", candidate["id"]),
+                            capture_output=True, text=True, timeout=10)
+    assert result.returncode == 2
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "REFUSED" and "review packet" in payload["error"]
+    assert "sources" not in payload
+
+
+def test_review_packet_refuses_source_drift(corpus):
+    candidate = D.propose(corpus, "memory/contracts.md", "memory/reference.md", origin="dream-v1")
+    (corpus / candidate["target"]).write_text("# Changed\nFresh evidence.\n")
+    result = subprocess.run(dream_cli(corpus, "review", candidate["id"]),
+                            capture_output=True, text=True, timeout=10)
+    assert result.returncode == 2
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "REFUSED" and "source changed" in payload["error"]
+
+
 def test_candidate_tamper_is_refused(corpus):
     candidate = D.propose(corpus, "memory/contracts.md", "memory/reference.md", origin="dream-v1")
     path = corpus / ".harness/dreaming/candidates" / (candidate["id"] + ".json")
