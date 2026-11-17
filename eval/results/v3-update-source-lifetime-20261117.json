@@ -1,0 +1,57 @@
+{
+  "schema": "harness.update-source-qualification/v1",
+  "version": "3.0.2",
+  "status": "LOCAL_SOURCE_AND_CANDIDATE_UPGRADE_PASS",
+  "native_calls": 0,
+  "original_public_upgrade": {
+    "from": "3.0.0",
+    "to": "3.0.1",
+    "self_update_exit": 0,
+    "ordinary_update_exit": 1,
+    "saved_source_exists": false
+  },
+  "candidate_archive": {
+    "from": "3.0.0",
+    "to": "3.0.2",
+    "transport": "FROZEN_LOCAL_CANDIDATE",
+    "self_update_exit": 0,
+    "ordinary_update_exit": 0,
+    "preserved_files": 5,
+    "owner_installation_unchanged": true
+  },
+  "controls": [
+    {
+      "mutant": "implicit-source-recovery",
+      "test": "test_update_survives_deleted_archive_source_and_keeps_installed_package",
+      "exit": 1
+    },
+    {
+      "mutant": "installed-package-selection",
+      "test": "test_installed_layout_uses_its_package_when_called_from_another_checkout",
+      "exit": 1
+    }
+  ],
+  "source_bindings": [
+    {
+      "source": "src/agent_harness/cli.py",
+      "sha256": "70506efc964b8e5a8d52e32368f26fcc29c26819685a41d69fa30670f7c69d7b"
+    },
+    {
+      "source": "src/agent_harness/installer.py",
+      "sha256": "1d7c35cb6385a68c97012414fb97c37317394e9e691bbe81e9315dade20e93a4"
+    },
+    {
+      "source": "tests/test_update_source_lifetime.py",
+      "sha256": "14fb1d0d0c1a0a5802be98622c043be86b944d897730dbe88f703f5c87bc957f"
+    }
+  ],
+  "efficacy_promotion": "NOT_GRANTED",
+  "remote_device_rollout": "NOT_VERIFIED",
+  "full_gate": {
+    "passed": 3227,
+    "skipped": 1,
+    "xfailed": 2,
+    "seconds": 422.46
+  },
+  "public_upgrade": "PENDING_RELEASE"
+}
