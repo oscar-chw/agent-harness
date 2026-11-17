@@ -23,10 +23,10 @@ LIMIT = 65536
 MAX_CANDIDATES = 200
 
 
-def _encoded(value):
+def _encoded(value, label="dream record"):
     raw = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
     if len(raw) > LIMIT:
-        raise ValueError("dream record exceeds its byte bound")
+        raise ValueError(f"{label} exceeds its byte bound")
     return raw
 
 
@@ -280,14 +280,40 @@ def list_candidates(corpus):
     return {"candidates": [read(root, path.stem) for path in paths]}
 
 
+def review_packet(corpus, identities):
+    """Serialize pending candidates and their exact, shared source bytes for review."""
+    if not 1 <= len(identities) <= 32 or len(set(identities)) != len(identities):
+        raise ValueError("review packet requires 1 to 32 distinct candidates")
+    root, _ = _store(corpus)
+    packet = {"schema": "harness.dream-review/v1", "candidates": [], "sources": {}}
+    source_bytes = 0
+    for identity in identities:
+        candidate = read(root, identity)
+        if candidate["status"] != "proposed":
+            raise ValueError("review packet requires pending proposals")
+        packet["candidates"].append({k: candidate[k] for k in ("id", "source", "target")})
+        for name, expected in candidate["sources"].items():
+            if name not in packet["sources"]:
+                raw = _read(_source_path(root, name), LIMIT)
+                source_bytes += len(raw)
+                if source_bytes > LIMIT:
+                    raise ValueError("review packet exceeds its byte bound")
+                packet["sources"][name] = {"sha256": _sha(raw), "text": raw.decode("utf-8")}
+            if packet["sources"][name]["sha256"] != expected:
+                raise ValueError(f"dream source changed: {name}")
+    return _encoded(packet, "review packet")
+
+
 def add_parser(subparsers):
     parser = subparsers.add_parser("dream", help="stage candidate knowledge links; independent gates own admission")
     actions = parser.add_subparsers(dest="dream_action", required=True)
-    for name in ("stage", "list", "show", "admit", "withdraw"):
+    for name in ("stage", "list", "show", "review", "admit", "withdraw"):
         action = actions.add_parser(name)
         action.add_argument("corpus")
         if name == "stage":
             action.add_argument("--limit", type=int, default=8)
+        elif name == "review":
+            action.add_argument("candidates", nargs="+")
         elif name != "list":
             action.add_argument("candidate")
         if name == "admit":
@@ -305,6 +331,9 @@ def command(args):
             result = list_candidates(args.corpus)
         elif args.dream_action == "show":
             result = read(args.corpus, args.candidate)
+        elif args.dream_action == "review":
+            print(review_packet(args.corpus, args.candidates).decode("utf-8"))
+            return 0
         elif args.dream_action == "withdraw":
             result = withdraw(args.corpus, args.candidate, reason=args.reason)
         else:

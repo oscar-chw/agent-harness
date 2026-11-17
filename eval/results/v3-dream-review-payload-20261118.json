@@ -1,0 +1,21 @@
+{
+  "status": "PASS_REVIEW_PAYLOAD_REPLAY",
+  "corpus_sha256": "af6af2815cadc84b2b7ba589ef02a9b3e9d61937755b39106f7cbbe920a68781",
+  "candidate_report_sha256": "30115eb9a2cc6b424322e95e6fbc7eb1133b76c2fa247ea9dc04a4884515a831",
+  "pairs_verified": 58,
+  "baseline": {
+    "packets": 58,
+    "over_budget_batches": 0,
+    "review_json_bytes": 434932,
+    "source_text_bytes": 399376
+  },
+  "candidate": {
+    "packets": 9,
+    "over_budget_batches": 1,
+    "review_json_bytes": 339802,
+    "source_text_bytes": 311886
+  },
+  "semantic_quality": "NOT_RUN",
+  "promotion": "NOT_GRANTED",
+  "new_native_benchmark_calls": 0
+}
