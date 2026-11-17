@@ -1,0 +1,23 @@
+{
+  "schema": "harness.context-profile-qualification/v1",
+  "date": "2026-11-17",
+  "status": "SOURCE_AND_METADATA_ONLY",
+  "profile": "task_context",
+  "native_model_calls": 0,
+  "promotion": "NOT_GRANTED",
+  "candidate_efficacy": "NOT_RUN",
+  "controller_sha256": "9082f0f76d4ac59b6b877825efae7a331d43a7f33111eb6284ba859a29217f63",
+  "effective_memory_use_by_arm": {
+    "base": true,
+    "cand": false
+  },
+  "native_memory_generation": false,
+  "shared_project_retrieval": "RETAINED_AND_COLD_CHECKED",
+  "same_task_prompt": true,
+  "owner_config_unchanged": true,
+  "readback_status": "METADATA_AND_COLD_MCP_PASS",
+  "mutations_caught": 3,
+  "historical_controller_replay": "PINNED_ORIGINAL_SOURCE",
+  "historical_tamper_control": "REJECTED_BEFORE_IMPORT",
+  "scope": "Two authored continuation cases, covering a saved reporting preference and stale completion evidence. Effective native configuration and cold shared-store mechanics only. Actual prompt injection, model adherence, quality and savings remain unmeasured."
+}

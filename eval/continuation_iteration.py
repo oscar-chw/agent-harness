@@ -27,6 +27,12 @@ CASES = [
     {"goal": "Restore invoice rounding checks.", "next": "Inspect the retained decimal integration checks.", "done": False},
     {"goal": "Continue shipment audit.", "next": "Read the checksum mismatch evidence before changing the importer.", "done": False},
 ]
+CONTEXT_CASES = [
+    {"goal": "Continue the owner's scheduled sales report.",
+     "next": "Use the saved UTC+8 preference when checking the next report boundary.", "done": False},
+    {"goal": "Revalidate the warehouse migration before release.",
+     "next": "Rerun the stale checksum check; the claimed completion has no verified gate.", "done": False},
+]
 PROMPT = (
     "Resume the saved task from the shared harness MCP. Read only. Do not edit, "
     "execute the task, send messages or change trust/configuration. Use harness MCP "
@@ -45,7 +51,9 @@ class PrelaunchRefused(ValueError):
     """No model process has been started for this reserved attempt."""
 
 
-def _settings(actor, servers):
+def _settings(actor, servers, *, native_memory=None):
+    if native_memory is not None and type(native_memory) is not bool:
+        raise ValueError('native memory mode must be boolean')
     settings = {'model_provider': 'openai', 'service_tier': 'default', 'features.apps': False,
         'model_reasoning_effort': 'high', 'mcp_servers.harness.command': sys.executable,
         'mcp_servers.harness.args': installer.mcp_cmd(actor / 'store')[1:],
@@ -53,6 +61,9 @@ def _settings(actor, servers):
     settings.update({'mcp_servers.' + json.dumps(name): {
                          'enabled': False, 'command': sys.executable, 'args': ['-c', 'pass']}
                      for name in servers if name != 'harness'})
+    if native_memory is not None:
+        settings.update({'features.memories': True, 'memories.use_memories': native_memory,
+                         'memories.generate_memories': False})
     return settings
 
 
@@ -62,10 +73,11 @@ def _environment():
             if key not in excluded and not key.endswith('API_KEY')}
 
 
-def _native_context(executable, actor, model='gpt-6.1-sol'):
+def _native_context(executable, actor, model='gpt-6.1-sol', *, native_memory=None):
     """Read account mode and available surfaces without logging identity or credentials."""
-    command = [executable, 'app-server', '--stdio', '-c', 'model_provider="openai"',
-               '-c', 'model=' + json.dumps(model), '-c', 'model_reasoning_effort="high"', '--disable', 'apps']
+    command = [executable, 'app-server', '--stdio', '-c', 'model=' + json.dumps(model)]
+    for key, value in _settings(actor, [], native_memory=native_memory).items():
+        command += ['-c', key + '=' + installer._toml_val(value)]
     child = subprocess.Popen(command, cwd=actor / 'project', env=_environment(),
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
         bufsize=0, start_new_session=True)
@@ -102,12 +114,14 @@ def _native_context(executable, actor, model='gpt-6.1-sol'):
             raise PrelaunchRefused('native resolved model context differs')
         inventory = request(5, 'mcpServerStatus/list', {'limit': 100, 'detail': 'toolsAndAuthOnly',
             'threadId': thread['thread']['id']})
+        effective = request(6, 'config/read', {'includeLayers': False}).get('config') if native_memory is not None else None
         safe = {'auth_mode': account.get('account', {}).get('type') if isinstance(account.get('account'), dict) else None,
             'limits_type': type(limits).__name__, 'limit_keys': list(limits) if isinstance(limits, dict) else [],
             'credits_type': type(limits.get('credits')).__name__ if isinstance(limits, dict) else None,
             'has_credits': limits['credits'].get('hasCredits') if isinstance(limits, dict) and isinstance(limits.get('credits'), dict) else None}
         (actor / 'admission-metadata.json').write_text(json.dumps(safe, indent=2) + '\n')
-        return _admit_context(actor, account, limits, inventory)
+        return _admit_context(actor, account, limits, inventory,
+                              native_memory=native_memory, effective_config=effective)
     finally:
         try:
             os.killpg(child.pid, signal.SIGTERM)
@@ -120,7 +134,15 @@ def _native_context(executable, actor, model='gpt-6.1-sol'):
             child.wait()
 
 
-def _admit_context(actor, account, limits, inventory):
+def _admit_context(actor, account, limits, inventory, *, native_memory=None, effective_config=None):
+    if native_memory is not None:
+        memory = effective_config.get('memories') if isinstance(effective_config, dict) else None
+        if (type(native_memory) is not bool or not isinstance(memory, dict)
+                or not isinstance(effective_config.get('features'), dict)
+                or effective_config['features'].get('memories') is not True
+                or memory.get('use_memories') is not native_memory
+                or memory.get('generate_memories') is not False):
+            raise PrelaunchRefused('effective native memory settings differ')
     if not isinstance(account.get('account'), dict) or account['account'].get('type') != 'chatgpt':
         raise PrelaunchRefused('included native ChatGPT login is required')
     if (not isinstance(limits, dict) or not isinstance(limits.get('credits'), dict)
@@ -136,21 +158,27 @@ def _admit_context(actor, account, limits, inventory):
             or any(not isinstance(s, dict) or not isinstance(s.get('name'), str)
                    or not s['name'] for s in servers)):
         raise PrelaunchRefused('native MCP surface cannot be bounded by this study')
-    return {'auth_mode': 'chatgpt', 'paid_credits_available': limits['credits']['hasCredits'],
+    context = {'auth_mode': 'chatgpt', 'paid_credits_available': limits['credits']['hasCredits'],
             'included_window_open': True,
             'quota_used_percent': [w['usedPercent'] for w in windows],
             'surface_names_sha256': P.digest(sorted(s['name'] for s in servers)),
             'surface_control': 'per-invocation disable requests; extra actions independently rejected',
-            'settings': _settings(actor, [s['name'] for s in servers])}
+            'settings': _settings(actor, [s['name'] for s in servers], native_memory=native_memory)}
+    if native_memory is not None:
+        context['native_memory'] = {'use_memories': native_memory, 'generate_memories': False}
+    return context
 
 
 def _sources():
     files = sorted((ROOT / "src/agent_harness").rglob("*.py"))
-    files += [Path(__file__), ROOT / "eval/reasoning_iteration.py"]
+    files += [Path(__file__).resolve(), ROOT / "eval/reasoning_iteration.py"]
     return {str(p.relative_to(ROOT)): R.C._sha(p.read_bytes()) for p in files}
 
 
-def prepare(out, *, mode="native", model="gpt-6.1-sol", max_tokens=350000, timeout_seconds=120):
+def prepare(out, *, mode="native", model="gpt-6.1-sol", max_tokens=350000, timeout_seconds=120,
+            profile="inherited"):
+    if profile not in ('inherited', 'task_context'):
+        raise ValueError('unknown continuation profile')
     if (mode not in ("native", "simulation") or type(max_tokens) is not int
             or not 1 <= max_tokens <= 350000 or type(timeout_seconds) is not int
             or not 1 <= timeout_seconds <= 120):
@@ -162,7 +190,8 @@ def prepare(out, *, mode="native", model="gpt-6.1-sol", max_tokens=350000, timeo
     if not executable:
         raise ValueError("native Codex executable is unavailable")
     version = subprocess.check_output([executable, "--version"], text=True).strip() if mode == "native" else "fixture"
-    for index, case in enumerate(CASES, 1):
+    cases = CONTEXT_CASES if profile == 'task_context' else CASES
+    for index, case in enumerate(cases, 1):
         for arm in ("base", "cand"):
             actor = out / str(index) / arm
             project = actor / "project"
@@ -184,8 +213,11 @@ def prepare(out, *, mode="native", model="gpt-6.1-sol", max_tokens=350000, timeo
             _preflight(actor, case)
     frozen = {"schema": "continuation-iteration/v1", "mode": mode, "model": model, "effort": "high",
         "max_calls": 4, "max_tokens": max_tokens, "timeout_seconds": timeout_seconds,
-        "executable": executable, "native_version": version, "cases": CASES,
-        "prompt": PROMPT, "candidate": CANDIDATE, "sources": _sources(),
+        "executable": executable, "native_version": version, "cases": cases,
+        "prompt": PROMPT, "candidate": "" if profile == 'task_context' else CANDIDATE,
+        "profile": profile,
+        "memory_policy": {"base": True, "cand": False, "generate": False} if profile == 'task_context' else None,
+        "sources": _sources(),
         "orders": [["base", "cand"], ["cand", "base"]], "preparation_native_calls": 0,
         "acceptance": "all paired answers correct, MCP evidence, no extra actions, candidate inference tokens strictly fewer",
         "scope": "two authored continuation cases; total fresh-turn input plus output, cached subsets counted once; preparation/selection history and general transfer unmeasured"}
@@ -296,7 +328,14 @@ def _invoke(actor, prompt, frozen, expected):
         _preflight(actor, expected)
         if subprocess.check_output([frozen["executable"], "--version"], text=True, timeout=10).strip() != frozen["native_version"]:
             raise PrelaunchRefused("native executable version changed")
-        context = _native_context(frozen['executable'], actor, frozen['model'])
+        if frozen.get('profile') == 'task_context':
+            policy = frozen['memory_policy']
+            if policy != {'base': True, 'cand': False, 'generate': False} or actor.name not in ('base', 'cand'):
+                raise PrelaunchRefused('frozen native memory policy differs')
+            context = _native_context(frozen['executable'], actor, frozen['model'],
+                                      native_memory=policy[actor.name])
+        else:
+            context = _native_context(frozen['executable'], actor, frozen['model'])
     except (ValueError, OSError, subprocess.SubprocessError) as error:
         raise PrelaunchRefused(str(error)) from error
     options = []
@@ -412,8 +451,11 @@ def main():
     parser.add_argument("action", choices=("prepare", "execute"))
     parser.add_argument("out", type=Path)
     parser.add_argument("--authorized-execute")
+    parser.add_argument("--profile", choices=('inherited', 'task_context'))
     args = parser.parse_args()
-    result = prepare(args.out) if args.action == "prepare" else execute(args.out, authorized_execute=args.authorized_execute)
+    if args.action == 'execute' and args.profile is not None:
+        parser.error('execution uses the frozen profile')
+    result = prepare(args.out, profile=args.profile or 'inherited') if args.action == "prepare" else execute(args.out, authorized_execute=args.authorized_execute)
     print(json.dumps(result, sort_keys=True))
 
 
