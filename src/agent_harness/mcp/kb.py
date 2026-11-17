@@ -401,11 +401,15 @@ def profile_roots(hh: Path) -> List[Path]:
 def default_kb_paths(hh: Path, project: Optional[Path] = None) -> List[Path]:
     """The live roots of a session: the profile's, plus the current project's docs/README/AGENTS.md when
     the session runs inside a git project other than $HOME. Nothing from an unrelated cwd is indexed.
-    The harness's own content (rules, skills) is not: every tool already loads it natively."""
+    Shared research knowledge is indexed too. Native rules and skill bodies stay
+    outside this index because clients already discover them directly."""
     env = os.environ.get("HARNESS_KB_PATHS")
     if env:
         return [Path(os.path.expanduser(p)) for p in env.split(os.pathsep) if p]
     paths = profile_roots(hh)
+    # Keep the optional root selected so a running reader sees later publication.
+    paths.append(hh / "content" / "knowledge")
+    paths.append(hh / "vault")
     root = _project_root(project or Path.cwd())
     if root is not None:
         paths += [root / "docs", root / "README.md", root / "AGENTS.md"]
@@ -595,7 +599,14 @@ class KB:
     # -- discovery
     def _walk(self) -> List[Tuple[Path, str]]:
         profile = _profile_folder(self.home) if self._live_profile else []
-        return discover_files(profile + self.roots, errors=self._discovery_errors)
+        found, seen = [], set()
+        for path, relative in discover_files(profile + self.roots, errors=self._discovery_errors):
+            # One physical source may be selected through a profile alias too.
+            # Indexing both names makes section ids change between search/get.
+            if path not in seen:
+                seen.add(path)
+                found.append((path, relative))
+        return found
 
     def refresh(self) -> dict:
         """Reindex changed filesystem fingerprints; drop disappeared files. Returns counts."""

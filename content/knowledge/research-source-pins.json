@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "hash_scope": "SHA-256 of HTTP response body bytes returned by urllib, without text normalization. Raw source bodies are not retained.",
+  "records": [
+    {
+      "id": "HAM",
+      "url": "https://www.cs.virginia.edu/~robins/YouAndYourResearch.html",
+      "retrieved_utc": "2026-11-17T05:46:45.322215+00:00",
+      "status": 200,
+      "final_url": "https://www.cs.virginia.edu/~robins/YouAndYourResearch.html",
+      "media_type": "text/html",
+      "bytes": 82911,
+      "sha256": "7700c07e3f027676192f76052dfd471e254e35dc28458ce3d4595be6a2d5d6b0"
+    },
+    {
+      "id": "KES",
+      "url": "https://cs.uwaterloo.ca/~brecht/courses/854-http-video-2012/readings/keshav-paper-reading.pdf",
+      "retrieved_utc": "2026-11-17T05:46:45.322683+00:00",
+      "status": 200,
+      "final_url": "https://cs.uwaterloo.ca/~brecht/courses/854-http-video-2012/readings/keshav-paper-reading.pdf",
+      "media_type": "application/pdf",
+      "bytes": 48347,
+      "sha256": "e3d97831bc19b60af9798bb6f0619b18bb886c0afb6ad3fc7a8b2f97512d32f7"
+    },
+    {
+      "id": "SPJ",
+      "url": "https://www.microsoft.com/en-us/research/uploads/prod/2016/07/How-to-write-a-great-research-paper.pdf",
+      "retrieved_utc": "2026-11-17T05:46:45.322863+00:00",
+      "status": 200,
+      "final_url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/07/How-to-write-a-great-research-paper.pdf",
+      "media_type": "application/pdf",
+      "bytes": 513948,
+      "sha256": "87fc803388d6b3d567554f75e4105e9657ba9d175a59e56accbb5701fc869cd1"
+    },
+    {
+      "id": "NCP",
+      "url": "https://neurips.cc/public/guides/PaperChecklist",
+      "retrieved_utc": "2026-11-17T05:46:45.323054+00:00",
+      "status": 200,
+      "final_url": "https://neurips.cc/public/guides/PaperChecklist",
+      "media_type": "text/html; charset=utf-8",
+      "bytes": 73699,
+      "sha256": "00b037f51b19548e9e49749eadb141e84860e08dfbe351211496d405898ff10a"
+    },
+    {
+      "id": "NRG",
+      "url": "https://nips.cc/Conferences/2025/ReviewerGuidelines",
+      "retrieved_utc": "2026-11-17T05:46:46.929430+00:00",
+      "status": 200,
+      "final_url": "https://nips.cc/Conferences/2025/ReviewerGuidelines",
+      "media_type": "text/html; charset=utf-8",
+      "bytes": 93490,
+      "sha256": "ea49abdc4a5954b94d159085144db908b6a7313c103fa4745a7ca88b0639afe2"
+    },
+    {
+      "id": "SIG",
+      "url": "https://conferences.sigcomm.org/sigcomm/2026/artifacts/",
+      "retrieved_utc": "2026-11-17T05:46:47.540873+00:00",
+      "status": 200,
+      "final_url": "https://conferences.sigcomm.org/sigcomm/2026/artifacts/",
+      "media_type": "text/html",
+      "bytes": 36475,
+      "sha256": "2b201e48e05c6b1e24f1edfb5461dbe6e10c56d413b15f2e03fc5a54e035d6c5"
+    },
+    {
+      "id": "ASA",
+      "url": "https://www.amstat.org/asa/files/pdfs/p-valuestatement.pdf",
+      "retrieved_utc": "2026-11-17T05:46:47.745145+00:00",
+      "status": 200,
+      "final_url": "https://www.amstat.org/asa/files/pdfs/p-valuestatement.pdf",
+      "media_type": "application/pdf",
+      "bytes": 242050,
+      "sha256": "5327785901ea402c063458e9d061b131a2f4a81c8a6d46fd9e217238b61f8ca9"
+    },
+    {
+      "id": "LAK",
+      "url": "https://pure.tue.nl/ws/portalfiles/portal/80918653/lakeequi2017.pdf",
+      "retrieved_utc": "2026-11-17T05:46:48.340227+00:00",
+      "status": 200,
+      "final_url": "https://pure.tue.nl/ws/portalfiles/portal/80918653/lakeequi2017.pdf",
+      "media_type": "application/pdf",
+      "bytes": 306931,
+      "sha256": "9b6388a987cbabe19a996f4457ea82ec503a2d73f777ea6d4cc0da7511392abe"
+    },
+    {
+      "id": "NOSEK",
+      "url": "https://psychologicalsciences.unimelb.edu.au/__data/assets/pdf_file/0007/2888098/The-preregistration-revolution.pdf",
+      "retrieved_utc": "2026-11-17T05:46:48.395779+00:00",
+      "status": "FETCH_FAILED",
+      "error": "HTTP Error 403: Forbidden",
+      "bibliographic_pin": {
+        "doi": "10.1073/pnas.1708274114",
+        "edition": "PNAS 115(11), 2600-2606, 2018",
+        "read_extent": "Extracted paper text, published pages 2600-2602, selected sections as described in sources.md"
+      },
+      "sha256": null,
+      "content_pin_status": "UNAVAILABLE",
+      "alternate_attempts": [
+        {
+          "url": "https://sep.csumb.edu/class/ENVS550/s3/lit/Ethics/NosekEtAl_2018.pdf",
+          "status": "FETCH_FAILED",
+          "error": "SSL EOF during direct HTTP retrieval. Web open also reported inaccessible."
+        }
+      ]
+    },
+    {
+      "id": "FIG",
+      "url": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003833",
+      "retrieved_utc": "2026-11-17T05:46:49.221226+00:00",
+      "status": 200,
+      "final_url": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003833",
+      "media_type": "text/html;charset=UTF-8",
+      "bytes": 128048,
+      "sha256": "dbc2ee3b51077aad016143e4bb7cfb1e2b29a7f32c8b154108afb53f2fe03d4a"
+    },
+    {
+      "id": "IMG",
+      "url": "https://proceedings.mlr.press/v97/recht19a/recht19a.pdf",
+      "retrieved_utc": "2026-11-17T05:46:49.296016+00:00",
+      "status": 200,
+      "final_url": "https://proceedings.mlr.press/v97/recht19a/recht19a.pdf",
+      "media_type": "application/pdf",
+      "bytes": 743145,
+      "sha256": "a4bb387e2ef3513173654f136dcd709a0f7db034ff54616b550bd90ab8d5261d"
+    },
+    {
+      "id": "RLI",
+      "url": "https://proceedings.neurips.cc/paper_files/paper/2021/file/f514cec81cb148559cf475e7426eed5e-Paper.pdf",
+      "retrieved_utc": "2026-11-17T05:46:49.378165+00:00",
+      "status": 200,
+      "final_url": "https://proceedings.neurips.cc/paper_files/paper/2021/file/f514cec81cb148559cf475e7426eed5e-Paper.pdf",
+      "media_type": "application/pdf",
+      "bytes": 10255284,
+      "sha256": "7553e280d4a1560860bc5f6be2d70539fc5b510e0e3bb2d556824e51e9a80252"
+    },
+    {
+      "id": "DESIGN",
+      "url": "https://www.itl.nist.gov/div898/handbook/pri/section3/pri33.htm",
+      "retrieved_utc": "2026-11-17T05:46:50.097336+00:00",
+      "status": 200,
+      "final_url": "https://www.itl.nist.gov/div898/handbook/pri/section3/pri33.htm",
+      "media_type": "text/html; charset=utf-8",
+      "bytes": 10809,
+      "sha256": "1b061dafc2d896cf88d8a04f9da2db19f757d1b523fb1f9cc245b3962753244a"
+    },
+    {
+      "id": "BLOCK",
+      "url": "https://www.itl.nist.gov/div898/handbook/pri/section3/pri332.htm",
+      "retrieved_utc": "2026-11-17T05:46:50.435893+00:00",
+      "status": 200,
+      "final_url": "https://www.itl.nist.gov/div898/handbook/pri/section3/pri332.htm",
+      "media_type": "text/html; charset=utf-8",
+      "bytes": 20514,
+      "sha256": "4a5dcd8b87f60c96df58f89d84ae37ad4a8fa06e805e7cd37dde045287da8641"
+    },
+    {
+      "id": "FACTOR",
+      "url": "https://www.itl.nist.gov/div898/handbook/pri/section3/pri333.htm",
+      "retrieved_utc": "2026-11-17T05:46:50.709409+00:00",
+      "status": 200,
+      "final_url": "https://www.itl.nist.gov/div898/handbook/pri/section3/pri333.htm",
+      "media_type": "text/html; charset=utf-8",
+      "bytes": 6733,
+      "sha256": "08158de1e09d5e01f5b19b95ce5f3ef33a070a7e7d6e50941f664eb2ce39ad73"
+    },
+    {
+      "id": "ORI",
+      "url": "https://ori.hhs.gov/definition-research-misconduct",
+      "retrieved_utc": "2026-11-17T05:46:51.966621+00:00",
+      "status": 200,
+      "final_url": "https://ori.hhs.gov/definition-research-misconduct",
+      "media_type": "text/html; charset=UTF-8",
+      "bytes": 49419,
+      "sha256": "ef9a0364dbd1fee725026cee52b2d89184bc37962c5f4b13f84f6b1907cd8ba0"
+    },
+    {
+      "id": "IMGART",
+      "url": "https://raw.githubusercontent.com/modestyachts/ImageNetV2/0b0c3fe89058e4c7ee2348938b3f4f706a931bf3/README.md",
+      "retrieved_utc": "2026-11-17T05:47:24.782289+00:00",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/modestyachts/ImageNetV2/0b0c3fe89058e4c7ee2348938b3f4f706a931bf3/README.md",
+      "media_type": "text/plain; charset=utf-8",
+      "bytes": 12080,
+      "sha256": "b19448813a7e3bcb73c5db0a2d07c06d4af1d75c9e98e4b2e18b695a263d179d",
+      "repository": "modestyachts/ImageNetV2",
+      "commit": "0b0c3fe89058e4c7ee2348938b3f4f706a931bf3",
+      "path": "README.md",
+      "commit_api_url": "https://api.github.com/repos/modestyachts/ImageNetV2/commits/master",
+      "commit_metadata_sha256": "d26e77fdeb81f903487fe88a48d8bccae555ded8c38f5b0d85df123d7cb3c77f",
+      "permalink": "https://github.com/modestyachts/ImageNetV2/blob/0b0c3fe89058e4c7ee2348938b3f4f706a931bf3/README.md"
+    },
+    {
+      "id": "SPEC",
+      "url": "https://raw.githubusercontent.com/pedrohcgs/claude-code-my-workflow/fe7077463c06e6d1572bb6c13d1b00525a4ff28e/.claude/skills/interview-me/SKILL.md",
+      "retrieved_utc": "2026-11-17T05:47:27.547568+00:00",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/pedrohcgs/claude-code-my-workflow/fe7077463c06e6d1572bb6c13d1b00525a4ff28e/.claude/skills/interview-me/SKILL.md",
+      "media_type": "text/plain; charset=utf-8",
+      "bytes": 7169,
+      "sha256": "cc1ca11146e737830f31f4f5c10dc74be617d9ecd86a892876763d891e8086ea",
+      "repository": "pedrohcgs/claude-code-my-workflow",
+      "commit": "fe7077463c06e6d1572bb6c13d1b00525a4ff28e",
+      "path": ".claude/skills/interview-me/SKILL.md",
+      "commit_api_url": "https://api.github.com/repos/pedrohcgs/claude-code-my-workflow/commits/main",
+      "commit_metadata_sha256": "c758cdcf27bb603a677b25dcae071acdfb3cad85b67ba5d66f11a329435c6be1",
+      "permalink": "https://github.com/pedrohcgs/claude-code-my-workflow/blob/fe7077463c06e6d1572bb6c13d1b00525a4ff28e/.claude/skills/interview-me/SKILL.md"
+    }
+  ],
+  "unadopted_access_outcomes": [
+    {
+      "url": "https://www.acm.org/publications/policies/artifact-review-and-badging-current",
+      "channel": "web",
+      "outcome": "HTTP 403. Used the scoped SIGCOMM 2026 artifact call instead."
+    },
+    {
+      "url": "https://ojs.aaai.org/index.php/AAAI/article/view/11694",
+      "channel": "web",
+      "outcome": "Access-denied bot-protection page. Source was not used."
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5856500/",
+      "channel": "web",
+      "outcome": "Browser-check page. Used extracted text from a university-hosted published-paper copy."
+    }
+  ]
+}

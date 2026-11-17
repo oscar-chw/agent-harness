@@ -81,8 +81,9 @@ class ProjectMemory:
         if type(max_bytes) is not int or max_bytes <= 0:
             raise ValueError("memory storage budget must be positive")
         self.max_bytes = max_bytes
-        # H6b: optional write-time backflow guard (duck-typed: memory_guard.Guard).
-        self.guard = guard
+        from .memory_admission import Admission
+        self.guard = guard if guard is not None else Admission(
+            self.root, _area(self.root) / "memory-admission.json")
         self._directory()
 
     def _directory(self):

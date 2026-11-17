@@ -234,7 +234,8 @@ class Server:
             if self._board is None:
                 from agent_harness.shared_board import SharedBoard
                 self._board = SharedBoard(self._home, self._op_cwd)
-            self._board.publish(args.get("summary", args.get("text", "")))
+            self._board.publish(args.get("summary", args.get("text", "")),
+                                state_path=result.get("path") if name == "state_save" else None)
         except (OSError, ValueError, TypeError):
             return "Shared board checkpoint unavailable; saved source checkpoint remains authoritative."
         return ""

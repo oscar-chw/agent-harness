@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "id": "allocation",
+      "family": "causal",
+      "facts": "Two clinics choose treatment by severity. Treated: 10 mild patients, 9 recover; 90 severe, 18 recover. Untreated: 90 mild, 72 recover; 10 severe, 1 recovers. No randomized allocation or other evidence exists.",
+      "output": "decision is one of causal_benefit, causal_harm, causal_unknown. Include treated_recoveries and untreated_recoveries as integers. Causal claims require identified treatment effects.",
+      "expected": {
+        "decision": "causal_unknown",
+        "treated_recoveries": 27,
+        "untreated_recoveries": 73
+      }
+    },
+    {
+      "id": "randomized",
+      "family": "causal",
+      "facts": "In this finite closed population, randomization is the sole cause of group assignment, all outcomes are observed, and there is no interference. Treatment: 80 of 100 recover. Control: 60 of 100 recover. Report the observed randomized risk difference, without extrapolation.",
+      "output": "Return risk_difference_percentage_points as an integer.",
+      "expected": {
+        "risk_difference_percentage_points": 20
+      }
+    },
+    {
+      "id": "reversed_time",
+      "family": "causal",
+      "facts": "A daily report finalizes all revenue at 12:00. An alert is triggered at 13:00 whenever that revenue is low. The alert has no path to earlier transactions. Alert days have lower revenue. Consider only whether this alert caused the already-finalized revenue.",
+      "output": "decision is one of alert_caused_prior_revenue, alert_cannot_cause_prior_revenue.",
+      "expected": {
+        "decision": "alert_cannot_cause_prior_revenue"
+      }
+    },
+    {
+      "id": "shared_cause",
+      "family": "causal",
+      "facts": "An independent fair bit Z determines both X=Z and Y=Z. The complete structural equations are X=Z, Y=Z. Intervention sets X=1 while leaving Z unchanged. Compute the fraction with Y=1 after intervention.",
+      "output": "Return y_one_fraction as a reduced rational string n/d.",
+      "expected": {
+        "y_one_fraction": "1/2"
+      }
+    },
+    {
+      "id": "screen_rare",
+      "family": "base_rate",
+      "facts": "Exactly 1000 people are screened. 10 have the condition. Exactly 8 of those test positive. Exactly 99 of the 990 without it test positive. Choose one uniformly from positive tests.",
+      "output": "Return condition_given_positive as a reduced rational string n/d.",
+      "expected": {
+        "condition_given_positive": "8/107"
+      }
+    },
+    {
+      "id": "alarm_common",
+      "family": "base_rate",
+      "facts": "Of 200 machines, 80 are faulty. Exactly 60 faulty machines alarm. Exactly 30 nonfaulty machines alarm. Choose one uniformly from alarming machines.",
+      "output": "Return faulty_given_alarm as a reduced rational string n/d.",
+      "expected": {
+        "faulty_given_alarm": "2/3"
+      }
+    },
+    {
+      "id": "negative_test",
+      "family": "base_rate",
+      "facts": "Among 500 items, 100 are defective. The test flags exactly 90 defective and 20 sound items. A uniformly chosen item has a negative test.",
+      "output": "Return defective_given_negative as a reduced rational string n/d.",
+      "expected": {
+        "defective_given_negative": "1/39"
+      }
+    },
+    {
+      "id": "screen_action",
+      "family": "base_rate",
+      "facts": "Exactly 2 of 20 selected positives have the condition. Treating any selected person costs 3 units, and averts exactly 20 units of loss only if they have the condition. No other effects. Minimize expected cost for a uniformly selected positive.",
+      "output": "decision is treat or decline. Include expected_averted_loss as an integer.",
+      "expected": {
+        "decision": "decline",
+        "expected_averted_loss": 2
+      }
+    },
+    {
+      "id": "join_fanout",
+      "family": "sql",
+      "facts": "orders(id,total): (A,100),(B,80). lines(order_id): A,A,B. payments(order_id): A,A,A,B,B. Inner join orders to both child tables on order_id. Independently report revenue summed once per order.",
+      "output": "Return joined_rows, joined_sum_total and once_per_order_total as integers.",
+      "expected": {
+        "joined_rows": 8,
+        "joined_sum_total": 760,
+        "once_per_order_total": 180
+      }
+    },
+    {
+      "id": "left_count",
+      "family": "sql",
+      "facts": "parents(id): A,B,C. children(id,parent_id): (1,A),(2,A),(3,B). SQL SELECT p.id,COUNT(*),COUNT(c.id) FROM parents p LEFT JOIN children c ON c.parent_id=p.id GROUP BY p.id.",
+      "output": "Return C_count_star and C_count_child_id as integers.",
+      "expected": {
+        "C_count_star": 1,
+        "C_count_child_id": 0
+      }
+    },
+    {
+      "id": "join_average",
+      "family": "sql",
+      "facts": "orders(id,total): A=10,B=100. lines have 9 rows for A and 1 row for B. Joining lines to orders produces one row per line. Compute AVG(order.total) on the join and AVG(total) on orders.",
+      "output": "Return joined_average and order_average as integers.",
+      "expected": {
+        "joined_average": 19,
+        "order_average": 55
+      }
+    },
+    {
+      "id": "retry_deadline",
+      "family": "retry",
+      "facts": "Each attempt takes exactly 4 seconds. Start at t=0. After each failed attempt wait exactly 2 seconds before another. Every attempt fails. A strict absolute deadline is t=15. Launch only attempts that can finish by the deadline. Maximum 3 attempts.",
+      "output": "Return attempts_started and last_finish_second as integers.",
+      "expected": {
+        "attempts_started": 2,
+        "last_finish_second": 10
+      }
+    },
+    {
+      "id": "retry_exact",
+      "family": "retry",
+      "facts": "Each attempt takes exactly 3 seconds. Start at t=0. After each failed attempt wait 1 second. Every attempt fails. Absolute deadline is t=11, completion exactly at deadline allowed. Maximum 3 attempts.",
+      "output": "Return attempts_started and last_finish_second as integers.",
+      "expected": {
+        "attempts_started": 3,
+        "last_finish_second": 11
+      }
+    },
+    {
+      "id": "retry_after",
+      "family": "retry",
+      "facts": "At t=0 an attempt returns rate-limited and guarantees no effect. Retry-After requires waiting 6 seconds. Each future attempt would take 1 second. Deadline t=5. Respect Retry-After and start only attempts that can finish by deadline.",
+      "output": "Return additional_attempts as an integer.",
+      "expected": {
+        "additional_attempts": 0
+      }
+    },
+    {
+      "id": "lost_idempotent",
+      "family": "external_effect",
+      "facts": "A charge request with key K lost its response. The service guarantees durable idempotency: any request with the same key and body returns the original result and creates at most one charge. Retention is still active. The original may or may not have committed. The goal requires completing the charge.",
+      "output": "decision is retry_same_key, retry_new_key or report_success. Include maximum_total_charges as an integer after the chosen retry.",
+      "expected": {
+        "decision": "retry_same_key",
+        "maximum_total_charges": 1
+      }
+    },
+    {
+      "id": "lost_ambiguous",
+      "family": "external_effect",
+      "facts": "A non-idempotent transfer timed out. It may have committed. All authoritative status queries are unavailable. No safe deduplication mechanism exists. Duplicate transfers are forbidden. No deadline overrides that rule.",
+      "output": "decision is resend, report_success or hold_unknown.",
+      "expected": {
+        "decision": "hold_unknown"
+      }
+    },
+    {
+      "id": "rejected_before_effect",
+      "family": "external_effect",
+      "facts": "The service authoritatively rejected a request before accepting or applying it. The record guarantees zero effects. A corrected request is valid, permitted, has no competing attempts and must produce exactly one effect.",
+      "output": "decision is retry_corrected or hold_unknown. Include prior_effects as an integer.",
+      "expected": {
+        "decision": "retry_corrected",
+        "prior_effects": 0
+      }
+    },
+    {
+      "id": "multiple_tests",
+      "family": "research",
+      "facts": "20 hypotheses were tested. Family-wise alpha is 0.05. The preregistered rule is Bonferroni, reject when p <= alpha/20. The smallest p is 0.01.",
+      "output": "Return rejected_hypotheses as an integer.",
+      "expected": {
+        "rejected_hypotheses": 0
+      }
+    },
+    {
+      "id": "equivalence",
+      "family": "research",
+      "facts": "The estimated difference is 0, with 95% CI [-10,10]. Equivalence requires this entire interval inside [-2,2]. No other evidence is available.",
+      "output": "decision is equivalent or equivalence_not_established.",
+      "expected": {
+        "decision": "equivalence_not_established"
+      }
+    },
+    {
+      "id": "holdout_reuse",
+      "family": "research",
+      "facts": "A model was selected by repeatedly examining the test set and tuning to it. A new untouched sample is available. The required claim is performance on unseen samples under the chosen data-generating process.",
+      "output": "decision is report_old_test_as_unseen or evaluate_new_untouched_sample.",
+      "expected": {
+        "decision": "evaluate_new_untouched_sample"
+      }
+    },
+    {
+      "id": "paired_research",
+      "family": "research",
+      "facts": "A preregistered paired instrument measures baseline and candidate on 4 matched tasks. Baseline errors [4,6,8,10], candidate errors [3,5,7,9]. Smaller is better. No population generalization is requested.",
+      "output": "Return paired_error_differences as four integers in candidate-minus-baseline order, and observed_tasks_improved as an integer.",
+      "expected": {
+        "paired_error_differences": [
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "observed_tasks_improved": 4
+      }
+    },
+    {
+      "id": "direct_arithmetic",
+      "family": "intent",
+      "facts": "The requester says: Give only the result of 17 times 6. For this instrument the object must include work, and direct-result requests require an empty work array.",
+      "output": "Return result as an integer and work as an array of integers.",
+      "expected": {
+        "result": 102,
+        "work": []
+      }
+    },
+    {
+      "id": "teach_distribution",
+      "family": "intent",
+      "facts": "The requester says: Teach me 6*(2+5) by distributivity. For this instrument teaching requires work to list the two products 6*2 then 6*5, followed by their sum. result is the final answer.",
+      "output": "Return result as an integer and work as an array of three integers.",
+      "expected": {
+        "result": 42,
+        "work": [
+          12,
+          30,
+          42
+        ]
+      }
+    },
+    {
+      "id": "direct_equation",
+      "family": "intent",
+      "facts": "The requester says: I know the method. Give only x for 3*x+5=26. For this instrument direct-result requests require an empty work array.",
+      "output": "Return x as an integer and work as an array of integers.",
+      "expected": {
+        "x": 7,
+        "work": []
+      }
+    }
+  ]
+}

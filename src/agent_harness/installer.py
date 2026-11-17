@@ -901,7 +901,7 @@ def _replace_profile(hh: Path, source: Path) -> Optional[Path]:
 
 def copy_harness(hh: Path, source: Path, profile_dir: Optional[Path]) -> Optional[Path]:
     hh.mkdir(parents=True, exist_ok=True)
-    for sub in ("memory", "lessons"):
+    for sub in ("memory", "lessons", "vault"):
         (hh / sub).mkdir(exist_ok=True)
     lib = hh / "lib" / "agent_harness"
     selected_package = Path(source) / "src" / "agent_harness"

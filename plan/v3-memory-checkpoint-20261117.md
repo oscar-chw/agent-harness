@@ -1,0 +1,11 @@
+## goal: Persist automatic State checkpoints for cold readers within the authorized project
+
+Done-condition: the affected model-free suite below exits 0 after a failing cold-reader reproduction.
+
+existing: inspected State.state_save/state_load, SharedBoard previews/coalescing, OperationalState checkpoint validation, source-vault bounded reads/atomic publication, and existing cold-reader/project-isolation controls. Root owns runtime root binding, tombstone policy and native verification.
+
+- [x] 1. Persist and bind automatic State packets for cold pickup | ctx: src/agent_harness/shared_board.py,src/agent_harness/mcp/server.py | owner: agent@redacted-host/s77484 | gate: PYTHONPATH=src python3 -m pytest -q tests/test_board_automatic.py tests/test_v3_board_followups.py tests/test_v3_workplace_board.py tests/test_operational_idle_recovery.py tests/test_session_memory_protocol.py tests/test_task_control_bridge.py tests/test_board_hooks.py tests/test_operational_context.py
+      2026-11-17T07:01:41Z RED first cold-reader reproduction exited 1 (checkpoint_status none instead of present). Initial implementation exposed absent-task status lookup; switched to snapshot selection. RED packet tamper probe exited 1 (claim admitted changed bytes); reuse existing evidence digest binding. No gate weakened.
+      2026-11-17T07:03:10Z RED reconnect downgrade test exited 1 (old actionable State remained idle_ready after unstructured replacement). Reused the same State identity for diagnostic updates, preserving legacy preview while retiring old next-action metadata.
+      2026-11-17T07:03:16Z exit 0 in 5s [85df8a3d] — ........................................................................ [ 54%] / ............................................................             [100%] / 132 passed in 5.74s
+      2026-11-17T07:05:15Z Affected gate PASS132 in5.74s; adjacent operational/process/handoff/interview/transport/KB metadata checks PASS66 in18.18s. /usr/bin/python3 -m ruff check --config ruff.toml on three owned Python files PASS. Temporary copied-source mutation controls rejected omitted task fields and omitted evidence binding (each pytest exit1/AssertionError). Initial bare ruff and Homebrew-module attempts unavailable; repo-declared system interpreter succeeded. No installs.

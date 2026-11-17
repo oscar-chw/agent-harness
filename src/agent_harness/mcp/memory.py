@@ -128,9 +128,9 @@ class Memory:
         self.fts = _kb.fts5_available() if fts is None else (fts and _kb.fts5_available())
         self.caps = dict(CAPS, **(caps or {}))
         self.project = str(project_root(project))
-        # H6b: optional write-time backflow guard (duck-typed: agent_harness.memory_guard.Guard).
-        # None keeps the store exactly as before.
-        self.guard = guard
+        from agent_harness.memory_admission import Admission
+        self.guard = guard if guard is not None else Admission(
+            self.home / "vault", self.home / "profile/memory-admission.json")
         self.con = _kb.connect(Path(db_path) if db_path else self.home / "index.sqlite")
         self.con.executescript("""
             CREATE TABLE IF NOT EXISTS mem_items(

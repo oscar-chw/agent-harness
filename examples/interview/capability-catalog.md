@@ -25,10 +25,11 @@ For mechanisms and worked examples, read the [four walkthroughs](https://github.
 | [data-job-trial-run](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/data-job-trial-run/SKILL.md) | Run long or costly data jobs, training or migrations small first, then a sample, then in full. Use before jobs touching many files or rows, or running for minutes. |
 | [debug-systematically](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/debug-systematically/SKILL.md) | Find a bug's root cause before changing code. Use when something fails, throws or misbehaves and the cause is not obvious. |
 | [production-code](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/production-code/SKILL.md) | Production bar for code you write or change - errors, logging without secrets, tests that catch breakage, lint, and the checks before saying done. |
+| [research-paper](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/research-paper/SKILL.md) | Research questions, experiments and scientific papers. |
 | [session-memory](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/session-memory/SKILL.md) | Inspect shared task handoffs and maintain evidence-backed memory during multi-step work. |
 | [standards](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/standards/SKILL.md) | Quality bar for tests, evals, gates and review - test tiers, real gates, tests that cannot fail. Load before writing a test or eval, or reviewing a diff. |
 | [verify-before-done](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/verify-before-done/SKILL.md) | Show real evidence before saying done, fixed or working. Use before any completion claim, hand-back, commit or pull request. |
-| [work-loop](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/work-loop/SKILL.md) | Default loop for research, coding and dev-ops - analyse, research, plan, execute, test, loop back where the evidence points. Use for any task beyond a one-line change. |
+| [work-loop](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/work-loop/SKILL.md) | Adaptive problem solving for material research, coding and operations. |
 | [write-tests-first](https://github.com/oscar-chw/agent-harness/blob/main/content/skills/write-tests-first/SKILL.md) | Write a failing test first, make it pass, then prove the tests catch breakage. Use when adding behaviour, fixing a bug, or changing untested logic. |
 
 ## MCP tools
@@ -63,7 +64,7 @@ Additional default-off features are `check_guard`, `memory_snapshot` and `skill_
 
 Use `harness COMMAND --help` for exact options.
 
-`privileges` · `evidence` · `continuation` · `install` · `uninstall` · `status` · `explain` · `doctor` · `cache-status` · `source-coverage` · `source-inventory` · `warmup` · `update` · `learn` · `sync` · `model-registry` · `daily-discovery` · `self-update` · `improve` · `discover` · `run` · `review` · `vault-read` · `vault-document` · `vault-search` · `memory-page` · `memory-read` · `op` · `task` · `launch` · `loop-check` · `method` · `preset` · `handoff` · `workspace`
+`privileges` · `evidence` · `continuation` · `install` · `uninstall` · `status` · `explain` · `doctor` · `cache-status` · `source-coverage` · `source-inventory` · `warmup` · `update` · `learn` · `sync` · `model-registry` · `daily-discovery` · `self-update` · `improve` · `discover` · `run` · `review` · `vault-read` · `vault-document` · `vault-search` · `memory-page` · `memory-read` · `op` · `task` · `launch` · `loop-check` · `method` · `preset` · `research` · `dream` · `handoff` · `workspace`
 
 The separate `plan` CLI provides graph operations including new, context, ready, claim, gate, status and run.
 

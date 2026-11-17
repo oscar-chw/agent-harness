@@ -1,0 +1,1 @@
+Identify the requested deliverable and decisive facts. Check units, denominators, dependence, timing, and whether observations distinguish alternatives. Choose the action justified by those facts, preserving uncertainty. Verify consequences and the output contract. For direct requests give the result. For teaching include a short derivation.

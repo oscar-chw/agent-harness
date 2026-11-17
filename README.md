@@ -2,12 +2,12 @@
 
 Shared task state, source-backed memory and executable completion checks for AI coding clients.
 
-**Current runtime release — v3.0.0rc2.** The candidate is installed and checked on Mac Studio and the research connection account. MacBook readback and broader learning efficacy remain open. [Release](https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0rc2)
+**v3.0.0 release candidate source.** This integration adds durable acquired knowledge, automatic checkpoint packets, research withdrawal and gated dream proposals. Installed and device readback are reported separately in the [current readiness record](docs/v3/readiness-20261117.md). [Release](https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0rc2)
 
 [![CI](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml)
 [![Lint](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml)
 
-[Walkthroughs](docs/walkthrough/README.md) · [Run the interview demo](examples/interview/README.md) · [All capabilities](docs/CAPABILITIES.md) · [Architecture](examples/interview/architecture.svg) · [Evidence](docs/v3/qualification-20261113.md) · [Install](#install)
+[Walkthroughs](docs/walkthrough/README.md) · [Run the interview demo](examples/interview/README.md) · [All capabilities](docs/CAPABILITIES.md) · [Architecture](examples/interview/architecture.svg) · [Evidence](docs/v3/readiness-20261117.md) · [Install](#install)
 
 ## What happens when a session starts
 
@@ -26,10 +26,10 @@ flowchart TB
     clients --> gateway
     gateway <-->|Read and checkpoint| board
     gateway <-->|Retrieve and record| memory
-    gateway -->|Plan tool when enabled| graph
+    gateway -->|Plan tool when enabled| workGraph
     workGraph --> controls
     controls --> work
-    work -->|Failed gate returns pending| graph
+    work -->|Failed gate returns pending| workGraph
     work -->|Observed outcome and measured cost| evaluation
     evaluation -.->|Qualified candidate only| memory
 ```
@@ -51,7 +51,7 @@ These are task-dependent capabilities. A whole lifecycle is useful where depende
 
 ## What ships
 
-- **9 skills** for work loops, production code, debugging, tests, standards, verification, session memory, data-job trials and clear documentation.
+- **10 skills** for work loops, production code, debugging, tests, standards, verification, session memory, data-job trials and clear documentation.
 - **17 MCP tool definitions**, covering knowledge, facts, lessons, saved state, task coordination, session inspection, method candidates and the work graph. `run_checks` is opt-in.
 - **7 templates, 4 reusable prompts and 4 task presets**, with explicit input/output and permission contracts.
 - **4 routing tiers**, constrained by configured model/effort support. Advisory automatic progression ships disabled until configured and qualified.
@@ -78,8 +78,9 @@ Open `examples/interview/guide.html` for the offline architecture, five-minute p
 |---|---|---|
 | Current memory against retained source history | 111,825 → 99,886 observed input/output tokens, **10.68% fewer** | 4 authored pairs, matched model/effort/facts, 4/4 correct in each arm; packet-level result |
 | Generated-procedure trial | Candidate-charged 172,569 tokens against baseline 48,969 | Adoption remains held; failed trials and preparation costs retained |
+| Compact guide replacing an existing long guide | 24/24 correct per arm; **3.50% fewer** inference tokens | 6 matched authored batches; no general reasoning or net-project saving claim |
 | Full reasoning-guide treatment | +3.38% tokens and one response-length failure | Treatment remains unadopted; learner transfer unmeasured |
-| rc2 release regression | 3,021 passed, 2 skipped, 2 expected failures | Release-bound run; newer documentation/demo checks are reported by CI |
+| Historical rc2 release regression | 3,021 passed, 2 skipped, 2 expected failures | Release-bound run; newer documentation/demo checks are reported by CI |
 | Installed readback | Mac Studio and research account passed cold MCP, board and stale-write checks | MacBook readback remains unverified |
 
 Cached input is included in the memory comparison. Four authored pairs leave general coding productivity, reliable speed gains and net whole-project savings unqualified. [Full protocol and limits](docs/v3/qualification-20261113.md)

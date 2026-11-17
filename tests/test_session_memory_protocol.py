@@ -66,3 +66,33 @@ def test_absent_handoff_is_refused_and_removed_checkpoint_is_visible(tmp_path):
     read = call(tmp_path, project, 'status', 'task', '--json')
     assert read.returncode == 0
     assert json.loads(read.stdout)['tasks'][0]['checkpoint_status'] != 'present'
+
+
+def test_workspace_bound_mcp_and_project_cli_keep_distinct_authorized_scopes(tmp_path, monkeypatch):
+    from agent_harness.mcp.server import Server
+    workspace, project = tmp_path / 'workspace', tmp_path / 'project'
+    workspace.mkdir()
+    project.mkdir()
+    hh = tmp_path / 'home/.agent-harness'
+    monkeypatch.setenv('HARNESS_HOME', str(hh))
+    monkeypatch.delenv('HARNESS_PROJECT', raising=False)
+    monkeypatch.chdir(workspace)
+    server = Server(home=hh)
+    packet = project / 'handoff.md'
+    packet.write_text('Goal: fix parser\nNext: run the parser gate.\n')
+    saved = call(tmp_path, project, 'checkpoint', 'parser', '--goal', 'Fix parser',
+                 '--checkpoint', 'handoff.md', '--next', 'Run parser gate', '--json')
+    assert saved.returncode == 0, saved.stderr
+    # A client cannot change this connection's scope by passing an extra field.
+    rejected = server.handle({'jsonrpc': '2.0', 'id': 1, 'method': 'tools/call',
+                              'params': {'name': 'op_state', 'arguments': {
+                                  'action': 'status', 'project': str(project)}}})
+    assert rejected['result']['isError']
+    assert server.call_tool('op_state', {'action': 'status'})['tasks'] == []
+    fresh = call(tmp_path, project, 'status', '--json')
+    assert fresh.returncode == 0, fresh.stderr
+    data = json.loads(fresh.stdout)
+    assert data['project'] == str(project)
+    assert data['tasks'][0]['checkpoint_status'] == 'present'
+    assert data['tasks'][0]['value']['next'] == 'Run parser gate'
+    assert server.call_tool('op_state', {'action': 'status'})['tasks'] == []
