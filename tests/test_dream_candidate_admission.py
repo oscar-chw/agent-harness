@@ -154,6 +154,96 @@ def test_full_queue_reports_unstaged_work_and_preserves_existing_proposals(score
     }
 
 
+def test_dismissal_frees_one_slot_and_remains_visible_after_cli_reconnect(scored_corpus, monkeypatch):
+    monkeypatch.setattr(D, "MAX_CANDIDATES", 2)
+    pages = {p: p.read_bytes() for p in scored_corpus.rglob("*.md")}
+    first = D.stage(scored_corpus)["candidates"]
+    rejected = first[0]
+    reason = "Independent review found a shared name and no supporting relationship."
+    result = subprocess.run(dream_cli(scored_corpus, "dismiss", rejected["id"], "--reason", reason),
+                            capture_output=True, text=True, timeout=10)
+    assert result.returncode == 0, result.stderr
+    dismissed = json.loads(result.stdout)
+    assert dismissed == {**rejected, "status": "dismissed", "reason": reason}
+    result = subprocess.run(dream_cli(scored_corpus, "show", rejected["id"]),
+                            capture_output=True, text=True, timeout=10)
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout) == dismissed
+    result = subprocess.run(dream_cli(scored_corpus, "list", "--dismissed"),
+                            capture_output=True, text=True, timeout=10)
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout)["candidates"] == [dismissed]
+
+    replacement = D.stage(scored_corpus)["candidates"]
+    active = D.list_candidates(scored_corpus)["candidates"]
+    assert len(replacement) == 1
+    assert {v["id"] for v in active} == {first[1]["id"], replacement[0]["id"]}
+    assert D.stage(scored_corpus)["remaining_scored"] == 0
+    with pytest.raises(ValueError, match="dismissed"):
+        D.propose(scored_corpus, rejected["source"], rejected["target"], origin=rejected["origin"])
+    assert {p: p.read_bytes() for p in scored_corpus.rglob("*.md")} == pages
+
+
+def test_dismissal_is_terminal_for_that_exact_proposal(corpus, tmp_path):
+    candidate = D.propose(corpus, "memory/contracts.md", "memory/reference.md", origin="review")
+    identity = candidate["id"]
+    plan = gate(tmp_path, identity)
+    first = D.dismiss(corpus, identity, reason="Context mismatch")
+    assert D.dismiss(corpus, identity, reason="Context mismatch") == first
+    with pytest.raises(ValueError, match="reason"):
+        D.dismiss(corpus, identity, reason="Another reason")
+    with pytest.raises(ValueError, match="dismiss"):
+        D.admit(corpus, identity, plan, 1)
+    with pytest.raises(ValueError, match="pending proposals"):
+        D.review_packet(corpus, [identity])
+    (corpus / candidate["target"]).write_text("# Revised\nA newly sourced reference.\n")
+    fresh = D.propose(corpus, candidate["source"], candidate["target"], origin=candidate["origin"])
+    assert fresh["id"] != identity and fresh["status"] == "proposed"
+    assert D.read(corpus, identity) == first
+
+
+def test_dismissal_recovers_after_interruption(corpus, monkeypatch):
+    candidate = D.propose(corpus, "memory/contracts.md", "memory/reference.md", origin="review")
+    identity = candidate["id"]
+    replace = D.os.replace
+
+    def interrupt(source, target):
+        if Path(source).name == identity + ".json":
+            raise OSError("interrupted before archival")
+        return replace(source, target)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(D.os, "replace", interrupt)
+        with pytest.raises(OSError, match="interrupted"):
+            D.dismiss(corpus, identity, reason="Insufficient evidence")
+    assert D.read(corpus, identity)["status"] == "dismissal_pending"
+    with pytest.raises(ValueError, match="dismiss"):
+        D.admit(corpus, identity, "unused-plan", 1)
+    assert D.dismiss(corpus, identity, reason="Insufficient evidence")["status"] == "dismissed"
+
+
+def test_dismissal_leaves_admitted_links_under_the_withdrawal_protocol(corpus, tmp_path):
+    candidate = D.propose(corpus, "memory/contracts.md", "memory/reference.md", origin="review")
+    identity = candidate["id"]
+    D.admit(corpus, identity, gate(tmp_path, identity), 1)
+    page = (corpus / candidate["source"]).read_bytes()
+    with pytest.raises(ValueError, match="pending"):
+        D.dismiss(corpus, identity, reason="Review changed")
+    assert D.read(corpus, identity)["status"] == "admitted"
+    assert (corpus / candidate["source"]).read_bytes() == page
+
+
+def test_dismissal_archive_limit_keeps_both_history_and_pending_work(scored_corpus, monkeypatch):
+    monkeypatch.setattr(D, "MAX_DISMISSED", 1)
+    first, second, *_ = D.stage(scored_corpus)["candidates"]
+    archived = D.dismiss(scored_corpus, first["id"], reason="First review rejected")
+    with pytest.raises(ValueError, match="archive is full"):
+        D.dismiss(scored_corpus, second["id"], reason="Second review rejected")
+    assert D.read(scored_corpus, second["id"]) == second
+    assert D.list_candidates(scored_corpus, dismissed=True)["candidates"] == [archived]
+    assert D.dismiss(scored_corpus, first["id"], reason="First review rejected") == archived
+
+
 def test_scanning_an_empty_queue_creates_no_store(corpus):
     assert D.list_candidates(corpus) == {"candidates": []}
     assert D.stage(corpus)["candidates"] == []

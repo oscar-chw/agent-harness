@@ -17,10 +17,12 @@ from . import settlement
 from .mcp.memory import _store_lock
 from .permission_profiles import _write
 from .presets import _read
+from .redact import redact
 from .vault_sources import _source_path, _unique_object
 
 LIMIT = 65536
 MAX_CANDIDATES = 200
+MAX_DISMISSED = 1000
 
 
 def _encoded(value, label="dream record"):
@@ -68,8 +70,8 @@ def _candidate(root, source, target, origin):
     return {**payload, "id": identity, "status": "proposed", "admitted": False}
 
 
-def _candidate_folder(store):
-    folder = store / "candidates"
+def _candidate_folder(store, name="candidates"):
+    folder = store / name
     if folder.is_symlink() or (folder.exists() and not folder.is_dir()):
         raise ValueError("dream candidate store is redirected or invalid")
     return folder
@@ -81,6 +83,9 @@ def propose(corpus, source, target, *, origin):
         value = _candidate(root, source, target, origin)
         identity = value["id"]
         folder = _candidate_folder(store)
+        archived = _candidate_folder(store, "dismissed") / (identity + ".json")
+        if archived.exists() or archived.is_symlink():
+            raise ValueError("this exact dream candidate was dismissed")
         folder.mkdir(exist_ok=True)
         path = folder / (identity + ".json")
         if path.exists() or path.is_symlink():
@@ -96,7 +101,14 @@ def propose(corpus, source, target, *, origin):
 def read(corpus, identity):
     _identifier(identity)
     _, store = _store(corpus)
-    value = _load(_source_path(store, "candidates/" + identity + ".json"))
+    name = identity + ".json"
+    archive = _candidate_folder(store, "dismissed")
+    try:
+        value = _load(_candidate_folder(store) / name)
+        dismissed = False
+    except FileNotFoundError:
+        value = _load(archive / name)
+        dismissed = True
     fields = {"schema", "source", "target", "origin", "sources", "id", "status", "admitted"}
     if not isinstance(value, dict) or set(value) != fields:
         raise ValueError("invalid dream candidate")
@@ -104,6 +116,15 @@ def read(corpus, identity):
     if (value["id"] != identity or _sha(_encoded(payload)) != identity
             or value["status"] != "proposed" or value["admitted"] is not False):
         raise ValueError("dream candidate identity changed")
+    reason_path = archive / (identity + ".reason")
+    if dismissed or reason_path.exists() or reason_path.is_symlink():
+        decision = _load(reason_path)
+        if (not isinstance(decision, dict) or set(decision) != {"candidate", "reason"}
+                or decision["candidate"] != identity or not isinstance(decision["reason"], str)
+                or not decision["reason"].strip() or len(decision["reason"]) > 1024):
+            raise ValueError("invalid dream dismissal receipt")
+        return {**value, "status": "dismissed" if dismissed else "dismissal_pending",
+                "reason": decision["reason"]}
     withdrawn = store / (identity + ".withdrawn.json")
     if withdrawn.exists():
         record = _load(withdrawn)
@@ -157,6 +178,8 @@ def admit(corpus, identity, plan, node):
     root, store = _store(corpus)
     with _store_lock(store):
         value = read(root, identity)
+        if value["status"] in ("dismissed", "dismissal_pending"):
+            raise ValueError("dream candidate was dismissed or dismissal is pending; review a fresh candidate")
         if value["status"] in ("withdrawn", "withdrawal_pending"):
             raise ValueError("dream candidate was withdrawn or withdrawal is pending; a new review is required")
         proof = _gate(plan, node, identity)
@@ -200,6 +223,32 @@ def admit(corpus, identity, plan, node):
         receipt["status"] = "admitted"
         _write(path, _encoded(receipt))
         return receipt
+
+
+def dismiss(corpus, identity, *, reason):
+    if not isinstance(reason, str) or not reason.strip() or len(reason) > 1024:
+        raise ValueError("dream dismissal needs a bounded reason")
+    reason = redact(reason.strip())
+    root, store = _store(corpus)
+    with _store_lock(store):
+        value = read(root, identity)
+        if value["status"] not in ("proposed", "dismissal_pending", "dismissed"):
+            raise ValueError("dream dismissal requires a pending proposal")
+        if value.get("reason", reason) != reason:
+            raise ValueError("dream dismissal already has a different reason")
+        if value["status"] == "dismissed":
+            return value
+        archive = _candidate_folder(store, "dismissed")
+        if value["status"] == "proposed":
+            if len(list(archive.glob("*.reason"))) >= MAX_DISMISSED:
+                raise ValueError("dream dismissal archive is full; existing history was retained")
+            archive.mkdir(exist_ok=True)
+            # Persist intent first. A restart between these writes cannot admit
+            # the candidate, and replay can finish the move without losing bytes.
+            _write(archive / (identity + ".reason"), _encoded({"candidate": identity, "reason": reason}))
+        name = identity + ".json"
+        os.replace(_candidate_folder(store) / name, archive / name)
+        return read(root, identity)
 
 
 def withdraw(corpus, identity, *, reason):
@@ -247,8 +296,9 @@ def stage(corpus, *, limit=8):
     with (_store_lock(store) if candidates else nullcontext()):
         folder = _candidate_folder(store)
         existing = {path.stem for path in folder.glob("*.json")}
+        dismissed = {path.stem for path in _candidate_folder(store, "dismissed").glob("*.json")}
         free = max(0, MAX_CANDIDATES - len(existing))
-        seen = set(existing)
+        seen = existing | dismissed
         for candidate in candidates:
             value = _candidate(root, candidate["source"], candidate["orphan"], "dreaming-v1-orphan")
             identity = value["id"]
@@ -269,13 +319,13 @@ def stage(corpus, *, limit=8):
             "semantic_precision": "NOT_QUALIFIED", "model_calls": 0}
 
 
-def list_candidates(corpus):
+def list_candidates(corpus, *, dismissed=False):
     root, store = _store(corpus)
-    folder = _candidate_folder(store)
+    folder = _candidate_folder(store, "dismissed" if dismissed else "candidates")
     if not folder.exists():
         return {"candidates": []}
     paths = sorted(folder.glob("*.json"))
-    if len(paths) > MAX_CANDIDATES:
+    if len(paths) > (MAX_DISMISSED if dismissed else MAX_CANDIDATES):
         raise ValueError("dream candidate storage limit exceeded")
     return {"candidates": [read(root, path.stem) for path in paths]}
 
@@ -307,19 +357,21 @@ def review_packet(corpus, identities):
 def add_parser(subparsers):
     parser = subparsers.add_parser("dream", help="stage candidate knowledge links; independent gates own admission")
     actions = parser.add_subparsers(dest="dream_action", required=True)
-    for name in ("stage", "list", "show", "review", "admit", "withdraw"):
+    for name in ("stage", "list", "show", "review", "admit", "dismiss", "withdraw"):
         action = actions.add_parser(name)
         action.add_argument("corpus")
         if name == "stage":
             action.add_argument("--limit", type=int, default=8)
+        elif name == "list":
+            action.add_argument("--dismissed", action="store_true")
         elif name == "review":
             action.add_argument("candidates", nargs="+")
-        elif name != "list":
+        else:
             action.add_argument("candidate")
         if name == "admit":
             action.add_argument("--plan", required=True)
             action.add_argument("--node", type=int, required=True)
-        if name == "withdraw":
+        if name in ("dismiss", "withdraw"):
             action.add_argument("--reason", required=True)
 
 
@@ -328,12 +380,14 @@ def command(args):
         if args.dream_action == "stage":
             result = stage(args.corpus, limit=args.limit)
         elif args.dream_action == "list":
-            result = list_candidates(args.corpus)
+            result = list_candidates(args.corpus, dismissed=args.dismissed)
         elif args.dream_action == "show":
             result = read(args.corpus, args.candidate)
         elif args.dream_action == "review":
             print(review_packet(args.corpus, args.candidates).decode("utf-8"))
             return 0
+        elif args.dream_action == "dismiss":
+            result = dismiss(args.corpus, args.candidate, reason=args.reason)
         elif args.dream_action == "withdraw":
             result = withdraw(args.corpus, args.candidate, reason=args.reason)
         else:
