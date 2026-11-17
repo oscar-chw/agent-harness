@@ -140,3 +140,13 @@ and an older updater running against a frozen local candidate archive. Its
 subsequent ordinary update retained five knowledge/state files and the unrelated
 Copilot configuration. Source and public rollout qualification remain separately
 recorded. [Update mechanism and checks](update-source-lifetime-20261117.md).
+
+
+## Continuation policy comparison
+
+A new board-first instruction recovered both cases correctly, matching the
+baseline, while using 9.64% more reported inference tokens. It is rejected for
+the tested profile. Native memory-instruction size varied substantially in
+one case. The study retained its initial CLI startup failure, unknown usage,
+369,021 measured tokens and 19,021 last-call planning-ceiling overshoot.
+The local runtime stays on its qualified 3.0.2 release. [Study and limits](continuation-read-policy-20261117.md).

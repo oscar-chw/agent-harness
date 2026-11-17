@@ -1,0 +1,93 @@
+{
+  "schema": "harness.continuation-comparison/v1",
+  "date": "2026-11-17",
+  "status": "NO_INFERENCE_GAIN",
+  "adoption_decision": "REJECT_CANDIDATE",
+  "promotion": "NOT_GRANTED",
+  "model": "gpt-6.1-sol",
+  "effort": "high",
+  "cases_per_arm": 2,
+  "correct_per_arm": {
+    "baseline": 2,
+    "candidate": 2
+  },
+  "baseline_tokens": 176028,
+  "candidate_tokens": 192993,
+  "percent_token_change": 9.63767127956916,
+  "paired_token_differences": [
+    -679,
+    17644
+  ],
+  "token_difference_se": 9161.499999999998,
+  "completed_native_calls": 4,
+  "known_consumed_tokens": 369021,
+  "planning_ceiling_tokens": 350000,
+  "last_inflight_overshoot_tokens": 19021,
+  "further_native_calls": 0,
+  "prior_failed_cli_attempts": 1,
+  "prior_attempt_usage": "UNKNOWN",
+  "complete_learning_cost": "UNMEASURED",
+  "source_bound_mcp_reads": {
+    "baseline": [
+      1,
+      2
+    ],
+    "candidate": [
+      1,
+      1
+    ]
+  },
+  "memory_instruction_blocks": [
+    {
+      "case": 1,
+      "arm": "base",
+      "memory_instruction_bytes": [
+        33749
+      ]
+    },
+    {
+      "case": 1,
+      "arm": "cand",
+      "memory_instruction_bytes": [
+        33776
+      ]
+    },
+    {
+      "case": 2,
+      "arm": "cand",
+      "memory_instruction_bytes": [
+        59336
+      ]
+    },
+    {
+      "case": 2,
+      "arm": "base",
+      "memory_instruction_bytes": [
+        33776
+      ]
+    }
+  ],
+  "scope": "Two authored task-continuation cases on the same requested native model/profile; provider-reported CLI fresh-turn input plus output, counting cached subsets once. Inherited native memory content varies. This does not isolate general reasoning or whole-project efficiency.",
+  "selection_history": "Earlier native CLI configuration failure retained separately with unknown usage. Metadata preflights invoked no model. Orchestrator/review preparation and general transfer remain unmeasured.",
+  "freeze_sha256": "fc1da0e7524df994ed6ce3195e32e4009ae10777ab4c5764fef7abe7fed9e80c",
+  "controller_sha256": "5e731d6a78c5a3cdc36e4d2c1321665e82fbd3d47a1b2debe1e79f02fbcd63ee",
+  "observed_receipt_sha256": [
+    "055c385c9c4e0cf94a7f8ef975d5b37ec172527b152c185a57b0eb07c338aa77",
+    "fd184c7a1bd49c36ace8ea36b78e50f1d9b21cad5a378b2c8bd7f4823da4f5dc",
+    "25e29a4314ef5aef549bd07c20c375c8a82ba9bb3dc6506336a3e8f38c49af42",
+    "e1bf39573b81600797deaf51cf7ad3b3170e3a51198e044b5d75127aa3a02ffc"
+  ],
+  "input_tokens": {
+    "base": 175748,
+    "cand": 192760
+  },
+  "cached_input_tokens": {
+    "base": 123264,
+    "cand": 143104
+  },
+  "cache_hit_input_share": {
+    "base": 0.7013678676286501,
+    "cand": 0.7423946876945424
+  },
+  "included_quota_economics": "UNMEASURED"
+}
