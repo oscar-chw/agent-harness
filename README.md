@@ -2,7 +2,7 @@
 
 Shared task state, source-backed memory and executable completion checks for AI coding clients.
 
-**v3.0.0 release candidate source.** This integration adds durable acquired knowledge, automatic checkpoint packets, research withdrawal and gated dream proposals. Installed and device readback are reported separately in the [current readiness record](docs/v3/readiness-20261117.md). [Release](https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0rc2)
+**v3.0.0.** Durable acquired knowledge, automatic checkpoint packets, research withdrawal and gated dream proposals share one local system. Mac Studio installation has passed cold checks; publication and other devices are tracked separately in the [current readiness record](docs/v3/readiness-20261117.md). [Release](https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0)
 
 [![CI](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml)
 [![Lint](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml)
@@ -34,7 +34,7 @@ flowchart TB
     evaluation -.->|Qualified candidate only| memory
 ```
 
-[Open the full architecture](examples/interview/architecture.svg) · [Printable PDF](examples/interview/architecture.pdf) · [Mermaid source](examples/interview/architecture.mmd)
+[Open the full architecture](examples/interview/architecture.svg) · [13 November PDF snapshot](examples/interview/architecture.pdf) · [Mermaid source](examples/interview/architecture.mmd)
 
 The board coordinates progress. The work graph owns dependency scheduling and gate settlement. Memory retains evidence and revisions. Models keep their native account, tool and approval boundaries. The shared store is local to an authorized home and canonical project. Cross-device synchronization needs separate configuration and verification.
 
@@ -80,8 +80,8 @@ Open `examples/interview/guide.html` for the offline architecture, five-minute p
 | Generated-procedure trial | Candidate-charged 172,569 tokens against baseline 48,969 | Adoption remains held; failed trials and preparation costs retained |
 | Compact guide replacing an existing long guide | 24/24 correct per arm; **3.50% fewer** inference tokens | 6 matched authored batches; no general reasoning or net-project saving claim |
 | Full reasoning-guide treatment | +3.38% tokens and one response-length failure | Treatment remains unadopted; learner transfer unmeasured |
-| Historical rc2 release regression | 3,021 passed, 2 skipped, 2 expected failures | Release-bound run; newer documentation/demo checks are reported by CI |
-| Installed readback | Mac Studio and research account passed cold MCP, board and stale-write checks | MacBook readback remains unverified |
+| v3 integration regression | **3,202 passed, 1 skipped, 2 expected failures** | Root-owned full source gate; Linux CI has its own results |
+| Installed readback | Mac Studio 3.0.0 passed cold MCP, automatic packets, scoped memory admission, vault retrieval and the five-step demonstration | Already-loaded connections need reconnecting; other devices need their own v3 readback |
 
 Cached input is included in the memory comparison. Four authored pairs leave general coding productivity, reliable speed gains and net whole-project savings unqualified. [Full protocol and limits](docs/v3/qualification-20261113.md)
 

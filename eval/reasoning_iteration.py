@@ -147,7 +147,7 @@ def _sources(cases_path):
     paths = [
         Path(__file__),
         Path(cases_path),
-        ROOT / ".harness-work/reasoning-eval/check-outcome.py",
+        ROOT / "eval/check_reasoning_outcome.py",
         FULL_GUIDE,
     ]
     # Prompt construction and store recovery are also part of the instrument.

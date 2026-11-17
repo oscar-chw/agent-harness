@@ -492,7 +492,7 @@ def test_simulation_cannot_be_promoted_by_claim_or_result_file(
     assert instrument.replay(out) == result
     command = [
         sys.executable,
-        str(ROOT / ".harness-work/reasoning-eval/check-outcome.py"),
+        str(ROOT / "eval/check_reasoning_outcome.py"),
         str(out),
     ]
     checked = subprocess.run(command, capture_output=True, text=True, check=False)
@@ -707,3 +707,20 @@ def test_invalid_frozen_resource_settings_refuse(tmp_path, instrument, configura
     with pytest.raises(ValueError):
         instrument.prepare(tmp_path / "invalid", **settings)
     assert not (tmp_path / "invalid").exists()
+
+
+def test_source_bindings_work_without_any_ignored_local_helpers(tmp_path, instrument, monkeypatch):
+    import shutil
+    root = tmp_path / "checkout"
+    (root / "eval").mkdir(parents=True)
+    (root / "src/agent_harness").mkdir(parents=True)
+    checker = ROOT / "eval/check_reasoning_outcome.py"
+    assert checker.is_file(), "the replay entrypoint must ship in a clean checkout"
+    shutil.copyfile(checker, root / "eval/check_reasoning_outcome.py")
+    monkeypatch.setattr(instrument, "ROOT", root)
+    sources = instrument._sources(instrument.CASES)
+    assert str((root / "eval/check_reasoning_outcome.py").resolve()) in sources
+    assert not (root / ".harness-work").exists()
+    (root / "eval/check_reasoning_outcome.py").unlink()
+    with pytest.raises(FileNotFoundError):
+        instrument._sources(instrument.CASES)

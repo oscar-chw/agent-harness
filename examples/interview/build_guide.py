@@ -33,13 +33,13 @@ def arrow(path, label="", x=0, y=0, dashed=False, both=False):
 
 def architecture():
     items = ['''<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1040" viewBox="0 0 1440 1040" role="img" aria-labelledby="title desc">
-<title id="title">Agent Harness 3.0.0rc2 architecture</title>
+<title id="title">Agent Harness 3.0.0 architecture</title>
 <desc id="desc">Native clients use separate MCP processes. Project-scoped task coordination and source-backed memory are shared locally. The work graph runs guarded gates. Evaluation controls candidate adoption. Model behavior and cross-device synchronization require separate verification.</desc>
 <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto-start-reverse"><path d="M0,0 L0,6 L7,3 z" fill="#38615c"/></marker></defs>
 <style>text{font-family:Arial,sans-serif;fill:#193b36}.boxTitle{font-size:22px;font-weight:700}.boxBody{font-size:18px;fill:#3e5b55}.edgeLabel{font-size:16px;fill:#315a53;paint-order:stroke;stroke:#f4f7f3;stroke-width:5px;stroke-linejoin:round}.section{font-size:18px;font-weight:700;letter-spacing:1px}.small{font-size:17px;fill:#52665f}</style>
 <rect width="1440" height="1040" fill="#f4f7f3"/>
 <text x="50" y="48" font-size="31" font-weight="700">Work survives the conversation</text>
-<text x="50" y="79" class="small">As-built mechanisms / 3.0.0rc2 / 13 November 2026 / local request-driven processes</text>
+<text x="50" y="79" class="small">As-built mechanisms / 3.0.0 / 17 November 2026 / local request-driven processes</text>
 ''']
     items += [box(60, 112, 405, 105, "Client A", ["Native app + selected model", "Own login, tools and approvals"]),
               box(505, 112, 405, 105, "Client B", ["Independent session or model", "Own login, tools and approvals"]),
@@ -165,7 +165,7 @@ h1{font-size:38px;line-height:1.15;letter-spacing:-1px;margin:22px 0 16px;max-wi
 @media(max-width:750px){header{align-items:flex-start;flex-direction:column}header,main{padding:18px}h1{font-size:30px}.two,.metrics{grid-template-columns:1fr}.diagram{overflow:auto}.diagram svg{min-width:900px}th,td{padding:10px 6px;font-size:15px}}
 @media print{header nav,button,.no-print{display:none}.tab[hidden]{display:block}.tab{page-break-before:always}.tab:first-of-type{page-break-before:auto}header,main{padding:0}h1{font-size:28px}.diagram{break-inside:avoid}details{break-inside:avoid}body{font-size:12px}summary{font-size:14px}details p{font-size:12px}}
 </style></head><body>
-<header><div><strong>Agent Harness</strong><br><span>Interview companion · 3.0.0rc2 · 13 November 2026</span></div><nav aria-label="Presentation sections" role="tablist">
+<header><div><strong>Agent Harness</strong><br><span>Interview companion · 3.0.0 · 17 November 2026</span></div><nav aria-label="Presentation sections" role="tablist">
 <button role="tab" aria-selected="true" aria-controls="overview" id="tab-overview" data-tab="overview">Architecture</button><button role="tab" aria-selected="false" aria-controls="demo" id="tab-demo" data-tab="demo">Run the demo</button><button role="tab" aria-selected="false" aria-controls="capabilities" id="tab-capabilities" data-tab="capabilities">Capabilities</button><button role="tab" aria-selected="false" aria-controls="evidence" id="tab-evidence" data-tab="evidence">Evidence</button><button role="tab" aria-selected="false" aria-controls="questions" id="tab-questions" data-tab="questions">Technical Q&amp;A</button></nav></header>
 <main>
 <section class="tab" id="overview" role="tabpanel" aria-labelledby="tab-overview"><h1>Work survives the conversation.</h1><p class="lede">A local control layer gives independent AI sessions shared task state, source-backed context and executable completion checks.</p><div class="diagram">{{SVG}}</div>
@@ -189,18 +189,19 @@ h1{font-size:38px;line-height:1.15;letter-spacing:-1px;margin:22px 0 16px;max-wi
 
 <section class="tab" id="capabilities" role="tabpanel" aria-labelledby="tab-capabilities" hidden>{{CAPABILITIES}}</section>
 <section class="tab" id="evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden><h1>Separate mechanics from outcomes.</h1><p class="lede">Deterministic controls test coordination and failure handling. Native paired trials measure the model-facing effect.</p>
-<div class="metrics"><div><div class="metric">10.68%</div><p class="label">fewer observed tokens<br>4 paired authored memory tasks</p></div><div><div class="metric">4/4</div><p class="label">correct answers in each arm<br>same model, effort, facts and requirements</p></div><div><div class="metric">3,021</div><p class="label">passed in the release regression run<br>2 skipped · 2 expected failures</p></div></div>
+<div class="metrics"><div><div class="metric">10.68%</div><p class="label">fewer observed tokens<br>4 paired authored memory tasks</p></div><div><div class="metric">4/4</div><p class="label">correct answers in each arm<br>same model, effort, facts and requirements</p></div><div><div class="metric">3,202</div><p class="label">passed in the v3 integration gate<br>1 skipped · 2 expected failures</p></div></div>
 <table><thead><tr><th>Comparison</th><th>Retained history</th><th>Current memory</th></tr></thead><tbody><tr><td>Observed input + output tokens</td><td>111,825</td><td>99,886</td></tr><tr><td>Correct answers</td><td>4/4</td><td>4/4</td></tr><tr><td>Memory-update model calls</td><td colspan="2">0</td></tr></tbody></table>
 <p>Cached input is included. The saving applies to the measured packets. Four authored pairs leave general coding benefit, durable speed gains and net whole-project savings unqualified.</p>
-<div class="two"><div class="callout"><strong>Operational evidence</strong><p>Candidate and merged-main Linux Python 3.9/3.12 tests and lint passed. Mac Studio and the research account passed installed readback. The live demo binds the installed gate engine's hash.</p></div><div class="callout caution"><strong>A learning candidate was held</strong><p>Generated procedures cost 172,569 candidate-charged tokens against a 48,969-token baseline. Adoption remained held. Full reasoning-guide treatment also remained unadopted after +3.38% tokens and a response-limit failure.</p></div></div>
+<div class="two"><div class="callout"><strong>Operational evidence</strong><p>Mac Studio 3.0.0 passed cold State, memory and vault readback, doctor and this five-step demo. Release CI and other devices are tracked in the current readiness record. The demo binds the installed gate engine's hash.</p></div><div class="callout caution"><strong>A learning candidate was held</strong><p>Generated procedures cost 172,569 candidate-charged tokens against a 48,969-token baseline. Adoption remained held. Full reasoning-guide treatment also remained unadopted after +3.38% tokens and a response-limit failure.</p></div></div>
+<p>Selective compaction of the existing reasoning guide retained 24/24 correct answers and used 3.50% fewer inference tokens. Adding it to an unguided baseline failed the cost criterion. Two native automatic-checkpoint readbacks passed but used 429,149 reported tokens and exposed a planning-ceiling failure; no efficiency claim follows. <a href="https://github.com/oscar-chw/agent-harness/blob/main/docs/v3/readiness-20261117.md">Current evidence and limits</a>.</p>
 <p><strong>Open qualification</strong> — MacBook installation, universal client/model compliance, cross-device memory synchronization, learner transfer and comparisons with human teams or other harnesses.</p>
-<p><a href="https://github.com/oscar-chw/agent-harness/blob/main/docs/v3/qualification-20261113.md">Published study and limitations</a> · <a href="https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0rc2">Versioned release</a></p></section>
+<p><a href="https://github.com/oscar-chw/agent-harness/blob/main/docs/v3/qualification-20261113.md">Published study and limitations</a> · <a href="https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0">Versioned release</a></p></section>
 
 <section class="tab" id="questions" role="tabpanel" aria-labelledby="tab-questions" hidden><h1>Explain the mechanism. Name the limit.</h1><p class="lede">Start with the purpose, trace one concrete input, then explain the tradeoff. Expand a question for implementation references.</p>
 <div class="callout"><strong>Version conflict example</strong><p>Two writers read task version 3. Writer A commits version 4 inside the SQLite transaction. Writer B still expects 3, so its update is rejected. It must read the new state before deciding what to do.</p></div>
 {{QUESTIONS}}
 <h2>Three things to rehearse without AI</h2><ol><li>Point to every arrow in the architecture and explain what crosses it.</li><li>Change the shipping threshold to 60 and name which tests should fail before editing them.</li><li>Explain why a passing test, a delivered STOP message and a current source hash each establish different facts.</li></ol></section>
-<footer>Prepared from the v3.0.0rc2 implementation and dated qualification evidence. The diagram shows current mechanisms and conditional paths. Technical citations are pinned to the published candidate.</footer>
+<footer>Prepared from the v3.0.0 implementation and dated qualification evidence. The diagram shows current mechanisms and conditional paths. Technical citations are pinned to the published candidate.</footer>
 </main><script>
 const proof={{PROOF}};
 const replay={{REPLAY}};let replayIndex=0;

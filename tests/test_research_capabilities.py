@@ -191,6 +191,7 @@ def test_fresh_kb_process_discovers_shared_research_and_retracts_removed_source(
               f"kb=KB(home=Path({str(home)!r}), fts=False); "
               "print(json.dumps(kb.search('quartzexperiment'))); kb.close()")
     fresh = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, timeout=20,
+                           env={**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parents[1] / "src")},
                            cwd=Path(__file__).resolve().parents[1])
     assert fresh.returncode == 0, fresh.stderr
     assert json.loads(fresh.stdout)[0]["id"] == matches[0]["id"]

@@ -1,4 +1,8 @@
-# Deployment evidence snapshot
+# Current deployment pointer
+
+17 November: Mac Studio3.0.0 passed cold State/memory/vault checks, byte-bound rollback, doctor and the fresh five-step installed demo. ReleaseCI and MacBook readback remain separate. See [current readiness](../../docs/v3/readiness-20261117.md). The printable PDF remains the clearly dated13November architecture snapshot; SVG/HTML and recorded rehearsal are updated.
+
+# Historical deployment evidence snapshot
 
 Prepared on13November2026 from root-retained publication and installed-runtime receipts.
 This snapshot is a summary. The runnable demo generates its own fresh local evidence.
