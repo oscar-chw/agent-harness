@@ -1,5 +1,6 @@
 """Failed/repeated controller trials retain costs; fixtures are not native proof."""
 import hashlib
+import json
 from pathlib import Path
 
 import pytest
@@ -144,6 +145,30 @@ def test_candidate_rename_cannot_reset_canonical_development_debt(lab, monkeypat
     _, result = run((home, project, oracle, changed, suite))
     assert result['execution_usage']['known_prior_tokens'] == 60
     assert result['known_candidate_tokens_lower_bound'] == 100
+
+
+def test_json_formatting_cannot_reset_canonical_development_debt(lab, monkeypatch):
+    monkeypatch.setattr(C, '_invoke', examples.fake_invoke)
+    first, prior = run(lab)
+    assert prior['status'] == 'GRADED_HELD' and prior['observed_calls'] == 6
+    home, project, oracle, proposal, suite = lab
+    for episode in proposal['candidate']['episodes']:
+        task = project / episode['task_path']
+        old = task.read_bytes()
+        reformatted = json.dumps(json.loads(old), indent=2, sort_keys=True).encode() + b'\n'
+        assert reformatted != old
+        task.write_bytes(reformatted)
+    candidate = P.prepare(str(project), {**proposal['candidate'], 'episodes': [
+        {k: e[k] for k in ('task_id', 'path', 'task_path')}
+        for e in proposal['candidate']['episodes']]})
+    changed = P.correct(home, str(project), proposal['id'], candidate)
+    second, result = run((home, project, oracle, changed, suite))
+
+    assert result['execution_usage']['attempt_ids'] == [first['run_id'], second['run_id']]
+    assert result['execution_usage']['known_prior_tokens'] == 60
+    assert result['known_candidate_tokens_lower_bound'] == 100
+    assert result['known_baseline_tokens'] == 20
+    assert result['promotion'] == 'NOT_GRANTED'
 
 
 def test_prepared_but_unconsumed_run_does_not_invent_usage(lab, monkeypatch):

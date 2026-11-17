@@ -53,6 +53,17 @@ def test_freeze_hashes_real_sources_without_executing_or_promoting(controller,la
     assert procedures.inspect(lab[0],str(lab[1]),lab[3]['id'])['status']=='proposed'
 
 
+def test_freeze_accepts_the_canonical_suite_through_a_parent_alias(controller, lab, monkeypatch):
+    home, project, oracle, proposal, suite = lab
+    alias = project.parent / 'project-alias'
+    alias.symlink_to(project, target_is_directory=True)
+    monkeypatch.setattr(controller, '_invoke', lambda *a, **k: pytest.fail('freeze cannot call a model'))
+    result = controller.prepare(home, str(project), proposal['id'], oracle, alias / suite.relative_to(project))
+    data = json.loads(Path(result['freeze_path']).read_text())
+    assert result['status'] == 'PREPARED'
+    assert data['suite_path'] == str(suite.resolve())
+
+
 def test_combined_procedure_prompt_is_checked_before_freeze_or_native_calls(controller,lab,monkeypatch):
     home,project,oracle,proposal,suite=lab
     candidate={**proposal['candidate'],'steps':['Use the current evidence. ' * 180]}
