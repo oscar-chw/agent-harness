@@ -109,10 +109,20 @@ Use an authorized project with the local overlay already available. The commands
 
 The intended experience is a direct request, relevant context recovery, useful action and a checked result. Deeper acquisition or learning happens when a substantive gap justifies it.
 
-Native readback failures, filesystem fallback and costs are retained in [the corrected probe receipt](../../eval/results/v3-native-board-readback-20261117.json). No further native calls were launched after this two-call demonstration. Existing board delivery tests establish changed-packet delivery and zero added board bytes at unchanged boundaries; they do not measure the native client's whole context cost.
+Native readback failures, filesystem fallback and costs are retained in [the corrected probe receipt](../../eval/results/v3-native-board-readback-20261117.json). The later explicit-store trial has a separate consumed-call receipt and retains its own cost failure. Existing board delivery tests establish changed-packet delivery and zero added board bytes at unchanged boundaries; they do not measure the native client's whole context cost.
 
 ## Release readback
 
 [Stable v3.0.0](https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0) is published from tested commit `c4233aad934094984f6b34b8d023316aa2e89202`, merged into main with an identical tree. The root-owned full gate passed **3,203 tests**, with one skip and two expected failures. Downloaded assets,142 source/installed package bindings, rollback bytes and the five-step installed demo passed. [Machine-readable receipt](../../eval/results/v3-release-readback-20261117.json).
 
 The MacBook update could not be activated through either existing chat: the app returned request `1891835f-5560-4798-bd20-cfcb87d1bd9f`. Its latest inspected state remains the earlier completion, so this is **NOT_VERIFIED**, not rollout success. The graph keeps that device gate open. New native calls were not used to work around this failure. Existing loaded MCP clients need reconnection to load new runtime code.
+
+## v3.0.1 follow-up qualification
+
+The corrected complete source passed 3,223 checks, with one skip and two expected
+failures. Explicit MCP store binding passed 110 affected checks and three cold
+stdio cases. One native trial returned the correct task through MCP with zero
+shell commands, while exceeding its 90,000-token planning threshold at 102,522
+reported tokens. Efficiency remains unqualified. Its failed threshold and the
+earlier filesystem fallback are preserved in the linked receipts. Device
+installation and public release readback have their own gates.

@@ -3,7 +3,7 @@
   "date": "2026-11-17",
   "version": "3.0.1",
   "status": "SOURCE_QUALIFIED",
-  "native_calls_added": 0,
+  "native_calls_added": 1,
   "full_source_gate": {
     "command": "PYTHONPATH=src python3 -m pytest -q tests eval",
     "passed": 3220,
@@ -127,5 +127,16 @@
     "seconds": 424.05,
     "failure": "four callers shared one stale exact-argv expectation",
     "status": "RETAINED_FAILURE"
+  },
+  "native_calls_added_by_model_free_regressions": 0,
+  "reported_native_tokens_added": 102522,
+  "corrected_complete_source_gate": {
+    "command": "PYTHONPATH=src python3 -m pytest -q tests eval",
+    "passed": 3223,
+    "skipped": 1,
+    "xfailed": 2,
+    "seconds": 421.42,
+    "version": "3.0.1",
+    "status": "PASS"
   }
 }
