@@ -1,6 +1,7 @@
 """Dream scores cannot create live knowledge links without independent evidence."""
 import json
 from pathlib import Path
+import os
 import subprocess
 import sys
 
@@ -92,6 +93,71 @@ def test_dream_scorer_results_are_only_proposals(corpus):
     assert result["admitted"] == 0
     assert result["mode"] == "candidate_only"
     assert before == {str(p): p.read_bytes() for p in corpus.rglob("*.md")}
+
+
+@pytest.fixture
+def scored_corpus(tmp_path):
+    root = tmp_path / "scored"
+    memory = root / "memory"
+    memory.mkdir(parents=True)
+    for index, stem in enumerate("abc"):
+        shared = " ".join(stem * 3 + chr(letter) * 4 for letter in range(97, 112))
+        pages = {"hub": f"{shared}\n[[anchor{index}]]", "anchor": f"[[hub{index}]]", "note": shared}
+        for role, body in pages.items():
+            name = f"{role}{index}"
+            (memory / f"{name}.md").write_text(f"---\nname: {name}\n---\n\n# {role}\n{body}\n")
+    return root
+
+
+def dream_cli(corpus, *arguments):
+    repo = Path(__file__).resolve().parents[1]
+    return [sys.executable, str(repo / "bin/harness"), "dream", arguments[0], str(corpus), *arguments[1:]]
+
+
+def test_successive_batches_and_cold_list_recover_every_proposal(scored_corpus):
+    before = {p: p.read_bytes() for p in scored_corpus.rglob("*.md")}
+    batches = [D.stage(scored_corpus, limit=1) for _ in range(4)]
+    assert [len(batch["candidates"]) for batch in batches] == [1, 1, 1, 0]
+    assert [batch["remaining_scored"] for batch in batches] == [2, 1, 0, 0]
+    identities = {row["id"] for batch in batches for row in batch["candidates"]}
+    assert len(identities) == 3
+    result = subprocess.run(dream_cli(scored_corpus, "list"), capture_output=True, text=True, timeout=10)
+    assert result.returncode == 0, result.stderr
+    rows = json.loads(result.stdout)["candidates"]
+    assert {row["id"] for row in rows} == identities
+    assert all(row["status"] == "proposed" and not row["admitted"] for row in rows)
+    assert before == {p: p.read_bytes() for p in scored_corpus.rglob("*.md")}
+
+
+def test_parallel_batches_stage_distinct_proposals(scored_corpus):
+    command = dream_cli(scored_corpus, "stage", "--limit", "1")
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env) as first:
+        second = subprocess.run(command, capture_output=True, text=True, env=env, timeout=10)
+        stdout, stderr = first.communicate(timeout=10)
+    assert first.returncode == second.returncode == 0, (stderr, second.stderr)
+    first_batch, second_batch = json.loads(stdout), json.loads(second.stdout)
+    assert first_batch["candidates"][0]["id"] != second_batch["candidates"][0]["id"]
+    assert sorted(batch["remaining_scored"] for batch in (first_batch, second_batch)) == [1, 2]
+
+
+def test_full_queue_reports_unstaged_work_and_preserves_existing_proposals(scored_corpus, monkeypatch):
+    monkeypatch.setattr(D, "MAX_CANDIDATES", 2)
+    first = D.stage(scored_corpus)
+    assert len(first["candidates"]) == 2
+    assert first["storage_remaining"] == 0 and first["remaining_scored"] == 1
+    replay = D.stage(scored_corpus)
+    assert replay["candidates"] == []
+    assert replay["storage_remaining"] == 0 and replay["remaining_scored"] == 1
+    assert {row["id"] for row in D.list_candidates(scored_corpus)["candidates"]} == {
+        row["id"] for row in first["candidates"]
+    }
+
+
+def test_scanning_an_empty_queue_creates_no_store(corpus):
+    assert D.list_candidates(corpus) == {"candidates": []}
+    assert D.stage(corpus)["candidates"] == []
+    assert not (corpus / ".harness").exists()
 
 
 def test_candidate_tamper_is_refused(corpus):

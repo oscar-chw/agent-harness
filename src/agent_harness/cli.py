@@ -402,6 +402,28 @@ def cmd_doctor(args) -> int:
     for e in state.get("entries", []):
         p = Path(e["path"])
         check(p.exists() or p.is_symlink(), f"{', '.join(e['tools'])}: {p}", "missing; re-run `harness install`")
+        if "codex" in e["tools"] and p.name == "hooks.json":
+            config = p.with_name("config.toml")
+            try:
+                settings = I.load_toml(config.read_text(encoding="utf-8")) if config.is_file() else {}
+                features = settings.get("features", {})
+                if not isinstance(features, dict):
+                    raise ValueError("features must be a table")
+                enabled = features.get("hooks", features.get("codex_hooks", True))
+                if not isinstance(enabled, bool):
+                    raise ValueError("hooks feature must be a boolean")
+            except (OSError, ValueError) as exc:
+                check(False, "Codex hooks configuration readable", f"{config}: {type(exc).__name__}")
+                continue
+            if enabled is False:
+                _out(f"[warn] Codex hooks locally disabled: {config} sets hooks = false "
+                     "(or deprecated codex_hooks = false); automatic hook delivery is unavailable "
+                     "under this configuration. Enable through native settings and review exact "
+                     "definitions in /hooks")
+            else:
+                _out("[info] Codex hooks locally enabled by explicit setting or default")
+            _out("[info] Codex native hook trust and running-client delivery require separate verification; "
+                 "local configuration alone cannot establish either")
     server = hh / "lib" / "agent_harness" / "mcp" / "server.py"
     if server.is_file():
         names = mcp_probe(I.mcp_cmd(hh))

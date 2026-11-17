@@ -4,6 +4,7 @@ Scores propose work. They grant neither semantic truth nor write authority.
 The owner-controlled work graph supplies the independent check and its bound
 output. This is a local cooperating-runner protocol, not hostile-host security.
 """
+from contextlib import nullcontext
 import hashlib
 import json
 import os
@@ -19,6 +20,7 @@ from .presets import _read
 from .vault_sources import _source_path, _unique_object
 
 LIMIT = 65536
+MAX_CANDIDATES = 200
 
 
 def _encoded(value):
@@ -52,8 +54,7 @@ def _identifier(value):
     return value
 
 
-def propose(corpus, source, target, *, origin):
-    root, store = _store(corpus)
+def _candidate(root, source, target, origin):
     if (source == target or any(not isinstance(v, str) or not v or len(v) > 4096
                                or any(ord(c) < 32 for c in v) for v in (source, target, origin))):
         raise ValueError("invalid dream source or origin")
@@ -64,21 +65,32 @@ def propose(corpus, source, target, *, origin):
         hashes[name] = _sha(_read(_source_path(root, name), LIMIT))
     payload = {"schema": 1, "source": source, "target": target, "origin": origin, "sources": hashes}
     identity = _sha(_encoded(payload))
-    value = {**payload, "id": identity, "status": "proposed", "admitted": False}
+    return {**payload, "id": identity, "status": "proposed", "admitted": False}
+
+
+def _candidate_folder(store):
+    folder = store / "candidates"
+    if folder.is_symlink() or (folder.exists() and not folder.is_dir()):
+        raise ValueError("dream candidate store is redirected or invalid")
+    return folder
+
+
+def propose(corpus, source, target, *, origin):
+    root, store = _store(corpus)
     with _store_lock(store):
-        folder = store / "candidates"
-        if folder.is_symlink():
-            raise ValueError("dream candidate store is redirected")
+        value = _candidate(root, source, target, origin)
+        identity = value["id"]
+        folder = _candidate_folder(store)
         folder.mkdir(exist_ok=True)
         path = folder / (identity + ".json")
-        if path.exists():
+        if path.exists() or path.is_symlink():
             if _load(path) != value:
                 raise ValueError("dream candidate changed")
         else:
-            if len(list(folder.glob("*.json"))) >= 200:
+            if len(list(folder.glob("*.json"))) >= MAX_CANDIDATES:
                 raise ValueError("dream candidate storage limit reached")
             _write(path, _encoded(value))
-    return read(root, identity)
+        return read(root, identity)
 
 
 def read(corpus, identity):
@@ -227,24 +239,56 @@ def withdraw(corpus, identity, *, reason):
 def stage(corpus, *, limit=8):
     if type(limit) is not int or not 1 <= limit <= 32:
         raise ValueError("dream staging limit must be 1 to 32")
-    root, _ = _store(corpus)
+    root, store = _store(corpus)
     report = dreaming.dream_v1(root, apply=False)
     candidates = [v for v in report["promoted"] if v["kind"] == "orphan_inbound_link"]
-    rows = [propose(root, v["source"], v["orphan"], origin="dreaming-v1-orphan") for v in candidates[:limit]]
+    rows = []
+    remaining = 0
+    with (_store_lock(store) if candidates else nullcontext()):
+        folder = _candidate_folder(store)
+        existing = {path.stem for path in folder.glob("*.json")}
+        free = max(0, MAX_CANDIDATES - len(existing))
+        seen = set(existing)
+        for candidate in candidates:
+            value = _candidate(root, candidate["source"], candidate["orphan"], "dreaming-v1-orphan")
+            identity = value["id"]
+            path = folder / (identity + ".json")
+            if identity in existing and _load(path) != value:
+                raise ValueError("dream candidate changed")
+            if identity in seen:
+                continue
+            seen.add(identity)
+            if len(rows) >= min(limit, free):
+                remaining += 1
+                continue
+            folder.mkdir(exist_ok=True)
+            _write(path, _encoded(value))
+            rows.append(value)
     return {"mode": "candidate_only", "admitted": 0, "candidates": rows,
-            "remaining_scored": max(0, len(candidates) - len(rows)),
+            "remaining_scored": remaining, "storage_remaining": free - len(rows),
             "semantic_precision": "NOT_QUALIFIED", "model_calls": 0}
+
+
+def list_candidates(corpus):
+    root, store = _store(corpus)
+    folder = _candidate_folder(store)
+    if not folder.exists():
+        return {"candidates": []}
+    paths = sorted(folder.glob("*.json"))
+    if len(paths) > MAX_CANDIDATES:
+        raise ValueError("dream candidate storage limit exceeded")
+    return {"candidates": [read(root, path.stem) for path in paths]}
 
 
 def add_parser(subparsers):
     parser = subparsers.add_parser("dream", help="stage candidate knowledge links; independent gates own admission")
     actions = parser.add_subparsers(dest="dream_action", required=True)
-    for name in ("stage", "show", "admit", "withdraw"):
+    for name in ("stage", "list", "show", "admit", "withdraw"):
         action = actions.add_parser(name)
         action.add_argument("corpus")
         if name == "stage":
             action.add_argument("--limit", type=int, default=8)
-        else:
+        elif name != "list":
             action.add_argument("candidate")
         if name == "admit":
             action.add_argument("--plan", required=True)
@@ -257,6 +301,8 @@ def command(args):
     try:
         if args.dream_action == "stage":
             result = stage(args.corpus, limit=args.limit)
+        elif args.dream_action == "list":
+            result = list_candidates(args.corpus)
         elif args.dream_action == "show":
             result = read(args.corpus, args.candidate)
         elif args.dream_action == "withdraw":
