@@ -59,6 +59,49 @@ def test_stale_snapshot_and_change_cursor_reconcile(tmp_path):
     assert db.snapshot()["tasks"][0]["value"] == {"stage": "two"}
 
 
+def test_scoped_status_and_field_check_leave_other_task_evidence_unread(tmp_path, monkeypatch):
+    db = ledger(tmp_path)
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text('{"tests": 4}')
+    other = tmp_path / "other.json"
+    other.write_text('{"tests": 7}')
+    digest = db.bind_evidence(receipt.name)
+    db.put("target", {"evidence": receipt.name, "evidence_sha256": digest},
+           expected=0, request_id="target")
+    db.put("other", {"evidence": other.name, "evidence_sha256": db.bind_evidence(other.name)},
+           expected=0, request_id="other")
+
+    reads = set()
+    bind = db.bind_evidence
+
+    def track(name):
+        reads.add(name)
+        return bind(name)
+
+    monkeypatch.setattr(db, "bind_evidence", track)
+    scoped = db.status("target")
+    assert scoped["cursor"] == 2
+    assert scoped["tasks"][0]["updated_cursor"] == 1
+    assert reads == {receipt.name}
+
+    reads.clear()
+    request = json.dumps({"path": receipt.name, "sha256": digest, "field": ["tests"], "equals": 4})
+    assert db.check_evidence_field("target", request)["field_check"]["result"] == "match"
+    assert reads == {receipt.name}
+
+    reads.clear()
+    full = db.status()
+    assert scoped["tasks"] == [row for row in full["tasks"] if row["task"] == "target"]
+    assert reads == {receipt.name, other.name}
+    with pytest.raises(ValueError, match="absent from this project"):
+        db.status("absent")
+
+    receipt.write_text('{"tests": 5}')
+    assert db.status("target")["tasks"][0]["evidence_status"] == "stale"
+    with pytest.raises(ValueError, match="no current evidence"):
+        db.check_evidence_field("target", request)
+
+
 def test_sourced_facts_are_not_last_write_wins_task_state(tmp_path):
     db = ledger(tmp_path)
     db.put("investigate", {"stage": "compare evidence"}, expected=0, request_id="p")

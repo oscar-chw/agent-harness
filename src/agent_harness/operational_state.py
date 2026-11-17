@@ -207,10 +207,20 @@ class OperationalState:
                 "memory_receipt": memory}
 
     def snapshot(self):
+        return self._snapshot()
+
+    def _snapshot(self, task=None):
         with self._db() as db:
             cursor = db.execute("SELECT COALESCE(MAX(seq),0) FROM events").fetchone()[0]
-            rows = [self._row(row) for row in db.execute("SELECT * FROM tasks ORDER BY id")]
-            updated = dict(db.execute("SELECT task,MAX(seq) FROM events GROUP BY task"))
+            if task is None:
+                rows = [self._row(row) for row in db.execute("SELECT * FROM tasks ORDER BY id")]
+                updated = dict(db.execute("SELECT task,MAX(seq) FROM events GROUP BY task"))
+            else:
+                row = db.execute("SELECT * FROM tasks WHERE id=?", (task,)).fetchone()
+                if row is None:
+                    raise ValueError("task is absent from this project")
+                rows = [self._row(row)]
+                updated = dict(db.execute("SELECT task,MAX(seq) FROM events WHERE task=? GROUP BY task", (task,)))
         for row in rows:
             row["updated_cursor"] = updated.get(row["task"], 0)
             row["memory_status"] = self._memory_status(row["memory_receipt"])
@@ -381,13 +391,11 @@ class OperationalState:
         return self._mutate(task, expected, request_id, "checkpoint", [value], change)
 
     def status(self, task=None):
-        snapshot = self.snapshot()
-        if task is not None:
-            self._check_key(task, "task")
-            snapshot["tasks"] = [row for row in snapshot["tasks"] if row["task"] == task]
-            if not snapshot["tasks"]:
-                raise ValueError("task is absent from this project")
-        return snapshot
+        if task is None:
+            return self.snapshot()
+        self._check_key(task, "task")
+        # Scope before validation so a targeted read never opens other tasks' receipts.
+        return self._snapshot(task)
 
     def evidence(self, task):
         row = self.status(task)["tasks"][0]
