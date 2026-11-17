@@ -196,3 +196,41 @@ def test_human_checkpoint_does_not_erase_a_source_memory_dependency(tmp_path):
     assert task_cli(tmp_path, env, "status", "linked", "--json")[1]["tasks"][0]["activity"] == "stale_memory"
     error, denied = mcp(tmp_path, env, "claim", task="linked", expected=4, request_id="stale-claim")
     assert error and "memory" in denied
+
+
+def test_receipt_field_check_discriminates_scope_type_and_current_bytes(tmp_path):
+    env = env_for(tmp_path)
+    (tmp_path / "plan").mkdir()
+    bound = "plan/release.json"
+    (tmp_path / "plan/goal.md").write_text("## goal: Verify release\n")
+    raw = b'{"counts":[{"passes":1}],"secret-shaped-fixture":"do-not-echo-the-receipt"}\n'
+    receipt = tmp_path / bound
+    receipt.write_bytes(raw)
+    (tmp_path / "plan/other.json").write_bytes(raw)
+    code, checkpoint = task_cli(tmp_path, env, "checkpoint", "release", "--goal", "Verify release",
+                                "--checkpoint", "plan/goal.md", "--next", "Verify counts",
+                                "--evidence", bound, "--json")
+    assert code == 0, checkpoint
+    code, original = task_cli(tmp_path, env, "evidence", "release", "--json")
+    assert code == 0 and original["claim"] == "reference_only"
+    request = {"path": bound, "sha256": hashlib.sha256(raw).hexdigest(),
+               "field": ["counts", 0, "passes"], "equals": 1}
+
+    def inspect(**changes):
+        return task_cli(tmp_path, env, "evidence", "release", "--assert-field",
+                        json.dumps({**request, **changes}), "--json")
+
+    code, match = inspect()
+    assert code == 0 and match["field_check"] == {"result": "match", "field": request["field"]}
+    assert match["claim"] == "reference_only" and "do-not-echo" not in json.dumps(match)
+    code, unequal = inspect(equals=True)
+    assert code == 1 and unequal["field_check"]["result"] == "different"
+    code, absent = inspect(field=["counts", 1, "passes"])
+    assert code == 1 and absent["field_check"]["result"] == "missing"
+    code, wrong = inspect(path="plan/other.json")
+    assert code == 2 and "reference" in wrong
+    receipt.write_bytes(raw.replace(b'"passes":1', b'"passes":2'))
+    code, stale = inspect()
+    assert code == 2 and "current" in stale
+    code, status = task_cli(tmp_path, env, "status", "release", "--json")
+    assert code == 0 and status["tasks"][0]["version"] == 1

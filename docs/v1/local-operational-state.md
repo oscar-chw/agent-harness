@@ -78,6 +78,23 @@ to 1 MiB inside the project, and becomes stale when it changes. Its status is
 Run `plan gate` to establish completion. `--json` exposes the same status to a
 script; `harness op` remains available for exact cursors and lease fencing.
 
+For a specific claim about the bound JSON receipt, pass `--assert-field` to
+`harness task evidence`. Take the path and SHA-256 from the current evidence
+response. Supply the exact field as a list of object keys and zero-based array
+indexes, and the expected scalar as its original JSON type.
+
+```sh
+harness task evidence release --json
+harness task evidence release --assert-field '{"path":"plan/receipt.json","sha256":"REPLACE_WITH_BOUND_SHA256","field":["counts","passed"],"equals":12}' --json
+```
+
+Exit 0 means the field matches. Exit 1 means it is missing or different.
+Exit 2 means the request or current evidence could not be verified. The
+command returns the comparison and reference while keeping the full receipt
+and unrelated values out of the response. It performs no task-state write.
+The comparison checks what the pinned source records. Use the original graph
+gate for completion and independent evidence for the underlying claim.
+
 CLI reads mutation fields as JSON from stdin, and returns one JSON result:
 
 ```sh

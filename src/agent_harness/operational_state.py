@@ -395,6 +395,65 @@ class OperationalState:
                 "sha256": row["value"].get("evidence_sha256"),
                 "status": row["evidence_status"], "claim": "reference_only"}
 
+    def check_evidence_field(self, task, raw_request):
+        """Compare one declared value on the current receipt without returning its contents."""
+        from .qualification import Bindings
+        from .vault_sources import _unique_object
+
+        def refuse_constant(_):
+            raise ValueError("receipt checks require finite JSON")
+
+        def decode(raw):
+            try:
+                return json.loads(raw, object_pairs_hook=_unique_object, parse_constant=refuse_constant)
+            except RecursionError as error:
+                raise ValueError("receipt check JSON is too deeply nested") from error
+
+        if len(raw_request.encode("utf-8")) > 4096:
+            raise ValueError("receipt check request exceeds 4096 bytes")
+        request = decode(raw_request)
+        if not isinstance(request, dict) or set(request) != {"path", "sha256", "field", "equals"}:
+            raise ValueError("receipt check requires path, sha256, field and equals")
+        path, digest, field, expected = (request[key] for key in ("path", "sha256", "field", "equals"))
+        if not isinstance(field, list) or not 1 <= len(field) <= 24 or any(
+                not ((isinstance(part, str) and 1 <= len(part) <= 256)
+                     or (type(part) is int and 0 <= part < 2**31)) for part in field):
+            raise ValueError("field requires a bounded list of object keys and array indexes")
+        if (type(expected) not in (bool, str, int, float, type(None))
+                or (type(expected) is float and not math.isfinite(expected))):
+            raise ValueError("equals requires a finite JSON scalar")
+
+        reference = self.evidence(task)
+        if reference["status"] != "current":
+            raise ValueError("task has no current evidence binding")
+        if path != reference["path"] or digest != reference["sha256"]:
+            raise ValueError("requested receipt does not match the task evidence reference")
+        bindings = Bindings(self.root)
+        document = decode(bindings.read({"path": path, "sha256": digest}))
+        if not isinstance(document, dict):
+            raise ValueError("task evidence must be a JSON object")
+        missing = object()
+        for part in field:
+            if isinstance(document, dict) and isinstance(part, str):
+                document = document.get(part, missing)
+            elif isinstance(document, list) and type(part) is int and part < len(document):
+                document = document[part]
+            else:
+                document = missing
+            if document is missing:
+                break
+        if self.evidence(task) != reference:
+            raise ValueError("task evidence reference changed during the check")
+        bindings.finish()
+
+        if document is missing:
+            result = "missing"
+        elif type(document) is type(expected) and document == expected:
+            result = "match"
+        else:
+            result = "different"
+        return {**reference, "field_check": {"field": field, "result": result}}
+
     def stop(self, task, reason, *, expected, request_id):
         if not isinstance(reason, str) or not reason.strip() or len(reason) > 1024:
             raise ValueError("stop needs a bounded reason")

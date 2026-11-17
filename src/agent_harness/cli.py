@@ -1320,6 +1320,8 @@ def cmd_task(args) -> int:
         checkpoint_fields = ("goal", "stage", "summary", "next", "resource", "checkpoint", "evidence")
         if args.action != "checkpoint" and any(getattr(args, key) is not None for key in checkpoint_fields):
             raise ValueError("checkpoint fields require the checkpoint action")
+        if args.action != "evidence" and args.assert_field is not None:
+            raise ValueError("--assert-field requires the evidence action")
         if args.action != "stop" and args.reason is not None:
             raise ValueError("reason requires the stop action")
         if args.action in ("status", "evidence") and (args.expected is not None or args.request_id is not None):
@@ -1329,7 +1331,10 @@ def cmd_task(args) -> int:
         if args.action in ("status", "evidence"):
             if args.action == "evidence" and not args.task:
                 raise ValueError("evidence needs a task id")
-            result = dispatch(store, {"action": args.action, **({"task": args.task} if args.task else {})})
+            if args.assert_field is not None:
+                result = store.check_evidence_field(args.task, args.assert_field)
+            else:
+                result = dispatch(store, {"action": args.action, **({"task": args.task} if args.task else {})})
         else:
             if not args.task:
                 raise ValueError("checkpoint, stop and resume need a task id")
@@ -1371,9 +1376,11 @@ def cmd_task(args) -> int:
                 _out(f"  evidence: {value['evidence']} ({row['evidence_status']}; reference only)")
     elif args.action == "evidence":
         _out(f"{result['task']}: {result['path'] or 'none'} ({result['status']}; reference only)")
+        if "field_check" in result:
+            _out(f"  field comparison: {result['field_check']['result']}")
     else:
         _out(f"{result['task']} v{result['version']}: {args.action} recorded; run the graph gate to prove completion")
-    return 0
+    return int("field_check" in result and result["field_check"]["result"] != "match")
 
 
 def cmd_launch(args) -> int:
@@ -1637,6 +1644,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--resource")
     p.add_argument("--checkpoint", help="existing project-local plan or checkpoint file")
     p.add_argument("--evidence", help="project-local receipt path (reference only, not proof of PASS)")
+    p.add_argument("--assert-field", metavar="JSON",
+                   help="compare a scalar in evidence against an explicit path, sha256, field and equals")
     p.add_argument("--reason", help="why new claims must stop; does not kill an active worker")
     p.add_argument("--expected", type=int, help="task version from status; omitted uses latest with CAS")
     p.add_argument("--request-id", help="idempotency key; requires --expected for stable retries")

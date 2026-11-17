@@ -487,6 +487,8 @@ def evaluate(home, project, campaign_id):
                         'preparation': prepared['observed_role_tokens']['preparation'],
                         'trial_base': child_result['execution_usage']['known_current_baseline_tokens'],
                         'trial_candidate': child_result['execution_usage']['known_current_candidate_tokens']})
+        if 'quality_rejection' in child_result:
+            result['quality_rejection'] = child_result['quality_rejection']
         _current(f); _development(home, row, f, path); _preparation(home, f, path, observations)
     except (OSError, ValueError, TypeError, KeyError, RuntimeError) as error:
         result.update(status='FAILED', error=redact(str(error))[:512])

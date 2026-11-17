@@ -562,6 +562,7 @@ def execute(home, project, run_id):
                     (P.encoded({'execution_attempts': []}).decode(), run_id))
     _account(home, project, f)  # Reject changed prior evidence before another native call.
     observations, failures, observed_calls = [], [], 0
+    quality_rejection = None
     native_tokens = 0
     attempts = []
     interrupted = None
@@ -605,8 +606,19 @@ def execute(home, project, run_id):
                                'split': c['split'], 'arm': arm}
                 observations.append(observation)
                 _save(path.parent / ('observed-' + str(observed_calls) + '.json'), {'native': r, 'grade': observation})
-                if c['split'] == 'development' and not observation['correct']:
-                    raise ValueError('development experience did not pass its frozen grader')
+                if not observation['correct']:
+                    if c['split'] == 'development':
+                        raise ValueError('development experience did not pass its frozen grader')
+                    # Replay requires every held-out candidate to pass the exact
+                    # answer and citation check. Neither later cases nor a
+                    # worse baseline can restore eligibility in this trial.
+                    if f.get('require_complete_usage') and arm == 'candidate':
+                        quality_rejection = {
+                            'task_id': c['task_id'],
+                            'failed_trial_call': observed_calls,
+                            'trial_calls_not_run': f['calls_max'] - observed_calls,
+                            'reason': 'held-out candidate failed its frozen answer or citation check',
+                        }
             except (OSError, ValueError, TypeError, KeyError, RuntimeError) as error:
                 failures.append({'task_id': c['task_id'], 'arm': arm,
                                  'error': redact(str(error))[:512], 'usage': 'UNKNOWN_UNLESS_OBSERVED'})
@@ -623,9 +635,9 @@ def execute(home, project, run_id):
                 except (ValueError, OSError) as error:
                     failures.append({'task_id': c['task_id'], 'arm': arm,
                                      'error': redact(str(error))[:512], 'usage': 'UNKNOWN_UNLESS_OBSERVED'})
-            if failures:
+            if failures or quality_rejection:
                 break
-        if failures:
+        if failures or quality_rejection:
             break
     holds = [('wider orchestration, review and maintenance usage/provenance unverified'
               if isinstance(preparation, dict) else
@@ -637,7 +649,10 @@ def execute(home, project, run_id):
         holds.append('execution attempts have unknown usage; known tokens are only a lower bound')
     holds.extend('held-out ' + o['task_id'] + ' did not pass the frozen grader'
                  for o in observations if o['split'] == 'heldout' and o['arm'] == 'candidate' and not o['correct'])
-    result = {'run_id': run_id, 'status': 'INTERRUPTED' if interrupted else 'FAILED' if failures else 'GRADED_HELD',
+    status = 'QUALITY_REJECTED' if quality_rejection else 'GRADED_HELD'
+    if interrupted or failures:
+        status = 'INTERRUPTED' if interrupted else 'FAILED'
+    result = {'run_id': run_id, 'status': status,
               'observed_calls': observed_calls, 'observations': observations, 'failures': failures,
               'execution_attempts': attempts, 'execution_usage': execution_usage,
               'known_candidate_tokens_lower_bound': (preparation_tokens + execution_usage['known_prior_tokens']
@@ -646,6 +661,8 @@ def execute(home, project, run_id):
               'known_baseline_tokens': execution_usage['known_current_baseline_tokens'], 'usage_complete': False,
               'holds': holds,
               'promotion': 'NOT_GRANTED', 'scope': f['scope']}
+    if quality_rejection:
+        result['quality_rejection'] = quality_rejection
     _save(path.parent / 'result.json', result)
     with P._db(home) as con:
         _table(con)
