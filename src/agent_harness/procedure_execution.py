@@ -161,10 +161,11 @@ def prepare(home, project, identity, oracle, suite, *, preparation_run_id=None, 
     if project not in oracle.parents:
         raise ValueError('oracle must remain inside the authorized project')
     suite = Path(suite)
-    if suite.is_symlink() or oracle not in suite.resolve(strict=True).parents:
+    canonical_suite = suite.resolve(strict=True)
+    if suite.is_symlink() or oracle not in canonical_suite.parents:
         raise ValueError('suite and original answers must be under the denied oracle')
     from .launch import _json as strict_json
-    suite_raw = _source_read(oracle, suite.relative_to(oracle).as_posix())
+    suite_raw = _source_read(oracle, canonical_suite.relative_to(oracle).as_posix())
     spec = strict_json(suite_raw)
     if not isinstance(spec, dict) or set(spec) != {'schema', 'cases', 'model', 'effort', 'timeout_seconds'} or type(spec['schema']) is not int or spec['schema'] != 1:
         raise ValueError('execution suite needs schema=1, cases, model, effort and timeout_seconds')
@@ -222,7 +223,7 @@ def prepare(home, project, identity, oracle, suite, *, preparation_run_id=None, 
     run_id = uuid.uuid4().hex
     frozen = {'schema': 1, 'run_id': run_id, 'project': str(project), 'procedure_id': identity,
               'candidate_sha256': payload['sha256'], 'oracle': str(oracle), 'cases': selected,
-              'suite_path': str(suite.resolve()), 'suite_sha256': _sha(suite_raw),
+              'suite_path': str(canonical_suite), 'suite_sha256': _sha(suite_raw),
               'model': spec['model'], 'effort': spec['effort'], 'timeout_seconds': spec['timeout_seconds'],
               'runtime': _runtime(), 'grader': 'exact-json-and-scoped-citation-v1',
               'calls_max': sum(1 if c['split'] == 'development' else 2 for c in selected),
