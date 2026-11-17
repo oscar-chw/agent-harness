@@ -473,8 +473,9 @@ def _checkpoint(home, project, run_id, attempts):
 
 
 def _series(frozen):
-    # Changing candidate text, case IDs, suite paths or models cannot erase debt.
-    return sorted(c['task_sha256'] for c in frozen['cases'] if c['split'] == 'development')
+    # Group by the frozen parsed task. Raw bytes still bind execution, but
+    # formatting a task cannot erase the cost of selecting a prior candidate.
+    return sorted(c['task_identity_sha256'] for c in frozen['cases'] if c['split'] == 'development')
 
 
 def _account(home, project, frozen):

@@ -204,6 +204,75 @@ def test_known_prior_campaign_cost_is_charged_to_candidate(lab, transport):
         adopt(lab, frozen, result)
 
 
+@pytest.mark.parametrize('fault', [None, 'changed', 'missing'])
+def test_retained_drafting_inputs_account_for_prior_completed_campaign(lab, transport, monkeypatch, fault):
+    def cheap_prior(*args, **kwargs):
+        receipt = transport(*args, **kwargs)
+        receipt['usage']['input_tokens'] = 9
+        receipt['evaluation_boundary']['provider_usage']['input_tokens'] = 9
+        return receipt
+
+    monkeypatch.setattr(launch, 'execute', cheap_prior)
+    _, previous = finish(lab)
+    monkeypatch.setattr(launch, 'execute', transport)
+    source = lab[1] / 'task-0.json'
+    source.write_text(json.dumps(json.loads(source.read_text()), indent=2) + '\n')
+    frozen, result = finish(lab)
+
+    if fault:
+        prior_draft = lab[2] / ('preparation-' + previous['preparation_run_id']) / 'actor' / 'evidence.md'
+        if fault == 'changed':
+            prior_draft.write_text(prior_draft.read_text() + '\n')
+        else:
+            prior_draft.rename(prior_draft.with_suffix('.held'))
+        with pytest.raises(ValueError, match='bound preparation input copy changed|preparation input unavailable'):
+            adopt(lab, frozen, result)
+        assert P.list_active(lab[0], str(lab[1])) == []
+    else:
+        accepted = adopt(lab, frozen, result)
+        # Two development calls, one preparation call, and six trial calls
+        # from the old campaign all count as selection overhead.
+        assert accepted['candidate_tokens'] == 160 and accepted['base_tokens'] == 2000
+
+
+def test_unconsumed_freeze_cannot_block_adoption_after_its_sources_change(lab, transport):
+    unused = freeze(lab)
+    task = lab[1] / 'task-0.json'
+    task.write_text(json.dumps(json.loads(task.read_text()), indent=2) + '\n')
+    frozen, result = finish(lab)
+    assert frozen['campaign_id'] != unused['campaign_id']
+    accepted = adopt(lab, frozen, result)
+    assert accepted['candidate_tokens'] == 70 and accepted['base_tokens'] == 2000
+
+
+@pytest.mark.parametrize('new_content', [False, True])
+def test_failed_call_is_scoped_by_frozen_identity_when_prior_campaign_inputs_change(
+        lab, transport, monkeypatch, new_content):
+    def wrong_answer(*args, **kwargs):
+        receipt = transport(*args, **kwargs)
+        receipt['answer'] = '{"status":"wrong","source_ids":["task-evidence"]}'
+        receipt['answer_sha256'] = C._sha(receipt['answer'].encode())
+        return receipt
+
+    monkeypatch.setattr(launch, 'execute', wrong_answer)
+    first = freeze(lab)
+    assert M.run(lab[0], str(lab[1]), first['campaign_id'])['status'] == 'FAILED'
+    monkeypatch.setattr(launch, 'execute', transport)
+    task = lab[1] / 'task-0.json'
+    raw = task.read_bytes()
+    inputs = json.loads(raw)
+    if new_content:
+        inputs['instruction'] += ' Copy the value using the exact documented field.'
+    changed = json.dumps(inputs, indent=2, sort_keys=True).encode() + b'\n'
+    assert changed != raw
+    task.write_bytes(changed)
+
+    frozen, result = finish(lab)
+    accepted = adopt(lab, frozen, result)
+    assert accepted['base_tokens'] == 2000
+    assert accepted['candidate_tokens'] == (70 if new_content else 80)
+
+
 def test_source_change_after_activation_withholds_recall(lab, transport):
     frozen, result = finish(lab)
     adopt(lab, frozen, result)

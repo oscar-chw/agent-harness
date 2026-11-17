@@ -552,7 +552,7 @@ def _history(records, frozen, run_id):
     A missing terminal upstream observation leaves the history unknown.
     """
     from .launch import _json as strict_json
-    series = sorted(c['task_identity_sha256'] for c in frozen['cases'] if c['split'] == 'development')
+    series = C._series(frozen)
     totals = {'base': 0, 'candidate': 0}
     identities, requests, threads, responses = [], set(), set(), set()
 
@@ -577,15 +577,35 @@ def _history(records, frozen, run_id):
 
     for table in ('procedure_campaign_runs', 'procedure_preparation_runs', 'procedure_execution_runs'):
         for row in records.get(table, []):
+            if row['state'] == 'PREPARED':
+                continue
             path = Path(row['freeze_path'])
             context = strict_json(C._bound(path.parent, path.name, row['freeze_sha256']))
-            development = (context['episodes'] if table == 'procedure_preparation_runs' else
-                           [c for c in context['cases'] if c['split'] == 'development'])
-            # Derive old receipt identities from their hash-bound source bytes.
-            # Formatting changes cannot reset selection-cost history.
-            tasks = sorted(P.digest(strict_json(C._bound(Path(context['project']),
-                           c['task_path'], c['task_sha256']))) for c in development)
-            if tasks != series or row['state'] == 'PREPARED':
+            if table == 'procedure_preparation_runs':
+                result = strict_json(row['result']) if row['result'] else None
+                if result is None:
+                    # An unfinished preparation may not have archived its input.
+                    raw_tasks = [C._bound(Path(context['project']), c['task_path'], c['task_sha256'])
+                                 for c in context['episodes']]
+                else:
+                    if C._json(path.parent / 'result.json') != result:
+                        raise ValueError('preparation history result changed')
+                    if result['observed_calls'] == 0:
+                        continue
+                    if result['observed_calls'] != 1:
+                        raise ValueError('preparation history call coverage is invalid')
+                    try:
+                        evidence = C._bound(path.parent, 'actor/evidence.md', context['evidence_sha256'],
+                                            label='preparation input')
+                    except OSError as error:
+                        raise ValueError('preparation input unavailable; usage unknown') from error
+                    raw_tasks = [item['task'] for item in strict_json(evidence)]
+                tasks = sorted(P.digest(strict_json(raw)) for raw in raw_tasks)
+            else:
+                # Classify historical usage from the frozen inputs, even if
+                # the working task file was replaced after that call.
+                tasks = C._series(context)
+            if tasks != series:
                 continue
             if row['state'] in ('CONSUMED', 'DEVELOPMENT_CONSUMED', 'PREPARATION_CONSUMED', 'TRIAL_CONSUMED'):
                 raise ValueError('relevant history is in progress; terminal complete usage is unknown')
@@ -599,15 +619,8 @@ def _history(records, frozen, run_id):
                         path.parent / ('development-native-' + str(index) + '.json'),
                         attempt.get('native_sha256'), context)
             elif table == 'procedure_preparation_runs':
-                if not row['result']:
+                if result is None:
                     raise ValueError('consumed preparation history has unknown usage')
-                result = strict_json(row['result'])
-                if C._json(path.parent / 'result.json') != result:
-                    raise ValueError('preparation history result changed')
-                if result['observed_calls'] == 0:
-                    continue
-                if result['observed_calls'] != 1:
-                    raise ValueError('preparation history call coverage is invalid')
                 attempt = C._json(path.parent / 'attempt.json')
                 consume((row['run_id'], 'preparation', 0), path.parent / 'actor', attempt,
                         path.parent / 'observed.json', result.get('observed_sha256'), context)
