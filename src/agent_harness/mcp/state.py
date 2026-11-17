@@ -71,7 +71,7 @@ def _replace_bytes(path: Path, data: bytes) -> None:
 
 class State:
     def __init__(self, home: Optional[os.PathLike] = None, project: Optional[os.PathLike] = None):
-        self.home = harness_home(home)
+        self.home = harness_home(home).expanduser().resolve()
         self.default_project = project
 
     def _root(self, project: Optional[str]) -> Path:

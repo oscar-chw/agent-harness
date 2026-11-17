@@ -157,6 +157,21 @@ def test_delayed_state_writer_cannot_replace_a_newer_board_checkpoint(lab, monke
     assert (project / row["value"]["checkpoint"]).read_text() == reader.state.state_load()
 
 
+def test_shared_board_accepts_the_configured_home_alias(lab):
+    project, home, _ = lab
+    alias = project / "harness-home-alias"
+    alias.symlink_to(home, target_is_directory=True)
+    writer = Server(home=alias)
+    text = "## Goal\nFinish the staged release\n## Next\nInspect the published asset hashes.\n"
+    response = writer.handle(message("tools/call", name="state_save", arguments={"text": text}))["result"]
+    assert not response["isError"]
+    reader = Server(home=home)
+    assert "Inspect the published asset hashes." in initialize(reader)["instructions"]
+    row = next(row for row in reader.call_tool("op_state", {"action": "snapshot"})["tasks"]
+               if row["value"].get("stage") == "checkpoint_saved")
+    assert (project / row["value"]["checkpoint"]).read_text() == text
+
+
 def test_identical_saved_packet_keeps_identity_and_cursor_across_reconnections(lab):
     text = '## Goal\nCheck recovery\n## Next\nInspect the receipt.\n'
     for _ in range(3):
