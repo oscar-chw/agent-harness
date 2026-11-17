@@ -88,13 +88,15 @@ def _status(p: Path) -> str:
         return "unreadable"                     # kept: what cannot be read is not known to be prunable
 
 
-def prune(hh: Path) -> None:
+def prune(hh: Path, *, lock_timeout: float = 30) -> None:
     """Bring every store back under its cap. Cheap: called by the Stop hook after each capture. One store that
     cannot be read (a stray non-UTF-8 byte) never stops the others from being pruned."""
     from .mcp.memory import _store_lock
-    if (hh / "candidates.jsonl").is_file():
+    if (hh / "candidates.jsonl").is_file() or (hh / "capture-pending.json").exists():
         try:
-            with _store_lock(hh):
+            with _store_lock(hh, timeout=lock_timeout):
+                from .capture import _recover_capture
+                _recover_capture(hh)
                 _keep_tail(hh / "candidates.jsonl", CAPS["candidates"])
         except (OSError, ValueError):
             pass

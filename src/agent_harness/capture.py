@@ -23,6 +23,7 @@ from .native_evidence import NativeEvidence as NativeEvidence
 from .mcp.memory import _store_lock
 
 STORE = "candidates.jsonl"
+PENDING = "capture-pending.json"
 # A check is a command whose PROGRAM is a test runner or linter, in any step of the command line: `grep -rn
 # pytest docs/` names pytest and is not one. Parsed with shlex, so text in quotes or a heredoc is never a step;
 # wrappers are skipped (VAR=1, env, time, timeout N, nice, sudo -u X, xvfb-run, uv/poetry/pdm/hatch run, npx,
@@ -116,7 +117,7 @@ EXIT_LINE = re.compile(r"\A\s*(?:Exit code|Command failed with exit code):?\s*(-
 # Strict on purpose: "Stop the server" is an instruction, not a correction.
 CORRECTION = re.compile(r"^\s*(no[,.!]|nope\b|don'?t\b|do not\b|wrong\b|that'?s (wrong|not)|not like that)"
                         r"|\b(instead of|use \S+ (instead|not))\b", re.I)
-TEACH = re.compile(r"^\s*(?:please\s+)?remember\s+(?:that\b|for this project\b)|^\s*from now on\b", re.I)
+TEACH = re.compile(r"^\s*(?:please\s+)?remember\s+(?:that\b|to\b|for this project\b)|^\s*from now on\b", re.I)
 FAIL_LINE = re.compile(r"(FAILED|ERROR|Error|Traceback|assert|FAIL\b|failed)")
 MAX_TEXT = 300
 
@@ -130,6 +131,55 @@ def _text(content) -> str:
 
 
 TAIL_BYTES = 4 * 1024 * 1024
+
+
+def _replace_capture(path, data):
+    temporary = path.with_name(path.name + '.capture-tmp')
+    if path.is_symlink() or path.parent.is_symlink() or temporary.is_symlink():
+        raise ValueError('capture storage is redirected')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary.touch(mode=0o600, exist_ok=True)
+    if path.exists():
+        temporary.chmod(path.stat().st_mode & 0o777)
+    temporary.write_bytes(data)
+    temporary.replace(path)
+
+
+def _recover_capture(home):
+    """Complete the pending writer before another cooperating writer changes its bytes."""
+    pending = home / PENDING
+    if pending.is_symlink():
+        raise ValueError('capture recovery record is redirected')
+    if not pending.exists():
+        return
+    value = json.loads(pending.read_text(encoding='utf-8'))
+    fields = {'schema', 'before', 'data', 'marker', 'state', 'sha256'}
+    if (not isinstance(value, dict) or set(value) != fields or type(value['schema']) is not int
+            or value['schema'] != 1 or not isinstance(value['data'], str)
+            or (value['before'] is not None and (not isinstance(value['before'], str)
+                or not re.fullmatch(r'[a-f0-9]{64}', value['before'])))
+            or not isinstance(value['marker'], str)
+            or not re.fullmatch(r'capture-[\w.-]+', value['marker'])
+            or not isinstance(value['state'], dict) or set(value['state']) != {'turn', 'keys'}
+            or not isinstance(value['state']['turn'], str)
+            or not isinstance(value['state']['keys'], list)
+            or any(not isinstance(key, str) for key in value['state']['keys'])):
+        raise ValueError('invalid capture recovery record')
+    bound = {key: item for key, item in value.items() if key != 'sha256'}
+    if hashlib.sha256(json.dumps(bound, sort_keys=True).encode()).hexdigest() != value['sha256']:
+        raise ValueError('capture recovery record changed')
+    path, marker = home / STORE, home / 'state' / value['marker']
+    if path.is_symlink() or marker.is_symlink() or marker.parent.is_symlink():
+        raise ValueError('capture recovery target is redirected')
+    current = hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
+    data = value['data'].encode('utf-8')
+    after = hashlib.sha256(data).hexdigest()
+    if current == value['before']:
+        _replace_capture(path, data)
+    elif current != after:
+        raise ValueError('capture data changed during recovery; retain the pending record')
+    _replace_capture(marker, json.dumps(value['state']).encode('utf-8'))
+    pending.unlink()
 
 
 def _last_turn(path: str) -> list:
@@ -206,6 +256,22 @@ def capture_kimi_turn(hh: Path, transcript: str, session: str, project=None) -> 
     return capture_turn(hh, str(transcript), session, project=project, events=events, started=started)
 
 
+def capture_prompt(home: Path, payload: dict) -> List[dict]:
+    """Observe the Codex prompt hook's documented event shape, with no authority inference."""
+    if (payload.get('hook_event_name') != 'UserPromptSubmit'
+            or any(not isinstance(payload.get(key), str) or not payload[key]
+                   for key in ('session_id', 'turn_id', 'cwd', 'prompt'))):
+        return []
+    project = Path(payload['cwd'])
+    if not project.is_absolute() or not project.is_dir():
+        return []
+    session = hashlib.sha256(payload['session_id'].encode()).hexdigest()
+    event = {'type': 'user', 'uuid': payload['turn_id'], 'capture_origin': 'codex-prompt',
+             'session_sha256': session, 'message': {'content': payload['prompt']}}
+    return capture_turn(home, 'codex-prompt/' + session, 'codex-prompt-' + session,
+                        project=project, events=[event], started=True, lock_timeout=0.2)
+
+
 def _checks(events) -> List[dict]:
     """[(command, exit, output)] for each check-like tool call in order, matched to its result."""
     calls, out = {}, []
@@ -255,9 +321,15 @@ def candidates(transcript: str, events: Optional[list] = None, project=None) -> 
     first = events[0] if events else {}
     prompt = _text((first.get("message") or {}).get("content")) if first.get("type") == "user" else ""
     if prompt and (CORRECTION.search(prompt) or TEACH.search(prompt)):
-        t = redact(prompt.strip())[:MAX_TEXT]       # redact the whole text first, then cut
+        clean = redact(prompt.strip())
+        t = clean[:MAX_TEXT]
+        key = _key("user", project_sha + ":" + t if project_sha else t)
+        if first.get('capture_origin') == 'codex-prompt':
+            # Literal preferences can differ by number, case or text past the preview.
+            # Native collection is new; keep legacy transcript identities readable.
+            key = hashlib.sha1(('codex-user:' + (project_sha or '') + ':' + clean).encode()).hexdigest()[:16]
         found.append({"source": "user", "summary": t, "evidence": t,
-                      "key": _key("user", project_sha + ":" + t if project_sha else t),
+                      "key": key,
                       # A retained transcript event can be matched later; neither hash
                       # authenticates the speaker or promotes the text to a method.
                       "source_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
@@ -286,7 +358,8 @@ def candidates(transcript: str, events: Optional[list] = None, project=None) -> 
 
 
 def capture_turn(hh: Path, transcript: str, session: str, project=None, *,
-                 events: Optional[list] = None, started: Optional[bool] = None) -> List[dict]:
+                 events: Optional[list] = None, started: Optional[bool] = None,
+                 lock_timeout: float = 30) -> List[dict]:
     """The Stop hook's entry point. A turn can end in more than one Stop (after the harness's own block, the
     model works on and stops again), so the marker names the turn and the lessons already recorded for it, and
     a later Stop of the same turn records only what is new: one fail-then-pass must count once, or a single
@@ -297,11 +370,12 @@ def capture_turn(hh: Path, transcript: str, session: str, project=None, *,
         started = True
     # The marker and candidate count form one read-modify-write operation.
     # Serializing only the JSONL replace still counts simultaneous Stops twice.
-    with _store_lock(hh):
+    with _store_lock(hh, timeout=lock_timeout):
+        _recover_capture(hh)
         rows = _capture_turn(hh, transcript, session, project, events, started)
     try:
         from . import storage
-        storage.prune(hh)
+        storage.prune(hh, lock_timeout=lock_timeout)
     except Exception:
         pass
     return rows
@@ -321,12 +395,11 @@ def _capture_turn(hh, transcript, session, project, events, started):
     except (OSError, ValueError, AttributeError, KeyError):
         pass
     new = [f for f in candidates(transcript, events, project=project) if f["key"] not in seen]
-    rows = _record(hh, new)
-    # The marker is written BEFORE anything else can fail: if pruning raised first, the next Stop of this turn
-    # would count the same lesson again (one occurrence would then pass the "has recurred" rule).
-    mark.parent.mkdir(parents=True, exist_ok=True)
-    mark.write_text(json.dumps({"turn": turn, "keys": seen + [f["key"] for f in new]}), encoding="utf-8")
-    return rows
+    state = {"turn": turn, "keys": seen + [f["key"] for f in new]}
+    if new:
+        return _record(hh, new, checkpoint=(mark.name, state))
+    _replace_capture(mark, json.dumps(state).encode('utf-8'))
+    return []
 
 
 def record(hh: Path, found: List[dict], now: Optional[str] = None) -> List[dict]:
@@ -334,21 +407,28 @@ def record(hh: Path, found: List[dict], now: Optional[str] = None) -> List[dict]
     if not found:
         return []
     with _store_lock(hh):
+        _recover_capture(hh)
         return _record(hh, found, now)
 
 
-def _record(hh, found, now=None):
+def _record(hh, found, now=None, checkpoint=None):
     if not found:
         return []
     now = now or time.strftime("%Y-%m-%dT%H:%M:%S")
     path = hh / STORE
+    if path.is_symlink():
+        raise ValueError('capture store is redirected')
+    original = path.read_bytes() if path.exists() else None
     rows = []
-    if path.is_file():
-        for line in path.read_text(encoding="utf-8").splitlines():
+    if original is not None:
+        for line in original.decode('utf-8').splitlines():
             try:
-                rows.append(json.loads(line))
+                row = json.loads(line)
             except ValueError:
                 continue
+            if not isinstance(row, dict):
+                raise ValueError('capture candidate row must be an object')
+            rows.append(row)
     by_key = {r.get("key"): r for r in rows if r.get("key")}
     for f in found:
         r = by_key.get(f["key"])
@@ -371,7 +451,14 @@ def _record(hh, found, now=None):
             rows.append(r)
             by_key[f["key"]] = r
     hh.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(".tmp")
-    tmp.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
-    tmp.replace(path)
+    data = "".join(json.dumps(r) + "\n" for r in rows)
+    if checkpoint is None:
+        _replace_capture(path, data.encode('utf-8'))
+    else:
+        marker, state = checkpoint
+        pending = {'schema': 1, 'before': hashlib.sha256(original).hexdigest() if original is not None else None,
+                   'data': data, 'marker': marker, 'state': state}
+        pending['sha256'] = hashlib.sha256(json.dumps(pending, sort_keys=True).encode()).hexdigest()
+        _replace_capture(hh / PENDING, json.dumps(pending).encode('utf-8'))
+        _recover_capture(hh)
     return rows

@@ -1,8 +1,8 @@
 """Codex CLI: AGENTS.md, [mcp_servers.*] in config.toml, shared skills in ~/.agents/skills.
 
 Per the provider specs (Codex 0.159): custom prompts (~/.codex/prompts) are deprecated in favour of
-skills, so none are written; `[profiles]` tables are no longer read, so none are written; Codex's own
-memories stay as they are (off by default).
+skills, so none are written; `[profiles]` tables are no longer read, so none are written. Native memory
+settings follow the user's selected configuration.
 
 A profile may add Codex settings of its own, merged key by key into the user's tables (their other
 keys stay; uninstall takes out only these):

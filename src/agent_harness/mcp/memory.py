@@ -55,11 +55,11 @@ SNAPSHOT_CHARS = 2200     # Hermes' MEMORY.md cap
 
 
 @contextlib.contextmanager
-def _store_lock(home: Path):
+def _store_lock(home: Path, timeout: float = 30):
     """Serialize memory operations across MCP processes, including duplicate detection."""
     home.mkdir(parents=True, exist_ok=True)
     with (home / ".memory.lock").open("a+b") as lock_file:
-        deadline = time.monotonic() + 30
+        deadline = time.monotonic() + timeout
         if os.name == "nt":
             import msvcrt
             # Windows byte-range locks may extend past EOF. Reading a byte held
@@ -86,7 +86,7 @@ def _store_lock(home: Path):
                 if exc.errno not in (errno.EACCES, errno.EAGAIN):
                     raise
                 if time.monotonic() >= deadline:
-                    raise TimeoutError("memory store is busy for 30 seconds") from exc
+                    raise TimeoutError("memory store is busy for %g seconds" % timeout) from exc
                 time.sleep(.01)
         try:
             yield

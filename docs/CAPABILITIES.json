@@ -31,7 +31,7 @@
       "run": "no: run `harness run` in a terminal; it drives Claude Code or Codex, not Claude desktop"
     },
     "codex": {
-      "capture": "no: the harness installs no hook in Codex",
+      "capture": "no: prompt hook stages user corrections; test-result capture is unavailable",
       "discover": "yes",
       "guard": "no: the harness installs no hook in Codex; its own sandbox and approvals apply",
       "improve": "yes",
@@ -368,7 +368,7 @@
       "why": "the Codex IDE extension, sharing ~/.codex/config.toml and AGENTS.md with the CLI"
     }
   ],
-  "package_version": "3.0.4",
+  "package_version": "3.0.5",
   "presets": {
     "draft-message": {
       "capabilities": [

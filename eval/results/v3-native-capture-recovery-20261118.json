@@ -1,0 +1,134 @@
+{
+  "schema": "harness.native-capture-recovery-qualification/v1",
+  "date": "2026-11-18",
+  "baseline_version": "3.0.4",
+  "candidate_version": "3.0.5",
+  "status": "FOCUSED_MECHANICS_PASS",
+  "baseline_reproduction": {
+    "failed": 9,
+    "passed": 7
+  },
+  "additional_teaching_reproduction": {
+    "failed": 1,
+    "failure": "Explicit remember-to teaching was omitted"
+  },
+  "focused_checks": 37,
+  "mutations": [
+    {
+      "mutation": "unbounded-prompt-acquisition",
+      "control": "PASS",
+      "mutant": "REJECTED",
+      "restored": "PASS"
+    },
+    {
+      "mutation": "nonobject-candidates-accepted",
+      "control": "PASS",
+      "mutant": "REJECTED",
+      "restored": "PASS"
+    },
+    {
+      "mutation": "explicit-teaching-omitted",
+      "control": "PASS",
+      "mutant": "REJECTED",
+      "restored": "PASS"
+    },
+    {
+      "mutation": "recovery-before-other-writer",
+      "control": "PASS",
+      "mutant": "REJECTED",
+      "restored": "PASS"
+    },
+    {
+      "mutation": "no-candidate-marker-intent",
+      "control": "PASS",
+      "mutant": "REJECTED",
+      "restored": "PASS"
+    },
+    {
+      "mutation": "changed-intent-accepted",
+      "control": "PASS",
+      "mutant": "REJECTED",
+      "restored": "PASS"
+    },
+    {
+      "mutation": "prompt-bridge-disabled",
+      "control": "PASS",
+      "mutant": "REJECTED",
+      "restored": "PASS"
+    },
+    {
+      "mutation": "literal-key-collapsed",
+      "control": "PASS",
+      "mutant": "REJECTED",
+      "restored": "PASS"
+    }
+  ],
+  "source_sha256": {
+    "src/agent_harness/capture.py": "1d065ccfe9ccb5e899b01a00e06e512cb2f9930f383fc1f5979d4075cfc8bdef",
+    "src/agent_harness/storage.py": "71aac33f36e77a7ef32910b74fa6a18033dfff9e52c990c5b3228c1c8814a178",
+    "src/agent_harness/cli.py": "9ef54612bef12c106d5757b3abf5b371b2f97b3211605e684ba70dae0b3ca8cf",
+    "src/agent_harness/adapters/codex.py": "1dd7989dda17c647c000a5f87fc0088cc142c11d8dc6f3e177f8e5e41ebfbf95",
+    "tests/test_capture_recovery.py": "02009a02dc9ec5ccfa8b14a1415e8daeaa65429d4217ac118f7a34a6b59edbc5",
+    "tests/test_native_prompt_capture.py": "f98d2f6e387da56a0ccea7fb2e31ca6e228eb6703fee76a9eaf023063ada148e",
+    "src/agent_harness/mcp/memory.py": "b91c8d9fdeb7710eacd7d8685b431496317fa2536e5c54b905f70c563a3218c2"
+  },
+  "registered_hook_definition": "UNCHANGED",
+  "paired_local_hook": {
+    "status": "PASS",
+    "arms": {
+      "baseline": {
+        "invocations": 9,
+        "median_seconds": 0.14286120900000004,
+        "context_bytes": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "counts": []
+      },
+      "candidate": {
+        "invocations": 9,
+        "median_seconds": 0.14548929200000016,
+        "context_bytes": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "counts": [
+          1,
+          1
+        ]
+      }
+    },
+    "context_output_identical": true,
+    "native_model_calls": 0,
+    "scope": "Paired local authored hook invocations. This does not measure native model use, total tokens or real-client event delivery."
+  },
+  "native_model_calls": 0,
+  "real_client_event_delivery": "NOT_VERIFIED",
+  "semantic_learning_efficacy": "NOT_MEASURED",
+  "aggregate_model_token_efficiency": "NOT_MEASURED",
+  "adoption": "NOT_GRANTED",
+  "affected_checks": 193,
+  "review_reproduction": {
+    "failed": 4,
+    "causes": [
+      "Unbounded prompt lock contention",
+      "Nonobject candidate rows suppressing recall"
+    ]
+  },
+  "prompt_collection_limit": "Busy lock delivery is diagnosed and requires retry; no automatic backlog guarantee",
+  "review": "No remaining findings after bounded-lock and malformed-row corrections"
+}

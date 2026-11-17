@@ -875,6 +875,11 @@ def prompt_hook(stdin=None) -> int:
                 print("harness recall: invalid project scope; no context injected", file=sys.stderr)
                 return 0
             cmd += ["--project", str(Path(scope).resolve())]
+        try:
+            from . import capture
+            capture.capture_prompt(I.harness_home(Path.home()), data)
+        except (OSError, ValueError, TypeError) as exc:
+            print("harness prompt capture unavailable: " + type(exc).__name__, file=sys.stderr)
         env = dict(os.environ, PYTHONPATH=str(I.PKG_DIR.parent))
         p = subprocess.run(cmd, input=prompt, capture_output=True, text=True, timeout=RECALL_TIMEOUT, env=env)
         if p.returncode == 0 and p.stdout.strip():

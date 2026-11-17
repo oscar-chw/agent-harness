@@ -14,7 +14,7 @@ TERMINAL = "no: run `harness %s` in a terminal; it drives Claude Code or Codex, 
 
 _NOTES = {
     "claude-code": {},
-    "codex": {"guard": NO_HOOK % "Codex; its own sandbox and approvals apply", "capture": NO_HOOK % "Codex"},
+    "codex": {"guard": NO_HOOK % "Codex; its own sandbox and approvals apply", "capture": "no: prompt hook stages user corrections; test-result capture is unavailable"},
     "cursor": {"guard": NO_HOOK % "Cursor", "capture": NO_HOOK % "Cursor",
                "review": TERMINAL % ("review", "Cursor"), "run": TERMINAL % ("run", "Cursor"),
                "discover": "no: Open VSX results install with `code`; Cursor's own CLI is not wired yet"},

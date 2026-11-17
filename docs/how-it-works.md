@@ -91,6 +91,22 @@ hook also records candidates on its own, from the same two trustworthy signals o
 you ("no, ...", "use X instead"). They are redacted, kept apart by source, deduplicated with a count, and
 written to `~/.agent-harness/candidates.jsonl`, never straight into lessons.
 
+**Codex correction capture (v3.0.5).** The existing prompt hook can stage an explicit correction or
+teaching candidate using the documented session, turn and project fields. Repeated delivery of one
+turn contributes once. A separate turn can supply another occurrence. Full redacted wording keeps
+literal values distinct even when their previews look alike. The hook retains ordinary memory recall.
+This path observes prompts. Codex test-result capture and model adherence require separate evidence.
+Native delivery also depends on that client's enabled, trusted hook configuration.
+Busy-store acquisition returns a diagnostic within its short capture budget. Collection on that
+delivery needs a retry. Malformed candidate objects preserve ordinary recall and their original bytes.
+
+**Interrupted capture recovery (v3.0.5).** Candidate data and its turn marker share a bounded pending
+transaction under the store lock. After process termination, the next cooperating capture, direct
+record or prune finishes the transaction before updating candidates. Recovery checks the original
+or completed data hash and retains unexpected edits for diagnosis. The temporary intent is removed
+after completion. This guarantee covers process termination. Physical power-loss durability and
+hostile local writers require further controls.
+
 **Getting better, only where measured.** `harness improve --propose` turns a candidate seen at least twice
 into a legacy proposal, which remains evidence and cannot be applied directly. The current path drafts a
 source-bound project procedure but holds activation: `harness improve --apply` rejects caller-attested
