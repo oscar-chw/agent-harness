@@ -125,6 +125,8 @@
     "loop-check",
     "method",
     "preset",
+    "research",
+    "dream",
     "handoff",
     "workspace"
   ],
@@ -366,7 +368,7 @@
       "why": "the Codex IDE extension, sharing ~/.codex/config.toml and AGENTS.md with the CLI"
     }
   ],
-  "package_version": "3.0.0rc2",
+  "package_version": "3.0.0",
   "presets": {
     "draft-message": {
       "capabilities": [
@@ -512,6 +514,11 @@
       "path": "content/skills/production-code/SKILL.md"
     },
     {
+      "description": "Research questions, experiments and scientific papers.",
+      "name": "research-paper",
+      "path": "content/skills/research-paper/SKILL.md"
+    },
+    {
       "description": "Inspect shared task handoffs and maintain evidence-backed memory during multi-step work.",
       "name": "session-memory",
       "path": "content/skills/session-memory/SKILL.md"
@@ -527,7 +534,7 @@
       "path": "content/skills/verify-before-done/SKILL.md"
     },
     {
-      "description": "Default loop for research, coding and dev-ops - analyse, research, plan, execute, test, loop back where the evidence points. Use for any task beyond a one-line change.",
+      "description": "Adaptive problem solving for material research, coding and operations.",
       "name": "work-loop",
       "path": "content/skills/work-loop/SKILL.md"
     },

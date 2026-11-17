@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "capabilities": [
+    {
+      "id": "research-paper",
+      "summary": "Question framing, literature, scientific comparisons, writing and peer review.",
+      "sources": [
+        {
+          "path": "skills/research-paper/SKILL.md",
+          "sha256": "8b1820f0defce43227be7554bfd65753d24ae300fc559537b3428ab6aa5f4596"
+        },
+        {
+          "path": "skills/research-paper/framing-literature.md",
+          "sha256": "a8a9e0d8d6ea18301b41e358a262afe75659242cce2719d8caf00d1e71fc910a"
+        },
+        {
+          "path": "skills/research-paper/method-design-eval.md",
+          "sha256": "81bdb3c06dca96bafbed6c17059a9309254a307e98c91ad8265d9bf324c89e8e"
+        },
+        {
+          "path": "skills/research-paper/writing-figures-review.md",
+          "sha256": "6d48d6c04e466313b33fef7c48ca9fab74fd4394843a3e84ec27f062aa98660a"
+        },
+        {
+          "path": "knowledge/RESEARCH-PRACTICE.md",
+          "sha256": "fcf919c20957f68899a0d2b934fd236b1b3ce11f27c3391a18d454e5b221065b"
+        },
+        {
+          "path": "knowledge/RESEARCH-SOURCES.md",
+          "sha256": "c7fd03bce31e923bde58e23f9a4950c8987d92485ee0f7259555b44f5da15077"
+        },
+        {
+          "path": "knowledge/research-source-pins.json",
+          "sha256": "d6d32d1b6c4a92c5dd59aec8a0abbc4bc626b97dd7507bc1eeaa65b99794ac7f"
+        }
+      ],
+      "related": [
+        "reasoning-decisions"
+      ],
+      "reviewed_at": "2026-11-17",
+      "quality_evaluation": "NOT_MEASURED"
+    },
+    {
+      "id": "reasoning-decisions",
+      "summary": "Existing optional principles guide, with held prior native calibration.",
+      "sources": [
+        {
+          "path": "skills/work-loop/reasoning.md",
+          "sha256": "410fc6b6087c9b26d85d6730c94df781ee98cbc543a1f8184bf5a190f152f338"
+        },
+        {
+          "path": "skills/work-loop/decision-check.md",
+          "sha256": "cffaf84339e6a150de0212b05dd00310be238a1bfe8ddbf29a9ab80de59c4047"
+        },
+        {
+          "path": "knowledge/REASONING-EVAL.md",
+          "sha256": "d1120d2000e800232b448c0cc9f0ce76572b6ea3819eae6ee2c027058da3a0e1"
+        }
+      ],
+      "related": [
+        "research-paper"
+      ],
+      "reviewed_at": "2026-11-17",
+      "quality_evaluation": "BOUNDED_COMPACTION_PASS_24_CASES_general_promotion_NOT_GRANTED"
+    },
+    {
+      "id": "web-design",
+      "summary": "Existing researched web design and inspection guidance.",
+      "sources": [
+        {
+          "path": "skills/clear-docs/web-design.md",
+          "sha256": "5b0eb1da8fd37633fe8459a1fc5b2f48b469044a04db51ed190ea777742f3b21"
+        }
+      ],
+      "related": [],
+      "reviewed_at": "2026-11-16",
+      "quality_evaluation": "NOT_MEASURED"
+    },
+    {
+      "id": "presentations",
+      "summary": "Existing researched presentation routing and design guidance.",
+      "sources": [
+        {
+          "path": "skills/clear-docs/presentations.md",
+          "sha256": "1e149f83c6b4d81090cc5476b8f9da333a2e1b14f05acd5da71c846f2f382ab9"
+        }
+      ],
+      "related": [],
+      "reviewed_at": "2026-11-16",
+      "quality_evaluation": "NOT_MEASURED"
+    },
+    {
+      "id": "graph-memory",
+      "summary": "Existing assessed graph-memory alternatives and limits.",
+      "sources": [
+        {
+          "path": "skills/session-memory/graph-memory.md",
+          "sha256": "d822851c5e1ffccca92f81372272c66749eb8487636011ac394f05be36d3924b"
+        }
+      ],
+      "related": [],
+      "reviewed_at": "2026-11-16",
+      "quality_evaluation": "NOT_MEASURED"
+    }
+  ]
+}

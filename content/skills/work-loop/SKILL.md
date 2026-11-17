@@ -1,14 +1,14 @@
 ---
 name: work-loop
-description: Default loop for research, coding and dev-ops - analyse, research, plan, execute, test, loop back where the evidence points. Use for any task beyond a one-line change.
+description: Adaptive problem solving for material research, coding and operations.
 ---
 
 # Adaptive problem solving
 
 Choose the next useful action from the current goal, evidence and constraints.
 These are available actions, not a mandatory sequence. Simple answers stay direct.
-Use relevant principles, counterevidence and alternatives; [reasoning.md](reasoning.md)
-provides optional depth when a concrete uncertainty cannot be resolved directly.
+Closed-world quantitative decisions can use [the compact check](decision-check.md)
+when guidance is needed. Use [reasoning.md](reasoning.md) for broader judgment or teaching.
 
 ## Prepare before task actions
 - Material includes requested plans and research. Before the substantive answer,
@@ -22,8 +22,8 @@ provides optional depth when a concrete uncertainty cannot be resolved directly.
 
 ## Understand and inspect
 - Establish the intended outcome, constraints, facts, assumptions and success check.
-- Inspect local knowledge, memory, task state and the project before asking for
-  information already available. Research only the consequential evidence gap.
+- Inspect local knowledge, memory, task state and the project before questions.
+  New task families follow [capability-research.md](capability-research.md) for research reuse and preferences.
 - Ask the user only for unrecoverable intent, authority or a real value tradeoff;
   give a recommended default and its consequences. Own technical diagnosis.
 

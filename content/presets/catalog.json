@@ -13,7 +13,7 @@
   "capabilities": {
     "work-loop": {
       "path": "skills/work-loop/SKILL.md",
-      "sha256": "56b5271d1e9a300dc6ae735a87ca9fea2bcc59dc54bce4d98452643a315bfe86"
+      "sha256": "8d8d50d496838ceee3c732999ee843f383c01fa8d9a69bc82434513431831118"
     },
     "verify-before-done": {
       "path": "skills/verify-before-done/SKILL.md",

@@ -347,6 +347,10 @@ def dream(src: Path, dst: Optional[Path] = None, work_dir: Optional[Path] = None
             raise ValueError('apply requires an explicit --dst; dreaming never writes in place')
         if Path(dst).resolve() == src.resolve():
             raise ValueError('--dst must differ from --src; the source corpus is read-only')
+        if src.resolve() in Path(dst).resolve().parents:
+            raise ValueError('--dst must be outside --src to avoid recursive copying')
+        if Path(dst).exists() or Path(dst).is_symlink():
+            raise FileExistsError('dream destination already exists; choose a new output directory')
     ov = dict(gate_overrides or {})
     thresholds = {'trigger_min_sessions': int(ov.get('trigger_min_sessions', TRIGGER_MIN_SESSIONS)),
                   'trigger_min_pages_changed': int(ov.get('trigger_min_pages_changed',
@@ -504,8 +508,6 @@ def dream(src: Path, dst: Optional[Path] = None, work_dir: Optional[Path] = None
 
     # ---- apply on the destination copy (Deep phase writes only) -------------
     dst = Path(dst)
-    if dst.exists():
-        shutil.rmtree(dst)
     shutil.copytree(src, dst)
     if freeze:
         mc._verify_freeze(mc.load_pages(dst), Path(freeze))

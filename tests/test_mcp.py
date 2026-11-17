@@ -642,7 +642,10 @@ class ProfileAndConflictTests(TmpCase):
             os.environ["HOME"] = str(fake_home)
             self.assertNotIn(fake_home / "docs", kbmod.default_kb_paths(self.home, fake_home))
             self.assertNotIn(fake_home / "docs", kbmod.default_kb_paths(self.home, fake_home / "Desktop"))
-            self.assertEqual(kbmod.default_kb_paths(self.home, loose), [])
+            # Shared installed research is now a selected root even before it
+            # exists. An unrelated workspace still contributes no private docs.
+            self.assertEqual(kbmod.default_kb_paths(self.home, loose),
+                             [self.home / "content/knowledge", self.home / "vault"])
             got = kbmod.default_kb_paths(self.home, proj / "docs")
             self.assertIn(proj.resolve() / "docs", got)
             self.assertNotIn(self.home / "content", got)

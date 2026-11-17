@@ -1,0 +1,78 @@
+{
+  "status": "HOLD",
+  "promotion": "NOT_GRANTED",
+  "evidence": "NATIVE_RECEIPT_REPLAY",
+  "holds": [
+    "candidate_cost_increase",
+    "no_strict_improvement"
+  ],
+  "consumed_calls": 12,
+  "usage_complete": true,
+  "known_consumed_tokens": 299907,
+  "partial_tokens_lower_bound": 0,
+  "unknown_attempts": [],
+  "orphan_receipts": [],
+  "baseline_tokens": 149713,
+  "candidate_tokens": 150194,
+  "paired_token_differences": [
+    99,
+    78,
+    45,
+    70,
+    100,
+    89
+  ],
+  "paired_quality_differences": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "token_difference_se": 8.506533436783231,
+  "quality_difference_se": 0.0,
+  "scope": "Six paired batches of authored closed-world decisions, fresh-thread upstream inference tokens including cached input and reasoning subsets once. Preparation, selection history, whole-project cost and general intelligence are unmeasured.",
+  "uncertainty": "Six authored batch pairs, descriptive differences and standard errors only. No population confidence or generalization claim.",
+  "ceiling_policy": "Stop before the next call at the observed ceiling. An in-flight call can overshoot.",
+  "schema": "harness.reasoning-comparison/v1",
+  "date": "2026-11-17",
+  "model": "gpt-6.1-sol",
+  "effort": "high",
+  "freeze_sha256": "b5d6b0914d4ff643f0115e0e1cbc89e5280c25d8b254220bd9627f49fe752760",
+  "receipt_sha256": [
+    "a75fadabba32a70d3c25d5add915f4819cb61112ca2e92d8812e7d65429ad703",
+    "7898d184b2c777d5510bfae06ac2621f17d01a3abf28ccb293bc02e469e626f4",
+    "0a74229ae37f30183fd0c41f60219145a91c9e2d82bed980a0168450a6830b23",
+    "5494d5dc42ea7a7097fb46a8fc469010b6fc37dd1f29f794bdc78d3835a3b211",
+    "637ede33c1ce0dd0041062f13966d79e23f02ef3b7eab9f3234d5776804fba7f",
+    "97428c073371def9841b39d0479bd8a57cd6f1a5429dadb643fd23635b0b4201",
+    "3cfe23c20d3efc3370e4c425935f349834f3314da9a1eae5b340e7f96b201edc",
+    "65adf88792baa19606a2eae55523294b9d0889d25a6c226d02c017d8a787760f",
+    "75fd18affeebcba035e83f1e9337bbf928305993b52a927bb0ca55e42b36a550",
+    "d07d39849a16fb29dd195c7c4745388f4dd24d9c351332e486cd5afc5eca1b5c",
+    "ddca70f632185841deadd10b539352c79ae41180328f11effa1f72662c5849f7",
+    "2f4dd34de265260245ccec7cfe49cdf283cbd88fb7e85da47eb632120f0884fd"
+  ],
+  "case_count_per_arm": 24,
+  "correct_per_arm": {
+    "baseline": 24,
+    "candidate": 24
+  },
+  "usage_per_arm": {
+    "baseline": {
+      "input_tokens": 148746,
+      "output_tokens": 967,
+      "cached_input_tokens": 37632
+    },
+    "candidate": {
+      "input_tokens": 149136,
+      "output_tokens": 1058,
+      "cached_input_tokens": 37632
+    }
+  },
+  "percent_token_change": 0.321281385050054,
+  "local_preflight_failures": 1,
+  "local_preflight_provider_calls": 0,
+  "raw_evidence": "Local retained oracle manifest, journal and12bound native receipts. Public aggregate omits machine paths and thread identities."
+}

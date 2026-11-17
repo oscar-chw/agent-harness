@@ -1634,6 +1634,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--uncertainty", choices=("none", "consequential"), default="none")
     from .presets import add_parser as add_preset_parser
     add_preset_parser(sub)
+    from .research_registry import add_parser as add_research_parser
+    add_research_parser(sub)
+    from .dream_candidates import add_parser as add_dream_parser
+    add_dream_parser(sub)
     handoff = sub.add_parser("handoff", help="read bounded project handoff files; no global database")
     handoff.add_argument("--task", help="exact task directory identifier")
     handoff.add_argument("--list", action="store_true", help="list packet names and sizes without their text; needs --task")
@@ -1667,6 +1671,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         return command(args)
     if args.cmd == "preset":
         from .presets import command
+        return command(args)
+    if args.cmd == "research":
+        from .research_registry import command
+        return command(args, _paths(args)[1])
+    if args.cmd == "dream":
+        from .dream_candidates import command
         return command(args)
     if args.cmd == "continuation":
         from .continuation import command

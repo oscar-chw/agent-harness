@@ -1,0 +1,48 @@
+{
+  "schema": "harness.native-board-readback/v1",
+  "status": "PASS_PICKUP_WITH_BUDGET_CONTROL_FAILURE",
+  "model": "gpt-6.1-sol",
+  "effort": "high",
+  "calls": 2,
+  "cold_sessions_distinct": true,
+  "exact_current_and_changed_packet": true,
+  "false_completion_claims": 0,
+  "reported_input_plus_output_tokens": 429149,
+  "planning_ceiling_tokens": 90000,
+  "budget_control": "Not enforced between calls; first overshoot should have prevented second call. No more calls in this run.",
+  "complete_provider_cost": "NOT_QUALIFIED",
+  "token_saving": "NOT_ESTABLISHED",
+  "scope": "two cold native Codex sessions recovered changed automatic State packets; no general adherence or token-saving claim",
+  "observations": [
+    {
+      "ordinal": 1,
+      "wall_s": 28.435419541999998,
+      "reported_turn_usage": [
+        {
+          "input_tokens": 121779,
+          "cached_input_tokens": 89472,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 575,
+          "reasoning_output_tokens": 32
+        }
+      ],
+      "events_sha256": "859eb62d4b4d20b3d8b9f3ac8d3b1431f750936bf6d8d85b87ed76bec0de86a9"
+    },
+    {
+      "ordinal": 2,
+      "wall_s": 44.942749917,
+      "reported_turn_usage": [
+        {
+          "input_tokens": 305942,
+          "cached_input_tokens": 268800,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 853,
+          "reasoning_output_tokens": 0
+        }
+      ],
+      "events_sha256": "bff22964d3149b26461dc4acaf6f908a98ddb9d9a36363f1f7c2a6379badb132"
+    }
+  ],
+  "original_controller_sha256": "a99dbad723bea543128ab1911ae14d58f446d3deb3bf4a1e000ccf72340c4575",
+  "post_run_correction": "Future controller stops before another call when observed input/output exceeds planning ceiling; this run is not relabelled."
+}

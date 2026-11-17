@@ -7,5 +7,10 @@ list). Every test therefore starts from an ABSENT list; tests that exercise prot
 it (tests/test_guard.py).
 """
 import os
+from pathlib import Path
+import sys
+
+# Focused source-checkout tests must not depend on another module being collected first.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 os.environ["HARNESS_GUARD_PROTECTED_FILE"] = os.path.join(os.path.dirname(__file__), "no-such-protected-paths")

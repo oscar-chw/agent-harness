@@ -16,7 +16,8 @@ does not require a handoff. This protocol adds no access or messaging authority.
 2. `harness handoff --task <task>` reads local packets; large tasks: add `--list`,
    then `--packet <session>.md`; or read `handoffs/<task>/<session>.md`. Optional registered
    checkpoints: `harness task status --json` in the project. Use the default MCP
-   `op_state status` before material work; if explicitly disabled, use CLI/project files.
+   `op_state status` before material work. Check its project: if launch scope differs,
+   use CLI/project files from the authorized task root; never override MCP scope.
 3. Recheck source revisions, gates and artifact pointers. A handoff is advisory;
    `done` text, an expired lease or a quiet session proves neither PASS nor liveness.
 4. Missing detail: use scoped `mem_search`, KB or targeted `session_search`.
@@ -50,11 +51,10 @@ does not require a handoff. This protocol adds no access or messaging authority.
 - Keep durable documentation in the shared KB/vault, task state in the graph/
   packet, and reusable methods in the candidate lifecycle. Link originals; avoid
   copying whole conversations, secrets, personal data or hidden reasoning.
-- `state_save` is a small continuation fallback, not a shared multi-writer task
-  ledger. `state_load` restores it after compaction; revalidate before acting.
+- `state_save` is a small fallback, not a multi-writer ledger. Include `## Goal`
+  and `## Next`; use `state_load` to resume, then revalidate sources and authority.
 ## Bounds
 Graph redesigns: read [graph-memory.md](graph-memory.md); inspect only needed project/task data.
-Disclose missing or stale evidence.
-No polling messages, mandatory whole-history injection, background model calls,
+Disclose missing/stale evidence. No polling, whole-history injection or background calls;
 automatic sharing across users/projects, purging history or weakened gates.
 Tested file/CLI mechanics do not guarantee every model follows this protocol.

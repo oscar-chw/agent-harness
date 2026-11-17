@@ -42,6 +42,28 @@ For ordinary document retrieval, a peer may index a changed source before an exi
 
 ## Tradeoffs
 
+### Reusing researched capabilities
+
+The shared [research chapter](../../content/knowledge/RESEARCH.md) and
+[scientific practice guide](../../content/knowledge/RESEARCH-PRACTICE.md) provide
+section-level knowledge. Their source ledger retains read depth, versions and
+retrieval limits. The installed `research-paper` skill selects framing, methods
+or writing references for the current task.
+
+`harness research check research-paper` returns a source-bound capability record,
+related capability IDs and saved user preferences. Missing research requests a
+new study. Existing current research is reused. Changed sources request review.
+An explicitly requested upgrade with preferences requests confirmation before
+replacement. The registry detects stale records and preference digests, retains
+previous versions and bounds its stores. A confirmation digest detects changed
+data. The client must retain the actual human answer.
+
+These relationships are explicit local records. Model compliance, measured
+reasoning improvement and a complete automatically constructed knowledge graph
+need their own evidence. Researching a skill does not grant performance adoption.
+
+### Retrieval and ownership
+
 - The operational board is a small progress packet. Open its checkpoint and gate evidence when the decision needs detail.
 - Facts, source records, plans and raw documents have different ownership and access rules. A search index can be rebuilt from retained originals.
 - ProjectMemory requires a declared project manifest and explicit provenance. Presence of this interface does not mean every chat automatically writes source-verified records.
