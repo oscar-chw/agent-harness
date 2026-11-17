@@ -906,6 +906,8 @@ def copy_harness(hh: Path, source: Path, profile_dir: Optional[Path]) -> Optiona
         (hh / sub).mkdir(exist_ok=True)
     lib = hh / "lib" / "agent_harness"
     selected_package = Path(source) / "src" / "agent_harness"
+    if not selected_package.is_dir():
+        selected_package = Path(source) / "lib" / "agent_harness"
     package = selected_package if selected_package.is_dir() else PKG_DIR
     if lib.resolve() != package.resolve():
         _remove_any(lib)

@@ -126,3 +126,17 @@ shell commands, while exceeding its 90,000-token planning threshold at 102,522
 reported tokens. Efficiency remains unqualified. Its failed threshold and the
 earlier filesystem fallback are preserved in the linked receipts. Device
 installation and public release readback have their own gates.
+
+
+## v3.0.2 update recovery
+
+A disposable public v3.0.0 → v3.0.1 update passed doctor and then failed its next
+ordinary update because the saved extraction directory had been removed. The
+repair reuses the surviving installed package and content for an implicit missing
+source. Explicit invalid sources and incomplete payloads still fail.
+
+The candidate passed four new behavioral checks, two failing mutation controls
+and an older updater running against a frozen local candidate archive. Its
+subsequent ordinary update retained five knowledge/state files and the unrelated
+Copilot configuration. Source and public rollout qualification remain separately
+recorded. [Update mechanism and checks](update-source-lifetime-20261117.md).

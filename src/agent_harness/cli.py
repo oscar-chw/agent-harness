@@ -528,6 +528,11 @@ def cmd_update(args) -> int:
         _out("Install first: `harness install`.")
         return 1
     source = Path(args.source or state.get("source") or I.REPO_ROOT).resolve()
+    # Older self-updaters saved their temporary extraction path. Reapply the
+    # retained installed payload when that implicit source has disappeared.
+    if not args.source and not (source / "content").is_dir():
+        if (hh / "lib/agent_harness/__init__.py").is_file() and (hh / "content").is_dir():
+            source = hh.resolve()
     if not (source / "content").is_dir():
         _out(f"No harness source at {source}; pass --source DIR.")
         return 1
