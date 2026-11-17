@@ -29,3 +29,19 @@ Regression tests use the production controllers and a fake native transport.
 They establish call stopping, retained usage and unchanged adoption rules. They
 provide no new native efficacy result. Stable v3.0.0 and its frozen release assets
 retain their original evidence. This follow-up is qualified separately.
+
+## MCP store correction
+
+Configured server commands now carry an explicit harness store. This preserves
+the selected store when a client filters inherited environment variables. Cold
+stdio tests exercise a saved state, a fresh process and an automatic board packet
+under a filtered environment. The original native probe returned correct answers
+after filesystem fallback. Both recorded MCP state reads missed the fixture, so
+its automatic-MCP claim is now unqualified. The original responses, usage and
+budget failure remain in the corrected public receipt.
+
+One subsequent fresh native session read the fixture through two MCP responses
+and used zero shell commands. It answered correctly in 13.69 seconds and reported
+102,522 input/output tokens. Its 90,000-token planning threshold was exceeded
+in-flight, so the aggregate qualification remains NOT_QUALIFIED. The one-call
+bound was honored. No second call followed. [Readback receipt](../../eval/results/v3-native-store-binding-20261117.json).

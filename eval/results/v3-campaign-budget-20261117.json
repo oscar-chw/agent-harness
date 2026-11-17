@@ -11,7 +11,7 @@
     "xfailed": 2,
     "seconds": 407.21,
     "version_during_run": "3.0.0",
-    "scope": "same patched runtime; public 3.0.1 metadata and exact public tree receive fresh CI"
+    "scope": "Budget patch gate before store correction. Corrected complete source receives a separate full gate and exact public-tree CI."
   },
   "affected_gate": {
     "passed": 155,
@@ -82,6 +82,30 @@
     {
       "source": "tests/test_research_capabilities.py",
       "sha256": "83a28fbf13e1c261de9e4764ffb677bbbdf75c7ed0c2953ae08232ccb971992c"
+    },
+    {
+      "source": "src/agent_harness/installer.py",
+      "sha256": "c151d18541b1dba6722e2170bdf1052cfaa081def708e84ebe60a55824423016"
+    },
+    {
+      "source": "src/agent_harness/mcp/server.py",
+      "sha256": "83d5b50add844ee29060638f382beb0aa9c297667d1d19822af19093e5858a92"
+    },
+    {
+      "source": "tests/test_mcp_home_binding.py",
+      "sha256": "85f548b1c91696eb9125d38a732594fbda74c5bb40cc4f6de05223b696dbce6d"
     }
-  ]
+  ],
+  "mcp_store_correction": {
+    "filtered_environment_regressions": {
+      "failed_before": 2,
+      "passed_after": 3
+    },
+    "affected_gate": {
+      "passed": 110,
+      "seconds": 6.94
+    },
+    "native_readback": "eval/results/v3-native-store-binding-20261117.json",
+    "previous_probe_correction": "eval/results/v3-native-board-readback-20261117.json"
+  }
 }

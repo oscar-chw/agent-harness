@@ -1,0 +1,31 @@
+{
+  "status": "NOT_QUALIFIED",
+  "calls": 1,
+  "exit_code": 0,
+  "wall_seconds": 13.69268325,
+  "reported_usage": [
+    {
+      "input_tokens": 102385,
+      "cached_input_tokens": 65536,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 137,
+      "reasoning_output_tokens": 0
+    }
+  ],
+  "complete_provider_cost": "NOT_QUALIFIED",
+  "events_sha256": "38e54bd63d1f1966a4d17fcf3c6e3d26d8e19d6295d84d957c8354feaa529b22",
+  "planning_ceiling_tokens": 90000,
+  "promotion": "NOT_GRANTED",
+  "reported_tokens": 102522,
+  "answer_correct": true,
+  "command_executions": 0,
+  "mcp_fixture_reads": 2,
+  "planning_ceiling_reached": true,
+  "schema": "harness.native-store-binding/v1",
+  "version": "3.0.1",
+  "scope": "One fresh signed-in Codex session read the correct fixture from two MCP responses, with zero shell commands. The90,000 observed-token threshold was exceeded in-flight. No second native call was made. General adherence and efficiency remain unqualified.",
+  "source_binding": {
+    "src/agent_harness/mcp/server.py": "83d5b50add844ee29060638f382beb0aa9c297667d1d19822af19093e5858a92",
+    "src/agent_harness/installer.py": "c151d18541b1dba6722e2170bdf1052cfaa081def708e84ebe60a55824423016"
+  }
+}
