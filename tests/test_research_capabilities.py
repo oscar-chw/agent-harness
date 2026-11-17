@@ -69,6 +69,21 @@ def test_new_capability_requests_research_without_inventing_coverage(registry):
     assert not home.exists()
 
 
+def test_missing_registration_directs_local_inspection_before_duplicate_research(tmp_path):
+    home = tmp_path / 'absent-store'
+    missing = R.check(home, 'peer-review')
+    assert missing['status'] == 'RESEARCH_REQUIRED' and missing['record'] is None
+    assert missing['next_action'] == 'INSPECT_EXISTING_KNOWLEDGE'
+    assert missing['local_coverage'] == 'UNASSESSED'
+    broader = R.check(home, 'research-paper')
+    assert broader['status'] == 'REUSE_EXISTING'
+    assert 'peer review' in broader['record']['summary']
+    unknown = R.check(home, 'unregistered-new-domain')
+    assert unknown['record'] is None and unknown['execution_authorized'] is False
+    assert unknown['local_coverage'] == 'UNASSESSED'
+    assert not home.exists()
+
+
 def test_source_change_is_visible_and_not_relabelled_current(registry):
     home, content, _ = registry
     (content / "knowledge/RESEARCH.md").write_text("Changed knowledge.\n")

@@ -27,6 +27,20 @@ def _sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+def _native_budget(limit=None, spent=0):
+    if limit is None and type(spent) is int and spent == 0:
+        return {}
+    if type(limit) is not int or limit <= 0 or type(spent) is not int or spent < 0:
+        raise ValueError('native token limit must be a positive integer with nonnegative prior usage')
+    return {'native_token_limit': limit, 'native_tokens_before': spent}
+
+
+def _check_native_budget(frozen, spent):
+    limit = frozen.get('native_token_limit')
+    if limit is not None and frozen.get('native_tokens_before', 0) + spent >= limit:
+        raise ValueError('observed native token ceiling reached; no further call was started')
+
+
 def _read(path):
     raw = P._read_regular(path)
     if not raw or len(raw) > P.MAX_BYTES:
@@ -132,10 +146,12 @@ def _table(con):
                 'freeze_path TEXT, freeze_sha256 TEXT, result TEXT)')
 
 
-def prepare(home, project, identity, oracle, suite, *, preparation_run_id=None, require_complete_usage=False):
+def prepare(home, project, identity, oracle, suite, *, preparation_run_id=None, require_complete_usage=False,
+            native_token_limit=None, native_tokens_before=0):
     """Freeze a bounded explicit suite; do not launch, grade, or activate anything."""
     if type(require_complete_usage) is not bool:
         raise ValueError('complete usage requires an explicit observer boolean')
+    budget = _native_budget(native_token_limit, native_tokens_before)
     project = Path(P._scope(project))
     raw_oracle = Path(oracle)
     if (not raw_oracle.is_absolute() or raw_oracle.is_symlink() or not raw_oracle.is_dir()
@@ -212,6 +228,7 @@ def prepare(home, project, identity, oracle, suite, *, preparation_run_id=None, 
               'calls_max': sum(1 if c['split'] == 'development' else 2 for c in selected),
               'automatic_retries': 0, 'candidate_preparation_usage': preparation,
               'require_complete_usage': require_complete_usage,
+              **budget,
               'required_dimensions': list(QUALITY_DIMENSIONS),
               'scope': 'read-only structured output, no model tools; not general coding or research quality'}
     path = oracle / ('run-' + run_id)
@@ -545,6 +562,7 @@ def execute(home, project, run_id):
                     (P.encoded({'execution_attempts': []}).decode(), run_id))
     _account(home, project, f)  # Reject changed prior evidence before another native call.
     observations, failures, observed_calls = [], [], 0
+    native_tokens = 0
     attempts = []
     interrupted = None
     preparation = f.get('candidate_preparation_usage', 'UNKNOWN')
@@ -556,6 +574,7 @@ def execute(home, project, run_id):
             actor = Path(f['oracle']).parent / ('trial-' + run_id + '-' + str(index) + '-' + arm)
             created_actor = False
             try:
+                _check_native_budget(f, native_tokens)
                 _proposal_current(home, project, payload)
                 _current(project, payload, f, home)
                 _storage(path.parent)
@@ -577,6 +596,7 @@ def execute(home, project, run_id):
                 _save(native_path, r)
                 attempt['native_sha256'] = _sha(_read(native_path))
                 _checkpoint(home, project, run_id, attempts)
+                native_tokens += P._native_tokens(r)
                 _request(actor, attempt['request_sha256'], r, f)
                 _proposal_current(home, project, payload)
                 _current(project, payload, f, home)

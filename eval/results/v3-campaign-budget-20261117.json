@@ -1,0 +1,65 @@
+{
+  "schema": "harness.campaign-budget-qualification/v1",
+  "date": "2026-11-17",
+  "version": "3.0.1",
+  "status": "SOURCE_QUALIFIED",
+  "native_calls_added": 0,
+  "full_source_gate": {
+    "command": "PYTHONPATH=src python3 -m pytest -q tests eval",
+    "passed": 3220,
+    "skipped": 1,
+    "xfailed": 2,
+    "seconds": 407.21,
+    "version_during_run": "3.0.0",
+    "scope": "same patched runtime; public 3.0.1 metadata and exact public tree receive fresh CI"
+  },
+  "affected_gate": {
+    "passed": 155,
+    "seconds": 14.95
+  },
+  "content_research_gate": {
+    "passed": 77,
+    "skipped": 1,
+    "seconds": 3.85
+  },
+  "wheel_focused_checks": {
+    "passed": 73,
+    "seconds": 4.23
+  },
+  "mutation_control": {
+    "mutation": "disable _check_native_budget",
+    "expected_failed_cases": 8,
+    "actual_failed_cases": 8,
+    "native_calls": 0
+  },
+  "coverage": [
+    "development and preparation carry into trial ceiling",
+    "baseline and candidate calls both consume the budget",
+    "no next call when observed usage reaches ceiling",
+    "in-flight overshoot retained",
+    "unknown usage receipt retained and execution stops",
+    "ceiling can only be set at preparation",
+    "unconfigured legacy campaigns retain their bounds",
+    "missing research ID leaves local coverage unassessed"
+  ],
+  "fixture_corrections": [
+    "Expected refusal status corrected to the existing CLI exit1",
+    "Expected call order corrected to include development trial candidates",
+    "Receipt assertion corrected to inspect child run directories"
+  ],
+  "limits": [
+    "between-call planning stop, not an in-flight provider limit",
+    "fake transport regressions establish controller behavior, not model efficacy",
+    "known failed learning and dreaming outcomes remain held",
+    "other device installation requires independent receipt"
+  ],
+  "sources": {
+    "src/agent_harness/cli.py": "e0c89e2bd25e2a783449a97efb9fa959204f66596467bd18dfb4ce7548dddc08",
+    "src/agent_harness/procedure_campaign.py": "3f0e488703036640449233bfbc1a1513e50d4db9c12f09bf575806de1db9e313",
+    "src/agent_harness/procedure_execution.py": "39f72b56f76b1c67442deea58c164c51b0475f2968646e32ea9fa554f0630d78",
+    "src/agent_harness/procedure_preparation.py": "6a4aabe565236a7d67b94aa5f28990a2d5958d7d06f90e1245c479a1b542554b",
+    "src/agent_harness/research_registry.py": "17ddc3287ce4a65e125e9ff9de7e33fc3716287a61ddc7da4e46acd563b48c66",
+    "tests/test_campaign_token_budget.py": "a579640f0c199303e3adfb9aa4d802f32bcfc3055cde4817bed7c65791e249c1",
+    "tests/test_research_capabilities.py": "83a28fbf13e1c261de9e4764ffb677bbbdf75c7ed0c2953ae08232ccb971992c"
+  }
+}

@@ -932,9 +932,11 @@ def cmd_improve(args) -> int:
     complete_usage = getattr(args, 'complete_usage', False)
     auto_adopt = getattr(args, 'adopt_if_qualified', False)
     evaluation_run = getattr(args, 'evaluation_run', None)
+    native_token_limit = getattr(args, 'max_native_tokens', None)
     campaign_actions = (args.prepare_campaign, args.collect_campaign_development, args.execute_campaign,
                         adopt_campaign, assess_campaign)
-    if any(x is not None for x in campaign_actions) or complete_usage or auto_adopt or evaluation_run:
+    if (any(x is not None for x in campaign_actions) or complete_usage or auto_adopt
+            or evaluation_run or native_token_limit is not None):
         from . import procedure_campaign
         try:
             if (sum(x is not None for x in campaign_actions)
@@ -947,6 +949,8 @@ def cmd_improve(args) -> int:
                 raise ValueError('campaign action value cannot be empty')
             if complete_usage and not args.prepare_campaign:
                 raise ValueError('--complete-usage must be frozen with --prepare-campaign')
+            if native_token_limit is not None and not args.prepare_campaign:
+                raise ValueError('--max-native-tokens must be frozen with --prepare-campaign')
             if auto_adopt and not args.execute_campaign:
                 raise ValueError('--adopt-if-qualified requires --execute-campaign')
             if evaluation_run and not (adopt_campaign or assess_campaign):
@@ -957,6 +961,8 @@ def cmd_improve(args) -> int:
                 if not args.oracle_root:
                     raise ValueError('campaign freeze needs an explicit --oracle-root')
                 observer = {'require_complete_usage': True} if complete_usage else {}
+                if native_token_limit is not None:
+                    observer['native_token_limit'] = native_token_limit
                 result = procedure_campaign.prepare(hh, args.project, args.oracle_root, args.prepare_campaign,
                                                     **observer)
             elif adopt_campaign:
@@ -1483,6 +1489,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help='explicitly run the three frozen stages once; consumes native quota, ends held and never promotes')
     p.add_argument('--complete-usage', action='store_true',
                    help='freeze required terminal upstream usage observation for all campaign calls')
+    p.add_argument('--max-native-tokens', type=int,
+                   help='freeze a shared observed-token stop before the next campaign call; an in-flight call may overshoot')
     p.add_argument('--adopt-campaign', metavar='CAMPAIGN_ID',
                    help='replay controller-owned evidence and adopt only if every admission gate passes')
     p.add_argument('--assess-campaign', metavar='CAMPAIGN_ID',

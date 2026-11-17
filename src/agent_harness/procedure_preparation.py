@@ -69,9 +69,11 @@ def _current(project, frozen):
     return spec, evidence
 
 
-def prepare(home, project, oracle, specification, *, require_complete_usage=False):
+def prepare(home, project, oracle, specification, *, require_complete_usage=False,
+            native_token_limit=None, native_tokens_before=0):
     if type(require_complete_usage) is not bool:
         raise ValueError('complete usage requires an explicit observer boolean')
+    budget = C._native_budget(native_token_limit, native_tokens_before)
     project = Path(P._scope(project))
     oracle = Path(oracle)
     if (not oracle.is_absolute() or oracle.is_symlink() or not oracle.is_dir()
@@ -94,7 +96,7 @@ def prepare(home, project, oracle, specification, *, require_complete_usage=Fals
         'episodes': episodes, 'evidence_sha256': C._sha(evidence.encode()),
         'runtime': C._runtime(), 'model': spec['model'], 'effort': spec['effort'],
         'timeout_seconds': spec['timeout_seconds'], 'calls_max': 1, 'automatic_retries': 0,
-        'require_complete_usage': require_complete_usage}
+        'require_complete_usage': require_complete_usage, **budget}
     with P._db(home) as con:
         _table(con)
         if con.execute('SELECT count(*) FROM procedure_preparation_runs').fetchone()[0] >= C.MAX_RUNS:
@@ -165,6 +167,7 @@ def execute(home, project, run_id):
     created, interrupted, calls, tokens = False, None, 0, 'UNKNOWN'
     result = {'run_id': run_id, 'project': project, 'promotion': 'NOT_GRANTED'}
     try:
+        C._check_native_budget(frozen, 0)
         actor.mkdir(mode=0o700)
         created = True
         request = C._actor(actor, _task(evidence), None)

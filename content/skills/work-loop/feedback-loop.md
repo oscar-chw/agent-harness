@@ -54,3 +54,9 @@ Stop at the frozen attempt ceiling (`stop: true`, `STOP_EXPERIMENT`), or sooner
 when authority/resources end. Remaining attempts are not permission for calls.
 Use the returned bounded next action as advice; do not bypass a refusal or repeat
 the same failed approach. Report missing evidence and preserve consumed attempts.
+
+For controller-owned native procedure campaigns, freeze `--max-native-tokens N`
+with `--prepare-campaign`. Development, drafting and both trial arms share this
+observed-token stop. A completion may overshoot, then no further call starts.
+An omitted limit retains legacy call/time bounds. Never treat that stop as a
+provider-enforced in-flight ceiling or as evidence of learning efficacy.
