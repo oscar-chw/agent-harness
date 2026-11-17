@@ -47,6 +47,56 @@ def install(stage):
     return json.loads(path.read_text())["hooks"]
 
 
+@pytest.mark.parametrize("features,disabled", [
+    ("hooks = false", True),
+    ("codex_hooks = false", True),
+    ("hooks = true", False),
+    ("", False),
+    ("hooks = true\ncodex_hooks = false", False),
+    ("hooks = false\ncodex_hooks = true", True),
+])
+def test_doctor_names_disabled_installed_codex_hooks(stage, monkeypatch, capsys, features, disabled):
+    from agent_harness import cli
+
+    home, hh, _, _, _ = stage
+    monkeypatch.setenv("HARNESS_HOME", str(hh))
+    install(stage)
+    config = home / ".codex/config.toml"
+    config.write_text(config.read_text() + "\n[features]\n" + features + "\n")
+    before = config.read_bytes()
+    monkeypatch.setattr(cli, "mcp_probe", lambda _: ["kb_get"])
+    result = cli.main(["--home", str(home), "doctor"])
+    output = capsys.readouterr().out
+    assert config.read_bytes() == before
+    assert result == 0
+    assert ("[warn] Codex hooks locally disabled" in output) == disabled
+    assert "native" in output.lower() and "trust" in output.lower()
+    if disabled:
+        assert str(config) in output and "hooks = false" in output
+
+
+@pytest.mark.parametrize("configuration", [
+    'features = "private-config-canary"\n',
+    '[features]\nhooks = "private-config-canary"\n',
+    '[features\n',
+])
+def test_doctor_reports_invalid_hook_config_without_printing_values(stage, monkeypatch, capsys, configuration):
+    from agent_harness import cli
+
+    home, hh, _, _, _ = stage
+    monkeypatch.setenv("HARNESS_HOME", str(hh))
+    install(stage)
+    config = home / ".codex/config.toml"
+    config.write_text(configuration)
+    before = config.read_bytes()
+    monkeypatch.setattr(cli, "mcp_probe", lambda _: ["kb_get"])
+    assert cli.main(["--home", str(home), "doctor"]) == 1
+    output = capsys.readouterr().out
+    assert "[FAIL] Codex hooks configuration readable" in output
+    assert "private-config-canary" not in output
+    assert config.read_bytes() == before
+
+
 def event(stage, hooks, name, **values):
     _, _, _, projects, env = stage
     handlers = [handler for group in hooks[name] for handler in group["hooks"]

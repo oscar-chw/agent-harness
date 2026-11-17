@@ -368,7 +368,7 @@
       "why": "the Codex IDE extension, sharing ~/.codex/config.toml and AGENTS.md with the CLI"
     }
   ],
-  "package_version": "3.0.5",
+  "package_version": "3.0.6",
   "presets": {
     "draft-message": {
       "capabilities": [
