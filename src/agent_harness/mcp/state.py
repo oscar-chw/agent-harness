@@ -18,6 +18,7 @@ import hashlib
 import os
 import re
 import sys
+import tempfile
 from pathlib import Path
 from typing import List, Optional
 
@@ -56,9 +57,21 @@ def _now() -> _dt.datetime:
     return _dt.datetime.now()
 
 
+def _replace_bytes(path: Path, data: bytes) -> None:
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=path.parent, suffix=".tmp", delete=False) as stream:
+            temporary = Path(stream.name)
+            stream.write(data)
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
 class State:
     def __init__(self, home: Optional[os.PathLike] = None, project: Optional[os.PathLike] = None):
-        self.home = harness_home(home)
+        self.home = harness_home(home).expanduser().resolve()
         self.default_project = project
 
     def _root(self, project: Optional[str]) -> Path:
@@ -69,26 +82,27 @@ class State:
 
     # ------------------------------------------------------------ working state
     def state_save(self, text: str, project: str = "") -> dict:
+        from agent_harness.mcp.memory import _store_lock
+
         data = text.encode("utf-8")
         if len(data) > STATE_MAX_BYTES:
             raise ValueError("state is %d bytes; the cap is %d. Save a shorter version: keep goal, decisions, "
                              "next steps and open questions; drop narration." % (len(data), STATE_MAX_BYTES))
         d = self._dir(project)
-        d.mkdir(parents=True, exist_ok=True)
         cur = d / "STATE.md"
-        if cur.exists():
-            ts = _dt.datetime.fromtimestamp(cur.stat().st_mtime).strftime("%Y%m%dT%H%M%S%f")
-            dst = d / ("STATE.%s.md" % ts)
-            n = 1
-            while dst.exists():
-                dst = d / ("STATE.%s-%d.md" % (ts, n))
-                n += 1
-            os.replace(str(cur), str(dst))
-        tmp = d / "STATE.md.tmp"
-        tmp.write_bytes(data)
-        os.replace(str(tmp), str(cur))
-        for old in self.versions(project)[STATE_VERSIONS:]:
-            old.unlink()
+        with _store_lock(d):
+            if cur.exists():
+                ts = _dt.datetime.fromtimestamp(cur.stat().st_mtime).strftime("%Y%m%dT%H%M%S%f")
+                dst = d / ("STATE.%s.md" % ts)
+                n = 1
+                while dst.exists():
+                    dst = d / ("STATE.%s-%d.md" % (ts, n))
+                    n += 1
+                # Keep the previous checkpoint visible until its replacement commits.
+                _replace_bytes(dst, cur.read_bytes())
+            _replace_bytes(cur, data)
+            for old in self.versions(project)[STATE_VERSIONS:]:
+                old.unlink()
         return {"ok": True, "bytes": len(data), "path": str(cur), "project": str(self._root(project))}
 
     def versions(self, project: str = "") -> List[Path]:
@@ -122,17 +136,18 @@ class State:
         return self.home / "sessions" / (project_key(self._root(project)) + ".log")
 
     def session_note(self, summary: str, project: str = "") -> dict:
+        from agent_harness.mcp.memory import _store_lock
+
         one = re.sub(r"\s+", " ", summary).strip()[:NOTE_CHARS]
         if not one:
             raise ValueError("summary is empty")
         f = self._log(project)
         f.parent.mkdir(parents=True, exist_ok=True)
         line = "%s\t%s\t%s\n" % (_now().strftime("%Y-%m-%d %H:%M"), self._root(project), one)
-        lines = f.read_text(encoding="utf-8").splitlines(True) if f.exists() else []
-        lines.append(line)
-        tmp = f.with_suffix(".tmp")
-        tmp.write_text("".join(lines[-SESSION_LINES:]), encoding="utf-8")
-        os.replace(str(tmp), str(f))
+        with _store_lock(self._dir(project)):
+            lines = f.read_text(encoding="utf-8").splitlines(True) if f.exists() else []
+            lines.append(line)
+            _replace_bytes(f, "".join(lines[-SESSION_LINES:]).encode("utf-8"))
         return {"ok": True}
 
     def session_recent(self, k: int = 5, project: str = "") -> List[dict]:

@@ -6,6 +6,7 @@ import re
 import uuid
 
 from .mcp import checks
+from .mcp.memory import _store_lock
 from .mcp.state import State, STATE_MAX_BYTES
 from .operational_state import OperationalState
 from .redact import redact
@@ -49,11 +50,7 @@ class SharedBoard:
             visible = {key: value for key, value in row.items() if key not in ('version', 'fence', 'until', 'updated_cursor')}
             self.rows[row['task']] = hashlib.sha256(json.dumps(visible, sort_keys=True).encode()).hexdigest()
 
-    def _state_checkpoint(self, summary, state_path):
-        state = State(home=self.store.path.parent.parent, project=self.store.root)
-        expected = state._dir(str(self.store.root)) / 'STATE.md'
-        if Path(state_path) != expected or expected.resolve() != expected:
-            raise ValueError('saved checkpoint is outside the local project State store')
+    def _state_checkpoint(self, summary, expected):
         text = _read(expected, STATE_MAX_BYTES).decode('utf-8')
         if text != summary:
             raise ValueError('saved checkpoint changed before publication')
@@ -92,14 +89,19 @@ class SharedBoard:
         value = {'stage': 'checkpoint_saved', 'summary': preview,
                  'resource': 'full_text_sha256=' + digest,
                  'next': 'Read the saved source checkpoint and verify current gate evidence'}
-        checkpoint = self._state_checkpoint(summary, state_path) if state_path is not None else None
-        if checkpoint is not None:
-            identity, fields = checkpoint
-            value.update(fields)
-            rows = [row for row in self.store.snapshot()['tasks'] if row['task'] == identity]
-            if not rows or rows[0]['value'] != value:
-                self.store.put(identity, value, expected=rows[0]['version'] if rows else 0,
-                               request_id=self.identity + '-' + str(self.sequence))
+        if state_path is not None:
+            state = State(home=self.store.path.parent.parent, project=self.store.root)
+            expected = state._dir(str(self.store.root)) / 'STATE.md'
+            if Path(state_path) != expected or expected.resolve() != expected:
+                raise ValueError('saved checkpoint is outside the local project State store')
+            # A State writer must not change the validated bytes before the board commit.
+            with _store_lock(expected.parent):
+                identity, fields = self._state_checkpoint(summary, expected)
+                value.update(fields)
+                rows = [row for row in self.store.snapshot()['tasks'] if row['task'] == identity]
+                if not rows or rows[0]['value'] != value:
+                    self.store.put(identity, value, expected=rows[0]['version'] if rows else 0,
+                                   request_id=self.identity + '-' + str(self.sequence))
         else:
             result = self.store.put(self.identity, value, expected=self.version,
                                     request_id=self.identity + '-' + str(self.sequence),

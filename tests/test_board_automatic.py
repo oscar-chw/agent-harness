@@ -1,9 +1,11 @@
 """Protocol-level cross-session pickup, with bounded delivery and no live model calls."""
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 from pathlib import Path
 import subprocess
 import sys
+from threading import Event
 
 import pytest
 
@@ -109,6 +111,65 @@ def test_saved_state_packet_is_resolvable_by_a_cold_reader_after_reconnection(la
     assert matching[0]['value']['next'] == 'Inspect the failed parser gate receipt.'
     assert (lab[0] / matching[0]['value']['checkpoint']).read_text() == newer
     assert path.read_text() == text
+
+
+def test_delayed_state_writer_cannot_replace_a_newer_board_checkpoint(lab, monkeypatch):
+    project, home, _ = lab
+    older, newer = Server(home=home), Server(home=home)
+    initialize(older)
+    verified, resume, started, finished = Event(), Event(), Event(), Event()
+    checkpoint = older._board._state_checkpoint
+
+    def delayed_checkpoint(*args):
+        result = checkpoint(*args)
+        verified.set()
+        assert resume.wait(5), "test did not release the first publisher"
+        return result
+
+    def save(server, next_step):
+        text = "## Goal\nShip the parser\n## Next\n" + next_step + "\n"
+        return server.handle(message("tools/call", name="state_save", arguments={"text": text}))["result"]
+
+    def newer_save():
+        started.set()
+        try:
+            return save(newer, "Deploy the verified parser.")
+        finally:
+            finished.set()
+
+    monkeypatch.setattr(older._board, "_state_checkpoint", delayed_checkpoint)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        old_call = pool.submit(save, older, "Run the parser tests.")
+        try:
+            assert verified.wait(5), "first writer did not reach board publication"
+            new_call = pool.submit(newer_save)
+            assert started.wait(5), "second writer did not start"
+            finished.wait(.5)
+        finally:
+            resume.set()
+        assert not old_call.result(timeout=5)["isError"]
+        assert not new_call.result(timeout=5)["isError"]
+
+    reader = Server(home=home)
+    assert "Deploy the verified parser." in initialize(reader)["instructions"]
+    row = next(row for row in reader.call_tool("op_state", {"action": "snapshot"})["tasks"]
+               if row["value"].get("stage") == "checkpoint_saved")
+    assert (project / row["value"]["checkpoint"]).read_text() == reader.state.state_load()
+
+
+def test_shared_board_accepts_the_configured_home_alias(lab):
+    project, home, _ = lab
+    alias = project / "harness-home-alias"
+    alias.symlink_to(home, target_is_directory=True)
+    writer = Server(home=alias)
+    text = "## Goal\nFinish the staged release\n## Next\nInspect the published asset hashes.\n"
+    response = writer.handle(message("tools/call", name="state_save", arguments={"text": text}))["result"]
+    assert not response["isError"]
+    reader = Server(home=home)
+    assert "Inspect the published asset hashes." in initialize(reader)["instructions"]
+    row = next(row for row in reader.call_tool("op_state", {"action": "snapshot"})["tasks"]
+               if row["value"].get("stage") == "checkpoint_saved")
+    assert (project / row["value"]["checkpoint"]).read_text() == text
 
 
 def test_identical_saved_packet_keeps_identity_and_cursor_across_reconnections(lab):
