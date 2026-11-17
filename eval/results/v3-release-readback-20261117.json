@@ -1,0 +1,59 @@
+{
+  "schema": "harness.v3-release-readback/v1",
+  "version": "3.0.0",
+  "status": "PASS_PUBLIC_AND_MAC_STUDIO",
+  "release": "https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0",
+  "source_commit": "c4233aad934094984f6b34b8d023316aa2e89202",
+  "merge_commit": "66cc6597c37cd0f1f458b3d74de548c62f44fba8",
+  "packaged_file_bindings": 142,
+  "downloaded_assets_sha256": {
+    "RELEASE-MANIFEST.json": "86b4f017e5e1ac97a6b0097f1bce492e5397334afbf7c3c50c95aa3de3b2866a",
+    "agent-harness-v3.0.0-interview.zip": "af236ff2a64c934411366e095e8325faa6bbfbef7d65bbfb6b2b1b79d11bd704",
+    "agent-harness-v3.0.0-source.tar.gz": "20bb86404599318f4dd368ac1cdefa34cbf2ce2db949c5b175b90c60fec28de1",
+    "agent_harness-3.0.0-py3-none-any.whl": "66b49219b5933ef85d0802d73d9c53aed90debf982488002ec4ed2a8e9287b41"
+  },
+  "full_local_gate": {
+    "passed": 3203,
+    "skipped": 1,
+    "expected_failures": 2
+  },
+  "linux_release_checks": [
+    "Python3.9 PASS",
+    "Python3.12 PASS",
+    "Ruff PASS"
+  ],
+  "installed_cold_checks": {
+    "automatic_packet": true,
+    "stale_write_refused": true,
+    "ordinary_memory_backflow_refused": true,
+    "unrelated_memory_admitted": true,
+    "capabilities_reusable": 5,
+    "durable_vault_retrieved": true,
+    "version": "3.0.0"
+  },
+  "installed_demo": {
+    "status": "PASS",
+    "model_calls": 0,
+    "cold_readers": 2,
+    "stale_write_refused": true,
+    "failed_then_passed_same_gate": true,
+    "unchanged_board_added_bytes": 0
+  },
+  "doctor": {
+    "exit": 0,
+    "base_mb": 17.9,
+    "base_cap_mb": 20,
+    "warmed_cap_mb": 1024
+  },
+  "native_settings_and_owner_data": "PRESERVED",
+  "rollback": "original bytes archived and restored for verification",
+  "loaded_connections": "RECONNECT_REQUIRED",
+  "macbook": "ACTIVATION_FAILED_NOT_VERIFIED",
+  "other_devices": "NOT_RECHECKED",
+  "claim_limits": [
+    "No universal model adherence",
+    "No broad semantic dream admission",
+    "No model weight erasure",
+    "No general productivity or net whole-project token guarantee"
+  ]
+}

@@ -20,9 +20,16 @@ existing: research-reasoning-20261117 completed6/6; central registry/knowledge/s
 - [x] 7. Integrate source, qualify installers and four-direction demonstration | needs: 2,3,4,5,6,9 | gate: PYTHONPATH=src python3 -m pytest -q tests eval
       2026-11-17T08:27:12Z exit 1 in 410s [04907870] — =========================== short test summary info ============================ / FAILED tests/test_quality_eval.py::TestInstrument::test_instrument_good_reference_passes_every_dimension / 1 failed, 3201 passed, 1 skipped, 2 xfailed in 409.94s (0:06:49)
       2026-11-17T08:37:18Z exit 0 in 412s [4be40bc0] — ........................................................................ [ 98%] / .....................................                                    [100%] / 3202 passed, 1 skipped, 2 xfailed in 412.11s (0:06:52)
-- [ ] 8. Publish reproducible v3 evidence and verify local reversible rollout | needs: 7 | gate: python3 .harness-work/check-v3-rollout.py
+      2026-11-17T09:00:10Z exit 0 in 403s [b3118453] — ........................................................................ [ 98%] / ......................................                                   [100%] / 3203 passed, 1 skipped, 2 xfailed in 403.28s (0:06:43)
+- [x] 8. Publish reproducible v3 evidence and verify local reversible rollout | needs: 7 | gate: python3 .harness-work/check-v3-rollout.py
+      2026-11-17T09:04:38Z exit 0 in 2s [268a033d] — PASS: current source/installed bytes, preserved rollback/data, cold MCP, demo, doctor, public release and CI / Scope: Mac Studio; other devices and already-loaded MCP processes require their own readback
 - [x] 9. Keep acquired knowledge durable and retrievable through updates | needs: 1 | gate: PYTHONPATH=src python3 -m pytest -q tests/test_research_capabilities.py tests/test_installer.py tests/test_kb_scope.py
       2026-11-17T08:06:29Z exit 0 in 4s [ea2a38be] — ........................................................................ [ 91%] / .......                                                                  [100%] / 79 passed in 4.43s
+
+- [ ] 10. Obtain independent MacBook installed-runtime readback after authorized activation | needs: 8 | hold: app-delivery-unavailable | gate: python3 .harness-work/check-macbook-rollout.py
+      2026-11-17T09:19:38Z exit 1 in 0s [885ae788] — BLOCKED: no root-inspected MacBook rollout receipt; app activation failed
+
+MacBook activation is externally blocked: two existing target chats returned the same app-tool error, request1891835f-5560-4798-bd20-cfcb87d1bd9f. Immediate inspection of the first target still showed only its13November completion. No new installation or native call is known to have started there. Keep the public/local release complete while this device readback remains pending. Do not retry heartbeat messages or invent remote success.
 
 ## Evidence boundaries
 
