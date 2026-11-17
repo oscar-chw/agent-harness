@@ -6,8 +6,11 @@ database migration. Its individual tool calls inherit that research context.
 Before using a new task family, inspect its saved research and user preferences.
 Use `harness research check <capability>` where a shell is available, or the shared
 KB's `RESEARCH.md` index and scoped memory tools. Known research should be reused.
-When the record is missing, research the practical skill, methodology, underlying
-reasoning and representative human or implementation examples. Record sources,
+A missing record leaves local coverage unassessed. Inspect broader capability
+records, existing skills, knowledge sections and the shared vault first. For
+example, peer review may already be covered by research-paper guidance. Reuse
+applicable sources and register missing provenance. Research remaining gaps in
+practical skill, methodology, reasoning and representative examples. Record sources,
 read depth, assumptions, applicability, counterexamples and evaluation limits.
 Distill guidance into the central knowledge/skill system and register its source
 hashes. Ordinary execution can then retrieve the relevant section directly.

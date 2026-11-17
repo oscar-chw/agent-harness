@@ -75,10 +75,11 @@ def _inputs(project, oracle, suite, *, raw=None):
     return spec, selected
 
 
-def prepare(home, project, oracle, suite, *, require_complete_usage=False):
+def prepare(home, project, oracle, suite, *, require_complete_usage=False, native_token_limit=None):
     """Freeze all cases before any model call; caller scores/episodes aren't accepted."""
     if type(require_complete_usage) is not bool:
         raise ValueError('complete usage requires an explicit observer boolean')
+    budget = C._native_budget(native_token_limit)
     project = Path(P._scope(project))
     oracle = Path(oracle)
     if (not oracle.is_absolute() or oracle.is_symlink() or not oracle.is_dir()
@@ -103,6 +104,7 @@ def prepare(home, project, oracle, suite, *, require_complete_usage=False):
               'timeout_seconds': spec['timeout_seconds'], 'runtime': _runtime(),
               'model_calls_max': 2 * len(selected) + 1, 'controller_retries': 0,
               'require_complete_usage': require_complete_usage,
+              **budget,
               'required_dimensions': list(C.QUALITY_DIMENSIONS),
               'scope': 'exact structured output; not general coding/research or efficacy proof'}
     with P._db(home) as con:
@@ -168,6 +170,7 @@ def collect_development(home, project, campaign_id):
         actor = Path(f['oracle']).parent / ('campaign-actor-' + campaign_id + '-' + str(index))
         created = False
         try:
+            C._check_native_budget(f, tokens)
             _current(f)
             C._storage(path.parent)
             actor.mkdir(mode=0o700); created = True
@@ -415,6 +418,7 @@ def draft(home, project, campaign_id):
     interrupted = None
     result = {'campaign_id': campaign_id, 'status': 'FAILED', 'usage_complete': False, 'promotion': 'NOT_GRANTED'}
     try:
+        C._check_native_budget(f, tokens)
         directory.mkdir(mode=0o700)
         for episode, item in zip(episodes, material):
             C._save(Path(f['project']) / episode['path'], json.loads(item['observation']))
@@ -422,6 +426,8 @@ def draft(home, project, campaign_id):
                 'model': f['model'], 'effort': f['effort'], 'timeout_seconds': f['timeout_seconds']}
         spec_path = path / 'preparation-spec.json'; C._save(spec_path, spec)
         observer = {'require_complete_usage': True} if f.get('require_complete_usage') else {}
+        observer.update(C._native_budget(f.get('native_token_limit'), tokens)
+                        if f.get('native_token_limit') is not None else {})
         child = S.prepare(home, f['project'], Path(f['oracle']), spec_path, **observer)
         _child(home, f, 'preparation', state, stage, child)
         child_frozen = _child_context(child, f)
@@ -463,6 +469,9 @@ def evaluate(home, project, campaign_id):
               'preparation_run_id': prepared['preparation_run_id'], 'procedure_id': prepared['procedure_id']}
     try:
         observer = {'require_complete_usage': True} if f.get('require_complete_usage') else {}
+        observer.update(C._native_budget(f.get('native_token_limit'),
+                        development_tokens + prepared['observed_role_tokens']['preparation'])
+                        if f.get('native_token_limit') is not None else {})
         child = C.prepare(home, f['project'], prepared['procedure_id'], Path(f['oracle']), Path(f['suite_path']),
                           preparation_run_id=prepared['preparation_run_id'], **observer)
         _child(home, f, 'trial', state, stage, child)

@@ -43,7 +43,8 @@ def harness_home(home: Path) -> Path:
 
 
 def mcp_cmd(hh: Path) -> List[str]:
-    return ["python3", str(hh / "lib" / "agent_harness" / "mcp" / "server.py")]
+    hh = hh.expanduser().absolute()
+    return ["python3", str(hh / "lib" / "agent_harness" / "mcp" / "server.py"), "--home", str(hh)]
 
 
 def load_state(hh: Path) -> dict:

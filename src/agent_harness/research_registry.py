@@ -157,11 +157,13 @@ def check(home, capability, *, content=DEFAULT_CONTENT, update_requested=False):
             status = "CONFIRM_SAVED_PREFERENCES" if preferences else "UPDATE_REQUESTED"
     if entry is not None and entry.get("lifecycle", {}).get("state") == "withdrawn":
         status = "WITHDRAWN"
+    missing = ({"next_action": "INSPECT_EXISTING_KNOWLEDGE", "local_coverage": "UNASSESSED"}
+               if entry is None else {})
     return {"schema": "harness.capability-research/v1", "capability": capability,
             "status": status, "record": entry,
             "record_sha256": _digest(entry) if entry is not None else None,
             "preferences": preferences, "preferences_sha256": _digest(preferences),
-            "execution_authorized": False}
+            "execution_authorized": False, **missing}
 
 
 def save_preference(home, capability, text, source):

@@ -38,6 +38,11 @@ before expensive work. Select the amount of procedure that the project needs.
 
 `harness research check research-paper` returns the saved record and preferences.
 Add `--update` when the user requests a refresh. `RESEARCH_REQUIRED` means this
-registry has no saved match. `SOURCE_REVIEW_REQUIRED` means a source changed or
+registry has no saved match. Its `INSPECT_EXISTING_KNOWLEDGE` action calls for
+checking broader task families, skills and vault sections before new research.
+For example, `research-paper` includes peer-review practice. A missing exact ID
+leaves coverage unassessed. Reuse sufficient source-bound guidance and register
+missing provenance, then research any remaining gap.
+`SOURCE_REVIEW_REQUIRED` means a source changed or
 became unavailable. `CONFIRM_SAVED_PREFERENCES` calls for the user's answer before
 an upgrade. A recorded capability can remain unmeasured for model performance.

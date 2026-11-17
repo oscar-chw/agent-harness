@@ -1,0 +1,142 @@
+{
+  "schema": "harness.campaign-budget-qualification/v1",
+  "date": "2026-11-17",
+  "version": "3.0.1",
+  "status": "SOURCE_QUALIFIED",
+  "native_calls_added": 1,
+  "full_source_gate": {
+    "command": "PYTHONPATH=src python3 -m pytest -q tests eval",
+    "passed": 3220,
+    "skipped": 1,
+    "xfailed": 2,
+    "seconds": 407.21,
+    "version_during_run": "3.0.0",
+    "scope": "Budget patch gate before store correction. Corrected complete source receives a separate full gate and exact public-tree CI."
+  },
+  "affected_gate": {
+    "passed": 155,
+    "seconds": 14.95
+  },
+  "content_research_gate": {
+    "passed": 77,
+    "skipped": 1,
+    "seconds": 3.85
+  },
+  "wheel_focused_checks": {
+    "passed": 73,
+    "seconds": 4.23
+  },
+  "mutation_control": {
+    "mutation": "disable _check_native_budget",
+    "expected_failed_cases": 8,
+    "actual_failed_cases": 8,
+    "native_calls": 0
+  },
+  "coverage": [
+    "development and preparation carry into trial ceiling",
+    "baseline and candidate calls both consume the budget",
+    "no next call when observed usage reaches ceiling",
+    "in-flight overshoot retained",
+    "unknown usage receipt retained and execution stops",
+    "ceiling can only be set at preparation",
+    "unconfigured legacy campaigns retain their bounds",
+    "missing research ID leaves local coverage unassessed"
+  ],
+  "fixture_corrections": [
+    "Expected refusal status corrected to the existing CLI exit1",
+    "Expected call order corrected to include development trial candidates",
+    "Receipt assertion corrected to inspect child run directories",
+    "Gitleaks historical exact fingerprint is a recomputed public source SHA256; source hash keys now use separate path and digest fields",
+    "The staged adapter expectation now includes its explicit --home binding; script path, complete argv, missing-workgraph refusal, uninstall and retained-memory assertions stay enforced"
+  ],
+  "limits": [
+    "between-call planning stop, not an in-flight provider limit",
+    "fake transport regressions establish controller behavior, not model efficacy",
+    "known failed learning and dreaming outcomes remain held",
+    "other device installation requires independent receipt"
+  ],
+  "sources": [
+    {
+      "source": "src/agent_harness/cli.py",
+      "sha256": "e0c89e2bd25e2a783449a97efb9fa959204f66596467bd18dfb4ce7548dddc08"
+    },
+    {
+      "source": "src/agent_harness/procedure_campaign.py",
+      "sha256": "3f0e488703036640449233bfbc1a1513e50d4db9c12f09bf575806de1db9e313"
+    },
+    {
+      "source": "src/agent_harness/procedure_execution.py",
+      "sha256": "39f72b56f76b1c67442deea58c164c51b0475f2968646e32ea9fa554f0630d78"
+    },
+    {
+      "source": "src/agent_harness/procedure_preparation.py",
+      "sha256": "6a4aabe565236a7d67b94aa5f28990a2d5958d7d06f90e1245c479a1b542554b"
+    },
+    {
+      "source": "src/agent_harness/research_registry.py",
+      "sha256": "17ddc3287ce4a65e125e9ff9de7e33fc3716287a61ddc7da4e46acd563b48c66"
+    },
+    {
+      "source": "tests/test_campaign_token_budget.py",
+      "sha256": "a579640f0c199303e3adfb9aa4d802f32bcfc3055cde4817bed7c65791e249c1"
+    },
+    {
+      "source": "tests/test_research_capabilities.py",
+      "sha256": "83a28fbf13e1c261de9e4764ffb677bbbdf75c7ed0c2953ae08232ccb971992c"
+    },
+    {
+      "source": "src/agent_harness/installer.py",
+      "sha256": "c151d18541b1dba6722e2170bdf1052cfaa081def708e84ebe60a55824423016"
+    },
+    {
+      "source": "src/agent_harness/mcp/server.py",
+      "sha256": "83d5b50add844ee29060638f382beb0aa9c297667d1d19822af19093e5858a92"
+    },
+    {
+      "source": "tests/test_mcp_home_binding.py",
+      "sha256": "85f548b1c91696eb9125d38a732594fbda74c5bb40cc4f6de05223b696dbce6d"
+    },
+    {
+      "source": "tests/test_v1_staging.py",
+      "sha256": "35a5a78b5c91eddef687d1adcc8a46a64867e1c50accf6278ef0978a0327d6fa"
+    }
+  ],
+  "mcp_store_correction": {
+    "filtered_environment_regressions": {
+      "failed_before": 2,
+      "passed_after": 3
+    },
+    "affected_gate": {
+      "passed": 110,
+      "seconds": 6.94
+    },
+    "native_readback": "eval/results/v3-native-store-binding-20261117.json",
+    "previous_probe_correction": "eval/results/v3-native-board-readback-20261117.json"
+  },
+  "store_binding_negative_control": {
+    "mutation": "omit explicit --home",
+    "failed": 2,
+    "passed_legacy_control": 1,
+    "native_calls": 0
+  },
+  "corrected_full_gate_before_check_correction": {
+    "failed": 4,
+    "passed": 3219,
+    "skipped": 1,
+    "xfailed": 2,
+    "seconds": 424.05,
+    "failure": "four callers shared one stale exact-argv expectation",
+    "status": "RETAINED_FAILURE"
+  },
+  "native_calls_added_by_model_free_regressions": 0,
+  "reported_native_tokens_added": 102522,
+  "corrected_complete_source_gate": {
+    "command": "PYTHONPATH=src python3 -m pytest -q tests eval",
+    "passed": 3223,
+    "skipped": 1,
+    "xfailed": 2,
+    "seconds": 421.42,
+    "version": "3.0.1",
+    "status": "PASS"
+  }
+}

@@ -92,7 +92,7 @@ Arrows describe available mechanisms or client-directed workflows. Structured St
 | Reasoning against an unguided baseline | Both arms 24/24 correct. Candidate used **481 more tokens**, 150,194 against 149,713. Rejected. | Equal authored-case scores failed the nonincreasing-token criterion. |
 | Existing full-guide compaction | Both arms 24/24 correct across six paired batches. **5,449 fewer tokens**, 150,194 against 155,643, a **3.50%** inference saving. Receipt status `PASS_BOUNDED`, promotion `NOT_GRANTED`. | Authored closed-world decisions only. General intelligence and net project savings remain unestablished. Preparation cost is UNKNOWN. |
 | Dreaming | Historical orphan-link precision **0.6034**, below required **0.80**. Overall verdict DISCONFIRMED. Candidate-only intake and candidate-bound admission are implemented. | Failed orphan arm stays held. 53 dream mechanics checks passed; every proposed link still needs an independent semantic check. |
-| Native cold-session pickup | Two distinct fresh Codex sessions recovered the original and changed State packet, with no false completion claim or chat relay. | Reported input/output cost **429,149 tokens**. The local probe failed to enforce its 90,000-token planning ceiling between calls. Pickup works in these two cases; cost control and efficient general uptake are not established. |
+| Native cold-session pickup | Both fresh sessions answered correctly after filesystem fallback. Both MCP state_load calls returned no saved state, and no MCP response contained the fixture goal. | Reported input/output cost **429,149 tokens**. The local probe failed to enforce its 90,000-token planning ceiling between calls. Automatic MCP pickup and efficient general uptake remain unqualified. A subsequent event replay corrected the earlier retrieval-channel claim. |
 | Learned methods and teaching | Procedure campaign gates and authored philosophy cases exist. Earlier generated-method campaign remains held on complete cost. | Broad framework benefit, learner transfer and general workplace efficacy remain unmeasured. |
 | Release and client reach | Mac Studio 3.0.0 passed the full source gate (3,203 passed, one skip, two expected failures), offline wheel install, cold memory/State/KB checks, five-step installed demo and doctor (17.9 MB / 20 MB base). | Release CI, downloaded asset hashes and142 installed-source bindings passed. MacBook activation failed at the app interface; device parity and any-provider automatic adherence remain unqualified. |
 
@@ -109,10 +109,20 @@ Use an authorized project with the local overlay already available. The commands
 
 The intended experience is a direct request, relevant context recovery, useful action and a checked result. Deeper acquisition or learning happens when a substantive gap justifies it.
 
-Native readback failures and costs are retained in [the probe receipt](../../eval/results/v3-native-board-readback-20261117.json). No further native calls were launched after this two-call demonstration. Existing board delivery tests establish changed-packet delivery and zero added board bytes at unchanged boundaries; they do not measure the native client's whole context cost.
+Native readback failures, filesystem fallback and costs are retained in [the corrected probe receipt](../../eval/results/v3-native-board-readback-20261117.json). The later explicit-store trial has a separate consumed-call receipt and retains its own cost failure. Existing board delivery tests establish changed-packet delivery and zero added board bytes at unchanged boundaries; they do not measure the native client's whole context cost.
 
 ## Release readback
 
 [Stable v3.0.0](https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0) is published from tested commit `c4233aad934094984f6b34b8d023316aa2e89202`, merged into main with an identical tree. The root-owned full gate passed **3,203 tests**, with one skip and two expected failures. Downloaded assets,142 source/installed package bindings, rollback bytes and the five-step installed demo passed. [Machine-readable receipt](../../eval/results/v3-release-readback-20261117.json).
 
 The MacBook update could not be activated through either existing chat: the app returned request `1891835f-5560-4798-bd20-cfcb87d1bd9f`. Its latest inspected state remains the earlier completion, so this is **NOT_VERIFIED**, not rollout success. The graph keeps that device gate open. New native calls were not used to work around this failure. Existing loaded MCP clients need reconnection to load new runtime code.
+
+## v3.0.1 follow-up qualification
+
+The corrected complete source passed 3,223 checks, with one skip and two expected
+failures. Explicit MCP store binding passed 110 affected checks and three cold
+stdio cases. One native trial returned the correct task through MCP with zero
+shell commands, while exceeding its 90,000-token planning threshold at 102,522
+reported tokens. Efficiency remains unqualified. Its failed threshold and the
+earlier filesystem fallback are preserved in the linked receipts. Device
+installation and public release readback have their own gates.

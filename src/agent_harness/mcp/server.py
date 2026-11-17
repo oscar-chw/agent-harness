@@ -513,13 +513,18 @@ def apply_flags(argv) -> None:
 
 
 def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(description="Local harness MCP server")
+    parser.add_argument("--home", type=Path, help="explicit harness store for filtered child environments")
+    parser.add_argument("--no-shell", action="store_true")
+    args = parser.parse_args()
     apply_flags(sys.argv[1:])
     try:
         sys.stdin.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
         sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
     except (AttributeError, ValueError):
         pass
-    Server().serve()
+    Server(home=args.home).serve()
 
 
 if __name__ == "__main__":

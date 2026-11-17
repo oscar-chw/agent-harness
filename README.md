@@ -2,7 +2,7 @@
 
 Shared task state, source-backed memory and executable completion checks for AI coding clients.
 
-**v3.0.0.** Durable acquired knowledge, automatic checkpoint packets, research withdrawal and gated dream proposals share one local system. Mac Studio installation has passed cold checks; public assets passed readback; other devices are tracked separately in the [current readiness record](docs/v3/readiness-20261117.md). [Release](https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.0)
+**v3.0.1.** Durable acquired knowledge, automatic checkpoint packets, research withdrawal and gated dream proposals share one local system. A frozen campaign token ceiling stops the next call after observed consumption reaches its limit. Missing research registrations direct local knowledge inspection before new research. [Patch qualification](docs/v3/campaign-budget-20261117.md). Device readbacks and measured performance remain scoped in the [readiness record](docs/v3/readiness-20261117.md). [Releases](https://github.com/oscar-chw/agent-harness/releases)
 
 [![CI](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/ci.yml)
 [![Lint](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml/badge.svg)](https://github.com/oscar-chw/agent-harness/actions/workflows/lint.yml)

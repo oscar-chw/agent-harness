@@ -1,6 +1,6 @@
 {
   "schema": "harness.native-board-readback/v1",
-  "status": "PASS_PICKUP_WITH_BUDGET_CONTROL_FAILURE",
+  "status": "MCP_PICKUP_NOT_QUALIFIED",
   "model": "gpt-6.1-sol",
   "effort": "high",
   "calls": 2,
@@ -12,7 +12,7 @@
   "budget_control": "Not enforced between calls; first overshoot should have prevented second call. No more calls in this run.",
   "complete_provider_cost": "NOT_QUALIFIED",
   "token_saving": "NOT_ESTABLISHED",
-  "scope": "two cold native Codex sessions recovered changed automatic State packets; no general adherence or token-saving claim",
+  "scope": "Two fresh sessions answered correctly after filesystem fallback. Automatic retrieval of the fixture through MCP is unqualified. Original costs and budget failure are retained.",
   "observations": [
     {
       "ordinal": 1,
@@ -44,5 +44,23 @@
     }
   ],
   "original_controller_sha256": "a99dbad723bea543128ab1911ae14d58f446d3deb3bf4a1e000ccf72340c4575",
-  "post_run_correction": "Future controller stops before another call when observed input/output exceeds planning ceiling; this run is not relabelled."
+  "post_run_correction": "Future controller stops before another call when observed input/output exceeds planning ceiling; this run is not relabelled.",
+  "original_status": "PASS_PICKUP_WITH_BUDGET_CONTROL_FAILURE",
+  "retrieval_observer": {
+    "state_load_no_saved_state": 2,
+    "mcp_results_containing_fixture_goal": 0,
+    "filesystem_outputs_containing_fixture_goal": [
+      1,
+      4
+    ],
+    "command_executions": [
+      4,
+      11
+    ],
+    "mcp_tool_calls": [
+      4,
+      4
+    ]
+  },
+  "correction": "Root replay of the raw item.completed events found that neither MCP state_load returned the fixture and shell output supplied it. The configured MCP command needs explicit store binding when inherited environment is filtered. Cold stdio regression is separately qualified."
 }
