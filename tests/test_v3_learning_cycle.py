@@ -318,3 +318,89 @@ def test_nonterminal_sibling_history_cannot_certify_complete_usage(lab, transpor
     with pytest.raises(ValueError, match='progress|terminal|consumed|unknown'):
         adopt(lab, frozen, current)
     assert P.list_active(lab[0], str(lab[1])) == []
+
+
+@pytest.mark.parametrize("candidate_first", [False, True])
+def test_irreversible_quality_failure_stops_before_unneeded_trial_calls(
+        lab, transport, monkeypatch, candidate_first):
+    if candidate_first:
+        suite = json.loads(lab[4].read_bytes())
+        first, second, third, fourth = suite["cases"]
+        suite["cases"] = [first, third, second, fourth]
+        lab[4].write_text(json.dumps(suite))
+
+    called = []
+
+    def wrong_citation(actor, *args, **kwargs):
+        called.append(actor.name)
+        receipt = transport(actor, *args, **kwargs)
+        if actor.name.startswith("trial-") and actor.name.endswith("-candidate") and (
+                (actor / "evidence.md").read_text().strip() == "Status: case-2."):
+            # Deliberately preserve the correct answer value. Citation integrity
+            # is independently mandatory before any later pair can help.
+            receipt["answer"] = '{"status":"case-2","source_ids":[]}'
+            receipt["answer_sha256"] = C._sha(receipt["answer"].encode())
+        return receipt
+
+    monkeypatch.setattr(launch, "execute", wrong_citation)
+    frozen = freeze(lab)
+    result = M.run(lab[0], str(lab[1]), frozen["campaign_id"])
+    assert len(called) == (5 if candidate_first else 7)
+    assert result["status"] == "QUALITY_REJECTED" and result["promotion"] == "NOT_GRANTED"
+    rejected = result["quality_rejection"]
+    assert rejected["task_id"] == "task-2"
+    assert rejected["trial_calls_not_run"] == frozen["model_calls_max"] - len(called)
+    assert result["failures"] == []
+    assert result["observations"][-1]["correct"] is False
+    assert result["observed_role_tokens"] == {
+        "development": 20,
+        "preparation": 10,
+        "trial_base": 0 if candidate_first else 1000,
+        "trial_candidate": 20 if candidate_first else 30,
+    }
+
+    trial = lab[2] / ("run-" + result["trial_run_id"])
+    child = C._json(trial / "result.json")
+    assert child["quality_rejection"] == rejected
+    assert len(child["execution_attempts"]) == len(called) - 3
+    assert child["execution_usage"]["unknown_attempts"] == []
+    for ordinal, attempt in enumerate(child["execution_attempts"], 1):
+        assert C._sha((trial / f"native-{ordinal}.json").read_bytes()) == attempt["native_sha256"]
+    assert not list(trial.glob(f"attempt-{len(called) - 2}.json"))
+    with pytest.raises(ValueError, match="state|terminal|consumed"):
+        M.run(lab[0], str(lab[1]), frozen["campaign_id"])
+    with pytest.raises(ValueError):
+        adopt(lab, frozen, result)
+    assert not P.list_active(lab[0], str(lab[1]))
+
+
+def test_followup_campaign_charges_usage_from_early_rejected_trial(lab, transport, monkeypatch):
+    def fail_candidate(actor, *args, **kwargs):
+        receipt = transport(actor, *args, **kwargs)
+        if actor.name.startswith("trial-") and actor.name.endswith("-2-candidate"):
+            receipt["answer"] = '{"status":"wrong","source_ids":["task-evidence"]}'
+            receipt["answer_sha256"] = C._sha(receipt["answer"].encode())
+        return receipt
+
+    monkeypatch.setattr(launch, "execute", fail_candidate)
+    first = freeze(lab)
+    rejected = M.run(lab[0], str(lab[1]), first["campaign_id"])
+    assert rejected["status"] == "QUALITY_REJECTED"
+    assert sum(rejected["observed_role_tokens"].values()) == 1060
+
+    def fail_only_baseline(actor, *args, **kwargs):
+        receipt = transport(actor, *args, **kwargs)
+        if actor.name.endswith("-2-base"):
+            receipt["answer"] = '{"status":"wrong","source_ids":["task-evidence"]}'
+            receipt["answer_sha256"] = C._sha(receipt["answer"].encode())
+        return receipt
+
+    monkeypatch.setattr(launch, "execute", fail_only_baseline)
+    followup, compared = finish(lab)
+    assert len(compared["observations"]) == 6
+    assert "quality_rejection" not in compared
+    assert any(not row["correct"] and row["arm"] == "base" for row in compared["observations"])
+    report = M.assess(lab[0], str(lab[1]), followup["campaign_id"], run_id=compared["trial_run_id"])
+    assert report["status"] == "QUALIFIED_UNADOPTED"
+    assert report["candidate_tokens"] == 1060 + 70 and report["base_tokens"] == 2000
+    assert not P.list_active(lab[0], str(lab[1]))
