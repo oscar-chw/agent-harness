@@ -23,7 +23,7 @@
   "planning_ceiling_reached": true,
   "schema": "harness.native-store-binding/v1",
   "version": "3.0.1",
-  "scope": "One fresh signed-in Codex session read the correct fixture from two MCP responses, with zero shell commands. The90,000 observed-token threshold was exceeded in-flight. No second native call was made. General adherence and efficiency remain unqualified.",
+  "scope": "One fresh signed-in Codex session read the correct fixture from two MCP responses, with zero shell commands. The 90,000 observed-token threshold was exceeded in-flight. No second native call was made. General adherence and efficiency remain unqualified.",
   "source_binding": {
     "src/agent_harness/mcp/server.py": "83d5b50add844ee29060638f382beb0aa9c297667d1d19822af19093e5858a92",
     "src/agent_harness/installer.py": "c151d18541b1dba6722e2170bdf1052cfaa081def708e84ebe60a55824423016"

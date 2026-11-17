@@ -104,7 +104,7 @@ def install(stage):
     entry = json.loads(config.read_text())["mcpServers"]["harness"]
     assert entry["type"] == "stdio"
     server = stage["home"] / ".agent-harness/lib/agent_harness/mcp/server.py"
-    assert entry["args"] == [str(server)]
+    assert entry["args"] == [str(server), "--home", str(stage["home"] / ".agent-harness")]
     stage["entry"] = [entry["command"], *entry["args"]]
 
 

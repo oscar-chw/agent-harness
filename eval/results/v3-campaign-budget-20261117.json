@@ -46,7 +46,8 @@
     "Expected refusal status corrected to the existing CLI exit1",
     "Expected call order corrected to include development trial candidates",
     "Receipt assertion corrected to inspect child run directories",
-    "Gitleaks historical exact fingerprint is a recomputed public source SHA256; source hash keys now use separate path and digest fields"
+    "Gitleaks historical exact fingerprint is a recomputed public source SHA256; source hash keys now use separate path and digest fields",
+    "The staged adapter expectation now includes its explicit --home binding; script path, complete argv, missing-workgraph refusal, uninstall and retained-memory assertions stay enforced"
   ],
   "limits": [
     "between-call planning stop, not an in-flight provider limit",
@@ -94,6 +95,10 @@
     {
       "source": "tests/test_mcp_home_binding.py",
       "sha256": "85f548b1c91696eb9125d38a732594fbda74c5bb40cc4f6de05223b696dbce6d"
+    },
+    {
+      "source": "tests/test_v1_staging.py",
+      "sha256": "35a5a78b5c91eddef687d1adcc8a46a64867e1c50accf6278ef0978a0327d6fa"
     }
   ],
   "mcp_store_correction": {
@@ -107,5 +112,20 @@
     },
     "native_readback": "eval/results/v3-native-store-binding-20261117.json",
     "previous_probe_correction": "eval/results/v3-native-board-readback-20261117.json"
+  },
+  "store_binding_negative_control": {
+    "mutation": "omit explicit --home",
+    "failed": 2,
+    "passed_legacy_control": 1,
+    "native_calls": 0
+  },
+  "corrected_full_gate_before_check_correction": {
+    "failed": 4,
+    "passed": 3219,
+    "skipped": 1,
+    "xfailed": 2,
+    "seconds": 424.05,
+    "failure": "four callers shared one stale exact-argv expectation",
+    "status": "RETAINED_FAILURE"
   }
 }
