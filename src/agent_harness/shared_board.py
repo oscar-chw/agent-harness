@@ -7,7 +7,7 @@ import uuid
 
 from .mcp import checks
 from .mcp.memory import _store_lock
-from .mcp.state import State, STATE_MAX_BYTES
+from .mcp.state import State, STATE_BOARD_PENDING, STATE_MAX_BYTES
 from .operational_state import OperationalState
 from .redact import redact
 from .vault_sources import _publish, _read
@@ -16,6 +16,9 @@ from .vault_sources import _publish, _read
 class SharedBoard:
     def __init__(self, home, project):
         self.store = OperationalState.for_host(home, cwd=project)
+        state = State(home=self.store.path.parent.parent, project=self.store.root)
+        self.state_path = state._dir(str(self.store.root)) / 'STATE.md'
+        self.checked_pending = False
         self.rows = {}
         self.observed = {}
         self.last_summary = None
@@ -26,6 +29,9 @@ class SharedBoard:
     def context(self):
         if checks.disabled('op_state'):
             return ''
+        if not self.checked_pending:
+            self.checked_pending = True
+            self._recover_pending_state()
         if not self.store.path.exists() and not self.store.path.is_symlink():
             return ''
         state = self.store.snapshot()
@@ -49,6 +55,26 @@ class SharedBoard:
         for row in snapshot.get('tasks', []):
             visible = {key: value for key, value in row.items() if key not in ('version', 'fence', 'until', 'updated_cursor')}
             self.rows[row['task']] = hashlib.sha256(json.dumps(visible, sort_keys=True).encode()).hexdigest()
+
+    def _pending_digest(self):
+        marker = self.state_path.with_name(STATE_BOARD_PENDING)
+        if marker.resolve() != marker:
+            raise ValueError('pending checkpoint path is redirected')
+        try:
+            return _read(marker, 64)
+        except FileNotFoundError:
+            return None
+
+    def _recover_pending_state(self):
+        pending = self._pending_digest()
+        if pending is None or self.state_path.resolve() != self.state_path:
+            return
+        try:
+            raw = _read(self.state_path, STATE_MAX_BYTES)
+        except FileNotFoundError:
+            return
+        if pending == hashlib.sha256(raw).hexdigest().encode('ascii'):
+            self.publish(raw.decode('utf-8'), state_path=str(self.state_path))
 
     def _state_checkpoint(self, summary, expected):
         text = _read(expected, STATE_MAX_BYTES).decode('utf-8')
@@ -90,8 +116,7 @@ class SharedBoard:
                  'resource': 'full_text_sha256=' + digest,
                  'next': 'Read the saved source checkpoint and verify current gate evidence'}
         if state_path is not None:
-            state = State(home=self.store.path.parent.parent, project=self.store.root)
-            expected = state._dir(str(self.store.root)) / 'STATE.md'
+            expected = self.state_path
             if Path(state_path) != expected or expected.resolve() != expected:
                 raise ValueError('saved checkpoint is outside the local project State store')
             # A State writer must not change the validated bytes before the board commit.
@@ -102,6 +127,8 @@ class SharedBoard:
                 if not rows or rows[0]['value'] != value:
                     self.store.put(identity, value, expected=rows[0]['version'] if rows else 0,
                                    request_id=self.identity + '-' + str(self.sequence))
+                if self._pending_digest() == hashlib.sha256(summary.encode('utf-8')).hexdigest().encode('ascii'):
+                    expected.with_name(STATE_BOARD_PENDING).unlink(missing_ok=True)
         else:
             result = self.store.put(self.identity, value, expected=self.version,
                                     request_id=self.identity + '-' + str(self.sequence),
