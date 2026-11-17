@@ -28,6 +28,15 @@ scope, acceptance criteria or authority to make a command run.
 5. If there is no supported approval path, name the boundary and required owner
    action. Keep the checkpoint resumable instead of claiming the task is done.
 
+Read the rejecting component's documented approval interface before declaring a
+human-approved operation impossible. A per-call approval option supplied by that
+component can consume an exact, current user grant. Bind it to the approved
+targets and effect, retain preflight and rollback, and inspect the actual result.
+Use an existing grant once within its scope. Global disabling, an undocumented
+override, another transport or a changed target requires separate review.
+Native and managed policies retain their own approval requirements. A hook
+protocol must support its approval response before it can be used for consent.
+
 Fix a false-positive rule only through an authorized maintenance path, with the
 innocent case and a genuinely invalid case checked. A proposed rule fix is not
 permission to execute the rejected action.

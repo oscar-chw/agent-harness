@@ -1,6 +1,6 @@
 # v3 architecture and readiness
 
-17 November 2026. v3 aims to make useful work easier to resume, verify and improve with less repeated context. Published **3.0.0** integrates the four directions below. Mac Studio now has **3.0.0** installed with byte-verified rollback data; native configuration, owner guard and user memory were preserved. The active goal is `v3-finalisation-20261117`; source checks and installation are separate evidence layers. This is a dated source-and-evidence snapshot. [Finalisation plan](../../plan/v3-finalisation-20261117.md), [completed research integration](../../plan/research-reasoning-20261117.md)
+17 November 2026. v3 combines local task coordination, adaptive methods, purpose-led reasoning and scoped knowledge. The diagram describes their shared mechanisms. Current release and device qualification live in the [release receipts](https://github.com/oscar-chw/agent-harness/releases/latest), while native comparisons retain their own outcome and cost gates. [Finalisation plan](../../plan/v3-finalisation-20261117.md), [research integration](../../plan/research-reasoning-20261117.md)
 
 ## How the parts work together
 
@@ -150,3 +150,15 @@ the tested profile. Native memory-instruction size varied substantially in
 one case. The study retained its initial CLI startup failure, unknown usage,
 369,021 measured tokens and 19,021 last-call planning-ceiling overshoot.
 The local runtime stays on its qualified 3.0.2 release. [Study and limits](continuation-read-policy-20261117.md).
+
+## Approved-operation recovery
+
+The guard instruction now directs agents to consume an existing documented
+approval path for an exact user-approved action, or retain the hold. The QTS
+case has an independently checked native restricted outcome. Every additional
+native policy keeps its own authority. [Mechanism and checked scope](approval-recovery-20261117.md)
+
+The optional task-context comparison changes native automatic memory injection
+while preserving explicit shared retrieval. Configuration and cold MCP checks
+passed with zero model-generation calls. Native adherence and savings remain
+unmeasured. [Source/metadata receipt](../../eval/results/v3-context-profile-qualification-20261117.json)
