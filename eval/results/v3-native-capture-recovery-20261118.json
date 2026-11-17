@@ -3,7 +3,7 @@
   "date": "2026-11-18",
   "baseline_version": "3.0.4",
   "candidate_version": "3.0.5",
-  "status": "FOCUSED_MECHANICS_PASS",
+  "status": "SOURCE_MECHANICS_PASS",
   "baseline_reproduction": {
     "failed": 9,
     "passed": 7
@@ -78,7 +78,7 @@
     "arms": {
       "baseline": {
         "invocations": 9,
-        "median_seconds": 0.14286120900000004,
+        "median_seconds": 0.14375120799999996,
         "context_bytes": [
           0,
           0,
@@ -94,7 +94,7 @@
       },
       "candidate": {
         "invocations": 9,
-        "median_seconds": 0.14548929200000016,
+        "median_seconds": 0.14666641599999997,
         "context_bytes": [
           0,
           0,
@@ -130,5 +130,11 @@
     ]
   },
   "prompt_collection_limit": "Busy lock delivery is diagnosed and requires retry; no automatic backlog guarantee",
-  "review": "No remaining findings after bounded-lock and malformed-row corrections"
+  "review": "No remaining findings after bounded-lock and malformed-row corrections",
+  "full_local_gate": {
+    "passed": 3318,
+    "skipped": 1,
+    "xfailed": 2,
+    "seconds": 430.92
+  }
 }

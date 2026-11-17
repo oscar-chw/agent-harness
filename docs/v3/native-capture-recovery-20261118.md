@@ -37,7 +37,9 @@ and hostile processes with the same filesystem access need additional controls.
 The frozen 3.0.4 reproduction produced nine failures and seven passing controls.
 The first candidate passed 33 focused checks. Review then reproduced two further
 defects in contention and malformed candidate handling. Their regression cases
-are included in the final source gate. Eight independently broken source variants
+are included in the final source gate, which passed 3,318 tests with one skip
+and two expected failures. All 37 focused and 193 affected checks passed.
+Eight independently broken source variants
 were rejected, and restored controls passed. Paired local hook invocations kept
 identical context output while recording corrections in the candidate arm.
 
