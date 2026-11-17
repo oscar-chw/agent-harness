@@ -1,0 +1,38 @@
+{
+  "schema": "harness.capture-concurrency-qualification/v1",
+  "date": "2026-11-17",
+  "status": "MECHANICS_PASS",
+  "baseline_version": "3.0.3",
+  "candidate_version": "3.0.4",
+  "baseline_reproduction": {
+    "failed_tests": 3,
+    "failure": "Concurrent candidate temporary replacement collision"
+  },
+  "focused_checks": 5,
+  "hook_processes": 6,
+  "affected_checks": 179,
+  "mutation_controls": [
+    {
+      "mutation": "marker-transaction",
+      "valid_control": "PASS",
+      "mutant": "REJECTED",
+      "restored_control": "PASS"
+    },
+    {
+      "mutation": "record-transaction",
+      "valid_control": "PASS",
+      "mutant": "REJECTED",
+      "restored_control": "PASS"
+    },
+    {
+      "mutation": "prune-transaction",
+      "valid_control": "PASS",
+      "mutant": "REJECTED",
+      "restored_control": "PASS"
+    }
+  ],
+  "native_model_calls": 0,
+  "semantic_learning_efficacy": "NOT_MEASURED",
+  "aggregate_token_efficiency": "NOT_MEASURED",
+  "scope": "Candidate collection, same-turn deduplication and pruning serialization. Independent method adoption and hard-crash recovery retain their own requirements."
+}

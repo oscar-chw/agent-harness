@@ -20,6 +20,7 @@ from typing import List, Optional
 
 from .redact import redact
 from .native_evidence import NativeEvidence as NativeEvidence
+from .mcp.memory import _store_lock
 
 STORE = "candidates.jsonl"
 # A check is a command whose PROGRAM is a test runner or linter, in any step of the command line: `grep -rn
@@ -294,6 +295,19 @@ def capture_turn(hh: Path, transcript: str, session: str, project=None, *,
         events, started = _last_turn_info(transcript)
     elif started is None:
         started = True
+    # The marker and candidate count form one read-modify-write operation.
+    # Serializing only the JSONL replace still counts simultaneous Stops twice.
+    with _store_lock(hh):
+        rows = _capture_turn(hh, transcript, session, project, events, started)
+    try:
+        from . import storage
+        storage.prune(hh)
+    except Exception:
+        pass
+    return rows
+
+
+def _capture_turn(hh, transcript, session, project, events, started):
     first = events[0] if events else {}
     turn = "%s:%s" % (transcript, first.get("uuid") or hashlib.sha1(
         json.dumps(first, sort_keys=True).encode()).hexdigest())
@@ -307,21 +321,23 @@ def capture_turn(hh: Path, transcript: str, session: str, project=None, *,
     except (OSError, ValueError, AttributeError, KeyError):
         pass
     new = [f for f in candidates(transcript, events, project=project) if f["key"] not in seen]
-    rows = record(hh, new)
+    rows = _record(hh, new)
     # The marker is written BEFORE anything else can fail: if pruning raised first, the next Stop of this turn
     # would count the same lesson again (one occurrence would then pass the "has recurred" rule).
     mark.parent.mkdir(parents=True, exist_ok=True)
     mark.write_text(json.dumps({"turn": turn, "keys": seen + [f["key"] for f in new]}), encoding="utf-8")
-    try:
-        from . import storage
-        storage.prune(hh)                        # capture runs every turn, so the cap is enforced here
-    except Exception:
-        pass
     return rows
 
 
 def record(hh: Path, found: List[dict], now: Optional[str] = None) -> List[dict]:
     """Merge into the store: a repeat raises the count of the entry it repeats."""
+    if not found:
+        return []
+    with _store_lock(hh):
+        return _record(hh, found, now)
+
+
+def _record(hh, found, now=None):
     if not found:
         return []
     now = now or time.strftime("%Y-%m-%dT%H:%M:%S")
