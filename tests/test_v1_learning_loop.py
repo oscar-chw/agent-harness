@@ -459,6 +459,45 @@ def test_renaming_a_development_task_does_not_make_it_unseen(lab):
     assert apply(lab, proposal, evidence).returncode != 0
 
 
+@pytest.mark.parametrize("phase", ["freeze", "comparison", "duplicate_pair"])
+def test_reformatted_structured_tasks_stay_seen_in_local_comparison(lab, phase):
+    from agent_harness import procedures
+    home, projects = lab
+    project = projects[1]
+    candidate = candidate_input(lab)
+    episode = candidate["episodes"][0]
+    task = {"instruction": "Check the inventory.", "evidence": "Entries: 1"}
+    raw = json.dumps(task).encode()
+    (project / episode["task_path"]).write_bytes(raw)
+    episode["task_sha256"] = hashlib.sha256(raw).hexdigest()
+    spec = project / "structured-candidate.json"
+    spec.write_text(json.dumps(candidate))
+    drafted = cli(lab, "--draft-procedure", str(spec))
+    assert drafted.returncode == 0, drafted.stdout + drafted.stderr
+    proposal = json.loads(drafted.stdout)
+
+    evidence = receipt(proposal)
+    pair = evidence["pairs"][0]
+    if phase == "duplicate_pair":
+        task = {**task, "evidence": "Entries: 2"}
+        raw = json.dumps(task).encode()
+        (project / pair["task_path"]).write_bytes(raw)
+        pair["task_sha256"] = hashlib.sha256(raw).hexdigest()
+        assert procedures.evaluate(proposal, evidence)["pairs"] == 2
+        pair = evidence["pairs"][1]
+    heldout_task = project / pair["task_path"]
+    reformatted = json.dumps(task, sort_keys=True, indent=2).encode()
+    assert reformatted != raw
+    heldout_task.write_bytes(reformatted)
+    pair["task_sha256"] = hashlib.sha256(reformatted).hexdigest()
+    if phase == "freeze":
+        with pytest.raises(ValueError, match="development input"):
+            procedures.freeze_case(home / "harness", str(project), proposal["id"], "fresh", reformatted, b"{}")
+    else:
+        with pytest.raises(ValueError, match="overlap"):
+            procedures.evaluate(proposal, evidence)
+
+
 def test_changed_heldout_input_and_duplicate_input_under_two_names_are_refused(lab):
     from agent_harness import procedures
     _, proposal = draft(lab)

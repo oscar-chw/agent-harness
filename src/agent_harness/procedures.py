@@ -20,6 +20,7 @@ from pathlib import Path
 
 from .mcp.state import project_root
 from .redact import redact
+from .vault_sources import _unique_object
 
 MAX_BYTES = 65536
 MAX_RECORDS = 128
@@ -124,6 +125,19 @@ def _bound_file(project, name, sha):
     raw = _read_regular(path)
     if len(raw) > MAX_BYTES or hashlib.sha256(raw).hexdigest() != sha:
         raise ValueError("source changed or exceeds its bound")
+    return raw
+
+
+def _task_fingerprint(raw, sha):
+    """Compare structured task contents while keeping byte pins for all inputs."""
+    try:
+        task = json.loads(raw.decode("utf-8"), object_pairs_hook=_unique_object)
+        if (isinstance(task, dict) and set(task) == {"instruction", "evidence"}
+                and all(isinstance(value, str) and value.strip() for value in task.values())):
+            return ("structured", digest(task))
+    except (ValueError, RecursionError):
+        pass
+    return ("bytes", sha)
 
 
 def _episodes(candidate, project):
@@ -142,13 +156,15 @@ def _episodes(candidate, project):
             raise ValueError("invalid or duplicate episode identity")
         ids.add(identity)
         _bound_file(project, name, sha)
-        _bound_file(project, episode["task_path"], episode["task_sha256"])
+        task_sha = episode["task_sha256"]
+        raw = _bound_file(project, episode["task_path"], task_sha)
         if sha in sources:
             raise ValueError("development episodes repeat the same source evidence")
         sources.add(sha)
-        if episode["task_sha256"] in fingerprints:
+        fingerprint = _task_fingerprint(raw, task_sha)
+        if fingerprint in fingerprints:
             raise ValueError("development episodes repeat the same task inputs")
-        fingerprints.add(episode["task_sha256"])
+        fingerprints.add(fingerprint)
     return ids, fingerprints
 
 
@@ -311,8 +327,9 @@ def evaluate(payload, result):
                 or not pair["class"]):
             raise ValueError("held-out task identities must be unique and unseen")
         seen.add(identity)
-        _bound_file(payload["project"], pair.get("task_path"), pair.get("task_sha256"))
-        fingerprint = pair["task_sha256"]
+        task_sha = pair.get("task_sha256")
+        raw = _bound_file(payload["project"], pair.get("task_path"), task_sha)
+        fingerprint = _task_fingerprint(raw, task_sha)
         if fingerprint in development_inputs or fingerprint in seen_inputs:
             raise ValueError("held-out inputs overlap development or another pair, even if renamed")
         seen_inputs.add(fingerprint)
@@ -363,7 +380,7 @@ def freeze_case(home, project, identity, task_id, task, answer):
     with _db(home) as con:
         payload = _proposal(con, project, identity)
         _, development_inputs = _episodes(payload["candidate"], project)
-        if task_sha in development_inputs:
+        if _task_fingerprint(task, task_sha) in development_inputs:
             raise ValueError("frozen task overlaps a development input")
         prior = con.execute("SELECT task_sha256,answer_sha256 FROM procedure_frozen_cases "
                             "WHERE id=? AND task_id=?", (identity, task_id)).fetchone()

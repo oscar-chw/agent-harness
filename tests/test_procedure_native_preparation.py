@@ -55,6 +55,17 @@ def test_prepare_binds_sources_but_never_calls_or_promotes(preparation, lab, mon
     assert not procedures.list_active(lab[0], str(lab[1]))
 
 
+def test_reformatted_development_task_cannot_freeze_preparation(preparation, lab, monkeypatch):
+    home, project, oracle, proposal, _ = lab
+    first, second = [project / episode['task_path'] for episode in proposal['candidate']['episodes']]
+    second.write_text(json.dumps(json.loads(first.read_bytes()), sort_keys=True, indent=2))
+    assert first.read_bytes() != second.read_bytes()
+    monkeypatch.setattr(controller, '_invoke', lambda *a, **k: pytest.fail('freeze must not call a model'))
+    with pytest.raises(ValueError, match='same task inputs'):
+        preparation.prepare(home, str(project), oracle, specification(lab))
+    assert not list(oracle.rglob('freeze.json'))
+
+
 def test_observed_draft_and_usage_feed_trial_total_but_wider_hold_remains(preparation, lab, monkeypatch):
     monkeypatch.setattr(controller, '_invoke', generated)
     freeze = frozen(preparation, lab)
