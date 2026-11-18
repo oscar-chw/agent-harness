@@ -97,7 +97,11 @@ def prune(hh: Path, *, lock_timeout: float = 30) -> None:
             with _store_lock(hh, timeout=lock_timeout):
                 from .capture import _recover_capture
                 _recover_capture(hh)
-                _keep_tail(hh / "candidates.jsonl", CAPS["candidates"])
+                if (hh / "weekly-intake/intake.sqlite").exists():
+                    from .weekly_intake import prune_candidates
+                    prune_candidates(hh, CAPS["candidates"])
+                else:
+                    _keep_tail(hh / "candidates.jsonl", CAPS["candidates"])
         except (OSError, ValueError):
             pass
     try:

@@ -33,13 +33,17 @@ graph. Its rows do not prove which project or independent task produced a
 repeat; that binding must be supplied by the later source-episode draft.
 
 `NO_CHANGE` is terminal for that invocation: no candidate is proposed and no
-model is called. A malformed, redirected, missing or rewound source, an evicted
-previously delivered row, stale cursor, or output that cannot fit the budget
-returns `HOLD` without advancing the cursor. Captured text is screened for
-credential-shaped strings before it is shown; receipts store IDs and hashes,
-not the captured summary or evidence. This reader neither authenticates a
-claim's truth nor distinguishes two independent tasks merely from a repeat
-count.
+model is called. A normal capture prune records the delivered rows it retires
+against the exact source hashes before and after the rewrite. Intake reports
+the retirement count and can continue. A later appearance starts a new
+candidate count. An interrupted prune recovers only if the source matches one
+of the recorded hashes.
+
+A missing, redirected, malformed or rewound source, unexplained disappearance,
+stale cursor or output above the budget returns `HOLD` without advancing the
+cursor. Receipts retain counts, hashes and selected IDs. The intake screens
+captured text for credential-shaped strings before returning it. Claims and
+repeat counts still require independent evidence before adoption.
 
 An item with `count >= 2` is still only a **candidate signal**. To draft a
 repeatable method, use the existing source-bound

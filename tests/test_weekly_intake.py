@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 SRC = Path(__file__).resolve().parents[1] / "src"
 
@@ -188,3 +190,130 @@ def test_fixture_targets_its_own_home_despite_external_harness_home(tmp_path, mo
     rc, result = intake(tmp_path, "--since", "0")
     assert rc == 0 and [item["id"] for item in result["candidates"]] == ["local"]
     assert not (tmp_path / "unrelated").exists()
+
+
+def test_intake_continues_after_verified_capture_retention(tmp_path, monkeypatch):
+    from agent_harness.storage import CAPS, prune
+    from agent_harness.weekly_intake import take
+
+    save(tmp_path, [candidate("previous", count=3)])
+    home = tmp_path / ".agent-harness"
+    first = take(home, since=0)
+    assert first["cursor"] == 1 and first["candidates"][0]["id"] == "previous"
+    save(tmp_path, [candidate("previous", count=3), candidate("new-a"), candidate("new-b")])
+    monkeypatch.setitem(CAPS, "candidates", 2)
+    prune(home)
+    assert "previous" not in (home / "candidates.jsonl").read_text()
+    after = take(home, since=1, max_items=1)
+    assert after["status"] == "CHANGED" and after["cursor"] == 2
+    assert after["retired_count"] == 1 and [x["id"] for x in after["candidates"]] == ["new-a"]
+    assert after["promotion"] == "NOT_RUN"
+    next_ = take(home, since=2)
+    assert next_["cursor"] == 3 and [x["id"] for x in next_["candidates"]] == ["new-b"]
+    assert "retired_count" not in next_
+    assert take(home, since=3)["status"] == "NO_CHANGE"
+    with sqlite3.connect(home / "weekly-intake/intake.sqlite") as db:
+        receipt = json.loads(db.execute("SELECT body FROM receipts WHERE seq=2").fetchone()[0])
+        assert receipt["retired_count"] == 1 and '"previous"' not in json.dumps(receipt)
+    assert not (home / "procedures.sqlite").exists()
+
+
+
+@pytest.mark.parametrize("timing", ["before", "after", "drift"])
+def test_retirement_recovery_distinguishes_interrupted_write_and_drift(tmp_path, monkeypatch, timing):
+    from agent_harness import weekly_intake
+    from agent_harness.storage import CAPS, prune
+
+    save(tmp_path, [candidate("previous")])
+    home = tmp_path / ".agent-harness"
+    assert weekly_intake.take(home)["cursor"] == 1
+    old, fresh = candidate("previous"), candidate("latest")
+    save(tmp_path, [old, fresh])
+    monkeypatch.setitem(CAPS, "candidates", 1)
+    replace = weekly_intake._durable_replace
+
+    def interrupted(path, content):
+        if path.name != "candidates.jsonl":
+            return replace(path, content)
+        if timing != "before":
+            replace(path, content)
+        raise OSError("retention fixture interruption")
+
+    with monkeypatch.context() as fault:
+        fault.setattr(weekly_intake, "_durable_replace", interrupted)
+        prune(home)
+    pending = home / "weekly-intake/retention-pending.json"
+    assert pending.is_file() and "fixture failure line" not in pending.read_text()
+    if timing == "drift":
+        save(tmp_path, [candidate("unverified")])
+        with pytest.raises(ValueError, match="retention_source_drift"):
+            weekly_intake.take(home, since=1)
+        assert pending.is_file()
+        with sqlite3.connect(home / "weekly-intake/intake.sqlite") as db:
+            assert db.execute("SELECT max(seq) FROM receipts").fetchone()[0] == 1
+        return
+
+    code, observed = intake(tmp_path, "--since", "1")
+    assert code == 0, observed
+    assert observed["cursor"] == 2 and [row["id"] for row in observed["candidates"]] == ["latest"]
+    assert observed.get("retired_count", 0) == (1 if timing == "after" else 0)
+    assert not pending.exists()
+    assert weekly_intake.take(home, since=2)["status"] == "NO_CHANGE"
+
+
+def test_retirement_only_is_reported_and_reappearance_starts_new_evidence(tmp_path, monkeypatch):
+    from agent_harness.storage import CAPS, prune
+    from agent_harness.weekly_intake import take
+
+    save(tmp_path, [candidate("previous", count=3), candidate("still-here")])
+    home = tmp_path / ".agent-harness"
+    assert take(home, since=0)["cursor"] == 1
+    monkeypatch.setitem(CAPS, "candidates", 1)
+    prune(home)
+    after = take(home, since=1)
+    assert after["cursor"] == 2 and after["retired_count"] == 1 and not after["candidates"]
+    assert take(home, since=2)["status"] == "NO_CHANGE"
+    save(tmp_path, [candidate("still-here"), candidate("previous", count=1)])
+    reappeared = take(home, since=2)
+    assert reappeared["cursor"] == 3
+    assert reappeared["candidates"][0]["id"] == "previous" and reappeared["candidates"][0]["count"] == 1
+    assert reappeared["promotion"] == "NOT_RUN"
+
+
+def test_retention_check_is_cheap_below_the_existing_cap(tmp_path, monkeypatch):
+    from agent_harness import weekly_intake
+    from agent_harness.storage import prune
+
+    save(tmp_path, [candidate("one")])
+    home = tmp_path / ".agent-harness"
+    assert weekly_intake.take(home)["cursor"] == 1
+    source = home / "candidates.jsonl"
+    before = source.read_bytes()
+
+    def unexpected_parse(*args):
+        raise AssertionError("a routine capture prune must skip candidate parsing below the cap")
+
+    monkeypatch.setattr(weekly_intake, "_rows", unexpected_parse)
+    prune(home)
+    assert before == source.read_bytes()
+    assert not (home / "weekly-intake/retention-pending.json").exists()
+
+
+def test_accepted_retirement_does_not_authorize_other_missing_rows(tmp_path, monkeypatch):
+    from agent_harness.storage import CAPS, prune
+    from agent_harness.weekly_intake import take
+
+    old, current, fresh = candidate("old"), candidate("current"), candidate("fresh")
+    hh = tmp_path / ".agent-harness"
+    save(tmp_path, [old, current])
+    assert take(hh)["cursor"] == 1
+    save(tmp_path, [old, current, fresh])
+    monkeypatch.setitem(CAPS, "candidates", 2)
+    prune(hh)
+    save(tmp_path, [fresh])
+    with pytest.raises(ValueError, match="source_evicted"):
+        take(hh, since=1)
+    save(tmp_path, [current, fresh])
+    restored = take(hh, since=1)
+    assert restored["cursor"] == 2 and restored["retired_count"] == 1
+    assert [row["id"] for row in restored["candidates"]] == ["fresh"]

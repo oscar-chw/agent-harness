@@ -24,6 +24,7 @@ from .mcp.memory import _store_lock
 
 STORE = "candidates.jsonl"
 PENDING = "capture-pending.json"
+RETENTION_PENDING = Path("weekly-intake/retention-pending.json")
 PROMPT_QUEUE = Path("capture-inbox/observations.json")
 PROMPT_QUEUE_LIMIT = 64
 PROMPT_QUEUE_BYTES = 256 * 1024
@@ -149,6 +150,11 @@ def _replace_capture(path, data):
 
 
 def _recover_capture(home):
+    retention = home / RETENTION_PENDING
+    if retention.exists() or retention.is_symlink():
+        from .weekly_intake import recover_retention
+        recover_retention(home)
+
     """Complete the pending writer before another cooperating writer changes its bytes."""
     pending = home / PENDING
     if pending.is_symlink():
