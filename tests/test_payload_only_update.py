@@ -131,8 +131,8 @@ def test_apply_restores_prior_bytes_after_failure(fixture, tmp_path, monkeypatch
     real = tool.replace
     failed = []
 
-    def fail_after_writing_version(path, payload):
-        real(path, payload)
+    def fail_after_writing_version(path, payload, **options):
+        real(path, payload, **options)
         if path == runtime / tool.VERSION_FILE and not failed:
             failed.append(path)
             raise OSError("fixture write interrupted")
@@ -156,4 +156,86 @@ def test_apply_respects_the_installed_updater_lock(fixture, tmp_path):
         other.execute("BEGIN IMMEDIATE")
         result = run(args(fixture, tmp_path), "--apply")
         assert result.returncode == 1 and "locked" in result.stderr
+    assert snapshot(home) == before and not (tmp_path / "backup").exists()
+
+
+@pytest.fixture
+def missing_prompt(fixture):
+    old, new, _, runtime = fixture
+    content = b"# Installed VS Code prompt\n"
+    source = "content/prompts/plan.md"
+    for root in (old, new, runtime):
+        store(root, {source: content})
+    generated = runtime / "content/copilot/prompts/plan.prompt.md"
+    state_path = runtime / "installed.json"
+    state = json.loads(state_path.read_bytes())
+    state["entries"].append({"path": str(generated), "tools": ["copilot-vscode"],
+                             "kind": "replace", "written": "f:" + sha(content)})
+    state_path.write_text(json.dumps(state))
+    return generated, content
+
+
+def test_missing_managed_prompt_requires_explicit_hash_bound_repair(fixture, missing_prompt, tmp_path):
+    _, _, home, _ = fixture
+    generated, content = missing_prompt
+    options = args(fixture, tmp_path)
+    before = snapshot(home)
+    held = run(options)
+    assert held.returncode == 1 and generated.name in held.stderr
+    assert snapshot(home) == before
+
+    repair = "--restore-missing-vscode-prompts"
+    preview = run(options, repair)
+    assert preview.returncode == 0, preview.stderr
+    assert json.loads(preview.stdout)["restored_vscode_prompts"] == 1
+    assert snapshot(home) == before and not (tmp_path / "backup").exists()
+
+    applied = run(options, repair, "--apply")
+    assert applied.returncode == 0, applied.stderr
+    result = json.loads(applied.stdout)
+    assert result["updated_paths"] == 3 and result["restored_vscode_prompts"] == 1
+    assert generated.read_bytes() == content
+    tx = json.loads((tmp_path / "backup/transaction.json").read_bytes())
+    assert tx["content/copilot/prompts/plan.prompt.md"]["before"] is None
+    second = run(options, repair, "--apply")
+    assert second.returncode == 0 and json.loads(second.stdout)["status"] == "CURRENT"
+
+    generated.unlink()
+    options[-1] = str(tmp_path / "repair-current")
+    current = run(options, repair, "--apply")
+    assert current.returncode == 0, current.stderr
+    result = json.loads(current.stdout)
+    assert result["updated_paths"] == 0 and result["restored_vscode_prompts"] == 1
+    assert generated.read_bytes() == content
+
+
+def test_repair_preserves_a_prompt_created_concurrently(fixture, missing_prompt, tmp_path, monkeypatch):
+    _, _, _, runtime = fixture
+    generated, _ = missing_prompt
+    spec = importlib.util.spec_from_file_location("update_payload", SCRIPT)
+    tool = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tool)
+    link = tool.os.link
+    competing = b"# Prompt saved by another process\n"
+
+    def concurrent_save(src, dst, *a, **kw):
+        if dst == generated:
+            generated.write_bytes(competing)
+        return link(src, dst, *a, **kw)
+
+    monkeypatch.setattr(tool.os, "link", concurrent_save)
+    assert tool.main([*args(fixture, tmp_path), "--restore-missing-vscode-prompts", "--apply"]) == 1
+    assert generated.read_bytes() == competing
+    assert (runtime / tool.VERSION_FILE).read_bytes() == OLD["src/agent_harness/__init__.py"]
+
+
+def test_prompt_repair_refuses_bytes_that_differ_from_the_owner_record(fixture, missing_prompt, tmp_path):
+    old, new, home, runtime = fixture
+    generated, _ = missing_prompt
+    source = "content/prompts/plan.md"
+    for root in (old, new, runtime):
+        store(root, {source: b"# Different prompt\n"})
+    before = snapshot(home)
+    result = run(args(fixture, tmp_path), "--restore-missing-vscode-prompts", "--apply")
+    assert result.returncode == 1 and generated.name in result.stderr
     assert snapshot(home) == before and not (tmp_path / "backup").exists()

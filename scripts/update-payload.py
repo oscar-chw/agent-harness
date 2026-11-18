@@ -16,6 +16,7 @@ from tempfile import NamedTemporaryFile
 FILE_LIMIT = 2 * 1024 * 1024
 STATE = Path("installed.json")
 VERSION_FILE = Path("lib/agent_harness/__init__.py")
+VSCODE_PROMPTS = Path("content/copilot/prompts")
 APPLICATION_FILES = (
     ".codex/AGENTS.md", ".codex/config.toml", ".codex/hooks.json",
     ".claude/CLAUDE.md", ".claude/settings.json", ".claude.json",
@@ -97,31 +98,56 @@ def expected_package(args):
     return manifest, old, new
 
 
+def missing_prompt_repairs(args, entries, new):
+    repairs = {}
+    for entry in entries:
+        target = Path(entry["path"])
+        suffix = ".prompt.md"
+        if (target.parent != args.harness_home / VSCODE_PROMPTS or not target.name.endswith(suffix)
+                or entry.get("tools") != ["copilot-vscode"] or entry.get("kind") != "replace"):
+            continue
+        relative = target.relative_to(args.harness_home)
+        if relative in new or regular(args.harness_home, relative, optional=True) is not None:
+            continue
+        if not args.restore_missing_vscode_prompts:
+            raise ValueError(f"managed VS Code prompt is missing: {target.name}; "
+                             "preview --restore-missing-vscode-prompts to check an exact repair")
+        source = Path("content/prompts") / (target.name[:-len(suffix)] + ".md")
+        pinned = new.get(source)
+        if (pinned is None or entry.get("written") != "f:" + digest(pinned[0])
+                or is_protected(relative)):
+            raise ValueError(f"no release bytes match the installed record for {target.name}")
+        repairs[relative] = (None, (pinned[0], 0o644))
+    return repairs
+
+
 def checks(args, manifest, old, new):
     live = {path: regular(args.harness_home, path, optional=True) for path in new}
     state_raw = regular(args.harness_home, STATE)
     state = json.loads(state_raw[0])
     if not isinstance(state["entries"], list) or not state["tools"]:
         raise ValueError("existing installation record missing")
-    if (all(live[p] is not None and live[p][0] == new[p][0] for p in new)
-            and state.get("source_commit") == manifest["build_commit"]):
-        return {}
-    updates = {}
-    for path, before in live.items():
-        source_old = old[path]
-        if ((before is None) != (source_old is None)
-                or (before is not None and before[0] != source_old[0])):
-            raise ValueError(f"installed payload differs from the baseline: {path}")
-        data, mode = new[path]
-        if before is None or before[0] != data:
-            if is_protected(path):
-                raise ValueError(f"protected package file would change: {path}")
-            updates[path] = (before, (data, mode if before is None else before[1]))
+    current = (all(live[p] is not None and live[p][0] == new[p][0] for p in new)
+               and state.get("source_commit") == manifest["build_commit"])
+    updates = missing_prompt_repairs(args, state["entries"], new)
+    if not current:
+        for path, before in live.items():
+            source_old = old[path]
+            if ((before is None) != (source_old is None)
+                    or (before is not None and before[0] != source_old[0])):
+                raise ValueError(f"installed payload differs from the baseline: {path}")
+            data, mode = new[path]
+            if before is None or before[0] != data:
+                if is_protected(path):
+                    raise ValueError(f"protected package file would change: {path}")
+                updates[path] = (before, (data, mode if before is None else before[1]))
     changed_paths = {args.harness_home / path for path in updates}
     for name in APPLICATION_FILES:
         app_path = args.application_home / name
         if app_path.resolve() in changed_paths:
             raise ValueError(f"active application configuration points to a changed package file: {name}")
+    if current:
+        return updates
     for entry in state["entries"]:
         target = Path(entry["path"])
         relative = (target.relative_to(args.harness_home)
@@ -135,7 +161,7 @@ def checks(args, manifest, old, new):
     return updates
 
 
-def replace(path, payload):
+def replace(path, payload, *, exclusive=False):
     data, mode = payload
     path.parent.mkdir(parents=True, exist_ok=True)
     stream = NamedTemporaryFile(dir=path.parent, delete=False)
@@ -146,7 +172,10 @@ def replace(path, payload):
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())
-        temporary.replace(path)
+        if exclusive:
+            os.link(temporary, path)
+        else:
+            temporary.replace(path)
     finally:
         stream.close()
         temporary.unlink(missing_ok=True)
@@ -173,8 +202,14 @@ def apply(args, updates, new):
             dest = args.harness_home / path
             directories.extend(parent for parent in dest.parents if not parent.exists())
             written.append(path)
-            replace(dest, after)
-        if any(regular(args.harness_home, path)[0] != pair[0] for path, pair in new.items()):
+            try:
+                replace(dest, after, exclusive=before is None)
+            except FileExistsError:
+                if before is None:
+                    written.pop()
+                raise
+        expected = {**new, **{path: after for path, (_, after) in updates.items()}}
+        if any(regular(args.harness_home, path)[0] != pair[0] for path, pair in expected.items()):
             raise ValueError("installed package readback failed")
     except BaseException as original:
         for path in reversed(written):
@@ -201,6 +236,7 @@ def main(argv=None):
         parser.add_argument("--" + name, type=lambda path: Path(path).expanduser().absolute(), required=True)
     parser.add_argument("--application-home", type=lambda path: Path(path).expanduser().absolute())
     parser.add_argument("--manifest-sha256", required=True)
+    parser.add_argument("--restore-missing-vscode-prompts", action="store_true")
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args(argv)
     args.application_home = args.application_home or args.harness_home.parent
@@ -228,7 +264,9 @@ def main(argv=None):
                     status = "CURRENT"
         print(json.dumps({"status": status, "version": manifest["version"],
                           "source_commit": manifest["build_commit"], "package_files": len(new),
-                          "updated_paths": len(set(updates) - {STATE}),
+                          "updated_paths": sum(path in new for path in updates),
+                          "restored_vscode_prompts": sum(path.parent == VSCODE_PROMPTS
+                                                         and path not in new for path in updates),
                           "backup": str(args.backup) if status == "INSTALLED" else None}))
         return 0
     except (OSError, ValueError, TypeError, KeyError, sqlite3.Error, KeyboardInterrupt) as error:
