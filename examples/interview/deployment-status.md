@@ -1,6 +1,6 @@
 # Current deployment pointer
 
-17 November: Mac Studio3.0.0 passed cold State/memory/vault checks, byte-bound rollback, doctor and the fresh five-step installed demo. ReleaseCI and MacBook readback remain separate. See [current readiness](../../docs/v3/readiness-20261117.md). The printable PDF remains the clearly dated13November architecture snapshot; SVG/HTML and recorded rehearsal are updated.
+Download the current package from the [latest stable release](https://github.com/oscar-chw/agent-harness/releases/latest). The [17 November v3.0.0 baseline](../../docs/v3/readiness-20261117.md) records Mac Studio installation, cold memory and vault readback, rollback, doctor and the five-step demo. A new device needs its own checks. The PDF is the dated 13 November diagram.
 
 # Historical deployment evidence snapshot
 

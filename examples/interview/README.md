@@ -5,8 +5,9 @@ observed results and expandable technical answers. It works offline.
 
 ## Run the actual demo
 
-Requirements are Python 3.9+, Git and an existing agent-harness 3.0.0rc2 installation with
-`lib/agent_harness`. No model account, internet connection or paid usage is used.
+Requirements are Python 3.9+, Git and an existing v3 installation with
+`lib/agent_harness`. Get the package from the [latest stable release](https://github.com/oscar-chw/agent-harness/releases/latest).
+The demo runs offline and uses zero model calls.
 From this folder run the following command, choosing a new output folder each time.
 
 ```sh
@@ -64,5 +65,5 @@ historical native-model study with its own qualification scope.
 - demo.py and check_pack.py for the runnable demonstration and receipt checks.
 - recorded-demo-proof.json and recorded-commands.json for the observed rehearsal.
 
-The published release remains3.0.0rc2. Mac Studio and the research account passed
-installed readback. MacBook rollout and broader self-learning efficacy remain open.
+The recorded deployment notes describe dated checks. A fresh rehearsal writes its
+actual runtime version and installed engine hash to `demo-proof.json`. [Deployment status](deployment-status.md)

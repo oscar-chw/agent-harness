@@ -2,7 +2,7 @@
 
 One local workspace for connected coding clients, with shared task state, sourced memory and evaluated improvements.
 
-Current integration is **3.0.0**, installed and cold-verified on Mac Studio. The [17 November readiness record](readiness-20261117.md) distinguishes source gates, current rollout and measured limits. The earlier research-account rc2 readback is historical; MacBook/new-device readback and broader efficacy remain open. Read the [four walkthroughs](../walkthrough/README.md) for the current mechanism and the [qualification report](qualification-20261113.md) for measured results. The older two-task smoke below retains its historical scope.
+Use the [latest stable release](https://github.com/oscar-chw/agent-harness/releases/latest) for installable artifacts. The [17 November readiness record](readiness-20261117.md) describes the v3.0.0 baseline and its Mac Studio checks. The [four walkthroughs](../walkthrough/README.md) explain the mechanisms, and the [qualification report](qualification-20261113.md) gives dated benchmark results. Each device needs its own installed readback. Automatic delivery also depends on the connected client's configuration and hook trust.
 
 ## Four directions
 
