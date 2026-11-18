@@ -5,8 +5,10 @@ memory corpus, never touch the frozen H1 snapshot, never touch the network,
 and never call a model. The certification tests build a real KB (SQLite FTS5)
 index over the tmp corpus — the index is the seam certification must interrogate.
 """
+from concurrent.futures import ThreadPoolExecutor
 import json
 from pathlib import Path
+from threading import Barrier, BrokenBarrierError, local
 
 import pytest
 
@@ -291,6 +293,35 @@ def test_relearn_restore_is_byte_identical(tmp_path):
     assert states[TARGET] == 'relearned'
 
 
+@pytest.mark.parametrize("problem", ["changed_index", "missing_escrow", "different_binding"])
+def test_restore_preflight_keeps_withdrawn_page_out_on_invalid_index(tmp_path, problem):
+    root = make_corpus(tmp_path / "corpus")
+    report, escrow = do_unlearn(root, tmp_path)
+    tomb = report["tombstone_record"]
+    index = root / "memory/MEMORY.md"
+    redacted = escrow / (tomb["page_sha256"] + ".redactions.json")
+    if problem == "changed_index":
+        index.write_bytes(index.read_bytes() + b"\n- An unrelated new entry.\n")
+    elif problem == "missing_escrow":
+        redacted.unlink()
+    else:
+        original = redacted.read_bytes()
+        data = json.loads(original)
+        data[0]["after_sha256"] = "0" * 64
+        redacted.write_text(json.dumps(data))
+    index_before = index.read_bytes()
+    ledger = mf.ledger_path(root)
+    ledger_before = ledger.read_bytes()
+
+    with pytest.raises(ValueError, match="redaction"):
+        mf.relearn(root, TARGET, authority="test-owner", reason="restore",
+                   escrow_dir=escrow, mode="restore", apply=True)
+
+    assert not (root / TARGET).exists()
+    assert index.read_bytes() == index_before
+    assert ledger.read_bytes() == ledger_before
+
+
 def test_relearn_supersede_writes_new_page_keeps_escrow_sealed(tmp_path):
     src = make_corpus(tmp_path / 'corpus')
     report, escrow = do_unlearn(src, tmp_path)
@@ -326,6 +357,65 @@ def test_relearn_refusals(tmp_path):
 
 
 # ---------------------------------------------------------------- the ledger
+
+@pytest.mark.parametrize("duplicate", [False, True])
+def test_concurrent_refusal_receipts_preserve_the_existing_chain(tmp_path, monkeypatch, duplicate):
+    root = make_corpus(tmp_path / "corpus")
+    receipt, _ = do_unlearn(root, tmp_path)
+    tombstone = receipt["tombstone_record"]
+    ledger = mf.ledger_path(root)
+    prefix = ledger.read_bytes()
+    load = mf.load_ledger
+    readers, barrier = local(), Barrier(2)
+
+    def overlap(path):
+        result = load(path)
+        readers.calls = getattr(readers, "calls", 0) + 1
+        if readers.calls <= 2:
+            # Overlap both the initial lookup and any subsequent tail read.
+            # A serialized writer commits after this bounded wait.
+            try:
+                barrier.wait(timeout=.75)
+            except BrokenBarrierError:
+                pass
+        return result
+
+    def refuse(sha):
+        return mf.append_refusal(root, page=TARGET, candidate_sha256=sha,
+                                 tombstone_record_hash=tombstone["record_hash"],
+                                 legs=["L1_exact"], path="mem_add", degraded=False,
+                                 authority="fixture")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(mf, "load_ledger", overlap)
+        with ThreadPoolExecutor(max_workers=2) as workers:
+            results = list(workers.map(refuse, ("a" * 64, ("a" if duplicate else "b") * 64)))
+    rows = mf.load_ledger(root)
+    assert mf.verify_ledger(rows) == []
+    assert ledger.read_bytes().startswith(prefix)
+    assert len(rows) == (2 if duplicate else 3)
+    assert len({row["record_hash"] for row in results}) == (1 if duplicate else 2)
+
+
+@pytest.mark.parametrize("operation", ["unlearn", "relearn"])
+def test_corpus_change_refuses_corrupt_ledger_before_touching_pages(tmp_path, operation):
+    root = make_corpus(tmp_path / "corpus")
+    _, escrow = do_unlearn(root, tmp_path)
+    ledger = mf.ledger_path(root)
+    record = mf.load_ledger(root)[0]
+    record["reason"] = "written without a valid chain hash"
+    ledger.write_text(json.dumps(record) + "\n")
+    original = ledger.read_bytes()
+    pages_before = {p: p.read_bytes() for p in (root / "memory").glob("*.md")}
+
+    with pytest.raises(ValueError, match="ledger integrity"):
+        command = mf.unlearn if operation == "unlearn" else mf.relearn
+        name = "memory/other-page.md" if operation == "unlearn" else TARGET
+        command(root, name, authority="fixture", reason="preflight",
+                escrow_dir=escrow, apply=True)
+    assert ledger.read_bytes() == original
+    assert {p: p.read_bytes() for p in (root / "memory").glob("*.md")} == pages_before
+
 
 def test_ledger_append_only_edit_of_earlier_record_is_caught(tmp_path):
     src = make_corpus(tmp_path / 'corpus')
