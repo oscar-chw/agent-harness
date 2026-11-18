@@ -190,7 +190,8 @@ def prune_candidates(home, limit):
         recover_retention(home)
 
 
-def take(home, *, since=None, max_items=10, max_output_bytes=2048):
+def take(home, *, since=None, max_items=10, max_output_bytes=2048, emit=None):
+    """Return the bounded result, flushing it through emit before committing if supplied."""
     if (type(max_items) is not int or not 1 <= max_items <= 20
             or type(max_output_bytes) is not int or not 120 <= max_output_bytes <= 4096
             or (since is not None and (type(since) is not int or since < 0))):
@@ -198,10 +199,10 @@ def take(home, *, since=None, max_items=10, max_output_bytes=2048):
     home = Path(home)
     with _store_lock(home, timeout=10):
         _recover_capture(home)
-        return _take_locked(home, since, max_items, max_output_bytes)
+        return _take_locked(home, since, max_items, max_output_bytes, emit)
 
 
-def _take_locked(home, since, max_items, max_output_bytes):
+def _take_locked(home, since, max_items, max_output_bytes, emit):
     source = home / STORE
     raw = _source_bytes(source)
     rows = _rows(raw)
@@ -244,8 +245,7 @@ def _take_locked(home, since, max_items, max_output_bytes):
         if not changed and not retired:
             if _size(result) > max_output_bytes:
                 raise ValueError("budget: even an empty result exceeds the output cap")
-            con.commit()
-            return result
+            return _deliver(con, result, emit)
         receipt = {"source_sha256": _sha(raw), "previous_cursor": cursor,
                    "cursor": cursor + 1, "selected_ids": [], "at": int(time.time())}
         if retired:
@@ -282,9 +282,16 @@ def _take_locked(home, since, max_items, max_output_bytes):
         con.execute("INSERT INTO receipts(body) VALUES (?)", (_json(receipt),))
         con.execute("DELETE FROM receipts WHERE seq NOT IN (SELECT seq FROM receipts ORDER BY seq DESC LIMIT ?)",
                     (MAX_AUDIT,))
-        con.commit()
-        return result
+        return _deliver(con, result, emit)
     except sqlite3.Error:
         raise ValueError("intake storage unavailable") from None
     finally:
         con.close()
+
+
+def _deliver(con, result, emit):
+    # With a CLI writer, a failed flush must leave the old cursor eligible.
+    if emit is not None:
+        emit(_json(result))
+    con.commit()
+    return result

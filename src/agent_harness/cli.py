@@ -1060,14 +1060,13 @@ def cmd_improve(args) -> int:
             return 1
         from .weekly_intake import take
         try:
-            result = take(hh, since=args.since, max_items=args.max_items,
-                          max_output_bytes=args.max_output_bytes)
+            take(hh, since=args.since, max_items=args.max_items,
+                 max_output_bytes=args.max_output_bytes, emit=_out)
+        except BrokenPipeError:
+            return 1
         except (OSError, ValueError) as error:
             _out("intake: HOLD — " + str(error))
             return 1
-        # One compact wire format regardless of --json: otherwise the human
-        # rendering could exceed the budget after the cursor had advanced.
-        _out(json.dumps(result, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
         return 0
     if args.draft_procedure or args.correct_procedure or args.rollback or (args.apply and args.apply.startswith("pr-")):
         from . import procedures
