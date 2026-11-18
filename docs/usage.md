@@ -12,6 +12,7 @@ Python 3.9 or newer, standard library only, under 20 MB. `harness` below is `pyt
 | `harness status` / `harness doctor` | what is installed, and is it healthy |
 | `harness explain [--client codex] [--session F] [--json]` | what a session actually used: rules installed / loaded, skills offered / invoked, harness tool calls, checks with exit codes, workers, compactions, tokens; anything the client does not record is NOT_OBSERVABLE |
 | `harness update` | refresh the rules and skills; memory and lessons are kept |
+| `scripts/update-payload.py` | preview or apply a verified package update while preserving native app settings |
 | `harness uninstall` | restore every changed file from its backup and remove what was added |
 | `harness status --matrix` | which tool gets which feature, and why not where it does not |
 | `harness review --run` / `--gate FILE` | review the diff in a fresh context (the `review` tier); the gate fails on any must-fix, on a missing or invalid review, and when the code changed since it was reviewed (the file records the diff it read); an empty diff is refused (after a commit, `--run --base REF`) |
@@ -31,6 +32,28 @@ A real install (without `--dry-run`) **replaces `~/.claude/CLAUDE.md`** and the 
 with the harness rules, and merges into their settings. Every file is backed up first, and `harness uninstall`
 restores them all. Memory and lessons stay in `~/.agent-harness` after an uninstall; delete that folder to
 remove them too. Which tool gets what: [how-it-works.md](how-it-works.md#supported-tools).
+
+## Update package files while preserving app settings
+
+Use `scripts/update-payload.py` when Codex, VS Code or Claude already have
+site-managed settings. Provide unpacked, trusted snapshots of the earlier
+release and the target. Verify the target manifest SHA-256 against the release
+asset digest from GitHub before passing it to the script.
+
+```sh
+python3 scripts/update-payload.py \
+  --baseline "$OLD_SOURCE" --source "$NEW_SOURCE" \
+  --manifest "$RELEASE_MANIFEST" --manifest-sha256 "$MANIFEST_SHA256" \
+  --harness-home "$HOME/.agent-harness" --backup "$ROLLBACK_DIR"
+```
+
+The default is a preview. Once it reports `READY`, add `--apply` to use the
+same inputs. Choose a new rollback directory outside the installation.
+The script accepts package additions and replacements on a matching
+baseline. It refuses local edits, linked files, package removals and changes
+to packaged guards and hooks. Existing app settings and user data stay in
+place. Keep the rollback directory through `harness doctor` and a fresh
+connection from each app.
 
 ## What the demo shows
 
