@@ -56,6 +56,102 @@ def test_daily_diff_retains_baseline_on_error_and_never_promotes(tmp_path):
     assert changed['snapshot']!=first['snapshot']
     assert not (hh/'routing.toml').exists() and not (hh/'skills').exists()
 
+def test_snapshot_storage_keeps_one_hot_body_for_unchanged_runs(tmp_path):
+    import sqlite3
+    from agent_harness import discovery_cycle as d
+
+    hh = tmp_path / 'h'
+    body = b'official reference ' * 7000
+    for day in range(6):
+        reply = d.run(hh, tmp_path, now=day * d.DAY, fetch=lambda _url: body)
+        assert reply['status'] == ('PROPOSED' if not day else 'UNCHANGED')
+    assert len({r['snapshot'] for r in d.history(hh)}) == 1
+    path = hh / 'discovery/audit.sqlite'
+    with sqlite3.connect(path) as db:
+        # The compatibility view still exposes every original source receipt.
+        rows = db.execute('SELECT snapshot,payload FROM runs ORDER BY id').fetchall()
+    assert len(rows) == 6 and len(set(rows)) == 1
+    assert json.loads(rows[0][1])['sources'][0]['text'] == body.decode()
+    assert path.stat().st_size < 400_000  # One 267 kB payload plus ledger metadata.
+
+
+def test_snapshot_storage_preserves_legacy_inline_receipts_on_migration(tmp_path):
+    import hashlib
+    import sqlite3
+    from agent_harness import discovery_cycle as d
+
+    hh = tmp_path / 'h'
+    path = hh / 'discovery/audit.sqlite'
+    path.parent.mkdir(parents=True)
+    body = 'old source forensic example'
+    payload = json.dumps({'registry': d.registry(tmp_path), 'sources': [
+        {'url': url, 'sha256': hashlib.sha256(body.encode()).hexdigest(), 'text': body}
+        for url in d.SOURCES]}, sort_keys=True, ensure_ascii=False)
+    digest = hashlib.sha256(payload.encode()).hexdigest()
+    prior = (1, 0, 'PROPOSED', digest, payload)
+    with sqlite3.connect(path) as db:
+        db.execute('CREATE TABLE runs (id INTEGER PRIMARY KEY, epoch REAL, status TEXT, '
+                   'snapshot TEXT, payload TEXT)')
+        db.execute('INSERT INTO runs VALUES (?,?,?,?,?)', prior)
+
+    reply = d.run(hh, tmp_path, now=d.DAY, fetch=lambda _url: body.encode())
+    assert reply['status'] == 'UNCHANGED' and reply['snapshot'] == digest
+    with sqlite3.connect(path) as db:
+        rows = db.execute('SELECT id,epoch,status,snapshot,payload FROM runs ORDER BY id').fetchall()
+        stored = db.execute('SELECT digest,payload FROM discovery_snapshots').fetchall()
+    assert rows == [prior, (2, d.DAY, 'UNCHANGED', digest, payload)]
+    assert stored == [(digest, payload)]
+
+
+def test_snapshot_storage_migration_failure_rolls_back_original_schema(tmp_path, monkeypatch):
+    import hashlib
+    import sqlite3
+    from agent_harness import discovery_cycle as d
+
+    hh = tmp_path / 'h'
+    path = hh / 'discovery/audit.sqlite'
+    path.parent.mkdir(parents=True)
+    body = '{"historical":"source receipt"}'
+    row = (1, 0.0, 'PROPOSED', hashlib.sha256(body.encode()).hexdigest(), body)
+    with sqlite3.connect(path) as db:
+        db.execute('CREATE TABLE runs (id INTEGER PRIMARY KEY, epoch REAL, status TEXT, '
+                   'snapshot TEXT, payload TEXT)')
+        db.execute('INSERT INTO runs VALUES (?,?,?,?,?)', row)
+
+    read = d._verified_rows
+    def fail_after_rebuild(db):
+        if db.execute("SELECT type FROM sqlite_master WHERE name='runs'").fetchone()[0] == 'view':
+            raise ValueError('fixture interrupted after layout rebuild')
+        return read(db)
+    monkeypatch.setattr(d, '_verified_rows', fail_after_rebuild)
+    with pytest.raises(ValueError, match='interrupted after layout rebuild'):
+        d.run(hh, tmp_path, now=d.DAY, fetch=lambda _url: pytest.fail('should fail before fetch'))
+    with sqlite3.connect(path) as db:
+        assert db.execute("SELECT type FROM sqlite_master WHERE name='runs'").fetchone() == ('table',)
+        assert db.execute('SELECT * FROM runs').fetchall() == [row]
+        assert db.execute("SELECT name FROM sqlite_master WHERE name='discovery_snapshots'").fetchall() == []
+
+
+@pytest.mark.parametrize('damage', ['missing', 'modified'])
+def test_snapshot_storage_keeps_hot_rows_when_a_bound_body_is_damaged(tmp_path, monkeypatch, damage):
+    import sqlite3
+    from agent_harness import discovery_cycle as d
+
+    monkeypatch.setattr(d, 'MAX_RUNS', 3)
+    hh = tmp_path / 'h'
+    for day in range(3):
+        d.run(hh, tmp_path, now=day * d.DAY, fetch=lambda _url: b'original published source')
+    before = d.history(hh)
+    with sqlite3.connect(hh / 'discovery/audit.sqlite') as db:
+        if damage == 'missing':
+            db.execute('DELETE FROM discovery_snapshots')
+        else:
+            db.execute("UPDATE discovery_snapshots SET payload='{}'")
+    with pytest.raises(ValueError, match='snapshot missing or changed'):
+        d.run(hh, tmp_path, now=3*d.DAY, fetch=lambda _url: pytest.fail('damaged receipt precedes fetch'))
+    assert d.history(hh) == before and d.archive_history(hh) == []
+
+
 @pytest.mark.parametrize('value',[b'',b'x'*262145],ids=['empty','oversized'])
 def test_empty_or_oversized_sources_do_not_create_a_candidate(tmp_path,value):
     from agent_harness import discovery_cycle as d

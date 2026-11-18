@@ -41,9 +41,20 @@ Unavailable pairs hold; they are not silently replaced with unrelated models.
   is an **inactive schedule specification**, not a registered OS timer. No daily
   update is claimed enabled.
 
-A changed source creates `PROPOSED`, never an install or a promoted skill. An
-unchanged snapshot avoids duplicate synthesis; a fetch failure keeps the old
-baseline and is visible. Concurrent invocations serialize. At 31 hot audit rows, exact older rows rotate into compressed archives with hash/readback validation before the hot copies are removed. The latest attempt and successful baseline stay hot. A 32 MiB archive cap and 1 MiB encoded-payload cap remain; capacity exhaustion is a visible RETENTION_HOLD before another fetch, never silent deletion or unlimited growth. No model calls occur in the discovery cycle.
+A changed source creates `PROPOSED`. An unchanged snapshot records a new
+observation and reuses the same source body. A fetch failure keeps the last
+successful baseline. Concurrent invocations serialize.
+
+On the first due run with the new runtime, the ledger verifies and converts
+legacy records in one SQLite transaction. Existing readers and the pinned
+scheduler still receive complete observation rows through the same SQL
+interface. Previously allocated database pages can be reused.
+
+At 31 hot observations, older rows move into self-contained compressed
+archives. The runtime verifies the source bodies and archive before removing
+hot copies. The latest attempt and successful baseline stay available.
+The 32 MiB archive cap and 1 MiB encoded-payload cap still apply. Exhausted
+archive capacity reports `RETENTION_HOLD` before the next fetch.
 
 ### Native schedule controls
 

@@ -120,9 +120,52 @@ def history(hh: Path) -> list:
         db.close()
 
 
+def _verified_rows(db):
+    rows = db.execute('SELECT id,epoch,status,snapshot,payload FROM runs ORDER BY id').fetchall()
+    for _, _, status, fingerprint, payload in rows:
+        if fingerprint is not None or status in ('PROPOSED', 'UNCHANGED'):
+            if not isinstance(payload, str) or hashlib.sha256(payload.encode()).hexdigest() != fingerprint:
+                raise ValueError('discovery snapshot missing or changed; hot records retained')
+    return rows
+
+
+def _compact_layout(db):
+    if db.execute("SELECT type FROM sqlite_master WHERE name='runs'").fetchone()[0] == 'view':
+        return
+    rows = _verified_rows(db)
+    # Rebuild inside the caller's write transaction. The old SQL interface
+    # still returns complete rows so earlier runtimes can rotate and archive.
+    db.execute('DROP TABLE runs')
+    db.execute('CREATE TABLE discovery_snapshots (digest TEXT PRIMARY KEY, payload TEXT NOT NULL)')
+    db.execute('CREATE TABLE discovery_observations (id INTEGER PRIMARY KEY, epoch REAL NOT NULL, '
+               'status TEXT NOT NULL, snapshot TEXT, error_payload TEXT)')
+    db.execute('CREATE INDEX discovery_observations_snapshot ON discovery_observations(snapshot)')
+    db.execute("""CREATE VIEW runs AS
+        SELECT o.id,o.epoch,o.status,o.snapshot,COALESCE(s.payload,o.error_payload) AS payload
+        FROM discovery_observations o LEFT JOIN discovery_snapshots s ON o.snapshot=s.digest""")
+    db.execute("""CREATE TRIGGER record_discovery_run INSTEAD OF INSERT ON runs BEGIN
+        INSERT OR IGNORE INTO discovery_snapshots(digest,payload)
+            SELECT NEW.snapshot,NEW.payload WHERE NEW.snapshot IS NOT NULL;
+        SELECT RAISE(ABORT,'discovery snapshot content changed')
+            WHERE NEW.snapshot IS NOT NULL
+                AND NEW.payload IS NOT (SELECT payload FROM discovery_snapshots WHERE digest=NEW.snapshot);
+        INSERT INTO discovery_observations(id,epoch,status,snapshot,error_payload)
+            VALUES(NEW.id,NEW.epoch,NEW.status,NEW.snapshot,
+                   CASE WHEN NEW.snapshot IS NULL THEN NEW.payload END);
+    END""")
+    db.execute("""CREATE TRIGGER archive_discovery_run INSTEAD OF DELETE ON runs BEGIN
+        DELETE FROM discovery_observations WHERE id=OLD.id;
+        DELETE FROM discovery_snapshots WHERE digest=OLD.snapshot AND NOT EXISTS
+            (SELECT 1 FROM discovery_observations WHERE snapshot=OLD.snapshot);
+    END""")
+    db.executemany('INSERT INTO runs(id,epoch,status,snapshot,payload) VALUES(?,?,?,?,?)', rows)
+    if _verified_rows(db) != rows:
+        raise ValueError('discovery compaction changed existing observations')
+
+
 def _rotate(db, root):
     """Archive exact rows before removing hot copies; retain cadence and last good baseline."""
-    rows = db.execute('SELECT id,epoch,status,snapshot,payload FROM runs ORDER BY id').fetchall()
+    rows = _verified_rows(db)
     keep = {rows[-1][0]}
     successful = [row[0] for row in rows if row[2] in ('PROPOSED', 'UNCHANGED')]
     if successful:
@@ -195,6 +238,7 @@ def run(hh: Path, home: Path, *, now=None, fetch=fetch_official) -> dict:
         if db.execute('SELECT count(*) FROM runs').fetchone()[0] >= MAX_RUNS:
             if not _rotate(db, root):
                 return {'status': 'RETENTION_HOLD', 'reason': 'Archive capacity reached; retain or export verified archives before renewal'}
+        _compact_layout(db)
         prior = db.execute("SELECT snapshot FROM runs WHERE status IN ('PROPOSED','UNCHANGED') "
                            'ORDER BY id DESC LIMIT 1').fetchone()
         previous = prior[0] if prior else None
