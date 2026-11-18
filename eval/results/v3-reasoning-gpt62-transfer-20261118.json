@@ -1,0 +1,178 @@
+{
+  "schema": "harness.reasoning-current-model-transfer/v1",
+  "status": "PASS_BOUNDED",
+  "promotion": "NOT_GRANTED",
+  "native_model": "gpt-6.2-sol",
+  "native_effort": "high",
+  "native_client_version": "codex-cli 0.169.0-alpha.11.1",
+  "comparison": "Compact decision guide versus the existing full guide on the pre-frozen 24 authored closed-world cases",
+  "matched_case_count": 24,
+  "paired_batches": [
+    {
+      "batch": 1,
+      "case_ids": [
+        "allocation",
+        "negative_test",
+        "retry_exact",
+        "equivalence"
+      ],
+      "baseline": {
+        "tokens": 26237,
+        "correct": 4,
+        "native_receipt_sha256": "980001acdf6fa77ddbe2bbfcde0a55be5695c028169232d16ad4b5b982b0679a",
+        "request_sha256": "8cc53e0eaf76adb00ae58cbefcf41e0d6ebfaad4e11e181b3da7554d54239056"
+      },
+      "candidate": {
+        "tokens": 25277,
+        "correct": 4,
+        "native_receipt_sha256": "c3aff641c0b48c53f8eba582c666fdce8ad73c479c224e86c8bad2e6e004ddaf",
+        "request_sha256": "80d26a89ebc83627aec5815cf85565fed03a85b2fe3df52277905c40a79aae68"
+      }
+    },
+    {
+      "batch": 2,
+      "case_ids": [
+        "randomized",
+        "screen_action",
+        "retry_after",
+        "holdout_reuse"
+      ],
+      "candidate": {
+        "tokens": 25268,
+        "correct": 4,
+        "native_receipt_sha256": "b390d8ae93b20fe974688d134c9519106d1ad27b8483ee0fd3a74585af51a11b",
+        "request_sha256": "fa00100b5590b4c1dcce2e0bd3aa24bd0455782bde78ebced6ee2625948304f0"
+      },
+      "baseline": {
+        "tokens": 26185,
+        "correct": 4,
+        "native_receipt_sha256": "d23525096e4a0655368f0303068d10158a1c1ee684faa79a86cfd74836aa94e9",
+        "request_sha256": "7a07308fe8430b1e7a3156a57fd931eaf8f2a082c2c8108df3fb055d00f15dec"
+      }
+    },
+    {
+      "batch": 3,
+      "case_ids": [
+        "reversed_time",
+        "join_fanout",
+        "lost_idempotent",
+        "paired_research"
+      ],
+      "baseline": {
+        "tokens": 26303,
+        "correct": 4,
+        "native_receipt_sha256": "79a57bec695fa0ffa67a07a21d65c936eb26df440a90038c7b76c29cf1254b5d",
+        "request_sha256": "90ac0b8829a4c44fdd36546fbedbf53076beff72500ebdbb7faa144d85511490"
+      },
+      "candidate": {
+        "tokens": 25403,
+        "correct": 4,
+        "native_receipt_sha256": "88f8abc0d4dc7c420a23e3117310ded0b67616b7d32f1f49c890b0fed5d8ad2b",
+        "request_sha256": "af41ee74b9a3d690b32fb082a5a46b721ed4f43f91ae6b3044c3413045fcaf2a"
+      }
+    },
+    {
+      "batch": 4,
+      "case_ids": [
+        "shared_cause",
+        "left_count",
+        "lost_ambiguous",
+        "direct_arithmetic"
+      ],
+      "candidate": {
+        "tokens": 25261,
+        "correct": 4,
+        "native_receipt_sha256": "ae93f21081929e937f393b28cf5f2a5b65fe328cc3552fba6c9f6d391f999272",
+        "request_sha256": "bf79e19284b128ba25afe230d374f7f95b10e4eb0c8ff76cd1fe82517ecb93eb"
+      },
+      "baseline": {
+        "tokens": 26138,
+        "correct": 4,
+        "native_receipt_sha256": "72aa9722b342f57e11e381ad85b4cbc3b1b6a7f3e68c0a05f40e9f3c3f6412d5",
+        "request_sha256": "a39e55250547c99c087e1bda88d05c55c466c78182ceafbde81aed4fd6fd7295"
+      }
+    },
+    {
+      "batch": 5,
+      "case_ids": [
+        "screen_rare",
+        "join_average",
+        "rejected_before_effect",
+        "teach_distribution"
+      ],
+      "baseline": {
+        "tokens": 26196,
+        "correct": 4,
+        "native_receipt_sha256": "34dbac794b44ac1eea25267d077db86125fb740577fe0293a0d27cd9397e6759",
+        "request_sha256": "1f5ee97cab2ace4bff09f2fd445eae54e78ace8e223f1177ac128afe640ada6b"
+      },
+      "candidate": {
+        "tokens": 25319,
+        "correct": 4,
+        "native_receipt_sha256": "9fc211eb0b718f97be34553fb28da35ae65d2b61739696293f1f3989d1f44c69",
+        "request_sha256": "90f36f8d85ca3b4f43c11e5e252f1498a832d7496383db0ce4064d86564dd5f0"
+      }
+    },
+    {
+      "batch": 6,
+      "case_ids": [
+        "alarm_common",
+        "retry_deadline",
+        "multiple_tests",
+        "direct_equation"
+      ],
+      "candidate": {
+        "tokens": 25239,
+        "correct": 4,
+        "native_receipt_sha256": "0b085799390bb3cc8e1fbf7c668a69638ff0f704b8b0e96cfd77250b821353c0",
+        "request_sha256": "a1cb35d3acd6b2a377c7c3d7c8abdd1a1975043c024a9e2e2c8ae0083129702a"
+      },
+      "baseline": {
+        "tokens": 26163,
+        "correct": 4,
+        "native_receipt_sha256": "153738e19b8a4287e77b9e371a47e64d0421071cd121dc23f1a699491dc181e1",
+        "request_sha256": "7d6eaa2c4993fbd06e41c4f60bb3197414c34b7c0041212b6a94b9f82396602d"
+      }
+    }
+  ],
+  "quality_correct": {
+    "baseline": 24,
+    "candidate": 24
+  },
+  "tokens": {
+    "baseline": 157222,
+    "candidate": 151767
+  },
+  "tokens_saved": 5455,
+  "percent_fewer_tokens": 3.4696,
+  "native_spend": {
+    "calls": 12,
+    "upstream_responses": 12,
+    "tokens": 308989,
+    "approved_calls": 12,
+    "approved_tokens": 350000,
+    "unknown_attempts": [],
+    "preparation_native_calls": 0
+  },
+  "provenance": {
+    "public_reference_commit": "542a3084b676ea874b3f3c3285064caa951a41ba",
+    "frozen_source_bindings": 97,
+    "public_byte_matches": 96,
+    "version_metadata_only_difference": {
+      "path": "src/agent_harness/__init__.py",
+      "frozen_sha256": "75f7d6bd1d79c6084e06a6d9bc038e4956b4208f681c4524b0ce89ed942aebaa",
+      "public_sha256": "dde2b3c51d726bfcda2320475616a036fe1d8e4e3e3090579c19fa9db194daa7"
+    },
+    "public_prepared_actor_bindings_matched": 12,
+    "relative_source_index_sha256": "00f8b235aff7cbf8513811c689b815eec3163bd14ad375ccf9764914947cbacf",
+    "freeze_sha256": "216200219f0e80dbd9bb64ff2eb74510c4161319bd9cb10f473a2782fe3c51aa",
+    "journal_head_sha256": "f4d9a4479d5fc41db4f5085e9144052f10a38004ec4d19c0a4f6c9fbdc1b9d39",
+    "independent_root_replay": "MATCHED_EXECUTION"
+  },
+  "limits": [
+    "Authored case transfer to the current configured client and effort",
+    "Matched fresh-turn provider inference, including cached input once",
+    "Development and selection costs, whole-project savings and generalized learning were not measured",
+    "Procedure and knowledge promotion was not granted"
+  ]
+}
