@@ -70,6 +70,13 @@ PURE_FUNCTION_HASHES = {
     'test_h2_semantic_rerank.py': '9f2e80d96dc849175259071967f7ec196d761780188f378b68d90f2796cb8003',
     'test_h3_hybrid.py': '77669b94e8a604617266c6fc7752ca69817b3227072e52b0646ef709a61fbe55',
 }
+# The public plugin fixture uses the current requirement that the decision
+# binds its exact qualification. All historical test bodies remain pinned.
+PUBLIC_HELPER_REVISIONS = {
+    'test_plugin_loop.py': {
+        'LoopFixture.__init__': 'c4197ff4eb659ca506097209ce7541f9eeb04b6b3856717e7576649fc793a5d7',
+    },
+}
 
 
 def _dump(definition):
@@ -156,9 +163,12 @@ def test_public_pure_retained_assertions_match_original_hashes(filename):
     else:
         expected_functions = set(entry['original_functions']) - set(PRIVATE_ONLY[filename])
     assert set(functions) == expected_functions
-    _assert_preserved(functions, {name: entry['original_functions'][name] for name in expected_functions})
+    revisions = PUBLIC_HELPER_REVISIONS.get(filename, {})
+    assert revisions.keys() <= expected_functions - expected_tests
+    expected_hashes = {name: entry['original_functions'][name] for name in expected_functions}
+    _assert_preserved(functions, {**expected_hashes, **revisions})
     assert classes == private_classes
-    assert all(functions[name] == private[name] for name in functions)
+    assert all(functions[name] == private[name] for name in functions if name not in revisions)
 
 
 @pytest.mark.parametrize('filename', PURE_FUNCTION_HASHES)
