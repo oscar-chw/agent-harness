@@ -7,7 +7,7 @@
 What counts as a release: a tag vX.Y.Z of the harness repository (the profile's `update_repo`, else
 HARNESS_UPDATE_REPO, else the project's own repository) whose commit has every GitHub check run completed and
 successful. Never a branch, never a tag whose checks failed or are still running, never a downgrade. The
-update itself is `harness update --source <that tag>`: memory, lessons and the active profile are kept, and
+source is downloaded by the checked commit SHA and handed to `harness update`: memory, lessons and the active profile are kept, and
 every file it replaces is backed up first. Afterwards `harness doctor` must pass, and the result (or the
 reason nothing changed) is recorded in ~/.agent-harness/state/self-update.json. Every network failure means
 "no update", never a half-done one.
@@ -79,12 +79,16 @@ def version_key(v: str) -> Tuple[int, ...]:
     return base + (3, 0, 0, 0)
 
 
-def installed_version(hh: Path) -> str:
+def _package_version(package: Path) -> str:
     try:
-        m = re.search(r'__version__ = "([^"]+)"', (hh / "lib" / "agent_harness" / "__init__.py").read_text())
-        return m.group(1) if m else ""
-    except OSError:
+        match = re.search(r'^__version__ = "([^"]+)"$', (package / "__init__.py").read_text(encoding="utf-8"), re.M)
+        return match.group(1) if match else ""
+    except (OSError, UnicodeError):
         return ""
+
+
+def installed_version(hh: Path) -> str:
+    return _package_version(hh / "lib" / "agent_harness")
 
 
 def newest_release(repo: str, get=_get) -> Optional[dict]:
@@ -156,19 +160,26 @@ def run(hh: Path, home: Path, check_only: bool = False, now: bool = False, get=_
             if not check_only:
                 _record(hh, result="current", version=have, newest=rel["tag"])
             return 0, "self-update: %s is current (newest release %s)" % (have, rel["tag"])
-        ok, why = checks_passed(repo, rel["sha"], get)
+        commit = rel["sha"]
+        if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-f]{40}", commit):
+            if not check_only:
+                _record(hh, result="refused", version=have, newest=rel["tag"], why="invalid commit identity")
+            return 1, "self-update: invalid release commit identity; no update"
+        ok, why = checks_passed(repo, commit, get)
         if not ok:
             if not check_only:
                 _record(hh, result="held", version=have, newest=rel["tag"], why=why)
             return 0, "self-update: %s is out but not taken: %s" % (rel["tag"], why)
         if check_only:
             return 0, "self-update: would update %s -> %s (%s)" % (have, rel["tag"], why)
-        blob = get("https://codeload.github.com/%s/tar.gz/refs/tags/%s" % (repo, rel["tag"]))
+        blob = get("https://codeload.github.com/%s/tar.gz/%s" % (repo, commit))
     except Exception as e:                     # network, API shape, rate limit: no update, never half of one
         return 0, "self-update: no update (%s)" % (str(e)[:200] or type(e).__name__)
     with tempfile.TemporaryDirectory(prefix="harness-update-") as t:
         try:
             src = _extract(blob, Path(t))
+            if _package_version(src / "src" / "agent_harness") != rel["tag"][1:]:
+                raise ValueError("source version differs from the checked release")
         except (ValueError, tarfile.TarError, OSError) as e:
             _record(hh, result="refused", version=have, newest=rel["tag"], why=str(e))
             return 1, "self-update: %s refused: %s" % (rel["tag"], e)
@@ -178,11 +189,16 @@ def run(hh: Path, home: Path, check_only: bool = False, now: bool = False, get=_
         if p.returncode != 0:
             _record(hh, result="failed", version=have, newest=rel["tag"], why=(p.stderr or p.stdout)[-300:])
             return 1, "self-update: harness update to %s failed: %s" % (rel["tag"], (p.stderr or p.stdout)[-300:])
+    installed = installed_version(hh)
+    if installed != rel["tag"][1:]:
+        _record(hh, result="installed-version-mismatch", version=installed, newest=rel["tag"], commit=commit,
+                previous=have)
+        return 1, "self-update: update returned success, but installed version differs from %s" % rel["tag"]
     d = subprocess.run(doctor_cmd or [sys.executable, "-m", "agent_harness.cli", "--home", str(home), "doctor"],
                        capture_output=True, text=True, timeout=300,
                        env=dict(os.environ, PYTHONPATH=str(hh / "lib")))
     _record(hh, result="updated" if d.returncode == 0 else "updated-doctor-failed", version=rel["tag"],
-            previous=have, doctor=d.returncode)
+            previous=have, doctor=d.returncode, commit=commit)
     if d.returncode != 0:
         return 1, "self-update: updated to %s, but harness doctor fails: %s" % (rel["tag"], d.stdout[-300:])
     return 0, "self-update: %s -> %s (%s); harness doctor OK" % (have, rel["tag"], why)
