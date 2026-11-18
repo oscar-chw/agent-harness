@@ -1,6 +1,6 @@
 """harness self-update: keep this machine on the newest released harness, by itself.
 
-    harness self-update            at most once a day: update when a newer release passed its checks
+    harness self-update            one writer per installation, at most once a day
     harness self-update --check    say what it would do, change nothing
     harness self-update --now      ignore the once-a-day limit
 
@@ -14,10 +14,12 @@ reason nothing changed) is recorded in ~/.agent-harness/state/self-update.json. 
 """
 from __future__ import annotations
 
+from contextlib import closing
 import io
 import json
 import os
 import re
+import sqlite3
 import subprocess
 import sys
 import tarfile
@@ -138,6 +140,24 @@ def _extract(blob: bytes, dest: Path) -> Path:
 
 def run(hh: Path, home: Path, check_only: bool = False, now: bool = False, get=_get,
         update_cmd: Optional[List[str]] = None, doctor_cmd: Optional[List[str]] = None) -> Tuple[int, str]:
+    if check_only:
+        return _run(hh, home, check_only, now, get, update_cmd, doctor_cmd)
+
+    state_dir = _state(hh).parent
+    state_dir.mkdir(parents=True, exist_ok=True)
+    with closing(sqlite3.connect(str(state_dir / ".self-update.lock"), timeout=0)) as lock:
+        try:
+            # Hold the write reservation across check, install and readback.
+            # No database changes are made, and process exit releases the lock.
+            lock.execute("BEGIN IMMEDIATE")
+        except sqlite3.OperationalError as exc:
+            if str(exc) == "database is locked":
+                return 0, "self-update: another update is already running"
+            raise
+        return _run(hh, home, check_only, now, get, update_cmd, doctor_cmd)
+
+
+def _run(hh, home, check_only, now, get, update_cmd, doctor_cmd):
     if not now and not check_only:
         try:
             last = json.loads(_state(hh).read_text(encoding="utf-8")).get("epoch", 0)
