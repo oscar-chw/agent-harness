@@ -43,13 +43,15 @@ import argparse
 import hashlib
 import json
 import math
+import posixpath
 import re
 import shutil
 import sys
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Set, Tuple
+from urllib.parse import unquote
 
 SHINGLE = 5
 NEAR_DUP_JACCARD = 0.6          # survey convention; near-dups are review flags, never merges
@@ -92,14 +94,16 @@ def _stem(path: str) -> str:
     return Path(path).stem
 
 
+REVIEWED_DREAM_PREFIX = "Related (reviewed dream): "
+_REVIEWED_LINK = re.compile(re.escape(REVIEWED_DREAM_PREFIX) + r'\[.+\]\(([^()\s]+)\)')
 _LINK_FENCE = re.compile(r'^ {0,3}(`{3,}|~{3,})(.*)$')
 _INLINE_CODE_OR_LINK = re.compile(
     r'(?<!`)(`+)(?!`).*?(?<!`)\1(?!`)|(?<!\\)\[\[([^\[\]]+)\]\]')
 
 
-def _wikilinks(text: str) -> List[str]:
-    """Read page targets from prose, including links with a heading or display label."""
-    links = []
+def _document_links(text: str) -> Tuple[List[str], List[str]]:
+    """Read wiki targets and the relative Markdown links written by dream admission."""
+    links, reviewed = [], []
     fence = ''
     for line in text.splitlines():
         boundary = _LINK_FENCE.match(line)
@@ -113,11 +117,14 @@ def _wikilinks(text: str) -> List[str]:
                 continue
         if fence:
             continue
+        admission = _REVIEWED_LINK.fullmatch(line)
+        if admission:
+            reviewed.append(unquote(admission.group(1)))
         for _, link in _INLINE_CODE_OR_LINK.findall(line):
             target = link.split('|', 1)[0].split('#', 1)[0].strip()
             if target:
                 links.append(target)
-    return links
+    return links, reviewed
 
 
 def _frontmatter_modified(text: str) -> str:
@@ -195,7 +202,7 @@ class Page:
         self.body = _body(self.text)
         self.stem = _stem(rel)
         self.modified = _frontmatter_modified(self.text)
-        self.links = _wikilinks(self.body)
+        self.links, self.reviewed_links = _document_links(self.body)
         self.shingles = _shingles(self.body)
         self.token_set = set(_tokens(self.body))
 
@@ -205,11 +212,11 @@ class Page:
 
 
 def load_pages(root: Path) -> List[Page]:
-    """All *.md under root, sorted by relpath; an archive/ subfolder is output, not input."""
+    """Read live Markdown pages in path order, excluding archives and dream rollback copies."""
     pages = []
     for p in sorted(root.rglob('*.md')):
         rel = p.relative_to(root).as_posix()
-        if rel.split('/', 1)[0] == 'archive':
+        if rel.split('/', 1)[0] in ('archive', '.harness'):
             continue
         pages.append(Page(rel, p.read_bytes()))
     return pages
@@ -220,13 +227,48 @@ def corpus_root_hash(digests: Sequence[str]) -> str:
     return hashlib.sha256(''.join(digests).encode()).hexdigest()
 
 
-def build_graph(pages: Sequence[Page]) -> Counter:
-    """Wikilink in-degree, survey convention: raw [[target]] matched against page stems."""
-    indeg: Counter = Counter()
-    for pg in pages:
-        for link in pg.links:
-            indeg[link] += 1
+def resolved_link_edges(pages: Sequence[Page]):
+    """Yield source and target paths for links that identify one live page."""
+    paths = {page.rel for page in pages}
+    suffixes = defaultdict(list)
+    for path in paths:
+        parts = path.split('/')
+        for index in range(len(parts)):
+            suffixes['/'.join(parts[index:])].append(path)
+    for page in pages:
+        directory = posixpath.dirname(page.rel)
+        for target in page.links:
+            if target.startswith('/'):
+                continue
+            name = target if target.endswith('.md') else target + '.md'
+            if name.startswith(('./', '../')):
+                resolved = posixpath.normpath(posixpath.join(directory, name))
+                if resolved in paths:
+                    yield page.rel, resolved, 'wiki'
+            elif '/' in name and name in paths:
+                yield page.rel, name, 'wiki'
+            elif len(suffixes.get(name, ())) == 1:
+                yield page.rel, suffixes[name][0], 'wiki'
+        for target in page.reviewed_links:
+            if not target.startswith('/'):
+                resolved = posixpath.normpath(posixpath.join(directory, target))
+                if resolved in paths:
+                    yield page.rel, resolved, 'reviewed'
+
+
+def build_graph(pages: Sequence[Page], *, by_path: bool = False) -> Counter:
+    """Count incoming links, with a stem view for callers that report names."""
+    indeg = Counter(target if by_path else _stem(target)
+                    for _, target, _ in resolved_link_edges(pages))
+    if by_path:
+        # An orphan's zero must take precedence over a colliding legacy stem.
+        for page in pages:
+            indeg.setdefault(page.rel, 0)
     return indeg
+
+
+def page_indegree(indeg, path: str) -> int:
+    return indeg.get(path, indeg.get(_stem(path), 0))
 
 
 def _distinctive_df_cap(n_pages: int) -> int:
@@ -269,7 +311,7 @@ def arm_dup_merge(pages: Sequence[Page], indeg: Counter) -> Tuple[List[dict], Li
     for h, group in sorted(by_hash.items()):
         if len(group) < 2:
             continue
-        keeper = sorted(group, key=lambda p: (-indeg.get(p.stem, 0), p.rel))[0]
+        keeper = sorted(group, key=lambda p: (-page_indegree(indeg, p.rel), p.rel))[0]
         losers = [p for p in group if p is not keeper]
         merges.append({'kind': 'dup_merge', 'keeper': keeper.rel,
                        'archive': [p.rel for p in losers], 'sha256': h,
@@ -396,15 +438,15 @@ def arm_decay(pages: Sequence[Page], indeg: Counter, df: Dict[str, int], cap: in
     hand-curated index: never mutated by v0."""
     retention, proposals = [], []
     for pg in pages:
-        d = indeg.get(pg.stem, 0)
+        d = page_indegree(indeg, pg.rel)
         retention.append({'path': pg.rel, 'indegree': d,
                           'class': 'protected' if d >= PROTECTED_INDEGREE
                                    else ('orphan' if d == 0 and pg.stem != 'MEMORY' else 'retained')})
     non_orphans = [pg for pg in pages
-                   if indeg.get(pg.stem, 0) > 0 and pg.stem != 'MEMORY']
+                   if page_indegree(indeg, pg.rel) > 0 and pg.stem != 'MEMORY']
     per_source: Counter = Counter()
     for pg in pages:
-        if pg.stem == 'MEMORY' or indeg.get(pg.stem, 0) != 0:
+        if pg.stem == 'MEMORY' or page_indegree(indeg, pg.rel) != 0:
             continue
         scored = []
         for src in non_orphans:
@@ -417,8 +459,6 @@ def arm_decay(pages: Sequence[Page], indeg: Counter, df: Dict[str, int], cap: in
             if picked >= ORPHAN_LINK_MAX_PER_ORPHAN:
                 break
             if per_source[src.rel] >= ORPHAN_LINK_MAX_PER_SOURCE:
-                continue
-            if pg.stem in src.links:
                 continue
             per_source[src.rel] += 1
             picked += 1
@@ -467,7 +507,7 @@ def consolidate(src: Path, dst: Optional[Path] = None, freeze: Optional[Path] = 
             raise ValueError('--dst must differ from --src; the source corpus is read-only')
     pages = load_pages(src)
     binding = _verify_freeze(pages, Path(freeze)) if freeze else {'verified': False}
-    indeg = build_graph(pages)
+    indeg = build_graph(pages, by_path=True)
     df = _df(pages)
     cap = _distinctive_df_cap(len(pages))
 

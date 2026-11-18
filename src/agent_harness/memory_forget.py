@@ -174,10 +174,10 @@ def _check_escrow_outside(corpus_root: Path, escrow_dir: Path) -> Path:
 
 
 def dependency_surface(corpus_root: Path, page_rel: str) -> dict:
-    """The erasure surface of a page: inbound wikilinks, MEMORY.md index lines
-    naming it (redaction candidates), plain name mentions (recorded, NOT
-    auto-redacted — fact-level closure on third-party pages is a separate,
-    human-gated decision), and the page's own outgoing wikilinks.
+    """Inventory inbound wiki and reviewed dream links plus MEMORY.md index lines.
+
+    Record plain name mentions and outgoing wikilinks for human review.
+    No source pages containing these references are redacted here.
 
     Index lines are scanned on raw BYTES and stored with their exact terminator
     ('raw'), so redaction and restore are byte-exact round-trips, verified by
@@ -185,14 +185,16 @@ def dependency_surface(corpus_root: Path, page_rel: str) -> dict:
     corpus_root = Path(corpus_root)
     stem = Path(page_rel).stem
     pages = mc.load_pages(corpus_root)
-    inbound, mentions, index_lines = [], [], []
+    inbound, reviewed = set(), set()
+    for source, destination, kind in mc.resolved_link_edges(pages):
+        if destination == page_rel and source != page_rel:
+            (inbound if kind == "wiki" else reviewed).add(source)
+    mentions, index_lines = [], []
     target = None
     for pg in pages:
         if pg.rel == page_rel:
             target = pg
             continue
-        if stem in pg.links:
-            inbound.append(pg.rel)
         if stem in pg.text:
             mentions.append(pg.rel)
     mem = corpus_root / 'memory/MEMORY.md'
@@ -205,6 +207,7 @@ def dependency_surface(corpus_root: Path, page_rel: str) -> dict:
                                     'raw': raw.decode('utf-8', 'replace'),
                                     'line_sha256': _sha256(raw)})
     return {'inbound_wikilinks': sorted(inbound),
+            'inbound_reviewed_links': sorted(reviewed),
             'name_mentions': sorted(mentions),
             'index_lines': index_lines,
             'outgoing_wikilinks': sorted(set(target.links)) if target else []}
@@ -371,6 +374,7 @@ def unlearn(corpus_root: Path, page_rel: str, *, authority: str, reason: str,
                        | {'line_nos': [l['line_no'] for l in r['lines']]}
                        for r in redactions] if redactions else [],
         'inbound_wikilinks': surface['inbound_wikilinks'],
+        'inbound_reviewed_links': surface['inbound_reviewed_links'],
         'name_mentions': surface['name_mentions'],
         'corpus_pages_sha256_before': root_before,
     }

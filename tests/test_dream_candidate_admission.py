@@ -138,6 +138,49 @@ def test_wikilink_target_already_present_is_not_staged(scored_corpus):
     assert before == {p: p.read_bytes() for p in memory.glob("*.md")}
 
 
+def test_exact_link_identity_keeps_distinct_legacy_stem_and_full_filename(tmp_path):
+    from agent_harness import memory_consolidate
+
+    (tmp_path / "page.md").write_text("First page.\n")
+    (tmp_path / "page.md.md").write_text("Different page.\n")
+    (tmp_path / "source.md").write_text("[[page.md]]\n")
+
+    stats = memory_dreaming.hygiene(memory_consolidate.load_pages(tmp_path))
+    assert "page.md" not in stats["orphans"]
+    assert "page.md.md" in stats["orphans"]
+    assert stats["indegree_top10"] == [["page.md", 1]]
+
+
+def test_admitted_markdown_link_exact_link_identity_survives_graph_readback(tmp_path):
+    from agent_harness import memory_consolidate, memory_forget
+
+    vault = tmp_path / "vault"
+    source = "memory/guide/source.md"
+    target = "memory/frontend/Setup notes.md"
+    other = "memory/backend/Setup notes.md"
+    for path in (source, target, other):
+        file = vault / path
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.write_text("Configuration guide.\n")
+    (vault / "memory/draft.md").write_text(
+        "```md\nRelated (reviewed dream): [Setup notes](frontend/Setup%20notes.md)\n```\n")
+    before = memory_dreaming.hygiene(memory_consolidate.load_pages(vault))
+    assert {target, other} <= set(before["orphans"])
+
+    candidate = D.propose(vault, source, target, origin="fixture")
+    proof = gate(tmp_path, candidate["id"])
+    D.admit(vault, candidate["id"], proof, 1)
+
+    after = memory_dreaming.hygiene(memory_consolidate.load_pages(vault))
+    assert target not in after["orphans"] and other in after["orphans"]
+    assert after["pages"] == before["pages"]
+    report = memory_forget.unlearn(vault, target, authority="fixture", reason="inventory",
+                                   escrow_dir=tmp_path / "escrow", apply=False)
+    assert report["tombstone_record"]["inbound_reviewed_links"] == [source]
+    assert report["tombstone_record"]["inbound_wikilinks"] == []
+    assert (vault / target).is_file()
+
+
 def test_successive_batches_and_cold_list_recover_every_proposal(scored_corpus):
     before = {p: p.read_bytes() for p in scored_corpus.rglob("*.md")}
     batches = [D.stage(scored_corpus, limit=1) for _ in range(4)]

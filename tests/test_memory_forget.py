@@ -91,6 +91,21 @@ def test_wikilink_target_in_unlearning_inventory_distinguishes_display_and_examp
     assert (root / 'memory/inbound.md').read_bytes().endswith(b'[[zqx-budget#Limits|session limits]]\n')
 
 
+def test_unlearning_exact_link_identity_isolates_qualified_and_ambiguous_pages(tmp_path):
+    src = tmp_path / 'corpus'
+    first = 'vault/frontend/Setup.md'
+    second = 'vault/backend/Setup.md'
+    write_page(src, first, 'Frontend configuration.\n')
+    write_page(src, second, 'Backend configuration.\n')
+    write_page(src, 'vault/readme.md', '[[frontend/Setup#Options|front end]]\n')
+    write_page(src, 'vault/frontend/reference.md', '[[../backend/Setup.md|back end]]\n')
+    write_page(src, 'vault/ambiguous.md', '[[Setup]]\n')
+    write_page(src, 'vault/external.md', '[[../../../frontend/Setup]]\n')
+
+    assert mf.dependency_surface(src, first)['inbound_wikilinks'] == ['vault/readme.md']
+    assert mf.dependency_surface(src, second)['inbound_wikilinks'] == ['vault/frontend/reference.md']
+
+
 def test_unlearn_dry_run_changes_nothing(tmp_path):
     src = make_corpus(tmp_path / 'corpus')
     before = {p.relative_to(src).as_posix(): p.read_bytes()

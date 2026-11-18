@@ -197,7 +197,7 @@ def score_orphan_link(cand: dict, pages_by_rel: Dict[str, mc.Page], indeg,
     orphan = pages_by_rel.get(cand['orphan'])
     s_lex = min(1.0, sum(_idf(t, df, n_pages) for t in shared) / lex_sat) if shared else 0.0
     s_clust = 1.0 if any(t in stems for t in shared) else 0.0
-    s_auth = min(1.0, indeg.get(mc._stem(cand['source']), 0) / 10.0)
+    s_auth = min(1.0, mc.page_indegree(indeg, cand['source']) / 10.0)
     s_sub = min(1.0, (len(orphan.data) / 2000.0)) if orphan else 0.0
     score = (W_ORPHAN['lex'] * s_lex + W_ORPHAN['clust'] * s_clust
              + W_ORPHAN['auth'] * s_auth + W_ORPHAN['sub'] * s_sub)
@@ -205,7 +205,7 @@ def score_orphan_link(cand: dict, pages_by_rel: Dict[str, mc.Page], indeg,
             'source': cand['source'], 'n_shared': len(shared),
             'signals': {'s_lex': round(s_lex, 4), 's_clust': s_clust,
                         's_auth': round(s_auth, 4), 's_sub': round(s_sub, 4),
-                        'source_indegree': indeg.get(mc._stem(cand['source']), 0),
+                        'source_indegree': mc.page_indegree(indeg, cand['source']),
                         'orphan_bytes': len(orphan.data) if orphan else 0,
                         'cluster_tokens': sorted(t for t in shared if t in stems)},
             'score': round(score, 4)}
@@ -257,7 +257,7 @@ def score_supersedes_edge(cand: dict, pages_by_rel: Dict[str, mc.Page], indeg) -
     da, db = _parse_dt(fs.get('a_date') or ''), _parse_dt(fs.get('b_date') or '')
     gap_days = (da - db).days if (da and db) else 0
     s_date = min(1.0, max(0, gap_days) / 14.0)
-    s_auth = min(1.0, indeg.get(mc._stem(cand['successor']), 0) / 10.0)
+    s_auth = min(1.0, mc.page_indegree(indeg, cand['successor']) / 10.0)
     score = (W_EDGE['scope'] * s_scope + W_EDGE['ctx'] * s_ctx
              + W_EDGE['date'] * s_date + W_EDGE['auth'] * s_auth)
     return {'kind': 'supersedes_edge', 'successor': cand['successor'],
@@ -304,13 +304,13 @@ def gate_supersedes_edge(sc: dict, min_ctx: float = EDGE_MIN_CTX,
 # ---------------------------------------------------------------------------
 
 def hygiene(pages: Sequence[mc.Page]) -> dict:
-    indeg = mc.build_graph(pages)
+    indeg = mc.build_graph(pages, by_path=True)
     hist = {'0': 0, '1-2': 0, '3-4': 0, '>=5': 0}
     orphans = []
     for pg in pages:
         if pg.stem == 'MEMORY':
             continue
-        d = indeg.get(pg.stem, 0)
+        d = mc.page_indegree(indeg, pg.rel)
         if d == 0:
             hist['0'] += 1
             orphans.append(pg.rel)
@@ -322,7 +322,7 @@ def hygiene(pages: Sequence[mc.Page]) -> dict:
             hist['>=5'] += 1
     return {'pages': len(pages), 'orphan_count': len(orphans),
             'orphans': sorted(orphans), 'indegree_hist': hist,
-            'indegree_top10': [[k, v] for k, v in indeg.most_common(10)]}
+            'indegree_top10': [[k, v] for k, v in indeg.most_common(10) if v]}
 
 
 # ---------------------------------------------------------------------------
@@ -371,7 +371,7 @@ def dream(src: Path, dst: Optional[Path] = None, work_dir: Optional[Path] = None
         raise ValueError('dreaming trigger did not fire; Deep phase refuses '
                          '(fail-closed). Reasons: %s' % '; '.join(trigger['reasons']))
 
-    indeg = mc.build_graph(pages)
+    indeg = mc.build_graph(pages, by_path=True)
     df = mc._df(pages)
     n_pages = len(pages)
     stems = _stem_set(pages)
