@@ -225,6 +225,70 @@ class TestSelfUpdate(Base):
         self.assertEqual(record["version"], "0.4.1")
         self.assertEqual(record["commit"], "b" * 40)
 
+    def test_overlapping_self_update_skips_another_writer_but_allows_read_only_check(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from threading import Event
+
+        from agent_harness import selfupdate
+
+        self.install_version("0.4.1")
+        downloading, resume = Event(), Event()
+        fetch = self.fake_get()
+        requests = []
+
+        def slow_fetch(url):
+            if "codeload.github.com" in url:
+                downloading.set()
+                if not resume.wait(5):
+                    raise RuntimeError("fixture updater did not resume")
+            return fetch(url)
+
+        def concurrent_fetch(url):
+            requests.append(url)
+            return fetch(url)
+
+        def separate_process():
+            result = subprocess.run([sys.executable, "-c", """
+import json
+from pathlib import Path
+import sys
+from agent_harness import selfupdate
+
+def unexpected_fetch(url):
+    raise SystemExit("overlapping updater reached the network")
+
+print(json.dumps(selfupdate.run(Path(sys.argv[1]), Path(sys.argv[2]), get=unexpected_fetch)))
+""", str(self.hh()), str(self.home)], capture_output=True, text=True, timeout=5,
+                env=dict(os.environ, PYTHONPATH=str(Path(selfupdate.__file__).resolve().parents[1])))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            return json.loads(result.stdout)
+
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            writer = pool.submit(self.go, get=slow_fetch)
+            try:
+                self.assertTrue(downloading.wait(5), "first updater did not enter its download")
+                for now in (False, True):
+                    result = selfupdate.run(self.hh(), self.home, now=now, get=concurrent_fetch,
+                                            update_cmd=["true"], doctor_cmd=["true"])
+                    self.assertEqual(result, (0, "self-update: another update is already running"))
+                self.assertEqual(requests, [])
+                self.assertEqual(separate_process(), [0, "self-update: another update is already running"])
+                self.assertFalse((self.hh() / "state/self-update.json").exists())
+                before = sorted(self.hh().rglob("*"))
+                rc, message = selfupdate.run(self.hh(), self.home, check_only=True, get=fetch)
+                self.assertEqual(rc, 0, message)
+                self.assertIn("would update", message)
+                self.assertEqual(sorted(self.hh().rglob("*")), before)
+            finally:
+                resume.set()
+            rc, message, _ = writer.result(timeout=5)
+            self.assertEqual(rc, 0, message)
+            self.assertIn("harness doctor OK", message)
+        self.assertEqual(selfupdate.installed_version(self.hh()), "0.4.2")
+        after = json.loads((self.hh() / "state/self-update.json").read_text())
+        self.assertEqual(after["result"], "updated")
+        self.assertEqual(separate_process(), [0, "self-update: checked within the last day"])
+
     def test_invalid_checked_commit_is_refused_before_download(self):
         self.install_version("0.4.1")
         requests = []
