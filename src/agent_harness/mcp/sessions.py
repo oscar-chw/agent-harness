@@ -109,10 +109,12 @@ class Sessions:
                 rowid INTEGER PRIMARY KEY, path TEXT, ts REAL, role TEXT, text TEXT);
             CREATE INDEX IF NOT EXISTS sess_msgs_path ON sess_msgs(path);
         """)
-        if self.fts:
-            self.con.execute("CREATE VIRTUAL TABLE IF NOT EXISTS sess_fts USING fts5(text, "
-                             "tokenize='porter unicode61')")
-        self.con.commit()
+        with self.con:
+            self.con.execute("BEGIN IMMEDIATE")
+            _kb._track_fts_changes(self.con, "sess_fts", "sess_msgs")
+            if self.fts:
+                self.con.execute("CREATE VIRTUAL TABLE IF NOT EXISTS sess_fts USING fts5(text, "
+                                 "tokenize='porter unicode61')")
 
     # ------------------------------------------------------------ discovery
     def files(self) -> List[Tuple[str, Path, os.stat_result]]:
@@ -148,9 +150,6 @@ class Sessions:
 
     # ------------------------------------------------------------ indexing
     def _drop_rows(self, path: str) -> None:
-        if self.fts:
-            self.con.execute("DELETE FROM sess_fts WHERE rowid IN (SELECT rowid FROM sess_msgs WHERE path=?)",
-                             (path,))
         self.con.execute("DELETE FROM sess_msgs WHERE path=?", (path,))
 
     def _read(self, tool: str, path: Path, st, row) -> None:
@@ -186,10 +185,7 @@ class Sessions:
             for role, text in it:
                 started = started or ts
                 msgs.append((key, ts or started, role, redact(text)[:MSG_CHARS]))   # cut after: a cut secret no longer matches
-        for m in msgs:
-            cur = self.con.execute("INSERT INTO sess_msgs(path, ts, role, text) VALUES (?,?,?,?)", m)
-            if self.fts:
-                self.con.execute("INSERT INTO sess_fts(rowid, text) VALUES (?,?)", (cur.lastrowid, m[3]))
+        self.con.executemany("INSERT INTO sess_msgs(path, ts, role, text) VALUES (?,?,?,?)", msgs)
         self.con.execute(
             "INSERT OR REPLACE INTO sess_files(path, tool, session, project, started, offset, size, mtime, dropped) "
             "VALUES (?,?,?,?,?,?,?,?,0)",
@@ -228,8 +224,9 @@ class Sessions:
         for key in set(known) - seen:     # transcript deleted or moved away: forget it
             self._drop_rows(key)
             self.con.execute("DELETE FROM sess_files WHERE path=?", (key,))
-        self._enforce_cap()
-        self.con.commit()
+        with self.con:
+            self._enforce_cap()
+            _kb._repair_fts(self.con, "sess_fts", "sess_msgs", ("text",), available=self.fts)
         return pending
 
     def _enforce_cap(self) -> None:
@@ -303,7 +300,8 @@ class Sessions:
             sql = ("SELECT m.rowid, m.ts, m.role, m.text, f.tool, f.session, f.project FROM sess_fts "
                    "JOIN sess_msgs m ON m.rowid = sess_fts.rowid JOIN sess_files f ON f.path = m.path "
                    "WHERE sess_fts MATCH ?" + where + " ORDER BY bm25(sess_fts) LIMIT 200")
-            rows = self.con.execute(sql, [_kb.fts_query(qt.values())] + params).fetchall()
+            with _kb._fts_snapshot(self.con, "sess_fts", "sess_msgs", ("text",)):
+                rows = self.con.execute(sql, [_kb.fts_query(qt.values())] + params).fetchall()
         else:
             like = " OR ".join("m.text LIKE ?" for _ in qt)
             sql = ("SELECT m.rowid, m.ts, m.role, m.text, f.tool, f.session, f.project FROM sess_msgs m "
