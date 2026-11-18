@@ -43,7 +43,9 @@ def test_enable_readback_disable_preserves_bundle_and_audit(tmp_path):
     result=d.disable(hh,home,runner=ctl,platform='darwin',uid=501)
     assert result['enabled'] is False and bundle.exists() and state.read_bytes()==b'existing audit'
     assert not Path(result['plist']).exists()
-    assert d.status(hh,home,runner=ctl,platform='darwin',uid=501)['status']=='DISABLED'
+    status = d.status(hh, home, runner=ctl, platform='darwin', uid=501)
+    assert status['status'] == 'DISABLED' and status['loaded'] is False
+    assert status['bundle_integrity'] == 'NOT_CHECKED'
 
 def test_existing_unowned_plist_is_never_replaced(tmp_path):
     from agent_harness import daily_schedule as d
@@ -76,6 +78,52 @@ def test_scheduler_uses_a_frozen_runner_and_refuses_changed_code(tmp_path,target
     result=subprocess.run(spec['ProgramArguments'],env=env,capture_output=True,text=True,timeout=5)
     assert result.returncode!=0 and 'changed' in result.stderr
     assert not (hh/'discovery/audit.sqlite').exists()
+
+@pytest.mark.parametrize('change', ['manifest', 'runner', 'module', 'unlisted'])
+def test_frozen_readback_reports_loaded_but_unverified_on_drift(tmp_path, change):
+    from agent_harness import daily_schedule as d
+
+    home = tmp_path / 'home'
+    home.mkdir()
+    hh = tmp_path / 'harness'
+    ctl = Launchctl()
+    initial = d.enable(hh, home, runner=ctl, platform='darwin', uid=501)
+    assert initial['status'] == 'LOADED' and initial['bundle_integrity'] == 'MATCH'
+    bundle = Path(initial['bundle'])
+    paths = {
+        'manifest': bundle / 'manifest.json',
+        'runner': bundle / 'run.py',
+        'module': bundle / 'lib/agent_harness/discovery_cycle.py',
+        'unlisted': bundle / 'lib/agent_harness/unlisted_fixture.py',
+    }
+    path = paths[change]
+    path.write_bytes(b'fixture drift')
+    report = d.status(hh, home, runner=ctl, platform='darwin', uid=501)
+    assert report['enabled'] is False and report['loaded'] is True
+    assert report['status'] == 'LOADED_BUNDLE_UNVERIFIED'
+    assert report['bundle_integrity'] == 'INVALID'
+    assert ctl.loaded and not (hh / 'discovery/audit.sqlite').exists()
+    disabled = d.disable(hh, home, runner=ctl, platform='darwin', uid=501)
+    assert disabled['status'] == 'DISABLED' and not ctl.loaded
+    assert path.read_bytes() == b'fixture drift' and bundle.is_dir()
+
+
+def test_frozen_status_cli_returns_failure_for_invalid_loaded_bundle(tmp_path, monkeypatch, capsys):
+    from agent_harness import cli, daily_schedule as d
+
+    home = tmp_path / 'home'
+    home.mkdir()
+    hh = tmp_path / 'harness'
+    ctl = Launchctl()
+    initial = d.enable(hh, home, runner=ctl, platform='darwin', uid=501)
+    status = d.status
+    monkeypatch.setattr(d, 'status', lambda *_: status(hh, home, runner=ctl, platform='darwin', uid=501))
+    assert cli.main(['daily-discovery', '--schedule-status']) == 0
+    assert json.loads(capsys.readouterr().out)['bundle_integrity'] == 'MATCH'
+    (Path(initial['bundle']) / 'run.py').write_bytes(b'changed')
+    assert cli.main(['daily-discovery', '--schedule-status']) == 1
+    assert json.loads(capsys.readouterr().out)['status'] == 'LOADED_BUNDLE_UNVERIFIED'
+
 
 def test_bootstrap_failure_is_not_reported_as_active(tmp_path):
     from agent_harness import daily_schedule as d
