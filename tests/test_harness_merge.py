@@ -175,7 +175,12 @@ class TestSelfUpdate(Base):
         from agent_harness import selfupdate
         calls = []
         kw.setdefault("get", self.fake_get())
-        rc, msg = selfupdate.run(self.hh(), self.home, now=True, update_cmd=["true"], doctor_cmd=["true"], **kw)
+        installed = self.hh() / "lib" / "agent_harness" / "__init__.py"
+        simulated_install = [sys.executable, "-c",
+                             "import sys; from pathlib import Path; Path(sys.argv[1]).write_text(sys.argv[2])",
+                             str(installed), '__version__ = "0.4.2"\n']
+        kw.setdefault("update_cmd", simulated_install)
+        rc, msg = selfupdate.run(self.hh(), self.home, now=True, doctor_cmd=["true"], **kw)
         return rc, msg, calls
 
     def test_self_update_takes_the_newest_release_that_passed(self):
@@ -184,6 +189,55 @@ class TestSelfUpdate(Base):
         self.assertEqual(rc, 0, msg)
         self.assertIn("0.4.1 -> v0.4.2", msg)
         self.assertEqual(json.loads((self.hh() / "state" / "self-update.json").read_text())["result"], "updated")
+
+    def test_download_uses_the_exact_commit_whose_checks_passed(self):
+        self.install_version("0.4.1")
+        requests = []
+        fixture = self.fake_get()
+
+        def tracked(url):
+            requests.append(url)
+            return fixture(url)
+
+        rc, message, _ = self.go(get=tracked)
+        self.assertEqual(rc, 0, message)
+        self.assertEqual([url for url in requests if "/check-runs" in url], [
+            "https://api.github.com/repos/oscar-chw/agent-harness/commits/" + "b" * 40 + "/check-runs?per_page=100"])
+        self.assertEqual([url for url in requests if "codeload.github.com" in url], [
+            "https://codeload.github.com/oscar-chw/agent-harness/tar.gz/" + "b" * 40])
+
+    def test_checked_commit_with_different_package_version_is_refused(self):
+        self.install_version("0.4.1")
+        rc, message, _ = self.go(get=self.fake_get(tar=release_tarball(version="0.4.3")))
+        self.assertEqual(rc, 1, message)
+        self.assertIn("source version differs", message)
+        self.assertEqual(json.loads((self.hh() / "state" / "self-update.json").read_text())["result"], "refused")
+        from agent_harness.selfupdate import installed_version
+        self.assertEqual(installed_version(self.hh()), "0.4.1")
+
+    def test_installer_success_alone_does_not_claim_the_release_is_installed(self):
+        self.install_version("0.4.1")
+        rc, message, _ = self.go(update_cmd=["true"])
+        self.assertEqual(rc, 1, message)
+        self.assertIn("installed version differs", message)
+        record = json.loads((self.hh() / "state" / "self-update.json").read_text())
+        self.assertEqual(record["result"], "installed-version-mismatch")
+        self.assertEqual(record["version"], "0.4.1")
+        self.assertEqual(record["commit"], "b" * 40)
+
+    def test_invalid_checked_commit_is_refused_before_download(self):
+        self.install_version("0.4.1")
+        requests = []
+
+        def get(url):
+            requests.append(url)
+            self.assertTrue(url.endswith("/tags?per_page=100"), url)
+            return json.dumps([{"name": "v0.4.2", "commit": {"sha": "unavailable"}}]).encode()
+
+        rc, message, _ = self.go(get=get)
+        self.assertEqual(rc, 1, message)
+        self.assertIn("invalid release commit identity", message)
+        self.assertEqual(len(requests), 1)
 
     def test_self_update_holds_a_release_whose_checks_failed(self):
         self.install_version("0.4.1")
