@@ -150,8 +150,10 @@ def test_apply_respects_the_installed_updater_lock(fixture, tmp_path):
     lock = runtime / "state/.self-update.lock"
     lock.parent.mkdir()
     with sqlite3.connect(lock) as other:
-        other.execute("BEGIN IMMEDIATE")
+        other.execute("PRAGMA user_version = 1")
+        # Closing the snapshot's descriptor can release this process's POSIX locks.
         before = snapshot(home)
+        other.execute("BEGIN IMMEDIATE")
         result = run(args(fixture, tmp_path), "--apply")
         assert result.returncode == 1 and "locked" in result.stderr
-        assert snapshot(home) == before and not (tmp_path / "backup").exists()
+    assert snapshot(home) == before and not (tmp_path / "backup").exists()
