@@ -11,12 +11,16 @@ import fcntl
 import json
 import os
 from pathlib import Path
+import re
+import shutil
 import statistics
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from agent_harness import procedure_execution as C, procedures as P  # noqa: E402
+from agent_harness.presets import _read  # noqa: E402
 from agent_harness.redact import redact  # noqa: E402
 
 CASES = ROOT / "eval/reasoning_iteration_cases.json"
@@ -49,6 +53,8 @@ CEILING_POLICY = (
     "An in-flight call can overshoot."
 )
 BINDINGS = ("request_sha256", "prompt_sha256", "context_sha256", "memory_receipts")
+CLIENT_VERSION = re.compile(r"codex-cli [0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.]+)?")
+SOURCE_FILE_BYTES = 2 * 1024 * 1024
 
 
 def read_json(path):
@@ -153,7 +159,7 @@ def _sources(cases_path):
     # Prompt construction and store recovery are also part of the instrument.
     paths.extend(sorted((ROOT / "src/agent_harness").rglob("*.py")))
     return {
-        str(path.resolve(strict=True)): C._sha(P._read_regular(path)) for path in paths
+        str(path.resolve(strict=True)): C._sha(_read(path, SOURCE_FILE_BYTES)) for path in paths
     }
 
 
@@ -226,6 +232,20 @@ def _append(out, kind, data):
     return event
 
 
+def _native_client():
+    executable = shutil.which("codex")
+    if executable is None:
+        raise ValueError("native Codex client unavailable")
+    path = Path(executable).resolve(strict=True)
+    try:
+        version = subprocess.check_output([str(path), "--version"], text=True, timeout=10).strip()
+    except subprocess.SubprocessError as error:
+        raise ValueError("could not determine native Codex client version") from error
+    if CLIENT_VERSION.fullmatch(version) is None:
+        raise ValueError("could not determine native Codex client version")
+    return {"path": str(path), "version": version}
+
+
 def prepare(
     out,
     *,
@@ -250,6 +270,7 @@ def prepare(
         or comparison not in ("unguided", "existing-full-guide")
     ):
         raise ValueError("need pinned model, effort, timeout and bounded ceiling")
+    client = _native_client() if mode == "native" else None
     cases = load_cases(cases_path)
     baseline = FULL_GUIDE.read_text() if comparison == "existing-full-guide" else None
     sources = _sources(cases_path)
@@ -313,7 +334,7 @@ def prepare(
         "batches": batches,
         "scope": SCOPE,
         "ceiling_policy": CEILING_POLICY,
-        "native_cli_expected": "0.167.0-alpha.4.1",
+        "native_cli": client,
         "preparation_model_calls": 0,
     }
     ref = _immutable(oracle / "freeze.json", frozen)
@@ -647,6 +668,8 @@ def execute(out, *, authorized_execute):
             actor = out / f"{index + 1}-{arm}"
             request = read_json(actor / "request.json")
             read_freeze(out)
+            if frozen["mode"] == "native" and _native_client() != frozen["native_cli"]:
+                raise ValueError("frozen native Codex client changed")
             ordinal = len(rows) + 1
             _append(
                 out,
