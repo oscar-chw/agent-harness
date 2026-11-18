@@ -19,9 +19,10 @@ registry entries):
 2. typed decision — a JEV record (`harness.jev-decision/v1`) is REQUIRED:
    declared sha256 must match, jev.validate + jev.verify_bindings must pass,
    domain must be `adoption`, and subject.name must equal the candidate
-   name. No JEV adoption decision refuses.
+   name. The decision must bind the exact REA file and digest as an input.
 3. admission — the verdict must equal the candidate's admit_verdict exactly;
-   confidence must meet policy.execute_at_or_above (ordinal: low < medium <
+   it must also be a positive verdict for that candidate kind.
+   Confidence must meet policy.execute_at_or_above (ordinal: low < medium <
    high). Below threshold ESCALATES — refused, never auto-admitted.
 
 A registry entry never grants authority: promotion is always NOT_GRANTED —
@@ -89,20 +90,20 @@ def validate_candidate(candidate):
     return candidate
 
 
-def _check_declared_hash(root, binding, label):
-    """The declared sha256 must equal the file's current bytes (drift =
-    tampered or stale evidence; fail-closed). Returns the absolute path."""
+def _load_bound_record(root, binding, label):
+    """Hash and parse one snapshot of the record."""
     path = os.path.realpath(os.path.join(root, binding["ref"]))
     base = os.path.realpath(root)
     _require(path == base or path.startswith(base + os.sep),
              label + " ref escapes the repo root: " + binding["ref"])
     _require(os.path.isfile(path), label + " not found on disk: " + binding["ref"])
     with open(path, "rb") as fh:
-        actual = hashlib.sha256(fh.read()).hexdigest()
+        raw = fh.read()
+    actual = hashlib.sha256(raw).hexdigest()
     _require(actual == binding["sha256"],
              label + " hash drift for " + binding["ref"] +
              " (declared bytes no longer on disk)")
-    return path
+    return json.loads(raw)
 
 
 def _entry(candidate, status, detail, decision=None, admitted_at=None):
@@ -127,21 +128,30 @@ def admit(candidate, root, admitted_at):
     name = candidate["name"]
     # ---- qualification: the REA record is REQUIRED -------------------------
     try:
-        rea_path = _check_declared_hash(root, candidate["rea"], "REA record")
-        rea.verify_record(rea_path, root)
+        qualification = _load_bound_record(root, candidate["rea"], "REA record")
+        rea.validate(qualification)
+        rea.verify_bindings(qualification, root)
+        _require(qualification["decision"]["type"] != "pattern-only" or candidate["kind"] == "pattern",
+                 "pattern-only qualification supports only a pattern")
     except (PluginLoopError, rea.ReaError, OSError, ValueError) as exc:
         return _entry(candidate, "refused",
                       "qualification refused (no REA record or invalid one): "
                       + str(exc))
     # ---- typed decision: the JEV adoption record is REQUIRED ---------------
     try:
-        jev_path = _check_declared_hash(root, candidate["jev"], "JEV record")
-        decision = jev.verify_record(jev_path, root)
+        decision = _load_bound_record(root, candidate["jev"], "JEV record")
+        jev.validate(decision)
+        jev.verify_bindings(decision, root)
         _require(decision["domain"] == "adoption",
                  "JEV record domain is %r, not adoption" % decision["domain"])
         _require(decision["subject"]["name"] == name,
                  "JEV record decides %r, not this capability %r"
                  % (decision["subject"]["name"], name))
+        _require(any(binding["kind"] == "local-file"
+                     and binding["ref"] == candidate["rea"]["ref"]
+                     and binding["digest"] == candidate["rea"]["sha256"]
+                     for binding in decision["inputs"]),
+                 "JEV decision does not bind this exact qualification record")
     except (PluginLoopError, jev.JevError, OSError, ValueError) as exc:
         return _entry(candidate, "refused",
                       "typed decision refused (no JEV adoption decision or "
@@ -152,6 +162,11 @@ def admit(candidate, root, admitted_at):
                       "verdict %r is not the admitting verdict %r"
                       % (decision["verdict"], candidate["admit_verdict"]),
                       decision=decision)
+    allowed = {"adopt", "adopt-pattern-only"} if candidate["kind"] == "pattern" else {"adopt"}
+    if decision["verdict"] not in allowed:
+        return _entry(candidate, "refused",
+                      "verdict %r does not authorize admission of a %s"
+                      % (decision["verdict"], candidate["kind"]), decision=decision)
     threshold = decision["policy"]["execute_at_or_above"]
     level = decision["confidence"]["level"]
     if CONFIDENCE_ORDINAL[level] < CONFIDENCE_ORDINAL[threshold]:

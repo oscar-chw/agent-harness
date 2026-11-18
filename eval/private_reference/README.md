@@ -6,6 +6,11 @@ the original function/method AST hashes against `MANIFEST.json`, the
 unchanged retained public assertions, and failure when private checks are
 explicitly collected with an absent research root.
 
+The public plugin fixture constructor is pinned to its current version. Its
+decision cites the exact qualification record required at admission. The
+historical constructor and all original test assertions retain their original
+hashes in the private archive.
+
 The manifest records private corpus distribution as `NOT_DISTRIBUTED` and
 private-corpus execution in public CI as `NOT_RUN`. The five unabridged original
 files retain 93 function/method bodies, including 75 original test functions

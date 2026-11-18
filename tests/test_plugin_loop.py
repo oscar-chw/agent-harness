@@ -92,8 +92,12 @@ class LoopFixture:
             "policy": {"execute_at_or_above": threshold, "below": "escalate"},
             "scope": "repo-local fixture", "reversibility": "reversible",
             "authority": "fixture gate, plan v3-settlement-plugin-loop tests",
-            "inputs": [{"ref": "docs/evidence.md", "kind": "local-file",
-                        "role": "the qualification evidence", "digest": digest}],
+            "inputs": [
+                {"ref": "docs/rea.json", "kind": "local-file",
+                 "role": "the qualification record", "digest": _sha(self.rea_path)},
+                {"ref": "docs/evidence.md", "kind": "local-file",
+                 "role": "the supporting evidence", "digest": digest},
+            ],
             "receipts": ["docs/receipt.json"],
             "unknowns": ["fixture unknown"],
             "links": {}, "promotion": "NOT_GRANTED"}
