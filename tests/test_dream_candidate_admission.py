@@ -122,6 +122,22 @@ def dream_cli(corpus, *arguments):
     return [sys.executable, str(repo / "bin/harness"), "dream", arguments[0], str(corpus), *arguments[1:]]
 
 
+def test_wikilink_target_already_present_is_not_staged(scored_corpus):
+    memory = scored_corpus / "memory"
+    references = {
+        "hub0.md": "\n[[note0|Reference notes]]\n",
+        "hub1.md": "\n[[note1#Limits]]\n",
+        "hub2.md": "\n`[[note2|example]]`\n[[anchor2#Index|note2]]\n",
+    }
+    for name, addition in references.items():
+        source = memory / name
+        source.write_text(source.read_text() + addition)
+    before = {p: p.read_bytes() for p in memory.glob("*.md")}
+    rows = D.stage(scored_corpus)["candidates"]
+    assert {row["target"] for row in rows} == {"memory/note2.md"}
+    assert before == {p: p.read_bytes() for p in memory.glob("*.md")}
+
+
 def test_successive_batches_and_cold_list_recover_every_proposal(scored_corpus):
     before = {p: p.read_bytes() for p in scored_corpus.rglob("*.md")}
     batches = [D.stage(scored_corpus, limit=1) for _ in range(4)]

@@ -92,8 +92,32 @@ def _stem(path: str) -> str:
     return Path(path).stem
 
 
+_LINK_FENCE = re.compile(r'^ {0,3}(`{3,}|~{3,})(.*)$')
+_INLINE_CODE_OR_LINK = re.compile(
+    r'(?<!`)(`+)(?!`).*?(?<!`)\1(?!`)|(?<!\\)\[\[([^\[\]]+)\]\]')
+
+
 def _wikilinks(text: str) -> List[str]:
-    return re.findall(r'\[\[([^\]]+)\]\]', text)
+    """Read page targets from prose, including links with a heading or display label."""
+    links = []
+    fence = ''
+    for line in text.splitlines():
+        boundary = _LINK_FENCE.match(line)
+        if boundary:
+            marker, tail = boundary.groups()
+            if not fence and (marker[0] == '~' or '`' not in tail):
+                fence = marker
+                continue
+            if fence and marker.startswith(fence) and not tail.strip():
+                fence = ''
+                continue
+        if fence:
+            continue
+        for _, link in _INLINE_CODE_OR_LINK.findall(line):
+            target = link.split('|', 1)[0].split('#', 1)[0].strip()
+            if target:
+                links.append(target)
+    return links
 
 
 def _frontmatter_modified(text: str) -> str:

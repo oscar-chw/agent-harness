@@ -79,6 +79,18 @@ def do_certify(root: Path, tmp_path: Path, escrow, **kw):
 
 # ---------------------------------------------------------------- unlearn
 
+def test_wikilink_target_in_unlearning_inventory_distinguishes_display_and_examples(tmp_path):
+    root = make_corpus(tmp_path / 'corpus')
+    write_page(root, 'memory/inbound.md', '[[zqx-budget#Limits|session limits]]\n')
+    write_page(root, 'memory/examples.md',
+               '```md\n[[zqx-budget|example]]\n```\n'
+               r'\[[zqx-budget|escaped]]' '\n[[other-page|zqx-budget]]\n[[#zqx-budget]]\n')
+    report = mf.unlearn(root, TARGET, authority='a', reason='r',
+                        escrow_dir=tmp_path / 'escrow', apply=False)
+    assert report['tombstone_record']['inbound_wikilinks'] == ['memory/inbound.md']
+    assert (root / 'memory/inbound.md').read_bytes().endswith(b'[[zqx-budget#Limits|session limits]]\n')
+
+
 def test_unlearn_dry_run_changes_nothing(tmp_path):
     src = make_corpus(tmp_path / 'corpus')
     before = {p.relative_to(src).as_posix(): p.read_bytes()
