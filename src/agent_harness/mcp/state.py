@@ -30,6 +30,7 @@ else:
 
 STATE_MAX_BYTES = 4096
 STATE_VERSIONS = 10
+STATE_BOARD_PENDING = "STATE.board-pending.tmp"
 SESSION_LINES = 200
 NOTE_CHARS = 300
 TEMPLATE = ("## Goal\n## Decisions\n## Done\n## Next\n## Open questions\n## Key files\n")
@@ -81,7 +82,7 @@ class State:
         return self.home / "state" / project_key(self._root(project))
 
     # ------------------------------------------------------------ working state
-    def state_save(self, text: str, project: str = "") -> dict:
+    def state_save(self, text: str, project: str = "", *, board_pending: bool = False) -> dict:
         from agent_harness.mcp.memory import _store_lock
 
         data = text.encode("utf-8")
@@ -100,6 +101,11 @@ class State:
                     n += 1
                 # Keep the previous checkpoint visible until its replacement commits.
                 _replace_bytes(dst, cur.read_bytes())
+            pending = d / STATE_BOARD_PENDING
+            if board_pending:
+                _replace_bytes(pending, hashlib.sha256(data).hexdigest().encode("ascii"))
+            else:
+                pending.unlink(missing_ok=True)
             _replace_bytes(cur, data)
             for old in self.versions(project)[STATE_VERSIONS:]:
                 old.unlink()

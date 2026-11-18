@@ -172,6 +172,80 @@ def test_shared_board_accepts_the_configured_home_alias(lab):
     assert (project / row["value"]["checkpoint"]).read_text() == text
 
 
+@pytest.mark.parametrize("previous", [False, True])
+def test_cold_board_recovers_interrupted_state_publication(lab, previous):
+    project, home, store = lab
+    first = Server(home=home)
+    if previous:
+        first.handle(message("tools/call", name="state_save",
+                             arguments={"text": "## Goal\nOld checkpoint\n## Next\nRun the old gate.\n"}))
+    text = "## Goal\nPublish the surviving checkpoint\n## Next\nInspect the saved receipt.\n"
+    worker = """
+import os
+import sys
+from agent_harness.mcp.server import Server
+
+server = Server()
+server.board_publish = lambda *args: os._exit(17)
+server.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+               "params": {"name": "state_save", "arguments": {"text": sys.argv[1]}}})
+"""
+    package = Path(sys.modules[Server.__module__].__file__).resolve().parents[2]
+    env = {**os.environ, "HARNESS_HOME": str(home), "HARNESS_PROJECT": str(project), "PYTHONPATH": str(package)}
+    child = subprocess.run([sys.executable, "-c", worker, text], cwd=project, env=env, timeout=10)
+    assert child.returncode == 17
+    assert first.state.state_load() == text
+    assert "Inspect the saved receipt." not in json.dumps(store.snapshot())
+
+    assert "Inspect the saved receipt." in initialize(Server(home=home))["instructions"]
+    recovered = store.snapshot()
+    row = next(row for row in recovered["tasks"] if row["value"].get("stage") == "checkpoint_saved")
+    assert (project / row["value"]["checkpoint"]).read_text() == text
+    assert "Inspect the saved receipt." in initialize(Server(home=home))["instructions"]
+    assert store.snapshot()["cursor"] == recovered["cursor"]
+
+
+def test_cold_board_keeps_previous_checkpoint_after_uncommitted_state(lab, monkeypatch):
+    _, home, store = lab
+    writer = Server(home=home)
+    before = "## Goal\nRetain the committed work\n## Next\nRead the prior receipt.\n"
+    writer.handle(message("tools/call", name="state_save", arguments={"text": before}))
+    state_module = sys.modules[type(writer.state).__module__]
+    replace = state_module._replace_bytes
+
+    def fail_state_replacement(path, data):
+        if path.name == "STATE.md":
+            raise OSError("replacement failed in fixture")
+        return replace(path, data)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(state_module, "_replace_bytes", fail_state_replacement)
+        response = writer.handle(message("tools/call", name="state_save", arguments={
+            "text": "## Goal\nAbandoned work\n## Next\nRun the uncommitted gate.\n"
+        }))
+        assert "error" in response
+
+    cursor = store.snapshot()["cursor"]
+    notice = initialize(Server(home=home))["instructions"]
+    assert "Read the prior receipt." in notice
+    assert "Run the uncommitted gate." not in notice
+    assert store.snapshot()["cursor"] == cursor
+
+
+def test_cold_board_does_not_recover_an_opted_out_state_save(lab, monkeypatch):
+    _, home, store = lab
+    text = "## Goal\nKeep State outside the board\n## Next\nRead locally.\n"
+    with monkeypatch.context() as patch:
+        patch.setenv("HARNESS_DISABLE", "op_state")
+        writer = Server(home=home)
+        response = writer.handle(message("tools/call", name="state_save",
+                                         arguments={"text": text}))["result"]
+        assert not response["isError"]
+        assert writer.state.state_load() == text
+    assert "Keep State outside the board" not in initialize(Server(home=home))["instructions"]
+    assert len(store.snapshot()["tasks"]) == 1
+
+
 def test_identical_saved_packet_keeps_identity_and_cursor_across_reconnections(lab):
     text = '## Goal\nCheck recovery\n## Next\nInspect the receipt.\n'
     for _ in range(3):

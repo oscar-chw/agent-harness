@@ -240,6 +240,14 @@ class Server:
             return "Shared board checkpoint unavailable; saved source checkpoint remains authoritative."
         return ""
 
+    def _save_state(self, args):
+        from agent_harness.mcp.state import project_root
+
+        project = args.get("project", "") or ""
+        publish = (not checks.disabled("op_state")
+                   and self.state._root(project) == project_root(self._op_cwd))
+        return self.state.state_save(args["text"], project, board_pending=publish)
+
     @property
     def kb(self) -> KB:
         if self._kb is None:
@@ -359,7 +367,7 @@ class Server:
             "lesson_add": lambda: self.mem.lesson_add(a["mistake"], a["fix"], a.get("trigger", "")),
             "lesson_search": lambda: self.memory_call("lesson_search", a, a["query"], int(a.get("k", 3)),
                                                        a.get("min_score")),
-            "state_save": lambda: self.state.state_save(a["text"], a.get("project", "") or ""),
+            "state_save": lambda: self._save_state(a),
             "state_load": lambda: self.state.state_load(a.get("project", "") or ""),
             "session_note": lambda: self.state.session_note(a["summary"]),
             "session_recent": lambda: self.state.session_recent(int(a.get("k", 5))),
