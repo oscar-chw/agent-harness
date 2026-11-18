@@ -15,6 +15,7 @@ from urllib.parse import quote
 from . import memory_dreaming_v1 as dreaming
 from . import settlement
 from .mcp.memory import _store_lock
+from .memory_consolidate import REVIEWED_DREAM_PREFIX
 from .permission_profiles import _write
 from .presets import _read
 from .redact import redact
@@ -233,7 +234,7 @@ def admit(corpus, identity, plan, node):
         original = _read(target, LIMIT)
         relative = os.path.relpath(root / value["target"], target.parent).replace(os.sep, "/")
         label = Path(value["target"]).stem.replace("[", "\\[").replace("]", "\\]")
-        suffix = ("\nRelated (reviewed dream): [" + label + "](" + quote(relative, safe="/.") + ")\n").encode()
+        suffix = ("\n" + REVIEWED_DREAM_PREFIX + "[" + label + "](" + quote(relative, safe="/.") + ")\n").encode()
         if len(original) + len(suffix) > LIMIT:
             raise ValueError("dream link would exceed the source byte bound")
         backup = store / (identity + ".before.md")

@@ -141,7 +141,7 @@ def score_orphan_link_v1(cand: dict, pages_by_rel: Dict[str, mc.Page], indeg,
     orphan = pages_by_rel.get(cand['orphan'])
     s_lex = min(1.0, sum(idf_bm25(t, df, n_pages) for t in shared) / lex_sat) if shared else 0.0
     s_clust = 1.0 if any(t in stems for t in shared) else 0.0
-    s_auth = s_auth_log(indeg.get(mc._stem(cand['source']), 0), max_indeg)
+    s_auth = s_auth_log(mc.page_indegree(indeg, cand['source']), max_indeg)
     s_sub = min(1.0, (len(orphan.data) / 2000.0)) if orphan else 0.0
     score = (W_ORPHAN_V1['lex'] * s_lex + W_ORPHAN_V1['clust'] * s_clust
              + W_ORPHAN_V1['auth'] * s_auth + W_ORPHAN_V1['sub'] * s_sub)
@@ -149,7 +149,7 @@ def score_orphan_link_v1(cand: dict, pages_by_rel: Dict[str, mc.Page], indeg,
             'source': cand['source'], 'n_shared': len(shared),
             'signals': {'s_lex_v1': round(s_lex, 4), 's_clust': s_clust,
                         's_auth_v1': round(s_auth, 4), 's_sub': round(s_sub, 4),
-                        'source_indegree': indeg.get(mc._stem(cand['source']), 0),
+                        'source_indegree': mc.page_indegree(indeg, cand['source']),
                         'orphan_bytes': len(orphan.data) if orphan else 0,
                         'cluster_tokens': sorted(t for t in shared if t in stems)},
             'score': round(score, 4)}
@@ -192,7 +192,7 @@ def score_supersedes_edge_v1(cand: dict, pages_by_rel: Dict[str, mc.Page], indeg
     da, db = md._parse_dt(fs.get('a_date') or ''), md._parse_dt(fs.get('b_date') or '')
     gap_days = (da - db).days if (da and db) else 0
     s_date = min(1.0, max(0, gap_days) / 14.0)
-    s_auth = s_auth_log(indeg.get(mc._stem(cand['successor']), 0), max_indeg)
+    s_auth = s_auth_log(mc.page_indegree(indeg, cand['successor']), max_indeg)
     score = (W_EDGE_V1['scope'] * s_scope + W_EDGE_V1['ctx'] * s_ctx_local
              + W_EDGE_V1['date'] * s_date + W_EDGE_V1['auth'] * s_auth
              + W_EDGE_V1['stance'] * s_stance_net)
@@ -295,7 +295,7 @@ def dream_v1(src: Path, dst: Optional[Path] = None, work_dir: Optional[Path] = N
         raise ValueError('dreaming trigger did not fire; Deep phase refuses '
                          '(fail-closed). Reasons: %s' % '; '.join(trigger['reasons']))
 
-    indeg = mc.build_graph(pages)
+    indeg = mc.build_graph(pages, by_path=True)
     df = mc._df(pages)
     n_pages = len(pages)
     max_indeg = max(indeg.values()) if indeg else 0
