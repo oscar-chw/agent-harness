@@ -65,6 +65,14 @@ def test_a_real_gate_for_another_candidate_cannot_admit(corpus, tmp_path):
         D.admit(corpus, candidate["id"], plan, 1)
 
 
+def test_gate_requires_the_complete_candidate_id_on_its_own_line(corpus, tmp_path):
+    candidate = D.propose(corpus, "memory/contracts.md", "memory/reference.md", origin="dream-v1")
+    plan = gate(tmp_path, candidate["id"] + "0")
+    with pytest.raises(ValueError, match="bound to this candidate"):
+        D.admit(corpus, candidate["id"], plan, 1)
+    assert "Related" not in (corpus / candidate["source"]).read_text()
+
+
 def test_source_drift_requires_fresh_review(corpus, tmp_path):
     candidate = D.propose(corpus, "memory/contracts.md", "memory/reference.md", origin="dream-v1")
     plan = gate(tmp_path, candidate["id"])
@@ -200,6 +208,65 @@ def test_dismissal_is_terminal_for_that_exact_proposal(corpus, tmp_path):
     fresh = D.propose(corpus, candidate["source"], candidate["target"], origin=candidate["origin"])
     assert fresh["id"] != identity and fresh["status"] == "proposed"
     assert D.read(corpus, identity) == first
+
+
+@pytest.mark.parametrize("variant", ["origin", "spelling", "alias"])
+def test_revision_decision_survives_equivalent_proposal(corpus, variant):
+    source, target = "memory/contracts.md", "memory/reference.md"
+    first = D.propose(corpus, source, target, origin="manual")
+    D.dismiss(corpus, first["id"], reason="The same text adds no supporting evidence.")
+    alternate = source
+    if variant == "spelling":
+        alternate = "memory/./contracts.md"
+    if variant == "alias":
+        alternate = "mirror/contracts.md"
+        (corpus / "mirror").symlink_to("memory", target_is_directory=True)
+
+    with pytest.raises(ValueError, match="dismissed"):
+        D.propose(corpus, alternate, target, origin="rescan")
+    assert D.propose(corpus, target, source, origin="reverse")["status"] == "proposed"
+    (corpus / target).write_text("# Reference\nA new revision adds the exact reset schedule.\n")
+    assert D.propose(corpus, source, target, origin="rescan")["status"] == "proposed"
+
+
+@pytest.mark.parametrize("action", ["packet", "admit"])
+def test_revision_decision_also_applies_to_older_queued_variants(corpus, tmp_path, action):
+    source, target = "memory/contracts.md", "memory/reference.md"
+    before = (corpus / source).read_bytes()
+    first = D.propose(corpus, source, target, origin="manual")
+    queued = D.propose(corpus, source, target, origin="rescan")
+    assert queued["id"] != first["id"]
+    D.dismiss(corpus, first["id"], reason="No supporting evidence.")
+    plan = gate(tmp_path, queued["id"])
+    with pytest.raises(ValueError, match="dismissed"):
+        if action == "packet":
+            D.review_packet(corpus, [queued["id"]])
+        else:
+            D.admit(corpus, queued["id"], plan, 1)
+    assert (corpus / source).read_bytes() == before
+
+
+def test_revision_decision_survives_later_automatic_staging(scored_corpus):
+    report = D.dreaming.dream_v1(scored_corpus, apply=False)
+    candidates = [entry for entry in report["promoted"] if entry["kind"] == "orphan_inbound_link"]
+    first = candidates[0]
+    declined = D.propose(scored_corpus, first["source"], first["orphan"], origin="manual")
+    D.dismiss(scored_corpus, declined["id"], reason="The link gives no useful evidence.")
+    staged = D.stage(scored_corpus)
+    assert len(staged["candidates"]) == len(candidates) - 1
+    assert all((entry["source"], entry["target"]) != (first["source"], first["orphan"])
+               for entry in staged["candidates"])
+
+
+def test_origin_does_not_reopen_a_withdrawn_revision(corpus, tmp_path):
+    source, target = "memory/contracts.md", "memory/reference.md"
+    candidate = D.propose(corpus, source, target, origin="initial-review")
+    before = (corpus / source).read_bytes()
+    D.admit(corpus, candidate["id"], gate(tmp_path, candidate["id"]), 1)
+    D.withdraw(corpus, candidate["id"], reason="Corrected prior judgment.")
+    assert (corpus / source).read_bytes() == before
+    with pytest.raises(ValueError, match="withdrawn"):
+        D.propose(corpus, source, target, origin="new-review-queue")
 
 
 def test_dismissal_recovers_after_interruption(corpus, monkeypatch):
