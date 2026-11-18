@@ -7,6 +7,7 @@ Search is BM25: SQLite FTS5 when available, a pure-Python BM25 otherwise. The in
 """
 from __future__ import annotations
 
+from contextlib import contextmanager, nullcontext
 from functools import lru_cache
 import heapq
 import math
@@ -75,6 +76,68 @@ def connect(db_path: Path) -> sqlite3.Connection:
     except sqlite3.Error:
         pass
     return con
+
+
+FTS_JOURNAL_ROWS = 16384
+
+def _track_fts_changes(con, index, source):
+    """Journal row identities only, including writes from clients without FTS5."""
+    pending = index + "_pending"
+    exists = con.execute("SELECT 1 FROM sqlite_master WHERE name=?", (pending,)).fetchone()
+    con.execute(f"CREATE TABLE IF NOT EXISTS {pending}(id INTEGER PRIMARY KEY)")
+    if not exists:
+        # SQLite assigns positive rowids to our canonical rows. Zero requests a
+        # one-time comparison of legacy entries when an FTS reader opens them.
+        con.execute(f"INSERT INTO {pending} VALUES (0)")
+    for event, identities in (("INSERT", ("new",)), ("DELETE", ("old",)), ("UPDATE", ("old", "new"))):
+        body = "; ".join(f"INSERT OR IGNORE INTO {pending} VALUES ({ref}.rowid)" for ref in identities)
+        con.execute(f"CREATE TRIGGER IF NOT EXISTS {pending}_{event} AFTER {event} ON {source} "
+                    f"WHEN NOT EXISTS (SELECT 1 FROM {pending} WHERE id=0) BEGIN {body}; END")
+
+
+def _repair_fts(con, index, source, columns, *, available=True):
+    """Apply changes transactionally, or bound the deferred journal."""
+    pending = index + "_pending"
+    if not available:
+        if con.execute(f"SELECT count(*) FROM {pending}").fetchone()[0] > FTS_JOURNAL_ROWS:
+            con.execute(f"DELETE FROM {pending}")
+            con.execute(f"INSERT INTO {pending} VALUES (0)")
+        return
+    if not con.execute(f"SELECT 1 FROM {pending} LIMIT 1").fetchone():
+        return
+    if not con.in_transaction:
+        con.execute("BEGIN IMMEDIATE")
+    if con.execute(f"SELECT 1 FROM {pending} WHERE id=0").fetchone():
+        mismatch = " OR ".join(f"s.{col} IS NOT f.{col}" for col in columns)
+        # Compare actual legacy entries once. Rebuilding every healthy row
+        # would increase disk writes and delay a first search of a warm cache.
+        con.execute(f"INSERT OR IGNORE INTO {pending} SELECT f.rowid FROM {index} f "
+                    f"LEFT JOIN {source} s ON s.rowid=f.rowid WHERE s.rowid IS NULL OR {mismatch}")
+        con.execute(f"INSERT OR IGNORE INTO {pending} SELECT s.rowid FROM {source} s "
+                    f"LEFT JOIN {index} f ON f.rowid=s.rowid WHERE f.rowid IS NULL")
+        con.execute(f"DELETE FROM {pending} WHERE id=0")
+    values = ",".join(columns)
+    con.execute(f"DELETE FROM {index} WHERE rowid IN (SELECT id FROM {pending})")
+    con.execute(f"INSERT INTO {index}(rowid,{values}) "
+                f"SELECT s.rowid,{values} FROM {source} s JOIN {pending} p ON p.id=s.rowid")
+    con.execute(f"DELETE FROM {pending}")
+
+
+@contextmanager
+def _fts_snapshot(con, index, source, columns):
+    """Keep canonical rows and term postings in one read snapshot."""
+    con.execute("BEGIN")
+    try:
+        if con.execute(f"SELECT 1 FROM {index}_pending LIMIT 1").fetchone():
+            con.rollback()
+            con.execute("BEGIN IMMEDIATE")
+            _repair_fts(con, index, source, columns)
+        yield
+    except BaseException:
+        con.rollback()
+        raise
+    else:
+        con.commit()
 
 
 _SUFFIXES = ("ations", "ation", "ating", "ated", "ates", "ate", "ions", "ion", "ings", "ing", "ments", "ment",
@@ -588,6 +651,7 @@ class KB:
                 c.execute("ALTER TABLE kb_sections ADD COLUMN ntok INTEGER DEFAULT 0")
             if "stat_token" not in [r[1] for r in c.execute("PRAGMA table_info(kb_files)")]:
                 c.execute("ALTER TABLE kb_files ADD COLUMN stat_token TEXT")
+            _track_fts_changes(c, "kb_fts", "kb_sections")
             if self.fts:
                 c.execute("CREATE VIRTUAL TABLE IF NOT EXISTS kb_fts USING fts5("
                           "title, body, tokenize='porter unicode61')")
@@ -650,9 +714,10 @@ class KB:
                     removed += 1
                 except OSError:
                     pass  # Inaccessible is not proven absent; retain excluded cache records.
-        c.execute("DELETE FROM kb_live")
-        c.executemany("INSERT OR IGNORE INTO kb_live(path) VALUES (?)", [(k,) for k in live])
-        c.commit()
+        with c:
+            _repair_fts(c, "kb_fts", "kb_sections", ("title", "body"), available=self.fts)
+            c.execute("DELETE FROM kb_live")
+            c.executemany("INSERT OR IGNORE INTO kb_live(path) VALUES (?)", [(k,) for k in live])
         stamp = (c.execute("PRAGMA data_version").fetchone()[0], frozenset(live))
         if not self.fts:
             # Another connection may have indexed the changed file already;
@@ -667,8 +732,6 @@ class KB:
 
     def _drop_file(self, key: str) -> None:
         c = self.con
-        if self.fts:
-            c.execute("DELETE FROM kb_fts WHERE rowid IN (SELECT rowid FROM kb_sections WHERE path=?)", (key,))
         c.execute("DELETE FROM kb_sections WHERE path=?", (key,))
         c.execute("DELETE FROM kb_files WHERE path=?", (key,))
 
@@ -692,13 +755,10 @@ class KB:
         self._drop_file(key)
         c = self.con
         for i, s in enumerate(split_sections(rel, text)):
-            cur = c.execute(
+            c.execute(
                 "INSERT INTO kb_sections(sid,path,rel,title,level,ord,body,bytes,ntok) VALUES (?,?,?,?,?,?,?,?,?)",
                 (s["id"], key, rel, s["title"], s["level"], i, s["body"], s["bytes"],
                  len(_doc_tokens(s["title"], s["body"]))))
-            if self.fts:
-                c.execute("INSERT INTO kb_fts(rowid,title,body) VALUES (?,?,?)",
-                          (cur.lastrowid, s["title"], s["body"]))
         c.execute("INSERT OR REPLACE INTO kb_files(path,rel,mtime,size,stat_token) VALUES (?,?,?,?,?)",
                   (key, rel, st.st_mtime, st.st_size, _stat_token(st)))
 
@@ -754,56 +814,58 @@ class KB:
         cannot change this project's results. The fallback uses scoped BM25.
         """
         self.refresh()
-        k = max(1, min(int(k), 50))
-        min_score = KB_MIN_SCORE if min_score is None else float(min_score)
-        qt = query_terms(query or "")
-        if not qt:
-            return []
-        c = self.con
-        if self.fts:
-            rows = c.execute(
-                "SELECT s.rowid, s.sid, s.title, s.rel, s.body, s.bytes FROM kb_fts f "
-                "JOIN kb_sections s ON s.rowid=f.rowid JOIN kb_live l ON l.path=s.path "
-                "WHERE kb_fts MATCH ?", (fts_query(qt.values()),))
-            st = c.execute("SELECT COUNT(*), AVG(s.ntok) FROM kb_sections s JOIN kb_live l ON l.path=s.path"
-                           ).fetchone()
-            n, avgdl = st[0], st[1] or 0.0
-            df = {t: c.execute(
-                "SELECT COUNT(*) FROM kb_fts f JOIN kb_sections s ON s.rowid=f.rowid "
-                "JOIN kb_live l ON l.path=s.path WHERE kb_fts MATCH ?",
-                (fts_query([w]),)).fetchone()[0] for t, w in qt.items()}
-        else:
-            bm = self._bm25 or self._build_bm25()
-            rows = []
-            for rowid, _ in bm.search(qt.keys(), CANDIDATES):
-                r = c.execute("SELECT rowid, sid, title, rel, body, bytes FROM kb_sections WHERE rowid=?",
-                              (rowid,)).fetchone()
-                if r:
-                    rows.append(r)
-            n, avgdl, df = len(bm.keys), bm.avg, {t: bm.df(t) for t in qt}
-        scored = ((relevance(qt, _doc_tokens(r["title"], r["body"]), n, avgdl, df), r) for r in rows)
-        # The profile's own files (the machine descriptor, the rules) are the authoritative source for
-        # questions about this environment, so among relevant hits they rank first: a wiki page that just
-        # repeats "GPU" should not push the descriptor's Machine section out of the top few. The threshold
-        # still applies to the unboosted score, so a weak descriptor match is not let through.
-        auth = self._authoritative()
-        rank_key = lambda x: (-(x[0] * (DESCRIPTOR_BOOST if x[1]["rel"] in auth else 1.0)),  # noqa: E731
-                              x[1]["sid"], x[1]["rel"])
-        if _honesty_enabled():
-            # Opt-in honesty layer (L2): if the frozen lexical-evidence rule says
-            # no candidate page carries the query's compound evidence, [] is the
-            # honest answer — confident-looking false positives are worse.
-            eligible = [x for x in scored if x[0] >= min_score]
-            window = heapq.nsmallest(HONESTY_WINDOW, eligible, key=rank_key)
-            if self._honest_miss(query, window):
+        snapshot = _fts_snapshot(self.con, "kb_fts", "kb_sections", ("title", "body")) if self.fts else nullcontext()
+        with snapshot:
+            k = max(1, min(int(k), 50))
+            min_score = KB_MIN_SCORE if min_score is None else float(min_score)
+            qt = query_terms(query or "")
+            if not qt:
                 return []
-            scored = heapq.nsmallest(k, eligible, key=rank_key)
-        else:
-            scored = heapq.nsmallest(k, (x for x in scored if x[0] >= min_score), key=rank_key)
-        return [{"id": r["sid"], "title": r["title"], "path": r["rel"],
-                 "snippet": snippet(r["body"].split("\n", 1)[-1] if r["body"].startswith("#") else r["body"],
-                                    query),
-                 "bytes": r["bytes"], "score": round(sc, 2)} for sc, r in scored]
+            c = self.con
+            if self.fts:
+                rows = c.execute(
+                    "SELECT s.rowid, s.sid, s.title, s.rel, s.body, s.bytes FROM kb_fts f "
+                    "JOIN kb_sections s ON s.rowid=f.rowid JOIN kb_live l ON l.path=s.path "
+                    "WHERE kb_fts MATCH ?", (fts_query(qt.values()),))
+                st = c.execute("SELECT COUNT(*), AVG(s.ntok) FROM kb_sections s JOIN kb_live l ON l.path=s.path"
+                               ).fetchone()
+                n, avgdl = st[0], st[1] or 0.0
+                df = {t: c.execute(
+                    "SELECT COUNT(*) FROM kb_fts f JOIN kb_sections s ON s.rowid=f.rowid "
+                    "JOIN kb_live l ON l.path=s.path WHERE kb_fts MATCH ?",
+                    (fts_query([w]),)).fetchone()[0] for t, w in qt.items()}
+            else:
+                bm = self._bm25 or self._build_bm25()
+                rows = []
+                for rowid, _ in bm.search(qt.keys(), CANDIDATES):
+                    r = c.execute("SELECT rowid, sid, title, rel, body, bytes FROM kb_sections WHERE rowid=?",
+                                  (rowid,)).fetchone()
+                    if r:
+                        rows.append(r)
+                n, avgdl, df = len(bm.keys), bm.avg, {t: bm.df(t) for t in qt}
+            scored = ((relevance(qt, _doc_tokens(r["title"], r["body"]), n, avgdl, df), r) for r in rows)
+            # The profile's own files (the machine descriptor, the rules) are the authoritative source for
+            # questions about this environment, so among relevant hits they rank first: a wiki page that just
+            # repeats "GPU" should not push the descriptor's Machine section out of the top few. The threshold
+            # still applies to the unboosted score, so a weak descriptor match is not let through.
+            auth = self._authoritative()
+            rank_key = lambda x: (-(x[0] * (DESCRIPTOR_BOOST if x[1]["rel"] in auth else 1.0)),  # noqa: E731
+                                  x[1]["sid"], x[1]["rel"])
+            if _honesty_enabled():
+                # Opt-in honesty layer (L2): if the frozen lexical-evidence rule says
+                # no candidate page carries the query's compound evidence, [] is the
+                # honest answer — confident-looking false positives are worse.
+                eligible = [x for x in scored if x[0] >= min_score]
+                window = heapq.nsmallest(HONESTY_WINDOW, eligible, key=rank_key)
+                if self._honest_miss(query, window):
+                    return []
+                scored = heapq.nsmallest(k, eligible, key=rank_key)
+            else:
+                scored = heapq.nsmallest(k, (x for x in scored if x[0] >= min_score), key=rank_key)
+            return [{"id": r["sid"], "title": r["title"], "path": r["rel"],
+                     "snippet": snippet(r["body"].split("\n", 1)[-1] if r["body"].startswith("#") else r["body"],
+                                        query),
+                     "bytes": r["bytes"], "score": round(sc, 2)} for sc, r in scored]
 
     def _authoritative(self) -> set:
         """Names of the top-level files in the active profile folder (their ids start with the name)."""
