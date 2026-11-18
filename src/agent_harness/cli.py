@@ -946,7 +946,7 @@ def cmd_daily_discovery(args) -> int:
         _out(json.dumps({"status": "UNAVAILABLE", "reason": type(exc).__name__}))
         return 1
     _out(json.dumps(result, indent=2))
-    return 1 if result.get("status") in ("FETCH_FAILED", "RETENTION_HOLD") else 0
+    return 1 if result.get("status") in ("FETCH_FAILED", "RETENTION_HOLD", "LOADED_BUNDLE_UNVERIFIED") else 0
 
 
 def cmd_self_update(args) -> int:

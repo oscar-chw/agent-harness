@@ -60,8 +60,10 @@ archive capacity reports `RETENTION_HOLD` before the next fetch.
 
 macOS only: `harness daily-discovery --enable-schedule` installs a per-user
 LaunchAgent with a pinned runner copy, `RunAtLoad` and a 24-hour interval.
-`--schedule-status` reads back launchd and the plist identity; `--disable-schedule`
-unloads the job and archives its plist while retaining the runner and audit.
+`--schedule-status` verifies launchd registration, the plist and the pinned
+runner. A loaded job with a changed or unreadable bundle returns
+`LOADED_BUNDLE_UNVERIFIED` and exits nonzero. `--disable-schedule` unloads
+the exact owned job and archives its plist while retaining the runner and audit.
 No administrator rights, model calls, credentials, code installs from the web,
 or native model-setting changes. Other hosts return an explicit unsupported
 status. These source controls require separate actual-host qualification before

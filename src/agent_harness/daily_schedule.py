@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+from pathlib import Path
 import plistlib
 import shutil
 import subprocess
@@ -48,19 +49,62 @@ def _save(path, value):
     os.replace(tmp, path)
 
 
+def _bundle_matches(plist_data, bundle, discovery_root):
+    spec = plistlib.loads(plist_data)
+    argv = spec['ProgramArguments']
+    if spec['Label'] != LABEL or len(argv) != 5 or argv[1] != '-c' or argv[3] != str(bundle):
+        return False
+    if bundle.is_symlink() or bundle.parent.resolve() != discovery_root.resolve():
+        return False
+    manifest = bundle / 'manifest.json'
+    library = bundle / 'lib'
+    script = bundle / 'run.py'
+    if manifest.is_symlink() or library.is_symlink() or script.is_symlink():
+        return False
+    if not manifest.is_file() or not library.is_dir() or not script.is_file():
+        return False
+    raw = manifest.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != argv[4]:
+        return False
+    expected = json.loads(raw)
+    if not isinstance(expected, dict) or 'lib/agent_harness/discovery_cycle.py' not in expected:
+        return False
+    paths = [script]
+    for path in library.rglob('*'):
+        if '__pycache__' in path.relative_to(library).parts:
+            continue
+        if path.is_symlink():
+            return False
+        if path.is_file():
+            paths.append(path)
+    actual = {str(path.relative_to(bundle)): _digest(path) for path in paths}
+    return actual == expected
+
+
 def status(hh, home, *, runner=subprocess.run, platform=sys.platform, uid=None):
     receipt, plist = _paths(hh, home)
     if not receipt.is_file():
-        return {'enabled': False, 'status': 'NOT_INSTALLED', 'plist': str(plist)}
+        return {'enabled': False, 'loaded': None, 'bundle_integrity': 'NOT_CHECKED',
+                'status': 'NOT_INSTALLED', 'plist': str(plist)}
     data = json.loads(receipt.read_text())
     if platform != 'darwin':
-        return {**data, 'enabled': False, 'status': 'UNSUPPORTED_HOST'}
+        return {**data, 'enabled': False, 'loaded': None, 'bundle_integrity': 'NOT_CHECKED',
+                'status': 'UNSUPPORTED_HOST'}
     loaded = _loaded(runner, _domain(uid) + '/' + LABEL)
     if data.get('status') == 'DISABLED' and not plist.exists() and not loaded:
-        return {**data, 'enabled': False, 'status': 'DISABLED'}
-    present = plist.is_file() and _digest(plist) == data['plist_sha256']
-    return {**data, 'enabled': loaded and present,
-            'status': 'LOADED' if loaded and present else 'NOT_LOADED_OR_CHANGED'}
+        return {**data, 'enabled': False, 'loaded': False, 'bundle_integrity': 'NOT_CHECKED',
+                'status': 'DISABLED'}
+    plist_data = plist.read_bytes() if loaded and not plist.is_symlink() and plist.is_file() else b''
+    if not plist_data or hashlib.sha256(plist_data).hexdigest() != data['plist_sha256']:
+        return {**data, 'loaded': loaded, 'enabled': False,
+                'bundle_integrity': 'NOT_CHECKED', 'status': 'NOT_LOADED_OR_CHANGED'}
+    try:
+        matches = _bundle_matches(plist_data, Path(data['bundle']), receipt.parent)
+    except (OSError, ValueError, KeyError, TypeError, plistlib.InvalidFileException):
+        matches = False
+    return {**data, 'loaded': True, 'enabled': matches,
+            'bundle_integrity': 'MATCH' if matches else 'INVALID',
+            'status': 'LOADED' if matches else 'LOADED_BUNDLE_UNVERIFIED'}
 
 
 def enable(hh, home, *, runner=subprocess.run, platform=sys.platform, uid=None):
@@ -145,6 +189,7 @@ def disable(hh, home, *, runner=subprocess.run, platform=sys.platform, uid=None)
         raise OSError('discovery job remains loaded')
     archived = hh / 'discovery' / ('disabled-' + str(time.time_ns()) + '.plist')
     plist.rename(archived)
-    data.update(enabled=False, status='DISABLED', archived_plist=str(archived))
+    data.update(enabled=False, loaded=False, bundle_integrity='NOT_CHECKED',
+                status='DISABLED', archived_plist=str(archived))
     _save(receipt, data)
     return data
