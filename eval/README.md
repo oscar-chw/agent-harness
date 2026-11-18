@@ -79,3 +79,46 @@ holding the corpus, so the harness indexes its `docs/` by itself and plain runs 
 they are. Whatever a run writes into the harness store, the Claude and Codex transcripts or the learned
 skills is moved to `$D/quarantine/` afterwards, so `session_search` and skills cannot read another run's
 answer.
+
+## Dream-link review
+
+Freeze independent labels for both supported and unsupported candidate links
+before collecting reviewer responses. A `harness.dream-review-labels/v1`
+JSON object has a `cases` array with `id`, `label` and the boolean
+`lexical_selected` on each row. Labels are `support`, `restatement`,
+`stale_or_conflicting`, `topic_only`, `insufficient`,
+`unclassified_negative` or `ambiguous`. Ambiguous cases remain visible
+and require adjudication if a reviewer accepts them.
+
+Check whether the required precision is reachable using the frozen label
+file and its SHA-256.
+
+```sh
+PYTHONPATH=src python3 -m eval.dream_review_grade --preflight-labels LABELS \
+  --freeze-sha256 LABELS_SHA256
+```
+
+Exit 0 means the precision target is reachable. Exit 1 means it exceeds
+the ceiling. Exit 2 means the freeze or invocation is invalid.
+
+Collect both review arms through `harness dream review CORPUS ID [ID ...]`.
+Use one candidate per packet in the standalone arm and share at least
+one packet in the batched arm. The results JSON contains `standalone` and
+`batched` arrays. Each entry has the ordered `candidate_ids`, the
+`packet_sha256` of the canonical review packet before the CLI newline,
+and a `decisions` list. Each decision has the candidate `id` and an
+`accept`, `reject` or `abstain` verdict in `decision`. Acceptance requires
+exact `source_quote` and `target_quote` spans. Cover every candidate once
+per arm.
+
+```sh
+PYTHONPATH=src python3 -m eval.dream_review_grade CORPUS LABELS RESULTS \
+  --freeze-sha256 LABELS_SHA256
+```
+
+Replay exit 0 means the quality gate passed. Exit 1 means quality is held.
+Exit 2 means the evidence is invalid or incomplete. The batched arm needs
+at least 80% precision, at least 50% recall and a precision gain of at least
+10 percentage points over the lexical arm. Cases decided correctly by the
+standalone reviewer must stay correct. Model usage, complete campaign cost
+and link admission have their own checks.
