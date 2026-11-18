@@ -1,4 +1,5 @@
 """Native Codex prompt observations are candidates with bounded scope and retries."""
+from contextlib import contextmanager
 import io
 import json
 import os
@@ -9,7 +10,7 @@ from unittest.mock import patch
 
 import pytest
 
-from agent_harness import cli
+from agent_harness import capture, cli
 from agent_harness.mcp.memory import Memory
 
 
@@ -185,14 +186,92 @@ def test_busy_capture_store_cannot_exceed_native_hook_timeout(lab):
         env=env, text=True)
     try:
         assert locker.stdout.readline().strip() == 'locked'
+        secret = 'ghp_' + 'Q' * 36
         result = subprocess.run([sys.executable, '-m', 'agent_harness.cli', '_hook-prompt'],
-                                input=json.dumps(event(lab)), capture_output=True, text=True,
+                                input=json.dumps(event(lab, prompt='Please remember that fixture token is ' + secret)),
+                                capture_output=True, text=True,
                                 env=env, timeout=4)
         assert result.returncode == 0
-        assert 'prompt capture unavailable: TimeoutError' in result.stderr
+        assert 'prompt capture deferred' in result.stderr
+        assert 'prompt capture unavailable' not in result.stderr
         assert saved(lab) == []
+        queue = lab[0] / 'capture-inbox' / 'observations.json'
+        pending = queue.read_text()
+        assert secret not in pending and '[REDACTED]' in pending
+        assert 'native-session' not in pending and str(lab[1]) not in pending
     finally:
         locker.communicate('', timeout=5)
         assert locker.returncode == 0
+    next_prompt = event(lab, turn='next-turn', prompt='Show the decimal contract.')
+    output, errors = deliver(next_prompt)
+    assert errors == '' and len(output.encode()) <= 1200
+    assert [row['count'] for row in saved(lab)] == [1]
+    assert not queue.exists()
+    deliver(next_prompt)
+    assert [row['count'] for row in saved(lab)] == [1]
+
+
+@pytest.fixture
+def busy_capture(lab, monkeypatch):
+    original = capture._store_lock
+
+    @contextmanager
+    def lock(home, **kwargs):
+        if home == lab[0]:
+            raise TimeoutError('fixture busy')
+        with original(home, **kwargs):
+            yield
+
+    with monkeypatch.context() as patch:
+        patch.setattr(capture, '_store_lock', lock)
+        yield
+
+
+def test_busy_retries_deduplicate_and_queue_full_retains_existing_observation(lab, busy_capture, monkeypatch):
+    monkeypatch.setattr(capture, 'PROMPT_QUEUE_LIMIT', 1, raising=False)
+    queue = lab[0] / 'capture-inbox' / 'observations.json'
+    _, errors = deliver(event(lab))
+    assert 'prompt capture deferred' in errors
+    existing = queue.read_bytes()
+    _, errors = deliver(event(lab))
+    assert 'prompt capture deferred' in errors and queue.read_bytes() == existing
+    _, errors = deliver(event(lab, turn='another-turn', prompt='No, keep the owner boundary.'))
+    assert 'prompt capture unavailable: ValueError' in errors
+    assert queue.read_bytes() == existing and saved(lab) == []
+
+
+def test_deferred_recovery_after_store_write_and_before_acknowledgement(lab, monkeypatch):
+    original_lock = capture._store_lock
+
+    @contextmanager
+    def defer(home, **kwargs):
+        if home == lab[0]:
+            raise TimeoutError('fixture busy')
+        with original_lock(home, **kwargs):
+            yield
+
+    with monkeypatch.context() as patch:
+        patch.setattr(capture, '_store_lock', defer)
+        _, errors = deliver(event(lab))
+        assert 'prompt capture deferred' in errors
+
+    queue = lab[0] / 'capture-inbox' / 'observations.json'
+    original_unlink = Path.unlink
+
+    def fail_ack(path, *args, **kwargs):
+        if path == queue:
+            raise OSError('fixture interruption')
+        return original_unlink(path, *args, **kwargs)
+
+    ordinary = event(lab, turn='next-turn', prompt='Show the decimal contract.')
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, 'unlink', fail_ack)
+        _, errors = deliver(ordinary)
+        assert 'prompt capture unavailable: OSError' in errors
+    assert queue.is_file() and [row['count'] for row in saved(lab)] == [1]
+    deliver(ordinary)
+    assert not queue.exists() and [row['count'] for row in saved(lab)] == [1]
     deliver(event(lab))
     assert [row['count'] for row in saved(lab)] == [1]
+    deliver(event(lab, turn='independent'))
+    assert [row['count'] for row in saved(lab)] == [2]

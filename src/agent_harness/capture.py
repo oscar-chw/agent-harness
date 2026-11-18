@@ -24,6 +24,9 @@ from .mcp.memory import _store_lock
 
 STORE = "candidates.jsonl"
 PENDING = "capture-pending.json"
+PROMPT_QUEUE = Path("capture-inbox/observations.json")
+PROMPT_QUEUE_LIMIT = 64
+PROMPT_QUEUE_BYTES = 256 * 1024
 # A check is a command whose PROGRAM is a test runner or linter, in any step of the command line: `grep -rn
 # pytest docs/` names pytest and is not one. Parsed with shlex, so text in quotes or a heredoc is never a step;
 # wrappers are skipped (VAR=1, env, time, timeout N, nice, sudo -u X, xvfb-run, uv/poetry/pdm/hatch run, npx,
@@ -256,8 +259,59 @@ def capture_kimi_turn(hh: Path, transcript: str, session: str, project=None) -> 
     return capture_turn(hh, str(transcript), session, project=project, events=events, started=started)
 
 
-def capture_prompt(home: Path, payload: dict) -> List[dict]:
-    """Observe the Codex prompt hook's documented event shape, with no authority inference."""
+def _pending_prompts(path: Path) -> List[dict]:
+    if path.is_symlink() or (path.exists() and not path.is_file()):
+        raise ValueError('deferred prompt storage is redirected or invalid')
+    if not path.exists():
+        return []
+    with path.open('rb') as stream:
+        raw = stream.read(PROMPT_QUEUE_BYTES + 1)
+    if len(raw) > PROMPT_QUEUE_BYTES:
+        raise ValueError('deferred prompt storage exceeds its byte limit')
+    rows = json.loads(raw)
+    hashes = {'key': 16, 'source_sha256': 64, 'source_event_sha256': 64, 'project_sha256': 64}
+    fields = {*hashes, 'source', 'summary', 'evidence'}
+    if (not isinstance(rows, list) or len(rows) > PROMPT_QUEUE_LIMIT
+            or any(not isinstance(row, dict) or set(row) != fields or row['source'] != 'user'
+                   or not isinstance(row['summary'], str) or len(row['summary']) > MAX_TEXT
+                   or row['summary'] != row['evidence']
+                   or any(not isinstance(row[key], str)
+                          or not re.fullmatch(r'[a-f0-9]{%d}' % length, row[key])
+                          for key, length in hashes.items()) for row in rows)):
+        raise ValueError('invalid deferred prompt observations')
+    return rows
+
+
+def _prompt_queue_lock(path: Path):
+    if path.parent.is_symlink():
+        raise ValueError('deferred prompt storage is redirected')
+    return _store_lock(path.parent, timeout=0.05)
+
+
+def _defer_prompt(path: Path, observation: dict) -> None:
+    with _prompt_queue_lock(path):
+        rows = _pending_prompts(path)
+        if any((row['key'], row['source_event_sha256']) ==
+               (observation['key'], observation['source_event_sha256']) for row in rows):
+            return
+        data = json.dumps([*rows, observation], ensure_ascii=False).encode('utf-8')
+        if len(rows) >= PROMPT_QUEUE_LIMIT or len(data) > PROMPT_QUEUE_BYTES:
+            raise ValueError('deferred prompt storage is full')
+        _replace_capture(path, data)
+
+
+def _merge_prompt_observations(home: Path, path: Path, observed: List[dict]) -> List[dict]:
+    if not path.exists() and not path.is_symlink():
+        return _record(home, observed)
+    with _prompt_queue_lock(path):
+        rows = _record(home, _pending_prompts(path) + observed)
+        # On process loss before this acknowledgement, event hashes deduplicate the replay.
+        path.unlink(missing_ok=True)
+        return rows
+
+
+def capture_prompt(home: Path, payload: dict) -> Optional[List[dict]]:
+    """Observe a Codex prompt without inferring authority. None means durably deferred."""
     if (payload.get('hook_event_name') != 'UserPromptSubmit'
             or any(not isinstance(payload.get(key), str) or not payload[key]
                    for key in ('session_id', 'turn_id', 'cwd', 'prompt'))):
@@ -268,8 +322,22 @@ def capture_prompt(home: Path, payload: dict) -> List[dict]:
     session = hashlib.sha256(payload['session_id'].encode()).hexdigest()
     event = {'type': 'user', 'uuid': payload['turn_id'], 'capture_origin': 'codex-prompt',
              'session_sha256': session, 'message': {'content': payload['prompt']}}
-    return capture_turn(home, 'codex-prompt/' + session, 'codex-prompt-' + session,
-                        project=project, events=[event], started=True, lock_timeout=0.2)
+    observed = candidates('', events=[event], project=project)
+    queue = home / PROMPT_QUEUE
+    pending = home / PENDING
+    if not observed and not any(p.exists() or p.is_symlink() for p in (queue, pending)):
+        return []
+    try:
+        with _store_lock(home, timeout=0.2):
+            _recover_capture(home)
+            rows = _merge_prompt_observations(home, queue, observed)
+    except TimeoutError:
+        if not observed:
+            raise
+        _defer_prompt(queue, observed[0])
+        return None
+    _prune_capture(home, 0.2)
+    return rows
 
 
 def _checks(events) -> List[dict]:
@@ -373,12 +441,16 @@ def capture_turn(hh: Path, transcript: str, session: str, project=None, *,
     with _store_lock(hh, timeout=lock_timeout):
         _recover_capture(hh)
         rows = _capture_turn(hh, transcript, session, project, events, started)
+    _prune_capture(hh, lock_timeout)
+    return rows
+
+
+def _prune_capture(hh, lock_timeout):
     try:
         from . import storage
         storage.prune(hh, lock_timeout=lock_timeout)
     except Exception:
         pass
-    return rows
 
 
 def _capture_turn(hh, transcript, session, project, events, started):
