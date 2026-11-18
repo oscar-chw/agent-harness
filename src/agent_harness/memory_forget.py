@@ -48,6 +48,7 @@ import json
 import re
 import sys
 from datetime import datetime, timezone
+from functools import wraps
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence
 
@@ -209,15 +210,55 @@ def dependency_surface(corpus_root: Path, page_rel: str) -> dict:
             'outgoing_wikilinks': sorted(set(target.links)) if target else []}
 
 
-def _append_record(corpus_root: Path, rec: dict) -> dict:
-    records = load_ledger(corpus_root)
+def _ledger_lock(corpus_root: Path):
+    from agent_harness.mcp.memory import _store_lock
+
+    root = corpus_root.resolve()
+    if not root.is_dir():
+        raise ValueError('ledger integrity: expected an existing corpus directory')
+    lp = ledger_path(root)
+    if lp.is_symlink() or lp.parent.is_symlink() or (lp.exists() and not lp.is_file()):
+        raise ValueError('ledger integrity: expected a local regular ledger file')
+    return _store_lock(lp.parent)
+
+
+def _verified_ledger(corpus_root: Path) -> List[dict]:
+    try:
+        records = load_ledger(corpus_root)
+    except ValueError as exc:
+        raise ValueError('ledger integrity: unreadable records') from exc
+    if any(not isinstance(rec, dict) or not isinstance(rec.get('kind'), str)
+           for rec in records):
+        raise ValueError('ledger integrity: invalid record structure')
+    problems = verify_ledger(records)
+    if problems:
+        raise ValueError('ledger integrity: ' + problems[0])
+    return records
+
+
+def _serialize_apply(operation):
+    @wraps(operation)
+    def call(corpus_root, *args, apply=False, **kwargs):
+        if not apply:
+            return operation(corpus_root, *args, apply=False, **kwargs)
+        with _ledger_lock(Path(corpus_root)):
+            return operation(corpus_root, *args, apply=True, **kwargs)
+    return call
+
+
+def _append_record(corpus_root: Path, rec: dict, records: Sequence[dict]) -> dict:
+    """Append against the verified snapshot while its writer lock is held."""
+    from agent_harness.permission_profiles import _write
+
     rec['seq'] = len(records) + 1
     rec['prev_hash'] = records[-1]['record_hash'] if records else GENESIS_HASH
     rec['record_hash'] = record_hash(rec)
     lp = ledger_path(corpus_root)
-    lp.parent.mkdir(parents=True, exist_ok=True)
-    with lp.open('a', encoding='utf-8') as f:
-        f.write(json.dumps(rec, sort_keys=True) + '\n')
+    exists = lp.is_file()
+    prefix = lp.read_bytes() if exists else b''
+    separator = b'\n' if prefix and not prefix.endswith(b'\n') else b''
+    line = (json.dumps(rec, sort_keys=True) + '\n').encode('utf-8')
+    _write(lp, prefix + separator + line, mode=lp.stat().st_mode & 0o777 if exists else 0o600)
     return rec
 
 
@@ -235,18 +276,20 @@ def append_refusal(corpus_root: Path, *, page: str, candidate_sha256: str,
     record is returned instead.
     """
     corpus_root = Path(corpus_root)
-    for rec in load_ledger(corpus_root):
-        if (rec.get('kind') == 'backflow_refused'
-                and rec.get('candidate_sha256') == candidate_sha256
-                and rec.get('tombstone_record_hash') == tombstone_record_hash
-                and rec.get('path') == path):
-            return rec
-    rec = {'kind': 'backflow_refused', 'page': page,
-           'candidate_sha256': candidate_sha256,
-           'tombstone_record_hash': tombstone_record_hash,
-           'legs': sorted(legs), 'path': path, 'degraded': bool(degraded),
-           'created_utc': created_utc or _utcnow(), 'authority': authority}
-    return _append_record(corpus_root, rec)
+    with _ledger_lock(corpus_root):
+        records = _verified_ledger(corpus_root)
+        for rec in records:
+            if (rec.get('kind') == 'backflow_refused'
+                    and rec.get('candidate_sha256') == candidate_sha256
+                    and rec.get('tombstone_record_hash') == tombstone_record_hash
+                    and rec.get('path') == path):
+                return rec
+        rec = {'kind': 'backflow_refused', 'page': page,
+               'candidate_sha256': candidate_sha256,
+               'tombstone_record_hash': tombstone_record_hash,
+               'legs': sorted(legs), 'path': path, 'degraded': bool(degraded),
+               'created_utc': created_utc or _utcnow(), 'authority': authority}
+        return _append_record(corpus_root, rec, records)
 
 
 def _redact_lines(path: Path, line_nos: Sequence[int]) -> None:
@@ -256,9 +299,8 @@ def _redact_lines(path: Path, line_nos: Sequence[int]) -> None:
     path.write_bytes(b''.join(keep))
 
 
-def _restore_lines(path: Path, lines: Sequence[dict], expected_sha256: str) -> None:
-    """Reinsert escrowed lines at their original 1-based positions; verify the
-    reconstructed file byte-hash equals the recorded pre-redaction hash."""
+def _restored_lines(path: Path, lines: Sequence[dict], expected_sha256: str) -> bytes:
+    """Reconstruct and verify a redacted index before any corpus write."""
     raw = path.read_bytes().splitlines(keepends=True)
     for item in sorted(lines, key=lambda d: d['line_no']):
         raw.insert(item['line_no'] - 1, item['raw'].encode('utf-8'))
@@ -266,9 +308,10 @@ def _restore_lines(path: Path, lines: Sequence[dict], expected_sha256: str) -> N
     if _sha256(data) != expected_sha256:
         raise ValueError('redaction restore of %s would not reproduce the recorded '
                          'before_sha256 — refusing to write' % path)
-    path.write_bytes(data)
+    return data
 
 
+@_serialize_apply
 def unlearn(corpus_root: Path, page_rel: str, *, authority: str, reason: str,
             escrow_dir: Path, apply: bool = False,
             freeze: Optional[Path] = None) -> dict:
@@ -284,7 +327,7 @@ def unlearn(corpus_root: Path, page_rel: str, *, authority: str, reason: str,
     page_path = corpus_root / page_rel
     if not page_path.is_file():
         raise ValueError('page not in corpus: %s' % page_rel)
-    records = load_ledger(corpus_root)
+    records = _verified_ledger(corpus_root) if apply else load_ledger(corpus_root)
     if _latest_tombstone(records, page_rel) is not None:
         raise ValueError('page is already tombstoned: %s' % page_rel)
     escrow_dir = _check_escrow_outside(corpus_root, Path(escrow_dir))
@@ -361,12 +404,13 @@ def unlearn(corpus_root: Path, page_rel: str, *, authority: str, reason: str,
         rec_red['after_sha256'] = r['after_sha256']
 
     # 3. the audit record
-    record = _append_record(corpus_root, record)
+    record = _append_record(corpus_root, record, records)
     receipt['tombstone_record'] = record
     receipt['corpus_pages_sha256']['after'] = _corpus_pages_root_hash(corpus_root)
     return receipt
 
 
+@_serialize_apply
 def relearn(corpus_root: Path, page_rel: str, *, authority: str, reason: str,
             escrow_dir: Path, mode: str = 'restore',
             new_bytes: Optional[bytes] = None, apply: bool = False) -> dict:
@@ -380,7 +424,7 @@ def relearn(corpus_root: Path, page_rel: str, *, authority: str, reason: str,
     """
     corpus_root = Path(corpus_root)
     escrow_dir = Path(escrow_dir)
-    records = load_ledger(corpus_root)
+    records = _verified_ledger(corpus_root) if apply else load_ledger(corpus_root)
     tomb = _latest_tombstone(records, page_rel)
     if tomb is None:
         raise ValueError('page is not currently tombstoned: %s' % page_rel)
@@ -388,6 +432,7 @@ def relearn(corpus_root: Path, page_rel: str, *, authority: str, reason: str,
         raise ValueError('unknown relearn mode: %s' % mode)
 
     page_escrow = escrow_dir / ('%s.md' % tomb['page_sha256'])
+    restored_indexes = {}
     receipt = {
         'tool': 'agent_harness.memory_forget (H5)',
         'op': 'relearn', 'mode': mode, 'dry_run': not apply, 'created_utc': _utcnow(),
@@ -407,8 +452,23 @@ def relearn(corpus_root: Path, page_rel: str, *, authority: str, reason: str,
             raise ValueError('a page already occupies %s — refusing to overwrite' % page_rel)
         redactions = []
         red_escrow = escrow_dir / ('%s.redactions.json' % tomb['page_sha256'])
-        if red_escrow.is_file():
+        expected_redactions = tomb['redactions']
+        if expected_redactions:
+            if not red_escrow.is_file():
+                raise ValueError('redaction escrow missing: restore impossible')
             redactions = json.loads(red_escrow.read_text())
+            if not isinstance(redactions, list) or len(redactions) != len(expected_redactions):
+                raise ValueError('redaction escrow does not match the tombstone')
+            for saved, expected in zip(redactions, expected_redactions):
+                # The sidecar is written before redaction, when the after hash
+                # is still unset. The ledger carries the completed binding.
+                if (any(saved.get(k) != expected[k] for k in ('file', 'before_sha256'))
+                        or saved.get('after_sha256') not in (None, expected['after_sha256'])
+                        or [line['line_no'] for line in saved['lines']] != expected['line_nos']):
+                    raise ValueError('redaction escrow does not match the tombstone')
+                path = corpus_root / expected['file']
+                restored_indexes[path] = _restored_lines(
+                    path, saved['lines'], expected['before_sha256'])
         receipt['restores_sha256'] = tomb['page_sha256']
         receipt['redactions_restored'] = [
             {'file': r['file'], 'line_nos': [l['line_no'] for l in r['lines']]}
@@ -436,17 +496,12 @@ def relearn(corpus_root: Path, page_rel: str, *, authority: str, reason: str,
     if not apply:
         return receipt
 
-    if mode == 'restore':
-        (corpus_root / page_rel).parent.mkdir(parents=True, exist_ok=True)
-        (corpus_root / page_rel).write_bytes(data)
-        for r in redactions:
-            f = corpus_root / r['file']
-            _restore_lines(f, r['lines'], r['before_sha256'])
-    else:
-        (corpus_root / page_rel).parent.mkdir(parents=True, exist_ok=True)
-        (corpus_root / page_rel).write_bytes(new_bytes)
+    (corpus_root / page_rel).parent.mkdir(parents=True, exist_ok=True)
+    (corpus_root / page_rel).write_bytes(data)
+    for path, restored in restored_indexes.items():
+        path.write_bytes(restored)
 
-    record = _append_record(corpus_root, record)
+    record = _append_record(corpus_root, record, records)
     receipt['relearn_record'] = record
     receipt['corpus_pages_sha256_after'] = _corpus_pages_root_hash(corpus_root)
     receipt['matches_pre_unlearn_root'] = (
