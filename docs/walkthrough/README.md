@@ -11,4 +11,4 @@ Start with the part you need. Each page traces one example, explains the mechani
 
 For every available surface, use the [generated capability catalogue](../CAPABILITIES.md). For the interview, use the [runnable demo and visual guide](../../examples/interview/README.md). For measured outcomes, use the [dated qualification report](../v3/qualification-20261113.md).
 
-The current runtime is 3.0.0rc2. These pages describe implemented mechanisms and authored guidance. Model compliance, a useful retrieved record and an improved task outcome are separate claims.
+Use the [latest stable release](https://github.com/oscar-chw/agent-harness/releases/latest) for installable artifacts. These walkthroughs explain the implemented mechanisms. A current release can provide shared retrieval and task recovery. The [qualification report](../v3/qualification-20261113.md) states what the measured runs establish about model behavior and task outcomes.
