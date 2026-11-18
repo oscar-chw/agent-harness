@@ -317,3 +317,27 @@ def test_accepted_retirement_does_not_authorize_other_missing_rows(tmp_path, mon
     restored = take(hh, since=1)
     assert restored["cursor"] == 2 and restored["retired_count"] == 1
     assert [row["id"] for row in restored["candidates"]] == ["fresh"]
+
+
+def test_closed_output_stream_leaves_candidate_and_cursor_for_the_next_reader(tmp_path):
+    save(tmp_path, [candidate("waiting")])
+    command = [sys.executable, "-m", "agent_harness.cli", "--home", str(tmp_path),
+               "improve", "--weekly-intake", "--since", "0"]
+    reader, writer = os.pipe()
+    os.close(reader)
+    try:
+        failed = subprocess.run(command, cwd=tmp_path, env=cli_env(), stdout=writer,
+                                stderr=subprocess.PIPE, text=True, timeout=10)
+    finally:
+        os.close(writer)
+    assert failed.returncode != 0
+
+    rc, redelivered = intake(tmp_path, "--since", "0")
+    assert rc == 0, redelivered
+    assert redelivered["status"] == "CHANGED" and redelivered["cursor"] == 1
+    assert [row["id"] for row in redelivered["candidates"]] == ["waiting"]
+
+    rc, quiet = intake(tmp_path, "--since", "1")
+    assert rc == 0 and quiet["status"] == "NO_CHANGE" and quiet["candidates"] == []
+    with sqlite3.connect(tmp_path / ".agent-harness/weekly-intake/intake.sqlite") as db:
+        assert db.execute("SELECT count(*) FROM receipts").fetchone()[0] == 1
