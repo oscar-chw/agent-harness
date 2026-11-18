@@ -77,15 +77,40 @@ def _candidate_folder(store, name="candidates"):
     return folder
 
 
+def _revision_key(root, value):
+    endpoints = []
+    for side in ("source", "target"):
+        name = value[side]
+        try:
+            relative = _source_path(root, name).resolve().relative_to(root).as_posix()
+        except (ValueError, RuntimeError):
+            # A historical path may have been removed or redirected since review.
+            relative = Path(name).as_posix()
+        endpoints.append((relative, value["sources"][name]))
+    return tuple(endpoints)
+
+
+def _rejected_revisions(root, store):
+    archive = _candidate_folder(store, "dismissed")
+    dismissed = {path.stem for path in archive.glob("*") if path.suffix in (".json", ".reason")}
+    withdrawn = {path.name.removesuffix(".withdrawn.json") for path in store.glob("*.withdrawn.json")}
+    if len(dismissed) > MAX_DISMISSED or len(withdrawn) > MAX_CANDIDATES:
+        raise ValueError("dream decision history exceeds its bound")
+    return {_revision_key(root, read(root, identity)) for identity in dismissed | withdrawn}
+
+
+def _require_reviewable(root, value, rejected):
+    if rejected and _revision_key(root, value) in rejected:
+        raise ValueError("this dream relation was dismissed or withdrawn for the same source revisions")
+
+
 def propose(corpus, source, target, *, origin):
     root, store = _store(corpus)
     with _store_lock(store):
         value = _candidate(root, source, target, origin)
         identity = value["id"]
         folder = _candidate_folder(store)
-        archived = _candidate_folder(store, "dismissed") / (identity + ".json")
-        if archived.exists() or archived.is_symlink():
-            raise ValueError("this exact dream candidate was dismissed")
+        _require_reviewable(root, value, _rejected_revisions(root, store))
         folder.mkdir(exist_ok=True)
         path = folder / (identity + ".json")
         if path.exists() or path.is_symlink():
@@ -168,7 +193,7 @@ def _gate(plan, node, identity):
     if len(selected) != 1 or selected[0]["status"] != "settled":
         raise ValueError("independent gate is not settled")
     attempts = [a for a in settlement._attempts(body) if not a["not_applied"]]
-    if not attempts or identity not in attempts[-1]["body"]:
+    if not attempts or identity not in [line.strip() for line in attempts[-1]["body"].splitlines()]:
         raise ValueError("independent gate is not bound to this candidate")
     return {"plan_sha256": _sha(_read(plan, LIMIT)), "node": node,
             "record_sha256": _sha(body.encode()), "settlement": selected[0]["settled_by"]}
@@ -182,6 +207,8 @@ def admit(corpus, identity, plan, node):
             raise ValueError("dream candidate was dismissed or dismissal is pending; review a fresh candidate")
         if value["status"] in ("withdrawn", "withdrawal_pending"):
             raise ValueError("dream candidate was withdrawn or withdrawal is pending; a new review is required")
+        if value["status"] != "admitted":
+            _require_reviewable(root, value, _rejected_revisions(root, store))
         proof = _gate(plan, node, identity)
         path = store / (identity + ".admitted.json")
         if path.exists():
@@ -296,16 +323,16 @@ def stage(corpus, *, limit=8):
     with (_store_lock(store) if candidates else nullcontext()):
         folder = _candidate_folder(store)
         existing = {path.stem for path in folder.glob("*.json")}
-        dismissed = {path.stem for path in _candidate_folder(store, "dismissed").glob("*.json")}
+        rejected = _rejected_revisions(root, store) if candidates else set()
         free = max(0, MAX_CANDIDATES - len(existing))
-        seen = existing | dismissed
+        seen = set(existing)
         for candidate in candidates:
             value = _candidate(root, candidate["source"], candidate["orphan"], "dreaming-v1-orphan")
             identity = value["id"]
             path = folder / (identity + ".json")
             if identity in existing and _load(path) != value:
                 raise ValueError("dream candidate changed")
-            if identity in seen:
+            if identity in seen or (rejected and _revision_key(root, value) in rejected):
                 continue
             seen.add(identity)
             if len(rows) >= min(limit, free):
@@ -334,23 +361,26 @@ def review_packet(corpus, identities):
     """Serialize pending candidates and their exact, shared source bytes for review."""
     if not 1 <= len(identities) <= 32 or len(set(identities)) != len(identities):
         raise ValueError("review packet requires 1 to 32 distinct candidates")
-    root, _ = _store(corpus)
+    root, store = _store(corpus)
     packet = {"schema": "harness.dream-review/v1", "candidates": [], "sources": {}}
     source_bytes = 0
-    for identity in identities:
-        candidate = read(root, identity)
-        if candidate["status"] != "proposed":
-            raise ValueError("review packet requires pending proposals")
-        packet["candidates"].append({k: candidate[k] for k in ("id", "source", "target")})
-        for name, expected in candidate["sources"].items():
-            if name not in packet["sources"]:
-                raw = _read(_source_path(root, name), LIMIT)
-                source_bytes += len(raw)
-                if source_bytes > LIMIT:
-                    raise ValueError("review packet exceeds its byte bound")
-                packet["sources"][name] = {"sha256": _sha(raw), "text": raw.decode("utf-8")}
-            if packet["sources"][name]["sha256"] != expected:
-                raise ValueError(f"dream source changed: {name}")
+    with _store_lock(store):
+        rejected = _rejected_revisions(root, store)
+        for identity in identities:
+            candidate = read(root, identity)
+            if candidate["status"] != "proposed":
+                raise ValueError("review packet requires pending proposals")
+            _require_reviewable(root, candidate, rejected)
+            packet["candidates"].append({k: candidate[k] for k in ("id", "source", "target")})
+            for name, expected in candidate["sources"].items():
+                if name not in packet["sources"]:
+                    raw = _read(_source_path(root, name), LIMIT)
+                    source_bytes += len(raw)
+                    if source_bytes > LIMIT:
+                        raise ValueError("review packet exceeds its byte bound")
+                    packet["sources"][name] = {"sha256": _sha(raw), "text": raw.decode("utf-8")}
+                if packet["sources"][name]["sha256"] != expected:
+                    raise ValueError(f"dream source changed: {name}")
     return _encoded(packet, "review packet")
 
 
