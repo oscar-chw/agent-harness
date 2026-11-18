@@ -16,7 +16,9 @@ merge. [Package-only updater and CI](https://github.com/oscar-chw/agent-harness/
 The readback covers two devices and native MCP transport. Per-site
 permission equality on the MacBook remains unverified. The startup
 probes ran without a model call, so model-facing adherence and current
-learning gains need separate evidence.
+learning gain claims need separate evidence. In the paired GPT‑6.2 Sol
+High reasoning check, both guides got 24/24 decisions right. The compact
+guide used 3.47% fewer inference tokens. [Reasoning results](../../eval/results/v3-reasoning-gpt62-transfer-20261118.json)
 
 Download the [latest stable release](https://github.com/oscar-chw/agent-harness/releases/latest)
 and run the [five-step demo](README.md) to check your own installation.

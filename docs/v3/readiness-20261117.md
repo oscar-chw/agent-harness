@@ -98,6 +98,22 @@ Arrows describe available mechanisms or client-directed workflows. Structured St
 
 Counts retain their original scopes and exact commands in the linked graph. Historical native experiments are bound to archived controller/source hashes. Later integrated runtime changes require their own installation checks; the native comparison is not a new whole-harness benchmark. [Research gates](../../plan/research-reasoning-20261117.md), [active integration gates](../../plan/v3-finalisation-20261117.md), [rejected comparison](../../eval/results/reasoning-iteration-20261117.json), [compaction receipt](../../eval/results/reasoning-compaction-20261117.json), [dreaming verdict](h6c-dreaming-v1-verdict-20261110.md), [prior qualification](qualification-20261113.md)
 
+## GPT‑6.2 Sol High reasoning check
+
+On 18 November 2026, both guides correctly answered all 24 existing
+decisions. The compact guide used fewer tokens in each of the six matched
+batches. It used 151,767 inference tokens against 157,222 for the existing
+full guide, a saving of 5,455 tokens (3.47%). The evaluation consumed
+308,989 tokens in 12 fresh calls with 12 complete provider usage records.
+[Paired results and source bindings](../../eval/results/v3-reasoning-gpt62-transfer-20261118.json)
+
+The original frozen source and grader replayed all receipts. The public
+tree matched 96 of 97 files byte-for-byte, with the package version
+declaration as the sole difference. It reproduced all 12 actor bindings
+against the original inputs. The result covers the existing authored
+cases and measured inference. Whole-project cost, general learning gains
+and procedure or knowledge promotion remain open.
+
 ## Short demonstration path
 
 Use an authorized project with the local overlay already available. The commands below inspect existing state and source-bound research without launching a model.
@@ -105,7 +121,7 @@ Use an authorized project with the local overlay already available. The commands
 1. Run `harness task status --json` to see the project's current task, packet reference and next permitted action. An empty board provides no pickup evidence.
 2. Run `plan status v3-finalisation-20261117`, then `plan context v3-finalisation-20261117 2` to inspect the automatic-pickup requirement and its exact gate. Read the referenced packet when available.
 3. Run `harness research check research-paper` to inspect the recorded capability, current source support and saved-preference review state. A stale or missing record calls for scoped research under the existing protocol.
-4. Compare the two public reasoning receipts above. The retained rejection and bounded compaction result show how a proposed improvement earns a limited claim. Use the current source/installed gate receipt to distinguish available code from the running client. Acquisition guidance reuses completed source-bound research and checks saved preferences before upgrades.
+4. Compare the public reasoning receipts above. They show the rejected unguided comparison, the original compaction result and its GPT‑6.2 Sol High repeat. Use the current source and installation receipts to distinguish available code from the running client. Acquisition guidance reuses completed source-bound research and checks saved preferences before upgrades.
 
 The intended experience is a direct request, relevant context recovery, useful action and a checked result. Deeper acquisition or learning happens when a substantive gap justifies it.
 
