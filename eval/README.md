@@ -122,3 +122,16 @@ at least 80% precision, at least 50% recall and a precision gain of at least
 10 percentage points over the lexical arm. Cases decided correctly by the
 standalone reviewer must stay correct. Model usage, complete campaign cost
 and link admission have their own checks.
+
+## Prepare a reasoning comparison
+
+`reasoning_iteration.py prepare` freezes paired case batches, their grader
+and the complete bytes of its source files. In native mode it also records
+the selected Codex executable path and the version reported by `codex --version`.
+Preparation uses zero model calls. Retain the source checkout or run preparation
+from a dedicated snapshot so later work can replay the same files.
+
+Each native trial checks the recorded client again before consuming a slot.
+A changed or missing client holds the run, including when a previous trial
+already completed. `check` reads saved evidence without launching Codex.
+An empty run remains held, and a completed comparison does not grant adoption.

@@ -4,6 +4,7 @@ from pathlib import Path
 import copy
 import importlib.util
 import json
+import os
 import sqlite3
 import subprocess
 import sys
@@ -17,12 +18,14 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.fixture
-def instrument():
+def instrument(monkeypatch):
     spec = importlib.util.spec_from_file_location(
         "reasoning_iteration", ROOT / "eval/reasoning_iteration.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    monkeypatch.setattr(module, "_native_client",
+                        lambda: {"path": "/fixture/bin/codex", "version": "codex-cli 0.169.0"})
     return module
 
 
@@ -33,6 +36,60 @@ def lab(tmp_path, instrument):
         out, model="fixture-model", effort="high", timeout_seconds=5
     )
     return instrument, out, prepared
+
+
+def test_source_hash_covers_file_tail(instrument, tmp_path, monkeypatch):
+    root = tmp_path
+    monkeypatch.setattr(instrument, "ROOT", root)
+    cases = root / "cases.json"
+    cases.write_text("{}")
+    guide = root / "reasoning.md"
+    guide.write_text("# Guide\n")
+    monkeypatch.setattr(instrument, "FULL_GUIDE", guide)
+    checker = root / "eval/check_reasoning_outcome.py"
+    checker.parent.mkdir()
+    checker.write_text("# Fixture\n")
+    source = root / "src/agent_harness/workgraph/plan.py"
+    source.parent.mkdir(parents=True)
+    prefix = b"a" * (instrument.P.MAX_BYTES + 1)
+    source.write_bytes(prefix + b"x")
+    before = instrument._sources(cases)
+    source.write_bytes(prefix + b"y")
+    after = instrument._sources(cases)
+    key = str(source.resolve())
+    assert before[key] != after[key]
+    assert {name: sha for name, sha in before.items() if name != key} == {
+        name: sha for name, sha in after.items() if name != key
+    }
+    with source.open("r+b") as stream:
+        stream.truncate(instrument.SOURCE_FILE_BYTES + 1)
+    with pytest.raises(ValueError, match="file exceeds its byte budget"):
+        instrument._sources(cases)
+
+
+@pytest.mark.parametrize("changed", ["path", "version"])
+@pytest.mark.parametrize("completed", [0, 1])
+def test_native_client_drift_refuses_before_consuming_slot(instrument, tmp_path, monkeypatch, changed, completed):
+    out = tmp_path / "run"
+    client = {"path": "/fixture/bin/codex", "version": "codex-cli 0.169.0"}
+    monkeypatch.setattr(instrument, "_native_client", lambda: client.copy())
+    frozen = instrument.prepare(out, model="fixture", effort="high")
+    if completed == 0:
+        client[changed] += "-changed"
+    invoked = []
+
+    def invoke(*args):
+        invoked.append(args)
+        client[changed] += "-changed"
+        return native_fixture(instrument, *args)
+
+    monkeypatch.setattr(instrument.C, "_call", invoke)
+    with pytest.raises(ValueError, match="frozen native Codex client changed"):
+        instrument.execute(out, authorized_execute=frozen["freeze_sha256"])
+    assert [item["kind"] for item in instrument.journal(out)] == (
+        ["FROZEN"] + ["CONSUMED", "RECEIVED"] * completed
+    )
+    assert len(invoked) == completed
 
 
 def native_fixture(r, actor, request, frozen):
@@ -502,15 +559,21 @@ def test_simulation_cannot_be_promoted_by_claim_or_result_file(
 
 def test_prepare_and_execute_cli_are_separate(tmp_path):
     command = [sys.executable, str(ROOT / "eval/reasoning_iteration.py")]
+    client = tmp_path / "codex"
+    client.write_text("#!/bin/sh\n[ \"$1\" = --version ] || exit 42\nprintf '%s\\n' 'codex-cli 0.169.0'\n")
+    client.chmod(0o700)
     prepared = subprocess.run(
         command
         + ["prepare", str(tmp_path / "cli"), "--model", "fixture", "--effort", "high"],
         capture_output=True,
         text=True,
         check=False,
+        env={**os.environ, "PATH": str(tmp_path) + os.pathsep + os.environ.get("PATH", "")},
     )
     assert prepared.returncode == 0
     assert json.loads(prepared.stdout)["status"] == "FROZEN_NOT_RUN"
+    freeze = json.loads((tmp_path / "cli/oracle/freeze.json").read_bytes())
+    assert freeze["native_cli"] == {"path": str(client.resolve()), "version": "codex-cli 0.169.0"}
     refused = subprocess.run(
         command + ["execute", str(tmp_path / "cli")],
         capture_output=True,
