@@ -1,6 +1,28 @@
-# Current deployment pointer
+# Verified deployment on two Macs
 
-Download the current package from the [latest stable release](https://github.com/oscar-chw/agent-harness/releases/latest). The [17 November v3.0.0 baseline](../../docs/v3/readiness-20261117.md) records Mac Studio installation, cold memory and vault readback, rollback, doctor and the five-step demo. A new device needs its own checks. The PDF is the dated 13 November diagram.
+On 18 November 2026, one Mac Studio and one MacBook Air each matched
+all 145 installed package files from v3.0.26. Both passed doctor and
+received a project-scoped startup packet at the Codex MCP boundary
+in disposable projects. [Verified release](https://github.com/oscar-chw/agent-harness/releases/tag/v3.0.26)
+
+The MacBook upgraded from v3.0.0rc2. Afterward, fresh Codex and VS Code
+MCP processes could both retrieve the same saved knowledge section.
+The rollout retained 195 synced files, verified the rollback backup,
+and a repeat preview found zero pending package changes. Doctor passed
+after restoring four missing VS Code prompts from exact-hash copies.
+The updater passed three checks on the pull request and three after
+merge. [Package-only updater and CI](https://github.com/oscar-chw/agent-harness/pull/39)
+
+The readback covers two devices and native MCP transport. Per-site
+permission equality on the MacBook remains unverified. The startup
+probes ran without a model call, so model-facing adherence and current
+learning gains need separate evidence.
+
+Download the [latest stable release](https://github.com/oscar-chw/agent-harness/releases/latest)
+and run the [five-step demo](README.md) to check your own installation.
+The [original stable baseline](../../docs/v3/readiness-20261117.md)
+documents the architecture and its other qualification checks. The
+PDF remains the dated 13 November diagram.
 
 # Historical deployment evidence snapshot
 
