@@ -55,6 +55,13 @@ to packaged guards and hooks. Existing app settings and user data stay in
 place. Keep the rollback directory through `harness doctor` and a fresh
 connection from each app.
 
+If preview reports a missing managed VS Code prompt, add
+`--restore-missing-vscode-prompts` to preview the repair. A repair can create
+only a missing copy inside the harness. It must match both the pinned release
+prompt and the installed record's digest. An existing copy is kept, including
+local edits. Re-run with the same flag and `--apply` once preview is ready.
+The rollback manifest records restored prompts separately from the package count.
+
 ## What the demo shows
 
 Output of `bash scripts/demo.sh` (2026-10-06, v0.3, macOS, Python 3.9) with the per-file lines cut to `...`. It
