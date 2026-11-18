@@ -143,15 +143,19 @@ stage's refusal is a named, recorded outcome):
 2. **Qualification** — the REA record (`harness.rea-record/v1`) is REQUIRED:
    load, `rea.validate`, `rea.verify_bindings` against disk, and the
    candidate's declared sha256 must equal the file's current bytes. No REA
-   record → refuse. (An external capability without a lawful, pinned,
+   record → refuse. Pattern-only qualification applies to pattern candidates.
+   (An external capability without a lawful, pinned,
    evidence-bound analysis is not admittable — the bootstrap rule from
    rea-support §7.)
 3. **Typed decision** — the JEV record is REQUIRED: load, `jev.validate`,
    `jev.verify_bindings`; `domain` MUST be `adoption`; `subject.name` MUST
-   equal the candidate name; the declared sha256 must match the bytes. No
+   equal the candidate name; the declared sha256 must match the bytes.
+   The decision must cite the exact REA reference and digest as a local
+   input. No
    JEV adoption decision → refuse.
-4. **Admission** — the verdict must equal `admit_verdict` exactly, else
-   refuse; confidence ordinal must be ≥ `policy.execute_at_or_above`
+4. **Admission** — the verdict must equal `admit_verdict` exactly and be
+   `adopt`, or `adopt-pattern-only` for a pattern. Confidence ordinal must
+   be ≥ `policy.execute_at_or_above`
    (low < medium < high), else ESCALATE — refused with the escalation
    named, never auto-admitted.
 
