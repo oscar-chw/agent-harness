@@ -899,7 +899,8 @@ def prompt_hook(stdin=None) -> int:
             cmd += ["--project", str(Path(scope).resolve())]
         try:
             from . import capture
-            capture.capture_prompt(I.harness_home(Path.home()), data)
+            if capture.capture_prompt(I.harness_home(Path.home()), data) is None:
+                print("harness prompt capture deferred", file=sys.stderr)
         except (OSError, ValueError, TypeError) as exc:
             print("harness prompt capture unavailable: " + type(exc).__name__, file=sys.stderr)
         env = dict(os.environ, PYTHONPATH=str(I.PKG_DIR.parent))
